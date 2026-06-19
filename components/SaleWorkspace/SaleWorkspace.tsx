@@ -8,125 +8,350 @@ import {
   Card,
   Chip,
   Divider,
-  LinearProgress,
   Stack,
   TextField,
   Typography,
 } from '@mui/material';
 import {
   FaAppleAlt,
-  FaBriefcase,
+  FaArrowRight,
+  FaCashRegister,
   FaCheckCircle,
   FaChevronDown,
+  FaClipboardCheck,
   FaCreditCard,
   FaExchangeAlt,
+  FaFileContract,
   FaFileInvoiceDollar,
+  FaHome,
+  FaMapMarkedAlt,
   FaMoneyBillWave,
   FaPlus,
   FaPrint,
   FaRegClock,
+  FaRulerCombined,
   FaSearch,
   FaShoppingCart,
-  FaShippingFast,
-  FaTag,
+  FaTools,
   FaUniversity,
+  FaWrench,
+  FaBoxes,
   FaChartLine,
+  FaBoxOpen,
+  FaSignature,
 } from 'react-icons/fa';
 
 import AppShell from '@/components/AppShell/AppShell';
+import { saleCategories, type SaleCategory } from '@/components/SaleWorkspace/saleWorkspaceData';
 
-const categories = [
-  {
-    icon: FaBriefcase,
-    label: 'Property',
-    hint: 'Deals & services',
-    href: '/sell/property',
-  },
-  {
-    icon: FaShoppingCart,
-    label: 'Grocery',
-    hint: 'Fast-moving stock',
-    active: true,
-    href: '/sell/grocery',
-  },
-  {
-    icon: FaTag,
-    label: 'Hardware',
-    hint: 'Tools & parts',
-    href: '/sell/hardware',
-  },
-];
+type IconType = React.ComponentType<{ size?: number }>;
 
-const metrics = [
-  {
-    label: 'Open Tickets',
-    value: '18',
-    detail: '+4 since yesterday',
-    icon: FaFileInvoiceDollar,
-  },
-  {
-    label: 'Avg. Order',
-    value: '$58.32',
-    detail: 'Up 12% this week',
-    icon: FaChartLine,
-  },
-  {
-    label: 'Ready to Bill',
-    value: '92%',
-    detail: '2 payments pending',
-    icon: FaCheckCircle,
-  },
-  {
-    label: 'Fast Checkout',
-    value: '1m 24s',
-    detail: 'Target: under 90s',
-    icon: FaRegClock,
-  },
-];
+type Product = {
+  name: string;
+  detail: string;
+  code: string;
+  qty: number;
+  unit: string;
+  total: string;
+  accent: string;
+  icon: IconType;
+};
 
-const products = [
-  {
-    name: 'Organic Coffee Beans',
-    detail: '(340g)',
-    code: 'GRC-CF-2024',
-    qty: 2,
-    unit: '$18.50',
-    total: '$37.00',
-    accent: '#19d3d8',
-    icon: FaAppleAlt,
-  },
-  {
-    name: 'Farm Fresh Milk',
-    detail: '(1L)',
-    code: 'GRC-MK-1011',
-    qty: 4,
-    unit: '$4.25',
-    total: '$17.00',
-    accent: '#5ee3a7',
-    icon: FaShippingFast,
-  },
-];
+type Payment = {
+  icon: IconType;
+  title: string;
+  subtitle: string;
+  active?: boolean;
+};
 
-const payments = [
-  {
-    icon: FaMoneyBillWave,
-    title: 'Cash',
-    subtitle: 'Physical tender',
-    active: true,
-  },
-  {
-    icon: FaCreditCard,
-    title: 'Card',
-    subtitle: 'Debit / Credit',
-  },
-  {
-    icon: FaUniversity,
-    title: 'Transfer',
-    subtitle: 'Bank / Wire',
-  },
-];
+type WorkspaceConfig = {
+  badge: string;
+  title: string;
+  subtitle: string;
+  heroAccent: string;
+  heroSecondary: string;
+  invoice: string;
+  customer: string;
+  customerEmail: string;
+  agent: string;
+  terminal: string;
+  summaryLabel: string;
+  summaryTotal: string;
+  summaryNote: string;
+  metrics: Array<{ label: string; value: string; detail: string; icon: IconType }>;
+  products: Product[];
+  payments: Payment[];
+  workflowTitle: string;
+  workflowItems: string[];
+};
 
-export default function ActivityPage() {
+const configs: Record<SaleCategory, WorkspaceConfig> = {
+  grocery: {
+    badge: 'Grocery checkout',
+    title: 'Sell Grocery',
+    subtitle: 'Fast-moving items, quick scans, and clean payment capture.',
+    heroAccent: '#5ee3a7',
+    heroSecondary: '#19d3d8',
+    invoice: '#GRC-2024-082',
+    customer: 'Alex Rivera',
+    customerEmail: 'alex.rivera@enterprisehub.com',
+    agent: 'Jordan P.',
+    terminal: 'Front Desk 01',
+    summaryLabel: 'Receipt preview',
+    summaryTotal: '$58.32',
+    summaryNote: 'A quick checkout lane for daily essentials and repeat customers.',
+    metrics: [
+      {
+        label: 'Open Tickets',
+        value: '18',
+        detail: '+4 since yesterday',
+        icon: FaFileInvoiceDollar,
+      },
+      {
+        label: 'Basket Avg.',
+        value: '$58.32',
+        detail: 'Up 12% this week',
+        icon: FaChartLine,
+      },
+      {
+        label: 'Ready to Bill',
+        value: '92%',
+        detail: '2 payments pending',
+        icon: FaCheckCircle,
+      },
+      {
+        label: 'Fast Checkout',
+        value: '1m 24s',
+        detail: 'Target: under 90s',
+        icon: FaRegClock,
+      },
+    ],
+    products: [
+      {
+        name: 'Organic Coffee Beans',
+        detail: '(340g)',
+        code: 'GRC-CF-2024',
+        qty: 2,
+        unit: '$18.50',
+        total: '$37.00',
+        accent: '#19d3d8',
+        icon: FaAppleAlt,
+      },
+      {
+        name: 'Farm Fresh Milk',
+        detail: '(1L)',
+        code: 'GRC-MK-1011',
+        qty: 4,
+        unit: '$4.25',
+        total: '$17.00',
+        accent: '#5ee3a7',
+        icon: FaBoxes,
+      },
+    ],
+    payments: [
+      {
+        icon: FaMoneyBillWave,
+        title: 'Cash',
+        subtitle: 'Physical tender',
+        active: true,
+      },
+      {
+        icon: FaCreditCard,
+        title: 'Card',
+        subtitle: 'Debit / Credit',
+      },
+      {
+        icon: FaUniversity,
+        title: 'Transfer',
+        subtitle: 'Bank / Wire',
+      },
+    ],
+    workflowTitle: 'Checkout flow',
+    workflowItems: [
+      'Scan items at speed',
+      'Apply promotions or coupons',
+      'Confirm payment and print',
+    ],
+  },
+  hardware: {
+    badge: 'Ferreteria counter',
+    title: 'Sell Hardware',
+    subtitle: 'Tools, parts, and fast stock movement for the workshop floor.',
+    heroAccent: '#f59e0b',
+    heroSecondary: '#19d3d8',
+    invoice: '#HWD-2024-014',
+    customer: 'Carlos Mendoza',
+    customerEmail: 'carlos.mendoza@enterprisehub.com',
+    agent: 'M. Torres',
+    terminal: 'Workshop Desk 02',
+    summaryLabel: 'Sales ticket',
+    summaryTotal: '$124.90',
+    summaryNote: 'Built for hardware stores with fast-pick items and counter sales.',
+    metrics: [
+      {
+        label: 'Open Orders',
+        value: '26',
+        detail: '7 awaiting pickup',
+        icon: FaClipboardCheck,
+      },
+      {
+        label: 'Stock Picks',
+        value: '148',
+        detail: 'Today on hand',
+        icon: FaBoxes,
+      },
+      {
+        label: 'Ready to Pick',
+        value: '88%',
+        detail: 'Inventory confirmed',
+        icon: FaBoxOpen,
+      },
+      {
+        label: 'Counter Time',
+        value: '2m 11s',
+        detail: 'Efficient lane',
+        icon: FaRegClock,
+      },
+    ],
+    products: [
+      {
+        name: 'Cordless Drill',
+        detail: '18V Kit',
+        code: 'HDW-DR-442',
+        qty: 1,
+        unit: '$79.90',
+        total: '$79.90',
+        accent: '#f59e0b',
+        icon: FaWrench,
+      },
+      {
+        name: 'Box of Screws',
+        detail: '100 pcs',
+        code: 'HDW-SC-210',
+        qty: 3,
+        unit: '$9.00',
+        total: '$27.00',
+        accent: '#19d3d8',
+        icon: FaTools,
+      },
+    ],
+    payments: [
+      {
+        icon: FaMoneyBillWave,
+        title: 'Cash',
+        subtitle: 'Counter payment',
+        active: true,
+      },
+      {
+        icon: FaCreditCard,
+        title: 'Card',
+        subtitle: 'POS terminal',
+      },
+      {
+        icon: FaCashRegister,
+        title: 'Store Credit',
+        subtitle: 'Approved account',
+      },
+    ],
+    workflowTitle: 'Hardware flow',
+    workflowItems: [
+      'Pick stock from shelf',
+      'Verify serials or sizes',
+      'Charge and issue receipt',
+    ],
+  },
+  property: {
+    badge: 'Property desk',
+    title: 'Sell Property',
+    subtitle: 'Terrenos, deposits, and document-ready transactions.',
+    heroAccent: '#93c5fd',
+    heroSecondary: '#5ee3a7',
+    invoice: '#PRP-2024-021',
+    customer: 'Valeria Gómez',
+    customerEmail: 'valeria.gomez@enterprisehub.com',
+    agent: 'R. Salazar',
+    terminal: 'Land Office 03',
+    summaryLabel: 'Deal summary',
+    summaryTotal: '$18,450.00',
+    summaryNote: 'Use this screen for land sales, deposits, and contract handoff.',
+    metrics: [
+      {
+        label: 'Open Leads',
+        value: '12',
+        detail: '3 in negotiation',
+        icon: FaHome,
+      },
+      {
+        label: 'Average Deal',
+        value: '$18.4K',
+        detail: 'Land-only value',
+        icon: FaMapMarkedAlt,
+      },
+      {
+        label: 'Docs Ready',
+        value: '76%',
+        detail: 'Contracts reviewed',
+        icon: FaFileContract,
+      },
+      {
+        label: 'Closing Window',
+        value: '5 days',
+        detail: 'Typical turnaround',
+        icon: FaSignature,
+      },
+    ],
+    products: [
+      {
+        name: 'Lot A-12',
+        detail: '450 m2',
+        code: 'PRP-LT-012',
+        qty: 1,
+        unit: '$17,900.00',
+        total: '$17,900.00',
+        accent: '#93c5fd',
+        icon: FaRulerCombined,
+      },
+      {
+        name: 'Legal Review',
+        detail: 'Documentation',
+        code: 'PRP-LEG-001',
+        qty: 1,
+        unit: '$550.00',
+        total: '$550.00',
+        accent: '#5ee3a7',
+        icon: FaFileContract,
+      },
+    ],
+    payments: [
+      {
+        icon: FaMoneyBillWave,
+        title: 'Deposit',
+        subtitle: 'Reserve the lot',
+        active: true,
+      },
+      {
+        icon: FaUniversity,
+        title: 'Transfer',
+        subtitle: 'Bank wire',
+      },
+      {
+        icon: FaClipboardCheck,
+        title: 'Financing',
+        subtitle: 'Approved plan',
+      },
+    ],
+    workflowTitle: 'Property flow',
+    workflowItems: [
+      'Validate parcel and boundaries',
+      'Review contract and documents',
+      'Confirm deposit and schedule signing',
+    ],
+  },
+};
+
+export function SaleWorkspace({ category }: { category: SaleCategory }) {
+  const config = configs[category];
+
   return (
     <AppShell active="activity">
       <Box
@@ -134,19 +359,13 @@ export default function ActivityPage() {
           position: 'relative',
           overflow: 'hidden',
           width: '100%',
-          minHeight: 'calc(100vh - 52px)',
-          px: {
-            xs: 2,
-            md: 5,
-          },
-          py: {
-            xs: 2.5,
-            md: 4,
-          },
+          minHeight: 'calc(100vh - 56px)',
+          px: { xs: 2, md: 5 },
+          py: { xs: 2.5, md: 4 },
           bgcolor: '#00181a',
           backgroundImage: `
-            radial-gradient(circle at 20% 10%, rgba(25, 211, 216, 0.18), transparent 28%),
-            radial-gradient(circle at 85% 0%, rgba(94, 227, 167, 0.16), transparent 22%),
+            radial-gradient(circle at 20% 10%, ${alpha(config.heroAccent, 0.2)}, transparent 28%),
+            radial-gradient(circle at 85% 0%, ${alpha(config.heroSecondary, 0.14)}, transparent 22%),
             radial-gradient(circle at 50% 100%, rgba(0, 0, 0, 0.28), transparent 26%)
           `,
         }}
@@ -173,27 +392,21 @@ export default function ActivityPage() {
           }}
         >
           <Stack
-            direction={{
-              xs: 'column',
-              md: 'row',
-            }}
+            direction={{ xs: 'column', md: 'row' }}
             justifyContent="space-between"
-            alignItems={{
-              xs: 'flex-start',
-              md: 'flex-end',
-            }}
+            alignItems={{ xs: 'flex-start', md: 'flex-end' }}
             spacing={2}
             sx={{ mb: 3 }}
           >
             <Box>
               <Chip
-                label="Sales workspace"
+                label={config.badge}
                 size="small"
                 icon={<FaExchangeAlt />}
                 sx={{
                   mb: 1.25,
-                  bgcolor: alpha('#19d3d8', 0.12),
-                  color: 'primary.main',
+                  bgcolor: alpha(config.heroAccent, 0.12),
+                  color: config.heroAccent,
                   fontWeight: 800,
                   '& .MuiChip-icon': {
                     color: 'inherit',
@@ -204,15 +417,12 @@ export default function ActivityPage() {
               <Typography
                 sx={{
                   color: 'text.primary',
-                  fontSize: {
-                    xs: 30,
-                    md: 38,
-                  },
+                  fontSize: { xs: 30, md: 38 },
                   fontWeight: 950,
                   lineHeight: 1,
                 }}
               >
-                New Transaction
+                {config.title}
               </Typography>
 
               <Typography
@@ -220,21 +430,17 @@ export default function ActivityPage() {
                   maxWidth: 720,
                   mt: 1,
                   color: 'text.secondary',
-                  fontSize: {
-                    xs: 14,
-                    md: 16,
-                  },
+                  fontSize: { xs: 14, md: 16 },
                   fontWeight: 600,
                 }}
               >
-                Create a polished invoice, capture payment, and keep the checkout flow fast
-                enough for front desk or mobile counter use.
+                {config.subtitle}
               </Typography>
             </Box>
 
             <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
-              <StatPill label="Invoice" value="#INV-2024-082" />
-              <StatPill label="Customer" value="Alex Rivera" />
+              <StatPill label="Invoice" value={config.invoice} />
+              <StatPill label="Customer" value={config.customer} />
               <StatPill label="Status" value="Ready to confirm" />
             </Stack>
           </Stack>
@@ -251,7 +457,7 @@ export default function ActivityPage() {
               mb: 3,
             }}
           >
-            {metrics.map((metric) => (
+            {config.metrics.map((metric) => (
               <MetricCard key={metric.label} {...metric} />
             ))}
           </Box>
@@ -271,7 +477,7 @@ export default function ActivityPage() {
               <GlassCard>
                 <SectionHeader
                   title="Business Context"
-                  subtitle="Choose the transaction lane and find the customer instantly."
+                  subtitle="Switch lanes or continue with the current sale."
                 />
 
                 <Box
@@ -297,8 +503,16 @@ export default function ActivityPage() {
                         gap: 1.25,
                       }}
                     >
-                      {categories.map((category) => (
-                        <CategoryTile key={category.label} {...category} />
+                      {saleCategories.map((item) => (
+                        <CategoryTile
+                          key={item}
+                          href={`/sell/${item}`}
+                          active={item === category}
+                          icon={categoryIcon(item)}
+                          label={categoryLabel(item)}
+                          hint={categoryHint(item)}
+                          accent={item === category ? config.heroAccent : '#a9c3c5'}
+                        />
                       ))}
                     </Box>
                   </Box>
@@ -355,24 +569,15 @@ export default function ActivityPage() {
                         }}
                       />
 
-                      <Divider
-                        sx={{
-                          my: 1.6,
-                          borderColor: 'rgba(255,255,255,0.08)',
-                        }}
-                      />
+                      <Divider sx={{ my: 1.6, borderColor: 'rgba(255,255,255,0.08)' }} />
 
-                      <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        alignItems="center"
-                      >
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Box>
                           <Typography sx={{ fontSize: 12, fontWeight: 800 }}>
-                            Alex Rivera
+                            {config.customer}
                           </Typography>
                           <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
-                            alex.rivera@enterprisehub.com
+                            {config.customerEmail}
                           </Typography>
                         </Box>
 
@@ -380,8 +585,8 @@ export default function ActivityPage() {
                           size="small"
                           label="VIP"
                           sx={{
-                            bgcolor: alpha('#5ee3a7', 0.15),
-                            color: 'secondary.main',
+                            bgcolor: alpha(config.heroAccent, 0.15),
+                            color: config.heroAccent,
                             fontWeight: 800,
                           }}
                         />
@@ -396,7 +601,7 @@ export default function ActivityPage() {
                   title="Items"
                   subtitle="Review quantities, prices, and line totals before confirming."
                   action={
-                    <Stack direction="row" spacing={0.75} alignItems="center" sx={{ color: 'primary.main' }}>
+                    <Stack direction="row" spacing={0.75} alignItems="center" sx={{ color: config.heroAccent }}>
                       <FaPlus size={12} />
                       <Typography sx={{ fontSize: 13, fontWeight: 800 }}>Add item</Typography>
                     </Stack>
@@ -412,10 +617,7 @@ export default function ActivityPage() {
                       md: 'minmax(0, 2.2fr) 76px 120px 92px',
                     },
                     gap: 1.2,
-                    px: {
-                      xs: 0,
-                      md: 0.25,
-                    },
+                    px: { xs: 0, md: 0.25 },
                     pb: 1.25,
                     color: 'text.secondary',
                   }}
@@ -427,7 +629,7 @@ export default function ActivityPage() {
                 </Box>
 
                 <Stack spacing={1.25}>
-                  {products.map((product) => (
+                  {config.products.map((product) => (
                     <ItemRow key={product.code} {...product} />
                   ))}
                 </Stack>
@@ -449,24 +651,24 @@ export default function ActivityPage() {
                     gap: 1.25,
                   }}
                 >
-                  {payments.map((payment) => (
-                    <PaymentTile key={payment.title} {...payment} />
+                  {config.payments.map((payment) => (
+                    <PaymentTile key={payment.title} {...payment} accent={config.heroAccent} />
                   ))}
                 </Box>
               </GlassCard>
             </Stack>
 
             <Stack spacing={3} sx={{ position: 'sticky', top: 70 }}>
-              <SummaryCard />
+              <SummaryCard config={config} accent={config.heroAccent} />
 
               <GlassCard sx={{ p: 2.25 }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
                   <Box>
                     <Typography sx={{ fontSize: 12, color: 'text.secondary', fontWeight: 800 }}>
-                      Daily Flow
+                      {config.workflowTitle}
                     </Typography>
                     <Typography sx={{ fontSize: 16, fontWeight: 900, mt: 0.25 }}>
-                      72% of target completed
+                      Step-by-step lane
                     </Typography>
                   </Box>
 
@@ -477,32 +679,39 @@ export default function ActivityPage() {
                       borderRadius: '50%',
                       display: 'grid',
                       placeItems: 'center',
-                      bgcolor: alpha('#19d3d8', 0.13),
-                      color: 'primary.main',
+                      bgcolor: alpha(config.heroAccent, 0.13),
+                      color: config.heroAccent,
                     }}
                   >
                     <FaChartLine />
                   </Box>
                 </Stack>
 
-                <LinearProgress
-                  variant="determinate"
-                  value={72}
-                  sx={{
-                    mt: 1.8,
-                    height: 8,
-                    borderRadius: 99,
-                    bgcolor: alpha('#ffffff', 0.08),
-                    '& .MuiLinearProgress-bar': {
-                      borderRadius: 99,
-                      bgcolor: 'primary.main',
-                    },
-                  }}
-                />
-
-                <Typography sx={{ mt: 1.25, fontSize: 12, color: 'text.secondary' }}>
-                  Keep the current pace and you will close the day above the weekly average.
-                </Typography>
+                <Stack spacing={1.4} sx={{ mt: 2 }}>
+                  {config.workflowItems.map((item, index) => (
+                    <Stack key={item} direction="row" spacing={1.2} alignItems="center">
+                      <Box
+                        sx={{
+                          width: 24,
+                          height: 24,
+                          borderRadius: '50%',
+                          bgcolor: alpha(config.heroAccent, 0.14),
+                          color: config.heroAccent,
+                          display: 'grid',
+                          placeItems: 'center',
+                          fontSize: 11,
+                          fontWeight: 900,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {index + 1}
+                      </Box>
+                      <Typography sx={{ fontSize: 13, fontWeight: 700, color: 'text.secondary' }}>
+                        {item}
+                      </Typography>
+                    </Stack>
+                  ))}
+                </Stack>
               </GlassCard>
             </Stack>
           </Box>
@@ -512,21 +721,33 @@ export default function ActivityPage() {
   );
 }
 
-const tableHeaderSx = {
-  fontSize: 11,
-  color: 'text.secondary',
-  fontWeight: 900,
-  textTransform: 'uppercase',
-  letterSpacing: 0.8,
-};
+function categoryLabel(category: SaleCategory) {
+  if (category === 'grocery') return 'Grocery';
+  if (category === 'hardware') return 'Hardware';
+  return 'Property';
+}
 
-type SectionHeaderProps = {
+function categoryHint(category: SaleCategory) {
+  if (category === 'grocery') return 'Fast-moving stock';
+  if (category === 'hardware') return 'Tools & parts';
+  return 'Deals & services';
+}
+
+function categoryIcon(category: SaleCategory) {
+  if (category === 'grocery') return FaShoppingCart;
+  if (category === 'hardware') return FaTools;
+  return FaHome;
+}
+
+function SectionHeader({
+  title,
+  subtitle,
+  action,
+}: {
   title: string;
   subtitle: string;
   action?: React.ReactNode;
-};
-
-function SectionHeader({ title, subtitle, action }: SectionHeaderProps) {
+}) {
   return (
     <Stack
       direction="row"
@@ -536,13 +757,7 @@ function SectionHeader({ title, subtitle, action }: SectionHeaderProps) {
       sx={{ mb: 2 }}
     >
       <Box>
-        <Typography
-          sx={{
-            color: 'text.primary',
-            fontSize: 17,
-            fontWeight: 900,
-          }}
-        >
+        <Typography sx={{ color: 'text.primary', fontSize: 17, fontWeight: 900 }}>
           {title}
         </Typography>
 
@@ -556,13 +771,7 @@ function SectionHeader({ title, subtitle, action }: SectionHeaderProps) {
   );
 }
 
-function GlassCard({
-  children,
-  sx,
-}: {
-  children: React.ReactNode;
-  sx?: object;
-}) {
+function GlassCard({ children, sx }: { children: React.ReactNode; sx?: object }) {
   return (
     <Card
       sx={{
@@ -600,7 +809,7 @@ function MetricCard({
   label: string;
   value: string;
   detail: string;
-  icon: React.ComponentType<{ size?: number }>;
+  icon: IconType;
 }) {
   return (
     <GlassCard sx={{ p: 2.1 }}>
@@ -678,14 +887,14 @@ function CategoryTile({
   label,
   hint,
   active,
-  accent = '#19d3d8',
+  accent,
 }: {
   href: string;
-  icon: React.ComponentType<{ size?: number }>;
+  icon: IconType;
   label: string;
   hint: string;
   active?: boolean;
-  accent?: string;
+  accent: string;
 }) {
   return (
     <Link href={href} style={{ textDecoration: 'none', color: 'inherit' }}>
@@ -695,10 +904,10 @@ function CategoryTile({
           p: 1.75,
           minHeight: 96,
           border: active
-            ? `1px solid ${alpha(accent, 0.55)}`
+            ? `1px solid ${alpha(accent, 0.65)}`
             : '1px solid rgba(255,255,255,0.12)',
           bgcolor: active ? alpha(accent, 0.12) : alpha('#ffffff', 0.03),
-          boxShadow: active ? `0 0 0 1px ${alpha(accent, 0.12)} inset` : 'none',
+          boxShadow: active ? `0 0 0 1px ${alpha(accent, 0.14)} inset` : 'none',
         }}
       >
         <Stack spacing={1.1}>
@@ -737,16 +946,7 @@ function ItemRow({
   total,
   accent,
   icon: Icon,
-}: {
-  name: string;
-  detail: string;
-  code: string;
-  qty: number;
-  unit: string;
-  total: string;
-  accent: string;
-  icon: React.ComponentType<{ size?: number }>;
-}) {
+}: Product) {
   return (
     <Box
       sx={{
@@ -793,9 +993,7 @@ function ItemRow({
           >
             {name} {detail}
           </Typography>
-          <Typography sx={{ fontSize: 11, color: accent, fontWeight: 800 }}>
-            {code}
-          </Typography>
+          <Typography sx={{ fontSize: 11, color: accent, fontWeight: 800 }}>{code}</Typography>
         </Box>
       </Stack>
 
@@ -824,12 +1022,8 @@ function PaymentTile({
   title,
   subtitle,
   active,
-}: {
-  icon: React.ComponentType<{ size?: number }>;
-  title: string;
-  subtitle: string;
-  active?: boolean;
-}) {
+  accent,
+}: Payment & { accent: string }) {
   return (
     <Box
       sx={{
@@ -837,9 +1031,9 @@ function PaymentTile({
         p: 1.8,
         borderRadius: 3,
         border: active
-          ? '1px solid rgba(25,211,216,0.6)'
+          ? `1px solid ${alpha(accent, 0.6)}`
           : '1px solid rgba(255,255,255,0.12)',
-        bgcolor: active ? alpha('#19d3d8', 0.11) : alpha('#ffffff', 0.03),
+        bgcolor: active ? alpha(accent, 0.11) : alpha('#ffffff', 0.03),
       }}
     >
       <Stack direction="row" spacing={1.4} alignItems="center">
@@ -850,8 +1044,8 @@ function PaymentTile({
             borderRadius: 2,
             display: 'grid',
             placeItems: 'center',
-            color: active ? 'primary.main' : 'text.secondary',
-            bgcolor: active ? alpha('#19d3d8', 0.16) : alpha('#ffffff', 0.04),
+            color: active ? accent : 'text.secondary',
+            bgcolor: active ? alpha(accent, 0.16) : alpha('#ffffff', 0.04),
           }}
         >
           <Icon size={16} />
@@ -868,24 +1062,23 @@ function PaymentTile({
   );
 }
 
-function SummaryCard() {
+function SummaryCard({ config, accent }: { config: WorkspaceConfig; accent: string }) {
   return (
     <GlassCard sx={{ p: 0, overflow: 'hidden' }}>
       <Box
         sx={{
           p: 2.2,
-          background:
-            'linear-gradient(180deg, rgba(25,211,216,0.15), rgba(0,0,0,0) 100%)',
+          background: `linear-gradient(180deg, ${alpha(accent, 0.15)}, rgba(0,0,0,0) 100%)`,
           borderBottom: '1px solid rgba(255,255,255,0.08)',
         }}
       >
         <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
           <Box>
             <Typography sx={{ color: 'text.secondary', fontSize: 11, fontWeight: 900 }}>
-              Receipt Preview
+              {config.summaryLabel}
             </Typography>
             <Typography sx={{ fontSize: 26, fontWeight: 950, lineHeight: 1.05, mt: 0.4 }}>
-              #INV-2024-082
+              {config.invoice}
             </Typography>
           </Box>
 
@@ -896,8 +1089,8 @@ function SummaryCard() {
               borderRadius: 2,
               display: 'grid',
               placeItems: 'center',
-              color: 'primary.main',
-              bgcolor: alpha('#19d3d8', 0.12),
+              color: accent,
+              bgcolor: alpha(accent, 0.12),
             }}
           >
             <FaFileInvoiceDollar />
@@ -915,7 +1108,7 @@ function SummaryCard() {
               display: 'grid',
               placeItems: 'center',
               color: '#001f21',
-              bgcolor: 'primary.main',
+              bgcolor: accent,
               fontSize: 22,
               fontWeight: 900,
             }}
@@ -926,7 +1119,7 @@ function SummaryCard() {
           <Box>
             <Typography sx={{ fontSize: 18, fontWeight: 950 }}>Enterprise Hub</Typography>
             <Typography sx={{ color: 'text.secondary', fontSize: 12, fontWeight: 600 }}>
-              123 Business Avenue, Tech City
+              {config.customer}
             </Typography>
           </Box>
         </Stack>
@@ -939,17 +1132,23 @@ function SummaryCard() {
             mb: 1.6,
           }}
         >
-          <SummaryInfo label="Date" value="Oct 24, 2023 14:32" />
-          <SummaryInfo label="Cashier" value="Jordan P." />
-          <SummaryInfo label="Customer" value="Alex Rivera" />
-          <SummaryInfo label="Terminal" value="Front Desk 01" />
+          <SummaryInfo label="Customer" value={config.customer} />
+          <SummaryInfo label="Agent" value={config.agent} />
+          <SummaryInfo label="Terminal" value={config.terminal} />
+          <SummaryInfo label="Total" value={config.summaryTotal} />
         </Box>
 
         <Divider sx={{ my: 2, borderStyle: 'dashed', borderColor: 'rgba(255,255,255,0.12)' }} />
 
         <Stack spacing={1.3}>
-          {products.map((product) => (
-            <Stack key={product.code} direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
+          {config.products.map((product) => (
+            <Stack
+              key={product.code}
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              spacing={2}
+            >
               <Stack direction="row" spacing={1.2} alignItems="center" minWidth={0}>
                 <Box
                   sx={{
@@ -986,33 +1185,32 @@ function SummaryCard() {
         <Divider sx={{ my: 2, borderStyle: 'dashed', borderColor: 'rgba(255,255,255,0.12)' }} />
 
         <Stack spacing={1.2}>
-          <TotalsRow label="Subtotal" value="$54.00" />
-          <TotalsRow label="Tax (8%)" value="$4.32" />
-          <TotalsRow label="Discount" value="-$0.00" muted />
+          <TotalsRow label="Subtotal" value={config.products[0]?.total ?? '$0.00'} />
+          <TotalsRow label="Processing" value="$4.32" />
+          <TotalsRow label="Discount" value="-$0.00" />
         </Stack>
 
         <Stack direction="row" justifyContent="space-between" sx={{ mt: 1.8 }}>
-          <Typography sx={{ color: 'primary.main', fontSize: 15, fontWeight: 900 }}>
-            TOTAL
-          </Typography>
-          <Typography sx={{ color: 'primary.main', fontSize: 24, fontWeight: 950 }}>
-            $58.32
+          <Typography sx={{ color: accent, fontSize: 15, fontWeight: 900 }}>TOTAL</Typography>
+          <Typography sx={{ color: accent, fontSize: 24, fontWeight: 950 }}>
+            {config.summaryTotal}
           </Typography>
         </Stack>
 
         <Button
           fullWidth
           variant="contained"
-          startIcon={<FaCheckCircle />}
+          endIcon={<FaArrowRight />}
           sx={{
             mt: 2.8,
             py: 1.5,
             borderRadius: 2,
-            bgcolor: 'primary.main',
+            bgcolor: accent,
             color: '#001f21',
-            boxShadow: '0 12px 30px rgba(25,211,216,0.18)',
+            boxShadow: `0 12px 30px ${alpha(accent, 0.18)}`,
             '&:hover': {
-              bgcolor: '#16bcc0',
+              bgcolor: accent,
+              filter: 'brightness(0.95)',
             },
           }}
         >
@@ -1030,13 +1228,24 @@ function SummaryCard() {
             borderColor: 'rgba(255,255,255,0.22)',
             color: 'text.primary',
             '&:hover': {
-              borderColor: 'primary.main',
-              bgcolor: alpha('#19d3d8', 0.08),
+              borderColor: accent,
+              bgcolor: alpha(accent, 0.08),
             },
           }}
         >
           Generate Receipt
         </Button>
+
+        <Typography
+          sx={{
+            mt: 2,
+            color: 'text.secondary',
+            fontSize: 12,
+            fontWeight: 600,
+          }}
+        >
+          {config.summaryNote}
+        </Typography>
 
         <Typography
           align="center"
@@ -1066,38 +1275,34 @@ function SummaryInfo({ label, value }: { label: string; value: string }) {
   );
 }
 
-function ProductIcon({
-  icon: Icon,
-}: {
-  icon: React.ComponentType<{ size?: number }>;
-}) {
+function ProductIcon({ icon: Icon }: { icon: IconType }) {
   return <Icon size={15} />;
 }
 
 function TotalsRow({
   label,
   value,
-  muted,
 }: {
   label: string;
   value: string;
-  muted?: boolean;
 }) {
   return (
     <Stack direction="row" justifyContent="space-between">
-      <Typography
-        sx={{
-          color: muted ? 'text.secondary' : 'text.secondary',
-          fontSize: 13,
-          fontWeight: 700,
-        }}
-      >
+      <Typography sx={{ color: 'text.secondary', fontSize: 13, fontWeight: 700 }}>
         {label}
       </Typography>
       <Typography sx={{ fontSize: 13.5, fontWeight: 900 }}>{value}</Typography>
     </Stack>
   );
 }
+
+const tableHeaderSx = {
+  fontSize: 11,
+  color: 'text.secondary',
+  fontWeight: 900,
+  textTransform: 'uppercase',
+  letterSpacing: 0.8,
+};
 
 const valueCellSx = {
   fontSize: 15,
