@@ -142,7 +142,7 @@ export default function LoginPage() {
             </Stack>
 
             <Button
-              href="/activity"
+              href="/sell"
               fullWidth
               variant="contained"
               endIcon={<FaArrowRight />}
