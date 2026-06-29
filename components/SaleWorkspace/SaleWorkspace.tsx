@@ -803,7 +803,7 @@ export function SaleWorkspace({ category }: { category: SaleCategory }) {
                       key={item.label}
                       sx={{
                         p: 1.5,
-                        borderRadius: 2.5,
+                        borderRadius: "16px",
                         border: '1px solid rgba(255,255,255,0.08)',
                         bgcolor: alpha('#ffffff', 0.03),
                       }}
@@ -1086,9 +1086,9 @@ function CategoryTile({
     <Link href={href} style={{ textDecoration: 'none', color: 'inherit' }}>
       <Box
         sx={{
-          borderRadius: 3,
+          borderRadius: "16px",
           p: 1.75,
-          minHeight: 96,
+          height: "140px",
           border: active
             ? `1px solid ${alpha(accent, 0.65)}`
             : '1px solid rgba(255,255,255,0.12)',
@@ -1213,7 +1213,6 @@ function PaymentTile({
   return (
     <Box
       sx={{
-        minHeight: 88,
         p: 1.8,
         borderRadius: 3,
         border: active
