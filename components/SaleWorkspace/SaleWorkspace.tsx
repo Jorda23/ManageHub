@@ -8,6 +8,7 @@ import {
   Card,
   Chip,
   Divider,
+  LinearProgress,
   Stack,
   TextField,
   Typography,
@@ -75,12 +76,20 @@ type WorkspaceConfig = {
   customerEmail: string;
   agent: string;
   terminal: string;
+  statusLabel: string;
   summaryLabel: string;
   summaryTotal: string;
   summaryNote: string;
+  dueDate?: string;
+  paymentState?: 'Pagado' | 'Pendiente';
+  totalAmount?: string;
+  paidAmount?: string;
+  customerMode: 'directory' | 'quick';
+  customerList?: Array<{ name: string; detail: string; status: 'Pagado' | 'Pendiente'; amount: string }>;
   metrics: Array<{ label: string; value: string; detail: string; icon: IconType }>;
   products: Product[];
   payments: Payment[];
+  salesAnalysis: Array<{ label: 'Dia' | 'Semana' | 'Mes'; value: string; detail: string; progress: number }>;
   workflowTitle: string;
   workflowItems: string[];
 };
@@ -97,6 +106,7 @@ const configs: Record<SaleCategory, WorkspaceConfig> = {
     customerEmail: 'alex.rivera@enterprisehub.com',
     agent: 'Jordan P.',
     terminal: 'Front Desk 01',
+    customerMode: 'quick',
     summaryLabel: 'Receipt preview',
     summaryTotal: '$58.32',
     summaryNote: 'A quick checkout lane for daily essentials and repeat customers.',
@@ -166,6 +176,11 @@ const configs: Record<SaleCategory, WorkspaceConfig> = {
         subtitle: 'Bank / Wire',
       },
     ],
+    salesAnalysis: [
+      { label: 'Dia', value: '$1.2K', detail: '34 tickets', progress: 62 },
+      { label: 'Semana', value: '$8.6K', detail: 'Up 11%', progress: 71 },
+      { label: 'Mes', value: '$34.1K', detail: 'Target 88%', progress: 88 },
+    ],
     workflowTitle: 'Checkout flow',
     workflowItems: [
       'Scan items at speed',
@@ -184,6 +199,7 @@ const configs: Record<SaleCategory, WorkspaceConfig> = {
     customerEmail: 'carlos.mendoza@enterprisehub.com',
     agent: 'M. Torres',
     terminal: 'Workshop Desk 02',
+    customerMode: 'quick',
     summaryLabel: 'Sales ticket',
     summaryTotal: '$124.90',
     summaryNote: 'Built for hardware stores with fast-pick items and counter sales.',
@@ -253,6 +269,11 @@ const configs: Record<SaleCategory, WorkspaceConfig> = {
         subtitle: 'Approved account',
       },
     ],
+    salesAnalysis: [
+      { label: 'Dia', value: '$2.8K', detail: '28 invoices', progress: 58 },
+      { label: 'Semana', value: '$15.4K', detail: 'Up 7%', progress: 66 },
+      { label: 'Mes', value: '$61.2K', detail: 'Target 79%', progress: 79 },
+    ],
     workflowTitle: 'Hardware flow',
     workflowItems: [
       'Pick stock from shelf',
@@ -271,9 +292,20 @@ const configs: Record<SaleCategory, WorkspaceConfig> = {
     customerEmail: 'valeria.gomez@enterprisehub.com',
     agent: 'R. Salazar',
     terminal: 'Land Office 03',
+    statusLabel: 'Pendiente',
+    customerMode: 'directory',
+    customerList: [
+      { name: 'Valeria Gomez', detail: 'Abono realizado hace 2 días', status: 'Pendiente', amount: '$4,500.00' },
+      { name: 'Carlos Mendoza', detail: 'Último pago confirmado', status: 'Pagado', amount: '$18,450.00' },
+      { name: 'Andrea Ruiz', detail: 'Cotización enviada', status: 'Pendiente', amount: '$0.00' },
+    ],
     summaryLabel: 'Deal summary',
     summaryTotal: '$18,450.00',
     summaryNote: 'Use this screen for land sales, deposits, and contract handoff.',
+    dueDate: 'November 10, 2026',
+    paymentState: 'Pendiente',
+    totalAmount: '$18,450.00',
+    paidAmount: '$4,500.00',
     metrics: [
       {
         label: 'Open Leads',
@@ -339,6 +371,11 @@ const configs: Record<SaleCategory, WorkspaceConfig> = {
         title: 'Financing',
         subtitle: 'Approved plan',
       },
+    ],
+    salesAnalysis: [
+      { label: 'Dia', value: '$4.5K', detail: '1 abono', progress: 42 },
+      { label: 'Semana', value: '$18.4K', detail: '2 cierres', progress: 73 },
+      { label: 'Mes', value: '$82.0K', detail: 'Meta 91%', progress: 91 },
     ],
     workflowTitle: 'Property flow',
     workflowItems: [
@@ -437,12 +474,6 @@ export function SaleWorkspace({ category }: { category: SaleCategory }) {
                 {config.subtitle}
               </Typography>
             </Box>
-
-            <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
-              <StatPill label="Invoice" value={config.invoice} />
-              <StatPill label="Customer" value={config.customer} />
-              <StatPill label="Status" value="Ready to confirm" />
-            </Stack>
           </Stack>
 
           <Box
@@ -519,79 +550,182 @@ export function SaleWorkspace({ category }: { category: SaleCategory }) {
 
                   <Box>
                     <SectionLabel>Customer</SectionLabel>
-
-                    <Box
-                      sx={{
-                        height: 122,
-                        borderRadius: 3,
-                        border: '1px solid rgba(255,255,255,0.14)',
-                        bgcolor: alpha('#0a2628', 0.92),
-                        p: 1.75,
-                      }}
-                    >
-                      <TextField
-                        fullWidth
-                        placeholder="Search customer or add new..."
-                        variant="standard"
-                        InputProps={{
-                          disableUnderline: true,
-                          startAdornment: (
-                            <Box
-                              sx={{
-                                mr: 1.2,
-                                color: 'text.secondary',
-                                display: 'flex',
-                                alignItems: 'center',
-                              }}
-                            >
-                              <FaSearch />
-                            </Box>
-                          ),
-                          endAdornment: (
-                            <Box
-                              sx={{
-                                color: 'text.secondary',
-                                display: 'flex',
-                                alignItems: 'center',
-                              }}
-                            >
-                              <FaChevronDown />
-                            </Box>
-                          ),
-                        }}
+                    {config.customerMode === 'directory' ? (
+                      <Box
                         sx={{
-                          '& .MuiInputBase-input': {
-                            color: 'text.primary',
-                            fontSize: 14,
-                            fontWeight: 700,
-                            py: 0.4,
-                          },
+                          borderRadius: 3,
+                          border: '1px solid rgba(255,255,255,0.14)',
+                          bgcolor: alpha('#0a2628', 0.92),
+                          p: 1.75,
                         }}
-                      />
+                      >
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <TextField
+                            fullWidth
+                            placeholder="Search customer..."
+                            variant="standard"
+                            InputProps={{
+                              disableUnderline: true,
+                              startAdornment: (
+                                <Box
+                                  sx={{
+                                    mr: 1.2,
+                                    color: 'text.secondary',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                  }}
+                                >
+                                  <FaSearch />
+                                </Box>
+                              ),
+                            }}
+                            sx={{
+                              '& .MuiInputBase-input': {
+                                color: 'text.primary',
+                                fontSize: 14,
+                                fontWeight: 700,
+                                py: 0.4,
+                              },
+                            }}
+                          />
 
-                      <Divider sx={{ my: 1.6, borderColor: 'rgba(255,255,255,0.08)' }} />
+                          <Button
+                            variant="contained"
+                            sx={{
+                              whiteSpace: 'nowrap',
+                              bgcolor: alpha(config.heroAccent, 0.2),
+                              color: config.heroAccent,
+                              '&:hover': {
+                                bgcolor: alpha(config.heroAccent, 0.28),
+                              },
+                            }}
+                          >
+                            Add new customer
+                          </Button>
+                        </Stack>
 
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Box>
-                          <Typography sx={{ fontSize: 12, fontWeight: 800 }}>
-                            {config.customer}
-                          </Typography>
-                          <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
-                            {config.customerEmail}
-                          </Typography>
-                        </Box>
+                        <Divider sx={{ my: 1.6, borderColor: 'rgba(255,255,255,0.08)' }} />
 
-                        <Chip
-                          size="small"
-                          label="VIP"
+                        <Stack spacing={1.1}>
+                          {(config.customerList ?? []).map((customer) => (
+                            <Box
+                              key={customer.name}
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                gap: 2,
+                                p: 1.15,
+                                borderRadius: 2.5,
+                                border: '1px solid rgba(255,255,255,0.08)',
+                                bgcolor: alpha('#ffffff', 0.03),
+                              }}
+                            >
+                              <Box>
+                                <Typography sx={{ fontSize: 12.5, fontWeight: 900 }}>
+                                  {customer.name}
+                                </Typography>
+                                <Typography sx={{ fontSize: 11.5, color: 'text.secondary' }}>
+                                  {customer.detail}
+                                </Typography>
+                              </Box>
+
+                              <Stack alignItems="flex-end" spacing={0.4}>
+                                <Chip
+                                  size="small"
+                                  label={customer.status}
+                                  sx={{
+                                    bgcolor:
+                                      customer.status === 'Pagado'
+                                        ? alpha('#5ee3a7', 0.14)
+                                        : alpha('#f59e0b', 0.14),
+                                    color:
+                                      customer.status === 'Pagado' ? 'secondary.main' : '#fbbf24',
+                                    fontWeight: 800,
+                                  }}
+                                />
+                                <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>
+                                  {customer.amount}
+                                </Typography>
+                              </Stack>
+                            </Box>
+                          ))}
+                        </Stack>
+                      </Box>
+                    ) : (
+                      <Box
+                        sx={{
+                          height: 122,
+                          borderRadius: 3,
+                          border: '1px solid rgba(255,255,255,0.14)',
+                          bgcolor: alpha('#0a2628', 0.92),
+                          p: 1.75,
+                        }}
+                      >
+                        <TextField
+                          fullWidth
+                          placeholder="Search customer or add new..."
+                          variant="standard"
+                          InputProps={{
+                            disableUnderline: true,
+                            startAdornment: (
+                              <Box
+                                sx={{
+                                  mr: 1.2,
+                                  color: 'text.secondary',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                }}
+                              >
+                                <FaSearch />
+                              </Box>
+                            ),
+                            endAdornment: (
+                              <Box
+                                sx={{
+                                  color: 'text.secondary',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                }}
+                              >
+                                <FaChevronDown />
+                              </Box>
+                            ),
+                          }}
                           sx={{
-                            bgcolor: alpha(config.heroAccent, 0.15),
-                            color: config.heroAccent,
-                            fontWeight: 800,
+                            '& .MuiInputBase-input': {
+                              color: 'text.primary',
+                              fontSize: 14,
+                              fontWeight: 700,
+                              py: 0.4,
+                            },
                           }}
                         />
-                      </Stack>
-                    </Box>
+
+                        <Divider sx={{ my: 1.6, borderColor: 'rgba(255,255,255,0.08)' }} />
+
+                        <Stack direction="row" justifyContent="space-between" alignItems="center">
+                          <Box>
+                            <Typography sx={{ fontSize: 12, fontWeight: 800 }}>
+                              {config.customer}
+                            </Typography>
+                            <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
+                              {config.customerEmail}
+                            </Typography>
+                          </Box>
+
+                          <Chip
+                            size="small"
+                            label="VIP"
+                            sx={{
+                              bgcolor: alpha(config.heroAccent, 0.15),
+                              color: config.heroAccent,
+                              fontWeight: 800,
+                            }}
+                          />
+                        </Stack>
+                      </Box>
+                    )}
                   </Box>
                 </Box>
               </GlassCard>
@@ -655,6 +789,58 @@ export function SaleWorkspace({ category }: { category: SaleCategory }) {
                     <PaymentTile key={payment.title} {...payment} accent={config.heroAccent} />
                   ))}
                 </Box>
+              </GlassCard>
+
+              <GlassCard>
+                <SectionHeader
+                  title="Sales Analysis"
+                  subtitle="Track how sales are moving by day, week, and month."
+                />
+
+                <Stack spacing={1.5}>
+                  {config.salesAnalysis.map((item) => (
+                    <Box
+                      key={item.label}
+                      sx={{
+                        p: 1.5,
+                        borderRadius: 2.5,
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        bgcolor: alpha('#ffffff', 0.03),
+                      }}
+                    >
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Box>
+                          <Typography sx={{ fontSize: 12, color: 'text.secondary', fontWeight: 800 }}>
+                            {item.label}
+                          </Typography>
+                          <Typography sx={{ fontSize: 18, fontWeight: 950 }}>{item.value}</Typography>
+                          <Typography sx={{ fontSize: 11.5, color: 'text.secondary', fontWeight: 600 }}>
+                            {item.detail}
+                          </Typography>
+                        </Box>
+
+                        <Typography sx={{ fontSize: 12, color: config.heroAccent, fontWeight: 900 }}>
+                          {item.progress}%
+                        </Typography>
+                      </Stack>
+
+                      <LinearProgress
+                        variant="determinate"
+                        value={item.progress}
+                        sx={{
+                          mt: 1.2,
+                          height: 6,
+                          borderRadius: 99,
+                          bgcolor: alpha('#ffffff', 0.08),
+                          '& .MuiLinearProgress-bar': {
+                            borderRadius: 99,
+                            bgcolor: config.heroAccent,
+                          },
+                        }}
+                      />
+                    </Box>
+                  ))}
+                </Stack>
               </GlassCard>
             </Stack>
 
@@ -1190,6 +1376,50 @@ function SummaryCard({ config, accent }: { config: WorkspaceConfig; accent: stri
           <TotalsRow label="Discount" value="-$0.00" />
         </Stack>
 
+        {config.paymentState ? (
+          <>
+            <Divider
+              sx={{ my: 2, borderStyle: 'dashed', borderColor: 'rgba(255,255,255,0.12)' }}
+            />
+
+            <Box
+              sx={{
+                p: 1.6,
+                borderRadius: 3,
+                border: `1px solid ${alpha(accent, 0.18)}`,
+                bgcolor: alpha(accent, 0.06),
+              }}
+            >
+              <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1.5}>
+                <Typography sx={{ fontSize: 13, fontWeight: 900 }}>Pago del terreno</Typography>
+                <Chip
+                  size="small"
+                  label={config.paymentState}
+                  sx={{
+                    bgcolor:
+                      config.paymentState === 'Pagado'
+                        ? alpha('#5ee3a7', 0.14)
+                        : alpha('#f59e0b', 0.14),
+                    color:
+                      config.paymentState === 'Pagado' ? 'secondary.main' : '#fbbf24',
+                    fontWeight: 800,
+                  }}
+                />
+              </Stack>
+
+              <Stack spacing={1.1}>
+                <SummaryInfo label="Fecha límite" value={config.dueDate ?? 'Sin fecha'} />
+                <SummaryInfo label="Monto total" value={config.totalAmount ?? config.summaryTotal} />
+                <SummaryInfo label="Monto abonado" value={config.paidAmount ?? '$0.00'} />
+                <SummaryInfo
+                  label="Saldo pendiente"
+                  value={formatCurrencyDifference(config.totalAmount, config.paidAmount)}
+                />
+              </Stack>
+            </Box>
+          </>
+        ) : null}
+
         <Stack direction="row" justifyContent="space-between" sx={{ mt: 1.8 }}>
           <Typography sx={{ color: accent, fontSize: 15, fontWeight: 900 }}>TOTAL</Typography>
           <Typography sx={{ color: accent, fontSize: 24, fontWeight: 950 }}>
@@ -1277,6 +1507,32 @@ function SummaryInfo({ label, value }: { label: string; value: string }) {
 
 function ProductIcon({ icon: Icon }: { icon: IconType }) {
   return <Icon size={15} />;
+}
+
+function formatCurrencyDifference(total?: string, paid?: string) {
+  const totalValue = parseCurrency(total);
+  const paidValue = parseCurrency(paid);
+
+  if (totalValue === null || paidValue === null) {
+    return '$0.00';
+  }
+
+  return formatCurrency(Math.max(totalValue - paidValue, 0));
+}
+
+function parseCurrency(value?: string) {
+  if (!value) return null;
+  const numeric = Number(value.replace(/[^0-9.-]/g, ''));
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
 }
 
 function TotalsRow({

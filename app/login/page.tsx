@@ -74,152 +74,11 @@ export default function LoginPage() {
           zIndex: 1,
           width: '100%',
           maxWidth: 1200,
-          display: 'grid',
-          gridTemplateColumns: {
-            xs: '1fr',
-            lg: '1.05fr 0.95fr',
-          },
-          gap: 3,
-          alignItems: 'stretch',
+          display: "flex",
+          alignItems: 'center',
+          justifyContent: 'center'
         }}
       >
-        <Card
-          sx={{
-            p: {
-              xs: 3,
-              md: 4.5,
-            },
-            borderRadius: 5,
-            overflow: 'hidden',
-            bgcolor: alpha('#001d1f', 0.9),
-            border: '1px solid rgba(255,255,255,0.12)',
-            boxShadow: '0 30px 80px rgba(0,0,0,0.34)',
-            position: 'relative',
-          }}
-        >
-          <Box
-            sx={{
-              position: 'absolute',
-              inset: 0,
-              background:
-                'linear-gradient(135deg, rgba(25,211,216,0.12), rgba(255,255,255,0) 45%)',
-              pointerEvents: 'none',
-            }}
-          />
-
-          <Box sx={{ position: 'relative', zIndex: 1 }}>
-            <Chip
-              icon={<FaWandSparkles />}
-              label="Enterprise Hub"
-              sx={{
-                mb: 2,
-                bgcolor: alpha('#19d3d8', 0.12),
-                color: 'primary.main',
-                fontWeight: 800,
-                '& .MuiChip-icon': {
-                  color: 'inherit',
-                },
-              }}
-            />
-
-            <Typography
-              sx={{
-                fontSize: {
-                  xs: 34,
-                  md: 46,
-                },
-                fontWeight: 950,
-                lineHeight: 0.98,
-                maxWidth: 520,
-              }}
-            >
-              Secure login for the new generation of operations.
-            </Typography>
-
-            <Typography
-              sx={{
-                mt: 2,
-                maxWidth: 560,
-                color: 'text.secondary',
-                fontSize: {
-                  xs: 15,
-                  md: 16,
-                },
-                fontWeight: 600,
-              }}
-            >
-              One workspace for sales, CRM, and inventory, with a polished sign-in flow
-              that feels fast on desktop and mobile.
-            </Typography>
-
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: {
-                  xs: '1fr',
-                  sm: 'repeat(3, minmax(0, 1fr))',
-                },
-                gap: 1.5,
-                mt: 4,
-                maxWidth: 620,
-              }}
-            >
-              {highlights.map((item) => (
-                <Box
-                  key={item.label}
-                  sx={{
-                    p: 2,
-                    borderRadius: 3,
-                    bgcolor: alpha('#ffffff', 0.03),
-                    border: '1px solid rgba(255,255,255,0.09)',
-                  }}
-                >
-                  <Typography sx={{ color: 'text.secondary', fontSize: 11, fontWeight: 800 }}>
-                    {item.label}
-                  </Typography>
-                  <Typography sx={{ mt: 0.5, fontSize: 17, fontWeight: 900 }}>
-                    {item.value}
-                  </Typography>
-                </Box>
-              ))}
-            </Box>
-
-            <Divider
-              sx={{
-                my: 4,
-                borderColor: 'rgba(255,255,255,0.08)',
-              }}
-            />
-
-            <Stack
-              direction="row"
-              spacing={1.2}
-              useFlexGap
-              sx={{ flexWrap: 'wrap' }}
-            >
-              <Chip
-                icon={<FaShieldAlt />}
-                label="Encrypted session"
-                sx={{
-                  bgcolor: alpha('#5ee3a7', 0.12),
-                  color: 'secondary.main',
-                  fontWeight: 800,
-                  '& .MuiChip-icon': { color: 'inherit' },
-                }}
-              />
-              <Chip
-                icon={<FaFingerprint />}
-                label="Biometric ready"
-                sx={{
-                  bgcolor: alpha('#19d3d8', 0.12),
-                  color: 'primary.main',
-                  fontWeight: 800,
-                  '& .MuiChip-icon': { color: 'inherit' },
-                }}
-              />
-            </Stack>
-          </Box>
-        </Card>
 
         <Card
           sx={{
@@ -299,23 +158,6 @@ export default function LoginPage() {
               }}
             >
               Log in to dashboard
-            </Button>
-
-            <Button
-              variant="outlined"
-              startIcon={<FaFingerprint />}
-              sx={{
-                py: 1.4,
-                borderRadius: 2.5,
-                borderColor: 'rgba(255,255,255,0.18)',
-                color: 'text.primary',
-                '&:hover': {
-                  borderColor: 'primary.main',
-                  bgcolor: alpha('#19d3d8', 0.06),
-                },
-              }}
-            >
-              Use biometric login
             </Button>
           </Stack>
 
