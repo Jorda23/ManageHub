@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   Card,
-  Chip,
   Divider,
   Stack,
   TextField,
@@ -11,27 +10,9 @@ import {
 } from "@mui/material";
 import {
   FaArrowRight,
-  FaFingerprint,
   FaLock,
-  FaShieldAlt,
   FaUserAlt,
 } from "react-icons/fa";
-import { FaWandSparkles } from "react-icons/fa6";
-
-const highlights = [
-  {
-    label: "Secure access",
-    value: "MFA ready",
-  },
-  {
-    label: "Uptime",
-    value: "99.98%",
-  },
-  {
-    label: "Avg login",
-    value: "8 sec",
-  },
-];
 
 export default function LoginPage() {
   return (
@@ -157,7 +138,7 @@ export default function LoginPage() {
             </Stack>
 
             <Button
-              href="/sell"
+              href="/dashboard"
               fullWidth
               variant="contained"
               endIcon={<FaArrowRight />}

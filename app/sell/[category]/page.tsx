@@ -1,6 +1,5 @@
-import { notFound } from 'next/navigation';
-import { SaleWorkspace } from '@/components/SaleWorkspace/SaleWorkspace';
-import { saleCategories, type SaleCategory } from '@/components/SaleWorkspace/saleWorkspaceData';
+import { saleCategories, isSaleCategory, SaleWorkspace } from "@/components/SaleWorkspace";
+import { notFound } from "next/navigation";
 
 type SellPageProps = {
   params: Promise<{
@@ -15,9 +14,9 @@ export function generateStaticParams() {
 export default async function SellCategoryPage({ params }: SellPageProps) {
   const { category } = await params;
 
-  if (!saleCategories.includes(category as SaleCategory)) {
+  if (!isSaleCategory(category)) {
     notFound();
   }
 
-  return <SaleWorkspace category={category as SaleCategory} />;
+  return <SaleWorkspace category={category} />;
 }
