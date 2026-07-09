@@ -33,6 +33,7 @@ import {
   FaTractor,
   FaWarehouse,
 } from "react-icons/fa";
+import AppShell from "../AppShell/AppShell";
 
 type MetricTone = "success" | "danger" | "warning" | "info";
 
@@ -224,123 +225,118 @@ const navItems: NavItem[] = [
 
 export default function MainDashboard() {
   return (
-    <Box
-      sx={{
-        width: "100%",
-        minHeight: "100vh",
-        bgcolor: colors.pageBg,
-        overflowX: "hidden",
-      }}
-    >
+    <AppShell active="dashboard">
       <Box
         sx={{
           width: "100%",
-          minHeight: "100vh",
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "1fr",
-            lg: "272px minmax(0, 1fr)",
+          maxWidth: "100vw",
+          minHeight: "calc(100vh - 64px)",
+          overflowX: "hidden",
+          bgcolor: colors.pageBg,
+          px: {
+            xs: 1.5,
+            sm: 2,
+            md: 3,
+          },
+          py: {
+            xs: 2,
+            md: 3,
           },
         }}
       >
-        <Sidebar />
-
-        <Box sx={{ minWidth: 0 }}>
-          <Topbar />
+        <Box
+          sx={{
+            width: "100%",
+            maxWidth: 1440,
+            mx: "auto",
+            display: "flex",
+            flexDirection: "column",
+            gap: {
+              xs: 2,
+              md: 3,
+            },
+            minWidth: 0,
+          }}
+        >
+          <DashboardHero />
 
           <Box
-            component="main"
             sx={{
-              px: {
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "repeat(2, minmax(0, 1fr))",
+                xl: "repeat(4, minmax(0, 1fr))",
+              },
+              gap: {
                 xs: 1.5,
-                sm: 2,
-                md: 3,
+                md: 2,
               },
-              py: {
-                xs: 2,
-                md: 3,
-              },
+              minWidth: 0,
             }}
           >
-            <Box
-              sx={{
-                width: "100%",
-                maxWidth: 1440,
-                mx: "auto",
-                display: "flex",
-                flexDirection: "column",
-                gap: 3,
-              }}
-            >
-              <DashboardHero />
+            {metrics.map((metric) => (
+              <DashboardMetricCard key={metric.label} {...metric} />
+            ))}
+          </Box>
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                xl: "minmax(0, 1.55fr) minmax(320px, 0.75fr)",
+              },
+              gap: {
+                xs: 2,
+                md: 2,
+              },
+              alignItems: "start",
+              minWidth: 0,
+            }}
+          >
+            <Box sx={{ minWidth: 0 }}>
+              <SectionHeading
+                title="Sector Management Modules"
+                subtitle="Access each independent module for sales, inventory, grains, and property payments."
+              />
 
               <Box
                 sx={{
                   display: "grid",
                   gridTemplateColumns: {
                     xs: "1fr",
-                    sm: "repeat(2, minmax(0, 1fr))",
-                    xl: "repeat(4, minmax(0, 1fr))",
+                    md: "repeat(2, minmax(0, 1fr))",
+                    xl: "repeat(3, minmax(0, 1fr))",
                   },
-                  gap: 2,
+                  gap: {
+                    xs: 1.5,
+                    md: 2,
+                  },
+                  minWidth: 0,
                 }}
               >
-                {metrics.map((metric) => (
-                  <DashboardMetricCard key={metric.label} {...metric} />
+                {modules.map((module) => (
+                  <SectorModuleCard key={module.title} {...module} />
                 ))}
               </Box>
+            </Box>
 
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: {
-                    xs: "1fr",
-                    xl: "minmax(0, 1.55fr) minmax(320px, 0.75fr)",
-                  },
-                  gap: 2,
-                  alignItems: "start",
-                }}
-              >
-                <Box sx={{ minWidth: 0 }}>
-                  <SectionHeading
-                    title="Sector Management Modules"
-                    subtitle="Access each independent module for sales, inventory, grains, and property payments."
-                  />
-
-                  <Box
-                    sx={{
-                      display: "grid",
-                      gridTemplateColumns: {
-                        xs: "1fr",
-                        md: "repeat(2, minmax(0, 1fr))",
-                        xl: "repeat(3, minmax(0, 1fr))",
-                      },
-                      gap: 2,
-                    }}
-                  >
-                    {modules.map((module) => (
-                      <SectorModuleCard key={module.title} {...module} />
-                    ))}
-                  </Box>
-                </Box>
-
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 2,
-                    minWidth: 0,
-                  }}
-                >
-                  <OperationsHealth />
-                  <RecentActivity />
-                </Box>
-              </Box>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+                minWidth: 0,
+              }}
+            >
+              <OperationsHealth />
+              <RecentActivity />
             </Box>
           </Box>
         </Box>
       </Box>
-    </Box>
+    </AppShell>
   );
 }
 
