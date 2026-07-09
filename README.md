@@ -5,7 +5,7 @@ It includes independent modules for managing hardware store sales, basic grain s
 
 ## Live Demo
 
-[View deployed app](https://manage-doncwkhgh-jorda23s-projects.vercel.app)
+[View deployed app](https://manage-hub-gamma.vercel.app)
 
 ## Features
 
