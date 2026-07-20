@@ -25,7 +25,6 @@ import {
 
 import type { WorkspaceConfig } from "@/components/WorkspaceShared/workspaceTypes";
 import AppShell from "@/components/AppShell/AppShell";
-
 import {
   Box,
   Button,
@@ -59,8 +58,7 @@ type PropertyItem = {
   dueDate: string;
   status: AccountStatus;
   accent: string;
-  propertyType?: "Terreno" | "Casa" | "Finca" | "Local";
-  ownerName?: string;
+  ownerName: string;
   ownerPhone?: string;
   ownerDocument?: string;
 };
@@ -102,7 +100,7 @@ const propertyConfig: WorkspaceConfig = {
   badge: "Terrenos y propiedades",
   title: "Gestión de Propiedades",
   subtitle:
-    "Control de terrenos, compradores, abonos, fechas de pago, saldo pendiente y estado de cuenta.",
+    "Control de terrenos captados por clientes, compradores, abonos, saldo pendiente y estado de cuenta.",
   heroAccent: "#93c5fd",
   heroSecondary: "#5ee3a7",
   invoice: "#PRP-2026-021",
@@ -114,7 +112,7 @@ const propertyConfig: WorkspaceConfig = {
   summaryLabel: "Estado de cuenta",
   summaryTotal: "$18,450.00",
   summaryNote:
-    "Módulo para registrar propiedades, asociar compradores y controlar pagos por persona.",
+    "Módulo para registrar terrenos de clientes, asociar compradores y controlar sus pagos.",
   dueDate: "10 noviembre 2026",
   paymentState: "Pendiente",
   totalAmount: "$18,450.00",
@@ -126,7 +124,7 @@ const propertyConfig: WorkspaceConfig = {
   salesAnalysis: [],
   workflowTitle: "Flujo propiedades",
   workflowItems: [
-    "Seleccionar terreno o propiedad",
+    "Registrar o seleccionar terreno",
     "Asociar comprador",
     "Registrar abono y actualizar saldo",
   ],
@@ -141,6 +139,7 @@ const initialProperties: PropertyItem[] = [
     size: "450 m²",
     price: 17900,
     paid: 4500,
+    ownerName: "Valeria Gómez",
     buyerName: "Valeria Gómez",
     buyerEmail: "valeria.gomez@email.com",
     dueDate: "10 noviembre 2026",
@@ -155,6 +154,7 @@ const initialProperties: PropertyItem[] = [
     size: "380 m²",
     price: 18450,
     paid: 18450,
+    ownerName: "Carlos Mendoza",
     buyerName: "Carlos Mendoza",
     buyerEmail: "carlos.mendoza@email.com",
     dueDate: "Pagado",
@@ -169,6 +169,7 @@ const initialProperties: PropertyItem[] = [
     size: "520 m²",
     price: 22500,
     paid: 6200,
+    ownerName: "Andrea Ruiz",
     buyerName: "Andrea Ruiz",
     buyerEmail: "andrea.ruiz@email.com",
     dueDate: "Vencido hace 5 días",
@@ -183,6 +184,7 @@ const initialProperties: PropertyItem[] = [
     size: "180 m² construcción",
     price: 56000,
     paid: 12000,
+    ownerName: "Propietario por confirmar",
     buyerName: "Pendiente de asignar",
     buyerEmail: "Sin comprador",
     dueDate: "Sin fecha",
@@ -234,17 +236,12 @@ const paymentMethods = [
 const emptyPropertyForm: PropertyForm = {
   name: "",
   code: "",
-  propertyType: "Terreno",
   location: "",
   size: "",
   price: "",
   ownerName: "",
   ownerPhone: "",
   ownerDocument: "",
-  buyerName: "",
-  buyerEmail: "",
-  initialPayment: "0",
-  dueDate: "",
 };
 
 const inputSx: SxProps<Theme> = {
@@ -391,7 +388,6 @@ export function PropertyWorkspace() {
     const size = propertyForm.size.trim();
     const ownerName = propertyForm.ownerName.trim();
     const price = Number(propertyForm.price);
-    const initialPayment = Number(propertyForm.initialPayment || 0);
 
     if (!name || !code || !location || !size || !ownerName) {
       setPropertyFormError(
@@ -405,72 +401,31 @@ export function PropertyWorkspace() {
       return;
     }
 
-    if (!Number.isFinite(initialPayment) || initialPayment < 0) {
-      setPropertyFormError("El abono inicial no puede ser negativo.");
-      return;
-    }
-
-    if (initialPayment > price) {
-      setPropertyFormError(
-        "El abono inicial no puede superar el precio de la propiedad.",
-      );
-      return;
-    }
-
     if (properties.some((property) => property.code.toUpperCase() === code)) {
       setPropertyFormError("Ya existe una propiedad con ese código.");
       return;
     }
 
-    const hasBuyer = Boolean(propertyForm.buyerName.trim());
-    const isPaid = initialPayment >= price;
     const newProperty: PropertyItem = {
       id: crypto.randomUUID(),
       name,
       code,
-      propertyType: propertyForm.propertyType,
       location,
       size,
       price,
-      paid: initialPayment,
+      paid: 0,
       ownerName,
       ownerPhone: propertyForm.ownerPhone.trim(),
       ownerDocument: propertyForm.ownerDocument.trim(),
-      buyerName: hasBuyer
-        ? propertyForm.buyerName.trim()
-        : "Pendiente de asignar",
-      buyerEmail: hasBuyer
-        ? propertyForm.buyerEmail.trim() || "Comprador registrado"
-        : "Sin comprador",
-      dueDate: isPaid
-        ? "Pagado"
-        : propertyForm.dueDate || "Sin fecha",
-      status: isPaid ? "Pagado" : hasBuyer ? "Pendiente" : "Al día",
-      accent: isPaid ? colors.green : colors.primaryLight,
+      buyerName: "Pendiente de asignar",
+      buyerEmail: "Sin comprador",
+      dueDate: "Sin fecha",
+      status: "Al día",
+      accent: colors.primaryLight,
     };
 
     setProperties((currentProperties) => [newProperty, ...currentProperties]);
     setSelectedPropertyId(newProperty.id);
-
-    if (initialPayment > 0) {
-      const initialPaymentRecord: PaymentRecord = {
-        id: crypto.randomUUID(),
-        propertyId: newProperty.id,
-        propertyName: newProperty.name,
-        buyerName: newProperty.buyerName,
-        amount: initialPayment,
-        method: paymentMethods[0],
-        date: new Date().toLocaleString("es-NI", {
-          dateStyle: "short",
-          timeStyle: "short",
-        }),
-        note: "Abono inicial al registrar propiedad",
-      };
-      setPayments((currentPayments) => [
-        initialPaymentRecord,
-        ...currentPayments,
-      ]);
-    }
 
     handleClosePropertyDialog();
   };
@@ -628,9 +583,9 @@ export function PropertyWorkspace() {
               icon={<FaHome />}
               iconBg={colors.primarySoft}
               iconColor={colors.primaryLight}
-              label="Propiedades activas"
+              label="Terrenos activos"
               value={properties.length.toString()}
-              detail="Terrenos registrados"
+              detail="Captados por clientes"
             />
 
             <MetricCard
@@ -680,8 +635,8 @@ export function PropertyWorkspace() {
             <SectionCard>
               <SectionHeader
                 icon={<FaMapMarkedAlt />}
-                title="Terrenos y propiedades"
-                action="AGREGAR PROPIEDAD"
+                title="Terrenos registrados"
+                action="AGREGAR TERRENO"
                 onAction={() => setIsPropertyDialogOpen(true)}
               />
 
@@ -764,50 +719,11 @@ export function PropertyWorkspace() {
                     >
                       {properties.map((property) => (
                         <MenuItem key={property.id} value={property.id}>
-                          {property.name} - {property.buyerName}
+                          {property.name} - {property.ownerName}
                         </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
-                </Box>
-
-                <Box>
-                  <FieldLabel>Asignar comprador</FieldLabel>
-
-                  <Box
-                    sx={{
-                      display: "grid",
-                      gridTemplateColumns: {
-                        xs: "1fr",
-                        sm: "minmax(0, 1fr) auto",
-                      },
-                      gap: 1,
-                    }}
-                  >
-                    <TextField
-                      size="small"
-                      value={buyerName}
-                      placeholder="Nombre del comprador"
-                      onChange={(event) => setBuyerName(event.target.value)}
-                      fullWidth
-                      sx={inputSx}
-                    />
-
-                    <Button
-                      variant="outlined"
-                      onClick={handleAssignBuyer}
-                      sx={{
-                        borderRadius: 2.5,
-                        px: 2,
-                        fontWeight: 900,
-                        textTransform: "none",
-                        color: colors.primary,
-                        borderColor: colors.primaryLight,
-                      }}
-                    >
-                      Asociar
-                    </Button>
-                  </Box>
                 </Box>
 
                 <Box>
@@ -1301,11 +1217,6 @@ function PropertyCard({ property }: { property: PropertyItem }) {
           value={property.ownerName || "Cliente no registrado"}
         />
         <InfoLine
-          icon={<FaUserTie />}
-          label="Comprador"
-          value={property.buyerName}
-        />
-        <InfoLine
           icon={<FaCalendarAlt />}
           label="Próximo pago"
           value={property.dueDate}
@@ -1469,7 +1380,8 @@ function AccountSummary({ property }: { property?: PropertyItem }) {
       }}
     >
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.1 }}>
-        <SummaryRow label="Propiedad" value={property.name} />
+        <SummaryRow label="Terreno" value={property.name} />
+        <SummaryRow label="Cliente propietario" value={property.ownerName} />
         <SummaryRow label="Comprador" value={property.buyerName} />
         <SummaryRow
           label="Valor total"

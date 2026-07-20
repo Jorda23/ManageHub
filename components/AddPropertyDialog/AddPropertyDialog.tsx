@@ -3,7 +3,6 @@
 import type { ReactNode } from "react";
 import {
   FaMapMarkedAlt,
-  FaMoneyBillWave,
   FaPlusCircle,
   FaTimes,
   FaUserTie,
@@ -16,10 +15,7 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
-  FormControl,
   IconButton,
-  MenuItem,
-  Select,
   TextField,
   Typography,
 } from "@mui/material";
@@ -28,17 +24,12 @@ import type { SxProps, Theme } from "@mui/material/styles";
 export type PropertyForm = {
   name: string;
   code: string;
-  propertyType: "Terreno" | "Casa" | "Finca" | "Local";
   location: string;
   size: string;
   price: string;
   ownerName: string;
   ownerPhone: string;
   ownerDocument: string;
-  buyerName: string;
-  buyerEmail: string;
-  initialPayment: string;
-  dueDate: string;
 };
 
 type AddPropertyDialogProps = {
@@ -52,8 +43,8 @@ type AddPropertyDialogProps = {
 
 const fieldSx: SxProps<Theme> = {
   "& .MuiOutlinedInput-root": {
-    minHeight: 42,
-    borderRadius: 2,
+    minHeight: 44,
+    borderRadius: 2.5,
     bgcolor: "#ffffff",
     color: "#17251f",
     fontSize: 13,
@@ -74,33 +65,6 @@ const fieldSx: SxProps<Theme> = {
     color: "#7a8d85",
     WebkitTextFillColor: "#7a8d85",
     opacity: "1 !important",
-  },
-  "& input[type='date']": {
-    colorScheme: "light",
-  },
-  "& input[type='date']::-webkit-calendar-picker-indicator": {
-    opacity: 0.72,
-    cursor: "pointer",
-  },
-};
-
-const selectSx: SxProps<Theme> = {
-  minHeight: 42,
-  borderRadius: 2,
-  bgcolor: "#ffffff",
-  color: "#17251f",
-  fontSize: 13,
-  fontWeight: 700,
-  "& .MuiSelect-select": {
-    color: "#17251f !important",
-    WebkitTextFillColor: "#17251f !important",
-  },
-  "& .MuiSelect-icon": { color: "#52685f" },
-  "& fieldset": { borderColor: "#cbd8d2" },
-  "&:hover fieldset": { borderColor: "#819b90" },
-  "&.Mui-focused fieldset": {
-    borderColor: "#0b5a43",
-    borderWidth: 1.5,
   },
 };
 
@@ -131,7 +95,7 @@ export default function AddPropertyDialog({
             maxWidth: 620,
             maxHeight: "calc(100vh - 32px)",
             m: { xs: 1.5, sm: 2 },
-            borderRadius: 2.5,
+            borderRadius: 1,
             overflow: "hidden",
             border: "1px solid rgba(4, 77, 55, 0.18)",
             boxShadow: "0 28px 70px rgba(8, 34, 26, 0.32)",
@@ -152,7 +116,7 @@ export default function AddPropertyDialog({
         <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
           <Box sx={{ minWidth: 0 }}>
             <Typography sx={{ fontSize: 18, fontWeight: 950, lineHeight: 1.15 }}>
-              Agregar nueva propiedad
+              Agregar nuevo terreno
             </Typography>
             <Typography
               sx={{
@@ -162,7 +126,7 @@ export default function AddPropertyDialog({
                 fontWeight: 650,
               }}
             >
-              Registra un nuevo terreno o inmueble captado por el cliente.
+              Registra un terreno captado por el cliente propietario.
             </Typography>
           </Box>
 
@@ -188,7 +152,10 @@ export default function AddPropertyDialog({
         <Box sx={{ px: { xs: 2, sm: 2.5 }, py: 2.25 }}>
           {error ? <ErrorMessage>{error}</ErrorMessage> : null}
 
-          <SectionTitle icon={<FaUserTie size={12} />} title="Datos del cliente propietario" />
+          <SectionTitle
+            icon={<FaUserTie size={12} />}
+            title="Datos del cliente propietario"
+          />
           <FieldGrid sx={{ mb: 2.5 }}>
             <FormField label="Nombre del cliente *">
               <PropertyTextField
@@ -213,9 +180,12 @@ export default function AddPropertyDialog({
             </FormField>
           </FieldGrid>
 
-          <SectionTitle icon={<FaMapMarkedAlt size={12} />} title="Datos de la propiedad" />
-          <FieldGrid sx={{ mb: 2.5 }}>
-            <FormField label="Nombre de la propiedad *">
+          <SectionTitle
+            icon={<FaMapMarkedAlt size={12} />}
+            title="Datos del terreno"
+          />
+          <FieldGrid>
+            <FormField label="Nombre del terreno *">
               <PropertyTextField
                 placeholder="Ej. Lote D-15"
                 value={form.name}
@@ -224,25 +194,12 @@ export default function AddPropertyDialog({
             </FormField>
             <FormField label="Código *">
               <PropertyTextField
-                placeholder="PRP-001"
+                placeholder="PRP-LT-001"
                 value={form.code}
                 onChange={(value) => onChange("code", value)}
               />
             </FormField>
-            <FormField label="Tipo">
-              <FormControl fullWidth size="small">
-                <Select
-                  value={form.propertyType}
-                  onChange={(event) => onChange("propertyType", event.target.value)}
-                  sx={selectSx}
-                >
-                  {(["Terreno", "Casa", "Finca", "Local"] as const).map((type) => (
-                    <MenuItem key={type} value={type}>{type}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </FormField>
-            <FormField label="Ubicación *">
+            <FormField label="Ubicación *" fullRow>
               <PropertyTextField
                 placeholder="Ej. Managua, carretera sur"
                 value={form.location}
@@ -263,44 +220,6 @@ export default function AddPropertyDialog({
                 value={form.price}
                 onChange={(value) => onChange("price", value)}
                 inputProps={{ min: 0, step: 0.01 }}
-              />
-            </FormField>
-          </FieldGrid>
-
-          <SectionTitle
-            icon={<FaMoneyBillWave size={12} />}
-            title="Comprador y pago inicial (opcional)"
-          />
-          <FieldGrid>
-            <FormField label="Nombre del comprador">
-              <PropertyTextField
-                placeholder="Nombre completo"
-                value={form.buyerName}
-                onChange={(value) => onChange("buyerName", value)}
-              />
-            </FormField>
-            <FormField label="Correo del comprador">
-              <PropertyTextField
-                type="email"
-                placeholder="usuario@ejemplo.com"
-                value={form.buyerEmail}
-                onChange={(value) => onChange("buyerEmail", value)}
-              />
-            </FormField>
-            <FormField label="Abono inicial">
-              <PropertyTextField
-                type="number"
-                placeholder="0.00"
-                value={form.initialPayment}
-                onChange={(value) => onChange("initialPayment", value)}
-                inputProps={{ min: 0, step: 0.01 }}
-              />
-            </FormField>
-            <FormField label="Próxima fecha de pago">
-              <PropertyTextField
-                type="date"
-                value={form.dueDate}
-                onChange={(value) => onChange("dueDate", value)}
               />
             </FormField>
           </FieldGrid>
@@ -327,8 +246,9 @@ export default function AddPropertyDialog({
           startIcon={<FaPlusCircle size={13} />}
           onClick={onSubmit}
           sx={{
+            color: "white",
             bgcolor: "#064b36",
-            borderRadius: 2,
+            borderRadius: 1,
             px: 2.2,
             py: 1,
             textTransform: "none",
@@ -338,7 +258,7 @@ export default function AddPropertyDialog({
             "&:hover": { bgcolor: "#043d2d", boxShadow: "none" },
           }}
         >
-          Guardar propiedad
+          Guardar terreno
         </Button>
       </DialogActions>
     </Dialog>
