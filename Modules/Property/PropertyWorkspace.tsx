@@ -785,8 +785,9 @@ export function PropertyWorkspace() {
                   sx={{
                     py: 1.35,
                     borderRadius: 2.5,
+                    color: "white",
                     bgcolor: colors.primary,
-                    fontWeight: 900,
+                    fontWeight: 700,
                     textTransform: "none",
                     boxShadow: "0 12px 24px rgba(37, 99, 235, 0.22)",
                     "&:hover": {
@@ -1382,7 +1383,6 @@ function AccountSummary({ property }: { property?: PropertyItem }) {
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.1 }}>
         <SummaryRow label="Terreno" value={property.name} />
         <SummaryRow label="Cliente propietario" value={property.ownerName} />
-        <SummaryRow label="Comprador" value={property.buyerName} />
         <SummaryRow
           label="Valor total"
           value={formatCurrency(property.price)}

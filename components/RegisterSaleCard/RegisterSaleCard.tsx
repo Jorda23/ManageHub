@@ -280,6 +280,7 @@ export function RegisterSaleCard<TProduct extends SaleProduct>({
             fontWeight: 900,
             textTransform: "none",
             boxShadow: "0 12px 24px rgba(245, 158, 11, 0.22)",
+            color: "white",
 
             "&:hover": {
               bgcolor: "#78350f",
