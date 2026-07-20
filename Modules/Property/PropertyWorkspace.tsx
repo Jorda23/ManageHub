@@ -218,7 +218,12 @@ const initialPayments: PaymentRecord[] = [
   },
 ];
 
-const paymentMethods = ["Efectivo", "Transferencia", "Depósito bancario", "Cheque"];
+const paymentMethods = [
+  "Efectivo",
+  "Transferencia",
+  "Depósito bancario",
+  "Cheque",
+];
 
 const inputSx: SxProps<Theme> = {
   "& .MuiOutlinedInput-root": {
@@ -304,8 +309,7 @@ const getStatusColors = (status: AccountStatus) => {
 export function PropertyWorkspace() {
   const [properties, setProperties] =
     useState<PropertyItem[]>(initialProperties);
-  const [payments, setPayments] =
-    useState<PaymentRecord[]>(initialPayments);
+  const [payments, setPayments] = useState<PaymentRecord[]>(initialPayments);
 
   const [selectedPropertyId, setSelectedPropertyId] = useState("lot-a12");
   const [buyerName, setBuyerName] = useState("");
@@ -397,7 +401,11 @@ export function PropertyWorkspace() {
     const newPendingAmount = selectedProperty.price - newPaidAmount;
 
     const newStatus: AccountStatus =
-      newPendingAmount <= 0 ? "Pagado" : selectedProperty.status === "Atrasado" ? "Atrasado" : "Pendiente";
+      newPendingAmount <= 0
+        ? "Pagado"
+        : selectedProperty.status === "Atrasado"
+          ? "Atrasado"
+          : "Pendiente";
 
     const newPayment: PaymentRecord = {
       id: crypto.randomUUID(),
@@ -598,7 +606,7 @@ export function PropertyWorkspace() {
                     sx={{
                       px: 1.5,
                       py: 1,
-                                    borderRadius: "16px",
+                      borderRadius: "16px",
                       bgcolor: colors.dangerSoft,
                       border: "1px solid #fecaca",
                       color: colors.danger,
@@ -763,7 +771,7 @@ function HeroHeader() {
           sm: 2.5,
           md: 3,
         },
-                             borderRadius: "16px",
+        borderRadius: "16px",
 
         color: "white",
         background:
@@ -863,7 +871,7 @@ function MetricCard({
     <Card
       elevation={0}
       sx={{
-                      borderRadius: "16px",
+        borderRadius: "16px",
         border: `1px solid ${colors.cardBorder}`,
         bgcolor: colors.cardBg,
         boxShadow: "0 8px 22px rgba(15, 23, 42, 0.05)",
@@ -884,7 +892,7 @@ function MetricCard({
           sx={{
             width: 44,
             height: 44,
-                          borderRadius: "16px",
+            borderRadius: "16px",
             display: "grid",
             placeItems: "center",
             bgcolor: iconBg,
@@ -944,7 +952,7 @@ function SectionCard({
     <Card
       elevation={0}
       sx={{
-                      borderRadius: "16px",
+        borderRadius: "16px",
         border: `1px solid ${colors.cardBorder}`,
         bgcolor: colors.cardBg,
         overflow: "hidden",
@@ -982,12 +990,14 @@ function SectionHeader({
         gap: 2,
       }}
     >
-      <Box sx={{ display: "flex", gap: 1.2, alignItems: "center", minWidth: 0 }}>
+      <Box
+        sx={{ display: "flex", gap: 1.2, alignItems: "center", minWidth: 0 }}
+      >
         <Box
           sx={{
             width: 32,
             height: 32,
-                          borderRadius: "16px",
+            borderRadius: "16px",
             display: "grid",
             placeItems: "center",
             color: colors.primaryLight,
@@ -1035,7 +1045,9 @@ function SectionHeader({
 function PropertyCard({ property }: { property: PropertyItem }) {
   const pendingAmount = getPendingAmount(property);
   const progress =
-    property.price > 0 ? Math.min(100, (property.paid / property.price) * 100) : 0;
+    property.price > 0
+      ? Math.min(100, (property.paid / property.price) * 100)
+      : 0;
   const statusColors = getStatusColors(property.status);
 
   return (
@@ -1046,7 +1058,7 @@ function PropertyCard({ property }: { property: PropertyItem }) {
           xs: 1.8,
           md: 2,
         },
-                      borderRadius: "16px",
+        borderRadius: "16px",
         border: `1px solid ${colors.cardBorder}`,
         bgcolor: "#ffffff",
         width: "100%",
@@ -1116,10 +1128,26 @@ function PropertyCard({ property }: { property: PropertyItem }) {
           />
         </Box>
 
-        <InfoLine icon={<FaRulerCombined />} label="Medida" value={property.size} />
-        <InfoLine icon={<FaMapMarkedAlt />} label="Ubicación" value={property.location} />
-        <InfoLine icon={<FaUserTie />} label="Comprador" value={property.buyerName} />
-        <InfoLine icon={<FaCalendarAlt />} label="Próximo pago" value={property.dueDate} />
+        <InfoLine
+          icon={<FaRulerCombined />}
+          label="Medida"
+          value={property.size}
+        />
+        <InfoLine
+          icon={<FaMapMarkedAlt />}
+          label="Ubicación"
+          value={property.location}
+        />
+        <InfoLine
+          icon={<FaUserTie />}
+          label="Comprador"
+          value={property.buyerName}
+        />
+        <InfoLine
+          icon={<FaCalendarAlt />}
+          label="Próximo pago"
+          value={property.dueDate}
+        />
 
         <Box
           sx={{
@@ -1187,7 +1215,7 @@ function InfoLine({
         sx={{
           width: 22,
           height: 22,
-                      borderRadius: "16px",
+          borderRadius: "16px",
           bgcolor: colors.primarySoft,
           color: colors.primaryLight,
           display: "grid",
@@ -1229,7 +1257,7 @@ function AmountBox({ label, value }: { label: string; value: string }) {
     <Box
       sx={{
         p: 1,
-                      borderRadius: "16px",
+        borderRadius: "16px",
         bgcolor: "#f8fafc",
         border: `1px solid ${colors.cardBorder}`,
         minWidth: 0,
@@ -1273,7 +1301,7 @@ function AccountSummary({ property }: { property?: PropertyItem }) {
       elevation={0}
       sx={{
         p: 2,
-                      borderRadius: "16px",
+        borderRadius: "16px",
         bgcolor: "#f8fafc",
         border: `1px solid ${colors.cardBorder}`,
       }}
@@ -1281,9 +1309,15 @@ function AccountSummary({ property }: { property?: PropertyItem }) {
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.1 }}>
         <SummaryRow label="Propiedad" value={property.name} />
         <SummaryRow label="Comprador" value={property.buyerName} />
-        <SummaryRow label="Valor total" value={formatCurrency(property.price)} />
+        <SummaryRow
+          label="Valor total"
+          value={formatCurrency(property.price)}
+        />
         <SummaryRow label="Abonado" value={formatCurrency(property.paid)} />
-        <SummaryRow label="Saldo pendiente" value={formatCurrency(pendingAmount)} />
+        <SummaryRow
+          label="Saldo pendiente"
+          value={formatCurrency(pendingAmount)}
+        />
 
         <Divider sx={{ my: 0.5 }} />
 
@@ -1295,7 +1329,9 @@ function AccountSummary({ property }: { property?: PropertyItem }) {
             alignItems: "center",
           }}
         >
-          <Typography sx={{ fontSize: 13, color: colors.muted, fontWeight: 700 }}>
+          <Typography
+            sx={{ fontSize: 13, color: colors.muted, fontWeight: 700 }}
+          >
             Estado
           </Typography>
 
@@ -1339,12 +1375,14 @@ function PaymentHistoryTable({
           bgcolor: "#ffffff",
         }}
       >
-        <Box sx={{ display: "flex", gap: 1.2, alignItems: "center", minWidth: 0 }}>
+        <Box
+          sx={{ display: "flex", gap: 1.2, alignItems: "center", minWidth: 0 }}
+        >
           <Box
             sx={{
               width: 32,
               height: 32,
-                            borderRadius: "16px",
+              borderRadius: "16px",
               display: "grid",
               placeItems: "center",
               bgcolor: colors.primarySoft,
@@ -1394,7 +1432,9 @@ function PaymentHistoryTable({
             bgcolor: "#fbfdfc",
           }}
         >
-          <Typography sx={{ color: colors.text, fontWeight: 900, fontSize: 14 }}>
+          <Typography
+            sx={{ color: colors.text, fontWeight: 900, fontSize: 14 }}
+          >
             Todavía no hay abonos registrados.
           </Typography>
 
@@ -1493,7 +1533,13 @@ function PaymentHistoryTable({
               {payments.map((payment) => (
                 <tr key={payment.id}>
                   <td>
-                    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 0.25,
+                      }}
+                    >
                       <Typography sx={{ fontSize: 13, fontWeight: 850 }}>
                         {payment.date}
                       </Typography>
@@ -1505,12 +1551,14 @@ function PaymentHistoryTable({
                   </td>
 
                   <td>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
+                    <Box
+                      sx={{ display: "flex", alignItems: "center", gap: 1.2 }}
+                    >
                       <Box
                         sx={{
                           width: 30,
                           height: 30,
-                                        borderRadius: "16px",
+                          borderRadius: "16px",
                           display: "grid",
                           placeItems: "center",
                           bgcolor: colors.primarySoft,
@@ -1521,14 +1569,22 @@ function PaymentHistoryTable({
                         <FaHome size={13} />
                       </Box>
 
-                      <Typography sx={{ fontSize: 13, color: colors.text, fontWeight: 950 }}>
+                      <Typography
+                        sx={{
+                          fontSize: 13,
+                          color: colors.text,
+                          fontWeight: 950,
+                        }}
+                      >
                         {payment.propertyName}
                       </Typography>
                     </Box>
                   </td>
 
                   <td>
-                    <Typography sx={{ fontSize: 13, color: colors.text, fontWeight: 950 }}>
+                    <Typography
+                      sx={{ fontSize: 13, color: colors.text, fontWeight: 950 }}
+                    >
                       {payment.buyerName}
                     </Typography>
                   </td>
@@ -1560,7 +1616,6 @@ function PaymentHistoryTable({
 
                   <td>
                     <Typography
-                     
                       sx={{
                         color: colors.green,
                         fontVariantNumeric: "tabular-nums",
@@ -1598,11 +1653,15 @@ function PaymentHistoryTable({
         </Typography>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography sx={{ fontSize: 12, color: colors.muted, fontWeight: 700 }}>
+          <Typography
+            sx={{ fontSize: 12, color: colors.muted, fontWeight: 700 }}
+          >
             Total abonado:
           </Typography>
 
-          <Typography sx={{ fontSize: 15, color: colors.green, fontWeight: 950 }}>
+          <Typography
+            sx={{ fontSize: 15, color: colors.green, fontWeight: 950 }}
+          >
             {formatCurrency(totalPaid)}
           </Typography>
         </Box>
@@ -1664,7 +1723,7 @@ function SmallIconButton({ children }: { children: ReactNode }) {
         width: 36,
         height: 36,
         border: `1px solid ${colors.cardBorder}`,
-                      borderRadius: "16px",
+        borderRadius: "16px",
         color: colors.muted,
         bgcolor: "#ffffff",
         transition: "all 0.16s ease",

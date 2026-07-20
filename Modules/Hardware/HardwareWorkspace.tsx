@@ -5,21 +5,11 @@ import type { ReactNode } from "react";
 import {
   FaBoxOpen,
   FaBoxes,
-  FaCashRegister,
   FaCheckCircle,
   FaClipboardCheck,
-  FaCreditCard,
-  FaDownload,
   FaEdit,
   FaExclamationTriangle,
-  FaFilter,
-  FaHammer,
-  FaMoneyBillWave,
-  FaPlusCircle,
-  FaReceipt,
   FaRegClock,
-  FaShoppingCart,
-  FaSyncAlt,
   FaTools,
   FaWrench,
 } from "react-icons/fa";
@@ -28,20 +18,17 @@ import type { WorkspaceConfig } from "@/components/WorkspaceShared/workspaceType
 import AppShell from "@/components/AppShell/AppShell";
 import {
   Box,
-  Button,
   Card,
   Chip,
   Divider,
-  FormControl,
   IconButton,
   LinearProgress,
-  MenuItem,
   Paper,
-  Select,
-  TextField,
   Typography,
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
+import { RegisterSaleCard } from "@/components/RegisterSaleCard";
+import { SalesHistoryTable } from "@/components/SalesHistoryTable";
 
 type HardwareProduct = {
   id: string;
@@ -187,44 +174,6 @@ const paymentMethods = [
   "Transferencia",
 ];
 
-const inputSx: SxProps<Theme> = {
-  "& .MuiOutlinedInput-root": {
-    borderRadius: 2.5,
-    bgcolor: "#fbfdfc",
-    fontSize: 14,
-    fontWeight: 600,
-    color: colors.text,
-    "& fieldset": {
-      borderColor: colors.cardBorder,
-    },
-    "&:hover fieldset": {
-      borderColor: "#94a3b8",
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: colors.primaryLight,
-      borderWidth: 1.5,
-    },
-  },
-};
-
-const selectSx: SxProps<Theme> = {
-  borderRadius: 2.5,
-  bgcolor: "#fbfdfc",
-  fontSize: 14,
-  fontWeight: 600,
-  color: colors.text,
-  "& fieldset": {
-    borderColor: colors.cardBorder,
-  },
-  "&:hover fieldset": {
-    borderColor: "#94a3b8",
-  },
-  "&.Mui-focused fieldset": {
-    borderColor: colors.primaryLight,
-    borderWidth: 1.5,
-  },
-};
-
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -352,7 +301,6 @@ export function HardwareWorkspace() {
           }}
         >
           <HeroHeader />
-
           <Box
             sx={{
               display: "grid",
@@ -403,21 +351,15 @@ export function HardwareWorkspace() {
               detail="Atención promedio"
             />
           </Box>
-
           <Box
             sx={{
               display: "grid",
               gridTemplateColumns: {
                 xs: "1fr",
-                lg: "minmax(0, 2fr) minmax(340px, 1fr)",
+                lg: "minmax(0, 2fr) minmax(320px, 1fr)",
               },
-              gap: {
-                xs: 2,
-                md: 2.5,
-              },
-              alignItems: "start",
-              width: "100%",
-              minWidth: 0,
+              gap: 2.5,
+              alignItems: "stretch",
             }}
           >
             <SectionCard>
@@ -461,131 +403,40 @@ export function HardwareWorkspace() {
             </SectionCard>
 
             <SectionCard sx={{ height: "100%" }}>
-              <SectionHeader
-                icon={<FaCashRegister />}
-                title="Registrar venta"
+              <RegisterSaleCard
+                products={products}
+                selectedProduct={selectedProduct}
+                selectedProductId={selectedProductId}
+                quantity={quantity}
+                numericQuantity={numericQuantity}
+                paymentMethod={paymentMethod}
+                paymentMethods={paymentMethods}
+                saleTotal={saleTotal}
+                error={error}
+                onSelectedProductChange={setSelectedProductId}
+                onQuantityChange={setQuantity}
+                onPaymentMethodChange={setPaymentMethod}
+                onRegisterSale={handleRegisterSale}
               />
-
-              <Divider />
-
-              <Box
-                sx={{
-                  p: {
-                    xs: 1.8,
-                    md: 2.5,
-                  },
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 2,
-                }}
-              >
-                {error && (
-                  <Box
-                    sx={{
-                      px: 1.5,
-                      py: 1,
-
-                      borderRadius: "16px",
-
-                      bgcolor: colors.dangerSoft,
-                      border: "1px solid #fecaca",
-                      color: colors.danger,
-                      fontSize: 12,
-                      fontWeight: 800,
-                    }}
-                  >
-                    {error}
-                  </Box>
-                )}
-
-                <Box>
-                  <FieldLabel>Producto</FieldLabel>
-
-                  <FormControl fullWidth size="small">
-                    <Select
-                      value={selectedProductId}
-                      onChange={(event) =>
-                        setSelectedProductId(event.target.value)
-                      }
-                      sx={selectSx}
-                    >
-                      {products.map((product) => (
-                        <MenuItem key={product.id} value={product.id}>
-                          {product.name} - {product.detail}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Box>
-
-                <Box>
-                  <FieldLabel>Cantidad</FieldLabel>
-
-                  <TextField
-                    type="number"
-                    size="small"
-                    value={quantity}
-                    onChange={(event) => setQuantity(event.target.value)}
-                    slotProps={{
-                      htmlInput: {
-                        min: 1,
-                        step: 1,
-                      },
-                    }}
-                    fullWidth
-                    sx={inputSx}
-                  />
-                </Box>
-
-                <Box>
-                  <FieldLabel>Método de pago</FieldLabel>
-
-                  <FormControl fullWidth size="small">
-                    <Select
-                      value={paymentMethod}
-                      onChange={(event) => setPaymentMethod(event.target.value)}
-                      sx={selectSx}
-                    >
-                      {paymentMethods.map((method) => (
-                        <MenuItem key={method} value={method}>
-                          {method}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Box>
-
-                <SaleSummary
-                  product={selectedProduct}
-                  quantity={numericQuantity}
-                  total={saleTotal}
-                />
-
-                <Button
-                  fullWidth
-                  variant="contained"
-                  startIcon={<FaPlusCircle />}
-                  onClick={handleRegisterSale}
-                  sx={{
-                    py: 1.35,
-                    borderRadius: 2.5,
-                    bgcolor: colors.primary,
-                    fontWeight: 900,
-                    textTransform: "none",
-                    boxShadow: "0 12px 24px rgba(245, 158, 11, 0.22)",
-                    "&:hover": {
-                      bgcolor: "#78350f",
-                      boxShadow: "0 14px 28px rgba(245, 158, 11, 0.28)",
-                    },
-                  }}
-                >
-                  Registrar venta
-                </Button>
-              </Box>
             </SectionCard>
           </Box>
-
-          <SalesHistoryTable sales={sales} totalSold={totalSold} />
+          <SalesHistoryTable
+            sales={sales}
+            totalSold={totalSold}
+            productIcon={<FaWrench size={13} />}
+            colors={{
+              primary: colors.primary,
+              primarySoft: colors.primarySoft,
+              border: colors.cardBorder,
+              text: colors.text,
+              muted: colors.muted,
+              tableHead: colors.tableHead,
+              rowHover: "#fff7ed",
+              paymentBg: colors.greenSoft,
+              paymentText: colors.green,
+              paymentBorder: "#bbf7d0",
+            }}
+          />{" "}
         </Box>
       </Box>
     </AppShell>
@@ -1029,463 +880,5 @@ function ProductCard({ product }: { product: HardwareProduct }) {
         </Box>
       </Box>
     </Paper>
-  );
-}
-
-function SaleSummary({
-  product,
-  quantity,
-  total,
-}: {
-  product?: HardwareProduct;
-  quantity: number;
-  total: number;
-}) {
-  return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: 2,
-        borderRadius: "16px",
-
-        bgcolor: "#f8fafc",
-        border: `1px solid ${colors.cardBorder}`,
-      }}
-    >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.1 }}>
-        <SummaryRow label="Producto" value={product?.name ?? "-"} />
-        <SummaryRow
-          label="Precio unitario"
-          value={product ? formatCurrency(product.price) : "$0.00"}
-        />
-        <SummaryRow label="Cantidad" value={`${quantity || 0}`} />
-
-        <Divider sx={{ my: 0.5 }} />
-
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            gap: 2,
-            alignItems: "center",
-          }}
-        >
-          <Typography sx={{ fontSize: 20, fontWeight: 950 }}>Total</Typography>
-
-          <Typography
-            sx={{
-              fontSize: 20,
-              fontWeight: 950,
-              color: colors.primary,
-            }}
-          >
-            {formatCurrency(total)}
-          </Typography>
-        </Box>
-      </Box>
-    </Paper>
-  );
-}
-
-function SalesHistoryTable({
-  sales,
-  totalSold,
-}: {
-  sales: HardwareSale[];
-  totalSold: number;
-}) {
-  return (
-    <SectionCard>
-      <Box
-        sx={{
-          p: {
-            xs: 1.8,
-            md: 2.5,
-          },
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 2,
-          borderBottom: `1px solid ${colors.cardBorder}`,
-          bgcolor: "#ffffff",
-        }}
-      >
-        <Box
-          sx={{ display: "flex", gap: 1.2, alignItems: "center", minWidth: 0 }}
-        >
-          <Box
-            sx={{
-              width: 32,
-              height: 32,
-
-              borderRadius: "16px",
-
-              display: "grid",
-              placeItems: "center",
-              bgcolor: colors.primarySoft,
-              color: colors.primary,
-              flexShrink: 0,
-            }}
-          >
-            <FaSyncAlt size={14} />
-          </Box>
-
-          <Box sx={{ minWidth: 0 }}>
-            <Typography
-              sx={{
-                fontWeight: 950,
-                fontSize: {
-                  xs: 16,
-                  md: 18,
-                },
-                color: colors.text,
-              }}
-            >
-              Historial de ventas
-            </Typography>
-
-            <Typography sx={{ fontSize: 12, color: colors.muted }}>
-              Productos vendidos, cantidades, precios y métodos de pago
-            </Typography>
-          </Box>
-        </Box>
-
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <SmallIconButton>
-            <FaFilter />
-          </SmallIconButton>
-
-          <SmallIconButton>
-            <FaDownload />
-          </SmallIconButton>
-        </Box>
-      </Box>
-
-      {sales.length === 0 ? (
-        <Box
-          sx={{
-            p: 4,
-            textAlign: "center",
-            bgcolor: "#fbfdfc",
-          }}
-        >
-          <Typography
-            sx={{ fontSize: 14, fontWeight: 950, color: colors.muted }}
-          >
-            Todavía no hay ventas registradas.
-          </Typography>
-
-          <Typography sx={{ color: colors.muted, fontSize: 13, mt: 0.5 }}>
-            Cuando registres una venta, aparecerá aquí.
-          </Typography>
-        </Box>
-      ) : (
-        <Box
-          sx={{
-            width: "100%",
-            overflowX: "auto",
-            WebkitOverflowScrolling: "touch",
-          }}
-        >
-          <Box
-            component="table"
-            sx={{
-              width: "100%",
-              borderCollapse: "separate",
-              borderSpacing: 0,
-              minWidth: {
-                xs: 820,
-                md: 920,
-              },
-            }}
-          >
-            <Box
-              component="thead"
-              sx={{
-                "& th": {
-                  px: 2.5,
-                  py: 1.6,
-                  bgcolor: colors.tableHead,
-                  color: colors.muted,
-                  fontSize: 11,
-                  fontWeight: 950,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.04em",
-                  textAlign: "left",
-                  borderBottom: `1px solid ${colors.cardBorder}`,
-                  whiteSpace: "nowrap",
-                },
-                "& th:first-of-type": {
-                  pl: 3,
-                },
-                "& th:last-of-type": {
-                  pr: 3,
-                  textAlign: "right",
-                },
-              }}
-            >
-              <tr>
-                <th>Fecha</th>
-                <th>Producto</th>
-                <th>Cantidad</th>
-                <th>Precio unitario</th>
-                <th>Pago</th>
-                <th>Total</th>
-              </tr>
-            </Box>
-
-            <Box
-              component="tbody"
-              sx={{
-                "& tr": {
-                  transition: "background-color 0.16s ease",
-                },
-                "& tr:nth-of-type(even)": {
-                  bgcolor: "#fbfdfc",
-                },
-                "& tr:hover": {
-                  bgcolor: "#fff7ed",
-                },
-                "& td": {
-                  px: 2.5,
-                  py: 1.8,
-                  borderBottom: `1px solid ${colors.cardBorder}`,
-                  fontSize: 13,
-                  color: colors.text,
-                  verticalAlign: "middle",
-                  whiteSpace: "nowrap",
-                },
-                "& tr:last-of-type td": {
-                  borderBottom: "none",
-                },
-                "& td:first-of-type": {
-                  pl: 3,
-                },
-                "& td:last-of-type": {
-                  pr: 3,
-                  textAlign: "right",
-                },
-              }}
-            >
-              {sales.map((sale) => (
-                <tr key={sale.id}>
-                  <td>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 0.25,
-                      }}
-                    >
-                      <Typography sx={{ fontSize: 13, fontWeight: 850 }}>
-                        {sale.date}
-                      </Typography>
-
-                      <Typography sx={{ fontSize: 11, color: colors.muted }}>
-                        Ticket #{sale.id.slice(-4).toUpperCase()}
-                      </Typography>
-                    </Box>
-                  </td>
-
-                  <td>
-                    <Box
-                      sx={{ display: "flex", alignItems: "center", gap: 1.2 }}
-                    >
-                      <Box
-                        sx={{
-                          width: 30,
-                          height: 30,
-
-                          borderRadius: "16px",
-
-                          display: "grid",
-                          placeItems: "center",
-                          bgcolor: colors.primarySoft,
-                          color: colors.primary,
-                          flexShrink: 0,
-                        }}
-                      >
-                        <FaWrench size={13} />
-                      </Box>
-
-                      <Typography
-                        sx={{
-                          fontSize: 13,
-                          fontWeight: 850,
-                          overflowWrap: "anywhere",
-                        }}
-                      >
-                        {sale.productName}
-                      </Typography>
-                    </Box>
-                  </td>
-
-                  <td>
-                    <Typography
-                      sx={{
-                        fontSize: 13,
-                        fontWeight: 850,
-                        textAlign: "center",
-                      }}
-                    >
-                      {sale.quantity}
-                    </Typography>
-                  </td>
-
-                  <td>
-                    <Typography
-                      sx={{
-                        fontSize: 13,
-                        fontWeight: 850,
-                        textAlign: "center",
-                      }}
-                    >
-                      {formatCurrency(sale.unitPrice)}
-                    </Typography>
-                  </td>
-
-                  <td>
-                    <Chip
-                      label={sale.paymentMethod}
-                      size="small"
-                      sx={{
-                        height: 24,
-                        px: 0.5,
-                        fontSize: 11,
-                        fontWeight: 900,
-                        bgcolor: colors.greenSoft,
-                        color: colors.green,
-                        border: "1px solid #bbf7d0",
-                        "& .MuiChip-label": {
-                          px: 1,
-                        },
-                      }}
-                    />
-                  </td>
-
-                  <td>
-                    <Typography
-                      sx={{
-                        fontSize: 13,
-                        fontWeight: 950,
-                        color: colors.primary,
-                        textAlign: "right",
-                      }}
-                    >
-                      {formatCurrency(sale.total)}
-                    </Typography>
-                  </td>
-                </tr>
-              ))}
-            </Box>
-          </Box>
-        </Box>
-      )}
-
-      <Box
-        sx={{
-          px: {
-            xs: 1.8,
-            md: 3,
-          },
-          py: 1.8,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 2,
-          bgcolor: "#f8fafc",
-          borderTop: `1px solid ${colors.cardBorder}`,
-        }}
-      >
-        <Typography sx={{ fontSize: 12, color: colors.muted, fontWeight: 700 }}>
-          {sales.length} ventas registradas
-        </Typography>
-
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography
-            sx={{ fontSize: 12, color: colors.muted, fontWeight: 700 }}
-          >
-            Total vendido:
-          </Typography>
-
-          <Typography
-            sx={{ fontSize: 15, color: colors.primary, fontWeight: 950 }}
-          >
-            {formatCurrency(totalSold)}
-          </Typography>
-        </Box>
-      </Box>
-    </SectionCard>
-  );
-}
-
-function FieldLabel({ children }: { children: ReactNode }) {
-  return (
-    <Typography
-      sx={{
-        mb: 0.75,
-        fontSize: 11,
-        color: colors.text,
-        fontWeight: 950,
-        textTransform: "uppercase",
-        letterSpacing: "0.06em",
-      }}
-    >
-      {children}
-    </Typography>
-  );
-}
-
-function SummaryRow({ label, value }: { label: string; value: string }) {
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        gap: 2,
-      }}
-    >
-      <Typography sx={{ fontSize: 13, color: colors.muted, fontWeight: 600 }}>
-        {label}
-      </Typography>
-
-      <Typography
-        sx={{
-          fontSize: 13,
-          color: colors.text,
-          fontWeight: 950,
-          textAlign: "right",
-          overflowWrap: "anywhere",
-        }}
-      >
-        {value}
-      </Typography>
-    </Box>
-  );
-}
-
-function SmallIconButton({ children }: { children: ReactNode }) {
-  return (
-    <IconButton
-      size="small"
-      sx={{
-        width: 36,
-        height: 36,
-        border: `1px solid ${colors.cardBorder}`,
-        borderRadius: "16px",
-        color: colors.muted,
-        bgcolor: "#ffffff",
-        transition: "all 0.16s ease",
-        flexShrink: 0,
-        "&:hover": {
-          bgcolor: colors.primarySoft,
-          color: colors.primary,
-          borderColor: "#fed7aa",
-          transform: "translateY(-1px)",
-        },
-      }}
-    >
-      {children}
-    </IconButton>
   );
 }

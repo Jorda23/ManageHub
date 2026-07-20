@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 import {
-  alpha,
   Box,
   Button,
   Card,
@@ -14,13 +13,8 @@ import {
 } from "@mui/material";
 import {
   FaArrowRight,
-  FaBoxes,
-  FaBuilding,
-  FaCheckCircle,
   FaLock,
   FaShieldAlt,
-  FaTools,
-  FaTractor,
   FaUserAlt,
 } from "react-icons/fa";
 
@@ -98,12 +92,9 @@ export default function LoginPage() {
           position: "relative",
           zIndex: 1,
           width: "100%",
-          maxWidth: 1120,
+          maxWidth: 500,
           display: "grid",
-          gridTemplateColumns: {
-            xs: "1fr",
-            md: "minmax(0, 1.05fr) minmax(360px, 0.85fr)",
-          },
+          
           borderRadius: {
             xs: "24px",
             md: "32px",
@@ -115,7 +106,6 @@ export default function LoginPage() {
           backdropFilter: "blur(18px)",
         }}
       >
-        <BrandPanel />
 
         <Card
           elevation={0}
@@ -133,20 +123,7 @@ export default function LoginPage() {
           }}
         >
           <Box sx={{ mb: 3 }}>
-            <Chip
-              icon={<FaShieldAlt size={12} />}
-              label="Secure access"
-              size="small"
-              sx={{
-                mb: 1.4,
-                height: 26,
-                borderRadius: "999px",
-                bgcolor: colors.primarySoft,
-                color: colors.primary,
-                fontWeight: 900,
-                fontSize: 11,
-              }}
-            />
+          
 
             <Typography
               sx={{
@@ -269,161 +246,13 @@ export default function LoginPage() {
             </Button>
           </Box>
 
-          <Divider
-            sx={{
-              my: 3,
-              borderColor: colors.border,
-            }}
-          />
-
-          <Box
-            sx={{
-              p: 1.4,
-              borderRadius: "16px",
-              bgcolor: "#f8fafc",
-              border: `1px solid ${colors.border}`,
-            }}
-          >
-            <Typography
-              sx={{
-                color: colors.muted,
-                fontSize: 12.5,
-                fontWeight: 650,
-                lineHeight: 1.45,
-              }}
-            >
-              No account yet? Contact your administrator for access.
-            </Typography>
-          </Box>
         </Card>
       </Box>
     </Box>
   );
 }
 
-function BrandPanel() {
-  return (
-    <Box
-      sx={{
-        display: {
-          xs: "none",
-          md: "flex",
-        },
-        minHeight: 620,
-        p: 4,
-        color: "#ffffff",
-        position: "relative",
-        overflow: "hidden",
-        background:
-          "linear-gradient(135deg, #002b45 0%, #123f63 52%, #0f766e 100%)",
-        flexDirection: "column",
-        justifyContent: "space-between",
-      }}
-    >
-      <Box
-        sx={{
-          position: "absolute",
-          right: -90,
-          top: -90,
-          width: 260,
-          height: 260,
-          borderRadius: "50%",
-          bgcolor: "rgba(255,255,255,0.09)",
-        }}
-      />
 
-      <Box
-        sx={{
-          position: "absolute",
-          left: -100,
-          bottom: -120,
-          width: 300,
-          height: 300,
-          borderRadius: "50%",
-          bgcolor: "rgba(25,211,216,0.14)",
-        }}
-      />
-
-      <Box sx={{ position: "relative", zIndex: 1 }}>
-        <Typography
-          sx={{
-            fontSize: 24,
-            fontWeight: 950,
-            lineHeight: 1,
-          }}
-        >
-          AssetHub
-        </Typography>
-
-        <Typography
-          sx={{
-            mt: 0.75,
-            color: "rgba(255,255,255,0.72)",
-            fontSize: 13,
-            fontWeight: 700,
-          }}
-        >
-          Business Management Suite
-        </Typography>
-      </Box>
-
-      <Box sx={{ position: "relative", zIndex: 1 }}>
-        <Typography
-          sx={{
-            fontSize: 42,
-            fontWeight: 950,
-            lineHeight: 1.05,
-            letterSpacing: "-0.05em",
-            maxWidth: 420,
-          }}
-        >
-          Manage sales, grains and properties in one place.
-        </Typography>
-
-        <Typography
-          sx={{
-            mt: 1.5,
-            color: "rgba(255,255,255,0.74)",
-            fontSize: 14,
-            fontWeight: 600,
-            lineHeight: 1.6,
-            maxWidth: 440,
-          }}
-        >
-          Centralized access for ferretería inventory, grain sales and property
-          payment tracking.
-        </Typography>
-
-        <Box
-          sx={{
-            mt: 3,
-            display: "grid",
-            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-            gap: 1.2,
-          }}
-        >
-          <FeaturePill icon={<FaTools />} label="Hardware" />
-          <FeaturePill icon={<FaTractor />} label="Grains" />
-          <FeaturePill icon={<FaBuilding />} label="Property" />
-        </Box>
-      </Box>
-
-      <Box
-        sx={{
-          position: "relative",
-          zIndex: 1,
-          display: "grid",
-          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-          gap: 1.2,
-        }}
-      >
-        <MiniStat value="3" label="Modules" />
-        <MiniStat value="24/7" label="Access" />
-        <MiniStat value="100%" label="Control" />
-      </Box>
-    </Box>
-  );
-}
 
 function Field({
   label,
@@ -503,81 +332,6 @@ function Field({
           },
         }}
       />
-    </Box>
-  );
-}
-
-function FeaturePill({ icon, label }: { icon: ReactNode; label: string }) {
-  return (
-    <Box
-      sx={{
-        px: 1.2,
-        py: 1,
-        borderRadius: "16px",
-        bgcolor: "rgba(255,255,255,0.12)",
-        border: "1px solid rgba(255,255,255,0.14)",
-        display: "flex",
-        alignItems: "center",
-        gap: 0.8,
-        minWidth: 0,
-      }}
-    >
-      <Box
-        sx={{
-          color: colors.green,
-          display: "flex",
-          flexShrink: 0,
-        }}
-      >
-        {icon}
-      </Box>
-
-      <Typography
-        noWrap
-        sx={{
-          color: "#ffffff",
-          fontSize: 11,
-          fontWeight: 900,
-        }}
-      >
-        {label}
-      </Typography>
-    </Box>
-  );
-}
-
-function MiniStat({ value, label }: { value: string; label: string }) {
-  return (
-    <Box
-      sx={{
-        p: 1.4,
-        borderRadius: "18px",
-        bgcolor: "rgba(255,255,255,0.12)",
-        border: "1px solid rgba(255,255,255,0.14)",
-      }}
-    >
-      <Typography
-        sx={{
-          color: "#ffffff",
-          fontSize: 19,
-          fontWeight: 950,
-          lineHeight: 1,
-        }}
-      >
-        {value}
-      </Typography>
-
-      <Typography
-        sx={{
-          mt: 0.5,
-          color: "rgba(255,255,255,0.72)",
-          fontSize: 10,
-          fontWeight: 800,
-          textTransform: "uppercase",
-        }}
-      >
-        {label}
-      </Typography>
     </Box>
   );
 }
