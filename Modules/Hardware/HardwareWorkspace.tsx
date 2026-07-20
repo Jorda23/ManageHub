@@ -353,15 +353,20 @@ export function HardwareWorkspace() {
           </Box>
           <Box
             sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                lg: "minmax(0, 2fr) minmax(320px, 1fr)",
-              },
-              gap: 2.5,
-              alignItems: "stretch",
-            }}
-          >
+                         display: "grid",
+                         gridTemplateColumns: {
+                           xs: "1fr",
+                           lg: "minmax(0, 2fr) minmax(340px, 1fr)",
+                         },
+                         gap: {
+                           xs: 2,
+                           md: 2.5,
+                         },
+                         alignItems: "start",
+                         width: "100%",
+                         minWidth: 0,
+                       }}
+          > 
             <SectionCard>
               <SectionHeader
                 icon={<FaBoxOpen />}

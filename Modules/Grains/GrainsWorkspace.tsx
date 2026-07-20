@@ -298,14 +298,19 @@ export function GrainsWorkspace() {
           </Box>
 
           <Box
-            sx={{
+              sx={{
               display: "grid",
               gridTemplateColumns: {
                 xs: "1fr",
-                lg: "minmax(0, 2fr) minmax(320px, 1fr)",
+                lg: "minmax(0, 2fr) minmax(340px, 1fr)",
               },
-              gap: 2.5,
-              alignItems: "stretch",
+              gap: {
+                xs: 2,
+                md: 2.5,
+              },
+              alignItems: "start",
+              width: "100%",
+              minWidth: 0,
             }}
           >
             <SectionCard>
@@ -314,18 +319,20 @@ export function GrainsWorkspace() {
                 title="Inventario de granos"
                 action="VER TODO"
               />
-
-              <Divider />
-
               <Box sx={{ p: 2.5 }}>
                 <Box
-                  sx={{
+                    sx={{
                     display: "grid",
                     gridTemplateColumns: {
                       xs: "1fr",
                       md: "repeat(2, minmax(0, 1fr))",
                     },
-                    gap: 2,
+                    gap: {
+                      xs: 1.5,
+                      md: 2,
+                    },
+                    width: "100%",
+                    minWidth: 0,
                   }}
                 >
                   {products.map((product) => (
@@ -616,7 +623,6 @@ function ProductCard({ product }: { product: GrainProduct }) {
         borderRadius: "16px",
         border: `1px solid ${colors.cardBorder}`,
         bgcolor: "#ffffff",
-        minHeight: 132,
         transition: "all 0.18s ease",
         "&:hover": {
           transform: "translateY(-2px)",

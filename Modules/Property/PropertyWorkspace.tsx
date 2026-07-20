@@ -25,6 +25,7 @@ import {
 
 import type { WorkspaceConfig } from "@/components/WorkspaceShared/workspaceTypes";
 import AppShell from "@/components/AppShell/AppShell";
+
 import {
   Box,
   Button,
@@ -41,6 +42,7 @@ import {
   Typography,
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
+import AddPropertyDialog, { PropertyForm } from "@/components/AddPropertyDialog/AddPropertyDialog";
 
 type AccountStatus = "Al día" | "Pendiente" | "Atrasado" | "Pagado";
 
@@ -57,6 +59,10 @@ type PropertyItem = {
   dueDate: string;
   status: AccountStatus;
   accent: string;
+  propertyType?: "Terreno" | "Casa" | "Finca" | "Local";
+  ownerName?: string;
+  ownerPhone?: string;
+  ownerDocument?: string;
 };
 
 type PaymentRecord = {
@@ -225,6 +231,22 @@ const paymentMethods = [
   "Cheque",
 ];
 
+const emptyPropertyForm: PropertyForm = {
+  name: "",
+  code: "",
+  propertyType: "Terreno",
+  location: "",
+  size: "",
+  price: "",
+  ownerName: "",
+  ownerPhone: "",
+  ownerDocument: "",
+  buyerName: "",
+  buyerEmail: "",
+  initialPayment: "0",
+  dueDate: "",
+};
+
 const inputSx: SxProps<Theme> = {
   "& .MuiOutlinedInput-root": {
     borderRadius: 2.5,
@@ -317,6 +339,10 @@ export function PropertyWorkspace() {
   const [paymentMethod, setPaymentMethod] = useState(paymentMethods[0]);
   const [paymentNote, setPaymentNote] = useState("Abono de cuota");
   const [error, setError] = useState("");
+  const [isPropertyDialogOpen, setIsPropertyDialogOpen] = useState(false);
+  const [propertyForm, setPropertyForm] =
+    useState<PropertyForm>(emptyPropertyForm);
+  const [propertyFormError, setPropertyFormError] = useState("");
 
   const selectedProperty = useMemo(() => {
     return properties.find((property) => property.id === selectedPropertyId);
@@ -342,6 +368,112 @@ export function PropertyWorkspace() {
   const paidAccounts = useMemo(() => {
     return properties.filter((property) => property.status === "Pagado").length;
   }, [properties]);
+
+  const handlePropertyFormChange = (
+    field: keyof PropertyForm,
+    value: string,
+  ) => {
+    setPropertyForm((current) => ({ ...current, [field]: value }));
+  };
+
+  const handleClosePropertyDialog = () => {
+    setIsPropertyDialogOpen(false);
+    setPropertyFormError("");
+    setPropertyForm(emptyPropertyForm);
+  };
+
+  const handleCreateProperty = () => {
+    setPropertyFormError("");
+
+    const name = propertyForm.name.trim();
+    const code = propertyForm.code.trim().toUpperCase();
+    const location = propertyForm.location.trim();
+    const size = propertyForm.size.trim();
+    const ownerName = propertyForm.ownerName.trim();
+    const price = Number(propertyForm.price);
+    const initialPayment = Number(propertyForm.initialPayment || 0);
+
+    if (!name || !code || !location || !size || !ownerName) {
+      setPropertyFormError(
+        "Completa nombre, código, ubicación, medida y cliente propietario.",
+      );
+      return;
+    }
+
+    if (!Number.isFinite(price) || price <= 0) {
+      setPropertyFormError("Ingresa un precio de venta mayor a cero.");
+      return;
+    }
+
+    if (!Number.isFinite(initialPayment) || initialPayment < 0) {
+      setPropertyFormError("El abono inicial no puede ser negativo.");
+      return;
+    }
+
+    if (initialPayment > price) {
+      setPropertyFormError(
+        "El abono inicial no puede superar el precio de la propiedad.",
+      );
+      return;
+    }
+
+    if (properties.some((property) => property.code.toUpperCase() === code)) {
+      setPropertyFormError("Ya existe una propiedad con ese código.");
+      return;
+    }
+
+    const hasBuyer = Boolean(propertyForm.buyerName.trim());
+    const isPaid = initialPayment >= price;
+    const newProperty: PropertyItem = {
+      id: crypto.randomUUID(),
+      name,
+      code,
+      propertyType: propertyForm.propertyType,
+      location,
+      size,
+      price,
+      paid: initialPayment,
+      ownerName,
+      ownerPhone: propertyForm.ownerPhone.trim(),
+      ownerDocument: propertyForm.ownerDocument.trim(),
+      buyerName: hasBuyer
+        ? propertyForm.buyerName.trim()
+        : "Pendiente de asignar",
+      buyerEmail: hasBuyer
+        ? propertyForm.buyerEmail.trim() || "Comprador registrado"
+        : "Sin comprador",
+      dueDate: isPaid
+        ? "Pagado"
+        : propertyForm.dueDate || "Sin fecha",
+      status: isPaid ? "Pagado" : hasBuyer ? "Pendiente" : "Al día",
+      accent: isPaid ? colors.green : colors.primaryLight,
+    };
+
+    setProperties((currentProperties) => [newProperty, ...currentProperties]);
+    setSelectedPropertyId(newProperty.id);
+
+    if (initialPayment > 0) {
+      const initialPaymentRecord: PaymentRecord = {
+        id: crypto.randomUUID(),
+        propertyId: newProperty.id,
+        propertyName: newProperty.name,
+        buyerName: newProperty.buyerName,
+        amount: initialPayment,
+        method: paymentMethods[0],
+        date: new Date().toLocaleString("es-NI", {
+          dateStyle: "short",
+          timeStyle: "short",
+        }),
+        note: "Abono inicial al registrar propiedad",
+      };
+      setPayments((currentPayments) => [
+        initialPaymentRecord,
+        ...currentPayments,
+      ]);
+    }
+
+    handleClosePropertyDialog();
+  };
 
   const handleAssignBuyer = () => {
     setError("");
@@ -549,7 +681,8 @@ export function PropertyWorkspace() {
               <SectionHeader
                 icon={<FaMapMarkedAlt />}
                 title="Terrenos y propiedades"
-                action="VER TODO"
+                action="AGREGAR PROPIEDAD"
+                onAction={() => setIsPropertyDialogOpen(true)}
               />
 
               <Divider />
@@ -753,6 +886,15 @@ export function PropertyWorkspace() {
           </Box>
 
           <PaymentHistoryTable payments={payments} totalPaid={totalPaid} />
+
+          <AddPropertyDialog
+            open={isPropertyDialogOpen}
+            form={propertyForm}
+            error={propertyFormError}
+            onChange={handlePropertyFormChange}
+            onClose={handleClosePropertyDialog}
+            onSubmit={handleCreateProperty}
+          />
         </Box>
       </Box>
     </AppShell>
@@ -970,10 +1112,12 @@ function SectionHeader({
   icon,
   title,
   action,
+  onAction,
 }: {
   icon: ReactNode;
   title: string;
   action?: string;
+  onAction?: () => void;
 }) {
   return (
     <Box
@@ -1024,19 +1168,32 @@ function SectionHeader({
       </Box>
 
       {action && (
-        <Typography
+        <Button
+          type="button"
+          size="small"
+          variant={onAction ? "contained" : "text"}
+          startIcon={onAction ? <FaPlusCircle size={13} /> : undefined}
+          onClick={onAction}
           sx={{
+            borderRadius: 2.25,
+            px: onAction ? 1.6 : 1,
             fontSize: 11,
             fontWeight: 950,
-            color: colors.primary,
-            cursor: "pointer",
+            color: onAction ? "#ffffff" : colors.primary,
+            bgcolor: onAction ? colors.primary : "transparent",
             textTransform: "uppercase",
             letterSpacing: "0.04em",
             whiteSpace: "nowrap",
+            boxShadow: onAction
+              ? "0 8px 18px rgba(37, 99, 235, 0.2)"
+              : "none",
+            "&:hover": {
+              bgcolor: onAction ? "#172554" : colors.primarySoft,
+            },
           }}
         >
           {action}
-        </Typography>
+        </Button>
       )}
     </Box>
   );
@@ -1137,6 +1294,11 @@ function PropertyCard({ property }: { property: PropertyItem }) {
           icon={<FaMapMarkedAlt />}
           label="Ubicación"
           value={property.location}
+        />
+        <InfoLine
+          icon={<FaBuilding />}
+          label="Cliente"
+          value={property.ownerName || "Cliente no registrado"}
         />
         <InfoLine
           icon={<FaUserTie />}
