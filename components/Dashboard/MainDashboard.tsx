@@ -4,34 +4,29 @@ import Link from "next/link";
 import type { ComponentType, ReactNode } from "react";
 import {
   alpha,
-  Avatar,
   Box,
   Button,
   Card,
   Chip,
   Divider,
-  IconButton,
-  LinearProgress,
   Typography,
 } from "@mui/material";
 import {
-  FaBars,
+  FaArrowRight,
   FaBell,
-  FaBoxes,
   FaBuilding,
+  FaCashRegister,
   FaChartLine,
-  FaClipboardCheck,
+  FaCheckCircle,
   FaDownload,
   FaExclamationTriangle,
   FaHome,
-  FaLayerGroup,
-  FaRegCreditCard,
-  FaSearch,
-  FaShoppingCart,
-  FaSlidersH,
+  FaMoneyBillWave,
+  FaPlus,
+  FaReceipt,
   FaTools,
   FaTractor,
-  FaWarehouse,
+  FaWallet,
 } from "react-icons/fa";
 import AppShell from "../AppShell/AppShell";
 
@@ -67,16 +62,30 @@ type ActivityItem = {
   accent: string;
 };
 
-type NavItem = {
+type AlertItem = {
+  title: string;
+  detail: string;
+  href: string;
+  tone: "danger" | "warning" | "info";
+};
+
+type CommitmentItem = {
+  date: string;
+  title: string;
+  detail: string;
+  amount?: string;
+};
+
+type QuickAction = {
   label: string;
+  detail: string;
   href: string;
   icon: ComponentType<{ size?: number }>;
-  active?: boolean;
+  accent: string;
 };
 
 const colors = {
   pageBg: "#f3f7fa",
-  sidebarBg: "#eef5f8",
   cardBg: "#ffffff",
   border: "#dbe6ed",
   borderSoft: "#edf2f6",
@@ -91,135 +100,207 @@ const colors = {
   warning: "#f97316",
   danger: "#dc2626",
   info: "#2563eb",
+  teal: "#0f8b7f",
+  purple: "#7c3aed",
 };
 
 const metrics: MetricCard[] = [
   {
-    label: "Total Gross Sales",
-    value: "$1,284,500.00",
-    detail: "+12.5%",
-    icon: FaRegCreditCard,
-    accent: "#0ea5e9",
+    label: "Ventas de hoy",
+    value: "$286.40",
+    detail: "+12% vs. ayer",
+    icon: FaCashRegister,
+    accent: colors.success,
     tone: "success",
   },
   {
-    label: "Hardware Inventory",
-    value: "8,422 SKUs",
-    detail: "14 Low Stock",
-    icon: FaBoxes,
-    accent: "#ef4444",
-    tone: "danger",
+    label: "Ingresos del mes",
+    value: "$8,450.00",
+    detail: "68% de la meta",
+    icon: FaChartLine,
+    accent: colors.info,
+    tone: "info",
   },
   {
-    label: "Pending Payments",
-    value: "$42,105.80",
-    detail: "Due Today",
-    icon: FaClipboardCheck,
-    accent: "#f97316",
+    label: "Por cobrar",
+    value: "$73,700.00",
+    detail: "4 cuentas abiertas",
+    icon: FaWallet,
+    accent: colors.warning,
     tone: "warning",
   },
   {
-    label: "Current Silo Volume",
-    value: "12,400 MT",
-    detail: "88% Capacity",
-    icon: FaWarehouse,
-    accent: "#2563eb",
-    tone: "info",
+    label: "Alertas",
+    value: "3",
+    detail: "1 requiere atención",
+    icon: FaBell,
+    accent: colors.danger,
+    tone: "danger",
   },
 ];
 
 const modules: ModuleCard[] = [
   {
-    eyebrow: "HARDWARE & TOOLS",
-    title: "Central Supply Store",
+    eyebrow: "FERRETERÍA",
+    title: "Ventas de ferretería",
     description:
-      "Manage inventory tracking, procurement orders, and vendor relationships for construction assets.",
+      "Administra productos, existencias, precios y ventas del negocio de ferretería.",
     image:
-      "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1519520104014-df63821cb6f9?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     href: "/sell/hardware",
     stats: [
-      { value: "124", label: "ORDERS TODAY" },
-      { value: "98%", label: "FULFILLMENT" },
-      { value: "4.2k", label: "ACTIVE SKUS" },
+      { value: "$106.90", label: "VENTAS HOY" },
+      { value: "216", label: "EN STOCK" },
+      { value: "4", label: "PRODUCTOS" },
     ],
   },
   {
-    eyebrow: "COMMODITIES",
-    title: "Regional Grain Reserve",
+    eyebrow: "GRANOS BÁSICOS",
+    title: "Ventas de granos",
     description:
-      "Monitor silo capacities, moisture levels, and market pricing for corn, wheat, and soy reserves.",
+      "Controla inventario y ventas por libra, saco, quintal o kilogramo.",
     image:
-      "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1645331465778-eb409d112198?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     href: "/sell/grains",
     stats: [
-      { value: "3.2k", label: "DAILY INTAKE" },
-      { value: "8 Silos", label: "ACTIVE STORAGE" },
-      { value: "$412", label: "MARKET INDEX" },
+      { value: "$38.25", label: "VENTAS HOY" },
+      { value: "324", label: "UNIDADES" },
+      { value: "4", label: "PRODUCTOS" },
     ],
   },
   {
-    eyebrow: "REAL ESTATE",
-    title: "Portfolio Assets",
+    eyebrow: "TERRENOS",
+    title: "Propiedades y abonos",
     description:
-      "Track commercial properties, lease expirations, maintenance schedules, and investment yields.",
+      "Consulta propiedades vendidas, clientes, cuotas, saldos y pagos pendientes.",
     image:
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1672861847378-e15e90cc25ca?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     href: "/sell/property",
     stats: [
-      { value: "42", label: "UNITS HELD" },
-      { value: "94%", label: "OCCUPANCY" },
-      { value: "12", label: "DUE RENEWALS" },
+      { value: "4", label: "PROPIEDADES" },
+      { value: "$41.1k", label: "ABONADO" },
+      { value: "$73.7k", label: "PENDIENTE" },
     ],
+  },
+];
+
+const cashFlow = [
+  { day: "Lun", hardware: 92, grains: 48, property: 75 },
+  { day: "Mar", hardware: 65, grains: 58, property: 42 },
+  { day: "Mié", hardware: 78, grains: 36, property: 95 },
+  { day: "Jue", hardware: 54, grains: 66, property: 50 },
+  { day: "Vie", hardware: 88, grains: 72, property: 82 },
+  { day: "Sáb", hardware: 100, grains: 55, property: 64 },
+  { day: "Hoy", hardware: 73, grains: 44, property: 90 },
+];
+
+const alerts: AlertItem[] = [
+  {
+    title: "Lote C-21 con pago atrasado",
+    detail: "El vencimiento fue hace 5 días.",
+    href: "/sell/property",
+    tone: "danger",
+  },
+  {
+    title: "Inventario bajo de cemento",
+    detail: "Quedan 22 unidades disponibles.",
+    href: "/sell/hardware",
+    tone: "warning",
+  },
+  {
+    title: "Próximo pago de Lote A-12",
+    detail: "La cuota vence dentro de 3 días.",
+    href: "/sell/property",
+    tone: "info",
   },
 ];
 
 const activities: ActivityItem[] = [
   {
-    icon: FaShoppingCart,
-    title: "Bulk Order Approved",
-    subtitle: "Hardware Store: Order #8271 High-grade Cement Bulk",
-    time: "2 mins ago",
-    amount: "$12,450.00",
-    accent: "#0ea5e9",
-  },
-  {
-    icon: FaExclamationTriangle,
-    title: "Silo Moisture Alert",
-    subtitle: "Grain Reserve: North Silo reported high humidity level",
-    time: "15 mins ago",
-    accent: "#f97316",
+    icon: FaTools,
+    title: "Venta de taladro inalámbrico",
+    subtitle: "Ferretería · Efectivo",
+    time: "3:45 p. m.",
+    amount: "+$79.90",
+    accent: colors.warning,
   },
   {
     icon: FaBuilding,
-    title: "Property Payment Received",
-    subtitle: "Real Estate: Lot A-12 partial payment registered",
-    time: "48 mins ago",
-    amount: "$4,500.00",
-    accent: "#16a34a",
+    title: "Abono registrado para Lote A-12",
+    subtitle: "Valeria Gómez · Efectivo",
+    time: "2:20 p. m.",
+    amount: "+$500.00",
+    accent: colors.info,
+  },
+  {
+    icon: FaTractor,
+    title: "Venta de frijol rojo",
+    subtitle: "Granos básicos · 2 sacos",
+    time: "11:10 a. m.",
+    amount: "+$8.50",
+    accent: colors.teal,
+  },
+  {
+    icon: FaCheckCircle,
+    title: "Inventario actualizado",
+    subtitle: "Caja de tornillos · 140 unidades",
+    time: "9:35 a. m.",
+    accent: colors.success,
   },
 ];
 
-const navItems: NavItem[] = [
+const commitments: CommitmentItem[] = [
   {
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: FaLayerGroup,
-    active: true,
+    date: "26 JUL",
+    title: "Cobro de Lote A-12",
+    detail: "Valeria Gómez",
+    amount: "$500.00",
   },
   {
-    label: "Hardware Store",
+    date: "28 JUL",
+    title: "Reposición de cemento",
+    detail: "Inventario de ferretería",
+  },
+  {
+    date: "30 JUL",
+    title: "Seguimiento de Casa R-04",
+    detail: "Propietario por confirmar",
+  },
+  {
+    date: "31 JUL",
+    title: "Cierre mensual",
+    detail: "Consolidación de ventas e ingresos",
+  },
+];
+
+const quickActions: QuickAction[] = [
+  {
+    label: "Registrar venta",
+    detail: "Ferretería",
     href: "/sell/hardware",
-    icon: FaTools,
+    icon: FaCashRegister,
+    accent: colors.warning,
   },
   {
-    label: "Basic Grains",
+    label: "Registrar venta",
+    detail: "Granos básicos",
     href: "/sell/grains",
     icon: FaTractor,
+    accent: colors.teal,
   },
   {
-    label: "Real Estate",
+    label: "Registrar abono",
+    detail: "Terrenos",
     href: "/sell/property",
-    icon: FaBuilding,
+    icon: FaMoneyBillWave,
+    accent: colors.info,
+  },
+  {
+    label: "Agregar propiedad",
+    detail: "Nuevo terreno",
+    href: "/sell/property",
+    icon: FaPlus,
+    accent: colors.purple,
   },
 ];
 
@@ -229,19 +310,11 @@ export default function MainDashboard() {
       <Box
         sx={{
           width: "100%",
-          maxWidth: "100vw",
           minHeight: "calc(100vh - 64px)",
           overflowX: "hidden",
           bgcolor: colors.pageBg,
-          px: {
-            xs: 1.5,
-            sm: 2,
-            md: 3,
-          },
-          py: {
-            xs: 2,
-            md: 3,
-          },
+          px: { xs: 1.5, sm: 2, md: 3 },
+          py: { xs: 2, md: 3 },
         }}
       >
         <Box
@@ -251,10 +324,7 @@ export default function MainDashboard() {
             mx: "auto",
             display: "flex",
             flexDirection: "column",
-            gap: {
-              xs: 2,
-              md: 3,
-            },
+            gap: { xs: 2, md: 3 },
             minWidth: 0,
           }}
         >
@@ -268,11 +338,7 @@ export default function MainDashboard() {
                 sm: "repeat(2, minmax(0, 1fr))",
                 xl: "repeat(4, minmax(0, 1fr))",
               },
-              gap: {
-                xs: 1.5,
-                md: 2,
-              },
-              minWidth: 0,
+              gap: 2,
             }}
           >
             {metrics.map((metric) => (
@@ -285,54 +351,42 @@ export default function MainDashboard() {
               display: "grid",
               gridTemplateColumns: {
                 xs: "1fr",
-                xl: "minmax(0, 1.55fr) minmax(320px, 0.75fr)",
+                xl: "minmax(0, 1.7fr) minmax(320px, 0.7fr)",
               },
-              gap: {
-                xs: 2,
-                md: 2,
-              },
-              alignItems: "start",
-              minWidth: 0,
+              gap: 2,
+              alignItems: "stretch",
             }}
           >
-            <Box sx={{ minWidth: 0 }}>
-              <SectionHeading
-                title="Sector Management Modules"
-                subtitle="Access each independent module for sales, inventory, grains, and property payments."
-              />
+            <CashFlowCard />
+            <AlertsCard />
+          </Box>
 
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: {
-                    xs: "1fr",
-                    md: "repeat(2, minmax(0, 1fr))",
-                    xl: "repeat(3, minmax(0, 1fr))",
-                  },
-                  gap: {
-                    xs: 1.5,
-                    md: 2,
-                  },
-                  minWidth: 0,
-                }}
-              >
-                {modules.map((module) => (
-                  <SectorModuleCard key={module.title} {...module} />
-                ))}
-              </Box>
-            </Box>
+          <Box>
+            <SectionHeading
+              title="Módulos del negocio"
+              subtitle="Accede directamente a ventas, inventarios y gestión de propiedades."
+            />
 
             <Box
               sx={{
-                display: "flex",
-                flexDirection: "column",
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  md: "repeat(2, minmax(0, 1fr))",
+                  xl: "repeat(3, minmax(0, 1fr))",
+                },
                 gap: 2,
-                minWidth: 0,
               }}
             >
-              <OperationsHealth />
-              <RecentActivity />
+              {modules.map((module) => (
+                <SectorModuleCard key={module.title} {...module} />
+              ))}
             </Box>
+          </Box>
+
+          <Box
+          >
+            <ActivityCard />
           </Box>
         </Box>
       </Box>
@@ -340,315 +394,14 @@ export default function MainDashboard() {
   );
 }
 
-function Sidebar() {
-  return (
-    <Box
-      component="aside"
-      sx={{
-        display: {
-          xs: "none",
-          lg: "flex",
-        },
-        flexDirection: "column",
-        minHeight: "100vh",
-        position: "sticky",
-        top: 0,
-        borderRight: `1px solid ${colors.border}`,
-        bgcolor: colors.sidebarBg,
-      }}
-    >
-      <Box sx={{ px: 3, py: 3 }}>
-        <Typography
-          sx={{
-            color: colors.primaryDark,
-            fontSize: 20,
-            fontWeight: 950,
-            lineHeight: 1,
-          }}
-        >
-          AssetHub
-        </Typography>
-
-        <Typography
-          sx={{
-            mt: 0.6,
-            color: colors.muted,
-            fontSize: 11,
-            fontWeight: 700,
-          }}
-        >
-          Business Management Suite
-        </Typography>
-      </Box>
-
-      <Box
-        sx={{
-          px: 2,
-          display: "flex",
-          flexDirection: "column",
-          gap: 0.75,
-        }}
-      >
-        {navItems.map((item) => (
-          <NavLinkItem key={item.label} item={item} />
-        ))}
-      </Box>
-
-      <Box sx={{ flex: 1 }} />
-
-      <Box
-        sx={{
-          m: 2,
-          p: 2,
-          borderRadius: "16px",
-          bgcolor: "#ffffff",
-          border: `1px solid ${colors.border}`,
-          boxShadow: "0 10px 28px rgba(15, 23, 42, 0.05)",
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.4 }}>
-          <Avatar
-            sx={{
-              width: 40,
-              height: 40,
-              bgcolor: colors.primary,
-              color: "#ffffff",
-              fontSize: 13,
-              fontWeight: 900,
-            }}
-          >
-            AU
-          </Avatar>
-
-          <Box sx={{ minWidth: 0 }}>
-            <Typography
-              noWrap
-              sx={{
-                color: colors.text,
-                fontSize: 12,
-                fontWeight: 900,
-              }}
-            >
-              Admin User
-            </Typography>
-
-            <Typography
-              noWrap
-              sx={{
-                color: colors.muted,
-                fontSize: 11,
-                fontWeight: 600,
-              }}
-            >
-              Global Manager
-            </Typography>
-          </Box>
-        </Box>
-      </Box>
-    </Box>
-  );
-}
-
-function NavLinkItem({ item }: { item: NavItem }) {
-  const Icon = item.icon;
-
-  return (
-    <Link
-      href={item.href}
-      style={{
-        color: "inherit",
-        textDecoration: "none",
-      }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 1.4,
-          px: 1.6,
-          py: 1.35,
-          borderRadius: "16px",
-          bgcolor: item.active ? colors.primary : "transparent",
-          color: item.active ? "#ffffff" : "#294254",
-          fontSize: 13,
-          fontWeight: item.active ? 900 : 750,
-          transition: "0.18s ease",
-          "&:hover": {
-            bgcolor: item.active ? colors.primary : alpha(colors.primary, 0.08),
-            transform: "translateX(2px)",
-          },
-        }}
-      >
-        <Icon size={14} />
-
-        <Typography
-          sx={{
-            fontSize: 13,
-            fontWeight: "inherit",
-          }}
-        >
-          {item.label}
-        </Typography>
-      </Box>
-    </Link>
-  );
-}
-
-function Topbar() {
-  return (
-    <Box
-      component="header"
-      sx={{
-        minHeight: {
-          xs: 64,
-          md: 68,
-        },
-        px: {
-          xs: 1.5,
-          sm: 2,
-          md: 3,
-        },
-        py: {
-          xs: 1.25,
-          md: 0,
-        },
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 1.5,
-        borderBottom: `1px solid ${colors.border}`,
-        bgcolor: "rgba(247,250,252,0.92)",
-        backdropFilter: "blur(12px)",
-        position: "sticky",
-        top: 0,
-        zIndex: 20,
-      }}
-    >
-      <Box
-        sx={{
-          display: {
-            xs: "flex",
-            lg: "none",
-          },
-          alignItems: "center",
-          gap: 1,
-          minWidth: 0,
-        }}
-      >
-        <IconButton
-          size="small"
-          sx={{
-            width: 38,
-            height: 38,
-            borderRadius: "16px",
-
-            border: `1px solid ${colors.border}`,
-            color: colors.primary,
-            bgcolor: "#ffffff",
-          }}
-        >
-          <FaBars size={14} />
-        </IconButton>
-
-        <Typography
-          sx={{
-            color: colors.primaryDark,
-            fontSize: 16,
-            fontWeight: 950,
-          }}
-        >
-          AssetHub
-        </Typography>
-      </Box>
-
-      <Box
-        sx={{
-          flex: {
-            xs: 1,
-            md: "0 1 380px",
-          },
-          minWidth: 0,
-          display: "flex",
-          alignItems: "center",
-          gap: 1,
-          px: 1.5,
-          py: 1.05,
-          borderRadius: "16px",
-          bgcolor: "#edf2f6",
-          color: colors.muted,
-        }}
-      >
-        <FaSearch size={12} />
-
-        <Typography
-          noWrap
-          sx={{
-            fontSize: 12,
-            color: colors.muted,
-            fontWeight: 650,
-          }}
-        >
-          Search assets, invoices, or stock...
-        </Typography>
-      </Box>
-
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 1,
-          color: colors.primary,
-        }}
-      >
-        <TopbarIcon>
-          <FaBell size={14} />
-
-          <Box
-            sx={{
-              position: "absolute",
-              top: 8,
-              right: 8,
-              width: 7,
-              height: 7,
-              borderRadius: "50%",
-              bgcolor: colors.danger,
-              border: "1px solid #ffffff",
-            }}
-          />
-        </TopbarIcon>
-
-        <TopbarIcon>
-          <FaSlidersH size={14} />
-        </TopbarIcon>
-      </Box>
-    </Box>
-  );
-}
-
-function TopbarIcon({ children }: { children: ReactNode }) {
-  return (
-    <IconButton
-      size="small"
-      sx={{
-        position: "relative",
-        width: 38,
-        height: 38,
-        borderRadius: "16px",
-
-        border: `1px solid ${colors.border}`,
-        bgcolor: "#ffffff",
-        color: colors.primary,
-        "&:hover": {
-          bgcolor: colors.primarySoft,
-        },
-      }}
-    >
-      {children}
-    </IconButton>
-  );
-}
-
 function DashboardHero() {
+  const formattedDate = new Intl.DateTimeFormat("es-NI", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date());
+
   return (
     <Card
       elevation={0}
@@ -656,10 +409,7 @@ function DashboardHero() {
         position: "relative",
         overflow: "hidden",
         borderRadius: "16px",
-        p: {
-          xs: 2.25,
-          md: 3,
-        },
+        p: { xs: 2.25, md: 3 },
         bgcolor: colors.cardBg,
         border: `1px solid ${colors.border}`,
         boxShadow: "0 18px 45px rgba(15, 23, 42, 0.07)",
@@ -674,13 +424,9 @@ function DashboardHero() {
           height: 280,
           borderRadius: "50%",
           bgcolor: alpha(colors.primary, 0.08),
-          display: {
-            xs: "none",
-            md: "block",
-          },
+          display: { xs: "none", md: "block" },
         }}
       />
-
       <Box
         sx={{
           position: "absolute",
@@ -690,10 +436,7 @@ function DashboardHero() {
           height: 220,
           borderRadius: "50%",
           bgcolor: alpha("#0ea5e9", 0.08),
-          display: {
-            xs: "none",
-            lg: "block",
-          },
+          display: { xs: "none", lg: "block" },
         }}
       />
 
@@ -702,10 +445,7 @@ function DashboardHero() {
           position: "relative",
           zIndex: 1,
           display: "grid",
-          gridTemplateColumns: {
-            xs: "1fr",
-            md: "minmax(0, 1fr) auto",
-          },
+          gridTemplateColumns: { xs: "1fr", md: "minmax(0, 1fr) auto" },
           gap: 2.5,
           alignItems: "center",
         }}
@@ -719,7 +459,6 @@ function DashboardHero() {
               mb: 1.3,
               height: 25,
               borderRadius: "16px",
-
               bgcolor: colors.primarySoft,
               color: colors.primary,
               fontSize: 11,
@@ -730,34 +469,28 @@ function DashboardHero() {
           <Typography
             sx={{
               color: colors.text,
-              fontSize: {
-                xs: 28,
-                sm: 32,
-                md: 38,
-              },
+              fontSize: { xs: 28, sm: 32, md: 38 },
               fontWeight: 950,
               lineHeight: 1.05,
               letterSpacing: "-0.04em",
             }}
           >
-            Global Dashboard
+            Bienvenido, Administrador
           </Typography>
 
           <Typography
             sx={{
               mt: 0.9,
               color: colors.muted,
-              fontSize: {
-                xs: 13,
-                md: 14,
-              },
+              fontSize: { xs: 13, md: 14 },
               fontWeight: 600,
               lineHeight: 1.55,
-              maxWidth: 680,
+              maxWidth: 720,
+              textTransform: "capitalize",
             }}
           >
-            Comprehensive overview of hardware sales, grain reserves, property
-            payments, inventory status, and operational performance.
+            {formattedDate}. Consulta el estado general de ventas, inventarios,
+            propiedades y próximos compromisos.
           </Typography>
         </Box>
 
@@ -766,53 +499,22 @@ function DashboardHero() {
             display: "flex",
             gap: 1.2,
             flexWrap: "wrap",
-            justifyContent: {
-              xs: "flex-start",
-              md: "flex-end",
-            },
+            justifyContent: { xs: "flex-start", md: "flex-end" },
           }}
         >
           <Button
             variant="outlined"
-            sx={{
-              borderRadius: 2.25,
-              px: 2,
-              py: 1.1,
-              fontSize: 12,
-              fontWeight: 900,
-              textTransform: "none",
-              color: colors.primary,
-              borderColor: colors.border,
-              bgcolor: "#ffffff",
-              "&:hover": {
-                borderColor: colors.primary,
-                bgcolor: colors.primarySoft,
-              },
-            }}
+            startIcon={<FaChartLine size={12} />}
+            sx={buttonStyles("outlined")}
           >
-            View Analytics
+            Ver análisis
           </Button>
-
           <Button
             variant="contained"
             startIcon={<FaDownload size={12} />}
-            sx={{
-              bgcolor: colors.primary,
-              color: "#ffffff",
-              borderRadius: 2.25,
-              px: 2.2,
-              py: 1.1,
-              fontSize: 12,
-              fontWeight: 900,
-              textTransform: "none",
-              boxShadow: "0 12px 24px rgba(18, 63, 99, 0.22)",
-              "&:hover": {
-                bgcolor: colors.primaryDark,
-                boxShadow: "0 14px 28px rgba(18, 63, 99, 0.28)",
-              },
-            }}
+            sx={buttonStyles("contained")}
           >
-            Export Report
+            Exportar reporte
           </Button>
         </Box>
       </Box>
@@ -838,22 +540,7 @@ function DashboardMetricCard({
           : colors.info;
 
   return (
-    <Card
-      elevation={0}
-      sx={{
-        p: 2.2,
-        borderRadius: "16px",
-
-        bgcolor: colors.cardBg,
-        border: `1px solid ${colors.border}`,
-        boxShadow: "0 8px 24px rgba(15, 23, 42, 0.05)",
-        transition: "all 0.18s ease",
-        "&:hover": {
-          transform: "translateY(-2px)",
-          boxShadow: "0 16px 36px rgba(15, 23, 42, 0.09)",
-        },
-      }}
-    >
+    <Card elevation={0} sx={cardStyles}>
       <Box
         sx={{
           display: "flex",
@@ -863,21 +550,9 @@ function DashboardMetricCard({
           mb: 1.8,
         }}
       >
-        <Box
-          sx={{
-            width: 44,
-            height: 44,
-            borderRadius: "16px",
-            display: "grid",
-            placeItems: "center",
-            bgcolor: alpha(accent, 0.12),
-            color: accent,
-            flexShrink: 0,
-          }}
-        >
+        <IconBadge accent={accent}>
           <Icon size={18} />
-        </Box>
-
+        </IconBadge>
         <Chip
           label={detail}
           size="small"
@@ -886,38 +561,20 @@ function DashboardMetricCard({
             borderRadius: 999,
             bgcolor: alpha(detailColor, 0.1),
             color: detailColor,
-            fontSize: 11,
+            fontSize: 10.5,
             fontWeight: 900,
-            "& .MuiChip-label": {
-              px: 1,
-            },
+            "& .MuiChip-label": { px: 1 },
           }}
         />
       </Box>
 
-      <Typography
-        sx={{
-          color: colors.muted,
-          fontSize: 11,
-          fontWeight: 850,
-          mb: 0.6,
-          textTransform: "uppercase",
-          letterSpacing: "0.035em",
-        }}
-      >
-        {label}
-      </Typography>
-
+      <Typography sx={eyebrowStyles}>{label}</Typography>
       <Typography
         sx={{
           color: colors.text,
-          fontSize: {
-            xs: 19,
-            md: 21,
-          },
+          fontSize: { xs: 21, md: 24 },
           fontWeight: 950,
           lineHeight: 1.15,
-          overflowWrap: "anywhere",
         }}
       >
         {value}
@@ -926,39 +583,159 @@ function DashboardMetricCard({
   );
 }
 
-function SectionHeading({
-  title,
-  subtitle,
-}: {
-  title: string;
-  subtitle: string;
-}) {
+function CashFlowCard() {
   return (
-    <Box sx={{ mb: 1.5 }}>
-      <Typography
-        sx={{
-          color: colors.text,
-          fontSize: {
-            xs: 17,
-            md: 19,
-          },
-          fontWeight: 950,
-        }}
-      >
-        {title}
-      </Typography>
+    <Card elevation={0} sx={{ ...cardStyles, p: { xs: 2, md: 2.5 } }}>
+      <PanelHeader
+        icon={FaChartLine}
+        accent={colors.info}
+        title="Flujo de caja · últimos 7 días"
+        subtitle="Comparación diaria por línea de negocio"
+        action="Ver detalle"
+      />
 
-      <Typography
+      <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 2.5 }}>
+        <LegendDot label="Ferretería" accent={colors.warning} />
+        <LegendDot label="Granos" accent={colors.teal} />
+        <LegendDot label="Terrenos" accent={colors.info} />
+      </Box>
+
+      <Box
         sx={{
-          mt: 0.35,
-          color: colors.muted,
-          fontSize: 12.5,
-          fontWeight: 600,
+          height: 220,
+          display: "grid",
+          gridTemplateColumns: "repeat(7, minmax(34px, 1fr))",
+          alignItems: "end",
+          gap: { xs: 0.7, sm: 1.2 },
+          borderBottom: `1px solid ${colors.border}`,
+          pb: 1,
         }}
       >
-        {subtitle}
-      </Typography>
-    </Box>
+        {cashFlow.map((item) => (
+          <Box
+            key={item.day}
+            sx={{
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-end",
+              alignItems: "center",
+              gap: 0.7,
+            }}
+          >
+            <Box
+              sx={{
+                width: "100%",
+                maxWidth: 58,
+                height: 170,
+                display: "flex",
+                alignItems: "flex-end",
+                justifyContent: "center",
+                gap: "3px",
+              }}
+            >
+              <ChartBar value={item.hardware} accent={colors.warning} />
+              <ChartBar value={item.grains} accent={colors.teal} />
+              <ChartBar value={item.property} accent={colors.info} />
+            </Box>
+            <Typography
+              sx={{
+                color: item.day === "Hoy" ? colors.primary : colors.muted,
+                fontSize: 10.5,
+                fontWeight: item.day === "Hoy" ? 900 : 700,
+              }}
+            >
+              {item.day}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+
+      <Box
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" },
+          gap: 1.5,
+        }}
+      >
+        <MiniValue label="Ingresos 7 días" value="$2,841.60" />
+        <MiniValue label="Promedio diario" value="$405.94" />
+        <MiniValue label="Mejor día" value="Sábado" />
+      </Box>
+    </Card>
+  );
+}
+
+function AlertsCard() {
+  return (
+    <Card elevation={0} sx={{ ...cardStyles, p: { xs: 2, md: 2.5 } }}>
+      <PanelHeader
+        icon={FaExclamationTriangle}
+        accent={colors.danger}
+        title="Alertas y pendientes"
+        subtitle="Situaciones que requieren seguimiento"
+      />
+
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
+        {alerts.map((alert, index) => {
+          const accent =
+            alert.tone === "danger"
+              ? colors.danger
+              : alert.tone === "warning"
+                ? colors.warning
+                : colors.info;
+
+          return (
+            <Box key={alert.title}>
+              <Link href={alert.href} style={{ color: "inherit", textDecoration: "none" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 1.4,
+                    py: 1.55,
+                    borderRadius: 2,
+                    transition: "0.18s ease",
+                    "&:hover": { bgcolor: alpha(accent, 0.05), px: 1 },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 9,
+                      height: 9,
+                      mt: 0.65,
+                      borderRadius: "50%",
+                      bgcolor: accent,
+                      boxShadow: `0 0 0 5px ${alpha(accent, 0.1)}`,
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography sx={{ color: colors.text, fontSize: 12.5, fontWeight: 900 }}>
+                      {alert.title}
+                    </Typography>
+                    <Typography sx={{ mt: 0.35, color: colors.muted, fontSize: 11.5, fontWeight: 600 }}>
+                      {alert.detail}
+                    </Typography>
+                  </Box>
+                  <FaArrowRight size={11} color={colors.muted} />
+                </Box>
+              </Link>
+              {index < alerts.length - 1 && <Divider sx={{ borderColor: colors.borderSoft }} />}
+            </Box>
+          );
+        })}
+      </Box>
+
+      <Button
+        fullWidth
+        variant="outlined"
+        sx={{ ...buttonStyles("outlined"), mt: 2 }}
+      >
+        Ver todas las alertas
+      </Button>
+    </Card>
   );
 }
 
@@ -971,29 +748,11 @@ function SectorModuleCard({
   stats,
 }: ModuleCard) {
   return (
-    <Card
-      elevation={0}
-      sx={{
-        overflow: "hidden",
-        borderRadius: "16px",
-
-        bgcolor: colors.cardBg,
-        border: `1px solid ${colors.border}`,
-        boxShadow: "0 8px 24px rgba(15, 23, 42, 0.05)",
-        transition: "all 0.18s ease",
-        "&:hover": {
-          transform: "translateY(-3px)",
-          boxShadow: "0 18px 40px rgba(15, 23, 42, 0.1)",
-        },
-      }}
-    >
+    <Card elevation={0} sx={{ ...cardStyles, overflow: "hidden", p: 0 }}>
       <Box
         sx={{
-          height: {
-            xs: 168,
-            sm: 188,
-          },
-          backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.05), rgba(0,0,0,0.36)), url(${image})`,
+          height: { xs: 160, sm: 178 },
+          backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.04), rgba(0,0,0,0.4)), url(${image})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           position: "relative",
@@ -1018,109 +777,34 @@ function SectorModuleCard({
       </Box>
 
       <Box sx={{ p: 2 }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            gap: 1,
-            mb: 1,
-          }}
-        >
-          <Typography
-            sx={{
-              color: colors.text,
-              fontSize: 17,
-              fontWeight: 950,
-              lineHeight: 1.2,
-            }}
-          >
-            {title}
-          </Typography>
-
-          <Link href={href} style={{ color: colors.primary }}>
-            <Box
-              sx={{
-                width: 34,
-                height: 34,
-                borderRadius: "16px",
-
-                display: "grid",
-                placeItems: "center",
-                bgcolor: "#f8fafc",
-                border: `1px solid ${colors.border}`,
-                flexShrink: 0,
-                transition: "0.18s ease",
-                "&:hover": {
-                  bgcolor: colors.primarySoft,
-                  transform: "translateY(-1px)",
-                },
-              }}
+        <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1, mb: 1 }}>
+          <Box>
+            <Typography sx={{ color: colors.text, fontSize: 17, fontWeight: 950 }}>
+              {title}
+            </Typography>
+            <Typography
+              sx={{ mt: 0.65, color: colors.mutedDark, fontSize: 12, fontWeight: 600, lineHeight: 1.5 }}
             >
-              <FaChartLine size={14} />
-            </Box>
+              {description}
+            </Typography>
+          </Box>
+          <Link href={href} style={{ color: colors.primary }}>
+            <IconBadge accent={colors.primary} compact>
+              <FaArrowRight size={12} />
+            </IconBadge>
           </Link>
         </Box>
 
-        <Typography
-          sx={{
-            color: colors.mutedDark,
-            fontSize: 12.5,
-            fontWeight: 600,
-            lineHeight: 1.5,
-            minHeight: {
-              xs: "auto",
-              xl: 58,
-            },
-          }}
-        >
-          {description}
-        </Typography>
+        <Divider sx={{ my: 1.7, borderColor: colors.borderSoft }} />
 
-        <Divider sx={{ my: 1.8, borderColor: colors.borderSoft }} />
-
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-            gap: 1,
-          }}
-        >
+        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1 }}>
           {stats.map((stat) => (
-            <Box
-              key={stat.label}
-              sx={{
-                p: 1,
-                borderRadius: "16px",
-
-                bgcolor: "#f8fafc",
-                border: `1px solid ${colors.borderSoft}`,
-                minWidth: 0,
-              }}
-            >
-              <Typography
-                sx={{
-                  color: colors.text,
-                  fontSize: {
-                    xs: 17,
-                    md: 19,
-                  },
-                  fontWeight: 950,
-                  lineHeight: 1,
-                  overflowWrap: "anywhere",
-                }}
-              >
+            <Box key={stat.label} sx={{ minWidth: 0 }}>
+              <Typography sx={{ color: colors.text, fontSize: 13, fontWeight: 950 }}>
                 {stat.value}
               </Typography>
-
               <Typography
-                sx={{
-                  mt: 0.55,
-                  color: colors.mutedDark,
-                  fontSize: 8.5,
-                  fontWeight: 900,
-                  lineHeight: 1.2,
-                }}
+                sx={{ mt: 0.25, color: colors.muted, fontSize: 8.5, fontWeight: 850, lineHeight: 1.25 }}
               >
                 {stat.label}
               </Typography>
@@ -1132,276 +816,240 @@ function SectorModuleCard({
   );
 }
 
-function OperationsHealth() {
+function ActivityCard() {
   return (
-    <Card
-      elevation={0}
-      sx={{
-        borderRadius: "16px",
-
-        bgcolor: colors.cardBg,
-        border: `1px solid ${colors.border}`,
-        boxShadow: "0 8px 24px rgba(15, 23, 42, 0.05)",
-      }}
-    >
-      <Box sx={{ px: 2, py: 1.8 }}>
-        <Typography
-          sx={{
-            color: colors.text,
-            fontSize: 16,
-            fontWeight: 950,
-          }}
-        >
-          Operations Health
-        </Typography>
-
-        <Typography
-          sx={{
-            color: colors.muted,
-            fontSize: 12,
-            mt: 0.35,
-          }}
-        >
-          Performance by business line.
-        </Typography>
-      </Box>
-
-      <Divider sx={{ borderColor: colors.borderSoft }} />
-
-      <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.8 }}>
-        <HealthProgress
-          label="Hardware fulfillment"
-          value={98}
-          color="#0ea5e9"
-        />
-
-        <HealthProgress
-          label="Grain storage capacity"
-          value={88}
-          color="#2563eb"
-        />
-
-        <HealthProgress
-          label="Property occupancy"
-          value={94}
-          color="#16a34a"
-        />
-      </Box>
-    </Card>
-  );
-}
-
-function HealthProgress({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: number;
-  color: string;
-}) {
-  return (
-    <Box>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          gap: 1,
-          mb: 0.75,
-        }}
-      >
-        <Typography
-          sx={{
-            fontSize: 12,
-            fontWeight: 850,
-            color: colors.text,
-          }}
-        >
-          {label}
-        </Typography>
-
-        <Typography
-          sx={{
-            fontSize: 12,
-            fontWeight: 950,
-            color,
-          }}
-        >
-          {value}%
-        </Typography>
-      </Box>
-
-      <LinearProgress
-        variant="determinate"
-        value={value}
-        sx={{
-          height: 8,
-          borderRadius: 999,
-          bgcolor: "#e5edf3",
-          "& .MuiLinearProgress-bar": {
-            bgcolor: color,
-            borderRadius: 999,
-          },
-        }}
+    <Card elevation={0} sx={{ ...cardStyles, p: { xs: 2, md: 2.5 } }}>
+      <PanelHeader
+        icon={FaReceipt}
+        accent={colors.success}
+        title="Actividad reciente"
+        subtitle="Últimos movimientos realizados en todos los módulos"
+        action="Ver historial"
       />
-    </Box>
-  );
-}
 
-function RecentActivity() {
-  return (
-    <Card
-      elevation={0}
-      sx={{
-        borderRadius: "16px",
-
-        bgcolor: colors.cardBg,
-        border: `1px solid ${colors.border}`,
-        boxShadow: "0 8px 24px rgba(15, 23, 42, 0.05)",
-      }}
-    >
-      <Box
-        sx={{
-          px: 2,
-          py: 1.8,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 1,
-        }}
-      >
-        <Box sx={{ minWidth: 0 }}>
-          <Typography
-            sx={{
-              color: colors.text,
-              fontSize: 16,
-              fontWeight: 950,
-            }}
-          >
-            Recent Activity
-          </Typography>
-
-          <Typography
-            sx={{
-              color: colors.muted,
-              fontSize: 12,
-              mt: 0.35,
-            }}
-          >
-            Latest system events.
-          </Typography>
-        </Box>
-
-        <Typography
-          sx={{
-            color: colors.primary,
-            fontSize: 10,
-            fontWeight: 950,
-            cursor: "pointer",
-            whiteSpace: "nowrap",
-          }}
-        >
-          VIEW ALL
-        </Typography>
-      </Box>
-
-      <Divider sx={{ borderColor: colors.borderSoft }} />
-
-      <Box>
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
         {activities.map((activity, index) => {
           const Icon = activity.icon;
-
           return (
-            <Box key={activity.title}>
-              <Box
-                sx={{
-                  px: 2,
-                  py: 1.65,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1.5,
-                }}
-              >
-                <Box
-                  sx={{
-                    width: 42,
-                    height: 42,
-                    borderRadius: "16px",
-
-                    display: "grid",
-                    placeItems: "center",
-                    bgcolor: alpha(activity.accent, 0.1),
-                    color: activity.accent,
-                    flexShrink: 0,
-                  }}
-                >
-                  <Icon size={15} />
-                </Box>
-
+            <Box key={`${activity.title}-${activity.time}`}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1.45 }}>
+                <IconBadge accent={activity.accent} compact>
+                  <Icon size={13} />
+                </IconBadge>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography
-                    sx={{
-                      color: colors.text,
-                      fontSize: 12.5,
-                      fontWeight: 950,
-                    }}
-                  >
+                  <Typography sx={{ color: colors.text, fontSize: 12.5, fontWeight: 900 }}>
                     {activity.title}
                   </Typography>
-
-                  <Typography
-                    noWrap
-                    sx={{
-                      color: colors.mutedDark,
-                      fontSize: 11,
-                      fontWeight: 600,
-                    }}
-                  >
+                  <Typography sx={{ mt: 0.25, color: colors.muted, fontSize: 11.3, fontWeight: 600 }}>
                     {activity.subtitle}
                   </Typography>
                 </Box>
-
-                <Box
-                  sx={{
-                    textAlign: "right",
-                    display: {
-                      xs: "none",
-                      sm: "block",
-                    },
-                    flexShrink: 0,
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      color: colors.muted,
-                      fontSize: 11,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {activity.time}
-                  </Typography>
-
-                  {activity.amount ? (
-                    <Typography
-                      sx={{
-                        color: colors.text,
-                        fontSize: 12,
-                        fontWeight: 950,
-                      }}
-                    >
+                <Box sx={{ textAlign: "right", flexShrink: 0 }}>
+                  {activity.amount && (
+                    <Typography sx={{ color: colors.success, fontSize: 12.5, fontWeight: 950 }}>
                       {activity.amount}
                     </Typography>
-                  ) : null}
+                  )}
+                  <Typography sx={{ mt: 0.2, color: colors.muted, fontSize: 10.5, fontWeight: 700 }}>
+                    {activity.time}
+                  </Typography>
                 </Box>
               </Box>
-
-              {index < activities.length - 1 ? (
-                <Divider sx={{ borderColor: colors.borderSoft }} />
-              ) : null}
+              {index < activities.length - 1 && <Divider sx={{ borderColor: colors.borderSoft }} />}
             </Box>
           );
         })}
       </Box>
     </Card>
   );
+}
+
+function PanelHeader({
+  icon: Icon,
+  accent,
+  title,
+  subtitle,
+  action,
+}: {
+  icon: ComponentType<{ size?: number }>;
+  accent: string;
+  title: string;
+  subtitle: string;
+  action?: string;
+}) {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "flex-start",
+        justifyContent: "space-between",
+        gap: 2,
+        mb: 2,
+      }}
+    >
+      <Box sx={{ display: "flex", gap: 1.25, minWidth: 0 }}>
+        <IconBadge accent={accent} compact>
+          <Icon size={14} />
+        </IconBadge>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography sx={{ color: colors.text, fontSize: 16, fontWeight: 950 }}>
+            {title}
+          </Typography>
+          <Typography sx={{ mt: 0.25, color: colors.muted, fontSize: 11.5, fontWeight: 600 }}>
+            {subtitle}
+          </Typography>
+        </Box>
+      </Box>
+      {action && (
+        <Button
+          size="small"
+          endIcon={<FaArrowRight size={10} />}
+          sx={{
+            color: colors.primary,
+            fontSize: 10.5,
+            fontWeight: 900,
+            textTransform: "none",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {action}
+        </Button>
+      )}
+    </Box>
+  );
+}
+
+function IconBadge({
+  accent,
+  compact = false,
+  children,
+}: {
+  accent: string;
+  compact?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <Box
+      sx={{
+        width: compact ? 36 : 44,
+        height: compact ? 36 : 44,
+        borderRadius: "14px",
+        display: "grid",
+        placeItems: "center",
+        bgcolor: alpha(accent, 0.12),
+        color: accent,
+        flexShrink: 0,
+      }}
+    >
+      {children}
+    </Box>
+  );
+}
+
+function ChartBar({ value, accent }: { value: number; accent: string }) {
+  return (
+    <Box
+      sx={{
+        width: "24%",
+        minWidth: 5,
+        height: `${value}%`,
+        minHeight: 8,
+        borderRadius: "5px 5px 2px 2px",
+        bgcolor: accent,
+        opacity: 0.9,
+      }}
+    />
+  );
+}
+
+function LegendDot({ label, accent }: { label: string; accent: string }) {
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.7 }}>
+      <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: accent }} />
+      <Typography sx={{ color: colors.muted, fontSize: 10.8, fontWeight: 700 }}>
+        {label}
+      </Typography>
+    </Box>
+  );
+}
+
+function MiniValue({ label, value }: { label: string; value: string }) {
+  return (
+    <Box
+      sx={{
+        p: 1.3,
+        borderRadius: "8px",
+        bgcolor: "#f8fafc",
+        border: `1px solid ${colors.borderSoft}`,
+      }}
+    >
+      <Typography sx={{ color: colors.muted, fontSize: 9.5, fontWeight: 850 }}>
+        {label.toUpperCase()}
+      </Typography>
+      <Typography sx={{ mt: 0.4, color: colors.text, fontSize: 14, fontWeight: 950 }}>
+        {value}
+      </Typography>
+    </Box>
+  );
+}
+
+function SectionHeading({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <Box sx={{ mb: 1.5 }}>
+      <Typography sx={{ color: colors.text, fontSize: { xs: 17, md: 19 }, fontWeight: 950 }}>
+        {title}
+      </Typography>
+      <Typography sx={{ mt: 0.35, color: colors.muted, fontSize: 12.5, fontWeight: 600 }}>
+        {subtitle}
+      </Typography>
+    </Box>
+  );
+}
+
+const cardStyles = {
+  p: 2.2,
+  borderRadius: "16px",
+  bgcolor: colors.cardBg,
+  border: `1px solid ${colors.border}`,
+  boxShadow: "0 8px 24px rgba(15, 23, 42, 0.05)",
+  transition: "all 0.18s ease",
+  "&:hover": {
+    boxShadow: "0 16px 36px rgba(15, 23, 42, 0.08)",
+  },
+} as const;
+
+const eyebrowStyles = {
+  color: colors.muted,
+  fontSize: 10.5,
+  fontWeight: 850,
+  mb: 0.6,
+  textTransform: "uppercase",
+  letterSpacing: "0.035em",
+} as const;
+
+function buttonStyles(variant: "outlined" | "contained") {
+  return {
+    borderRadius: 2.25,
+    px: 2,
+    py: 1.05,
+    fontSize: 11.5,
+    fontWeight: 900,
+    textTransform: "none",
+    ...(variant === "contained"
+      ? {
+          bgcolor: colors.primary,
+          color: "#ffffff",
+          boxShadow: "0 12px 24px rgba(18, 63, 99, 0.22)",
+          "&:hover": { bgcolor: colors.primaryDark },
+        }
+      : {
+          color: colors.primary,
+          borderColor: colors.border,
+          bgcolor: "#ffffff",
+          "&:hover": {
+            borderColor: colors.primary,
+            bgcolor: colors.primarySoft,
+          },
+        }),
+  };
 }

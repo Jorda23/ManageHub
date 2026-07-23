@@ -27,28 +27,28 @@ type AppShellProps = {
 
 const navItems = [
   {
-    label: "Dashboard",
+    label: "Inicio",
     mobileLabel: "Inicio",
     href: "/dashboard",
     icon: FaLayerGroup,
     key: "dashboard",
   },
   {
-    label: "Hardware Store",
+    label: "Ferretería",
     mobileLabel: "Ferretería",
     href: "/sell/hardware",
     icon: FaTools,
     key: "hardware",
   },
   {
-    label: "Basic Grains",
+    label: "Granos basicos",
     mobileLabel: "Granos",
     href: "/sell/grains",
     icon: FaTractor,
     key: "grains",
   },
   {
-    label: "Real Estate",
+    label: "Terrenos",
     mobileLabel: "Terrenos",
     href: "/sell/property",
     icon: FaBuilding,
