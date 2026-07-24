@@ -19,7 +19,6 @@ import {
   FaEyeSlash,
   FaHeadset,
   FaLock,
-  FaSeedling,
   FaShieldAlt,
   FaTractor,
   FaUserAlt,
@@ -27,7 +26,6 @@ import {
 import { FaArrowRightToBracket, FaCircleCheck } from "react-icons/fa6";
 
 const colors = {
-  pageBg: "#181c1d",
   green: "#164c38",
   greenDark: "#073b2d",
   greenSoft: "#dff7ec",
@@ -46,76 +44,69 @@ export default function LoginPage() {
     <Box
       component="main"
       sx={{
-        minHeight: "100vh",
         width: "100%",
-        display: "grid",
-        placeItems: "center",
-        px: {
-          xs: 1.5,
-          sm: 3,
-          md: 4,
+        minHeight: "100dvh",
+        bgcolor: colors.white,
+        overflow: {
+          xs: "auto",
+          md: "hidden",
         },
-        py: {
-          xs: 2,
-          md: 3,
-        },
-        bgcolor: colors.pageBg,
-        backgroundImage:
-          "radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px)",
-        backgroundSize: "16px 16px",
       }}
     >
       <Card
         elevation={0}
+        square
         sx={{
           width: "100%",
-          maxWidth: 1000,
-          minHeight: {
-            xs: "auto",
-            md: 670,
-          },
+          minHeight: "100dvh",
           display: "grid",
           gridTemplateColumns: {
             xs: "1fr",
-            md: "minmax(360px, 1fr) minmax(420px, 1fr)",
+            md: "minmax(420px, 1fr) minmax(480px, 1fr)",
           },
           overflow: "hidden",
-          borderRadius: "8px",
+          border: 0,
+          borderRadius: 0,
+          boxShadow: "none",
           bgcolor: colors.white,
-          border: "1px solid rgba(255,255,255,0.18)",
-          boxShadow: "0 32px 90px rgba(0,0,0,0.35)",
         }}
       >
         <NarrativePanel />
 
         <Box
           sx={{
+            minHeight: {
+              xs: "100dvh",
+              md: "100dvh",
+            },
             bgcolor: colors.white,
             px: {
-              xs: 2.5,
-              sm: 4,
-              md: 6,
+              xs: 3,
+              sm: 6,
+              md: 8,
+              lg: 12,
             },
             py: {
-              xs: 4,
-              sm: 5,
+              xs: 5,
+              sm: 6,
               md: 6,
             },
             display: "flex",
             alignItems: "center",
+            justifyContent: "center",
           }}
         >
           <Box
             sx={{
               width: "100%",
-              maxWidth: 390,
+              maxWidth: 440,
               mx: "auto",
             }}
           >
             <Typography
               sx={{
                 color: colors.green,
-                fontSize: 9,
+                fontSize: 10,
                 fontWeight: 950,
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
@@ -130,8 +121,9 @@ export default function LoginPage() {
               sx={{
                 color: colors.text,
                 fontSize: {
-                  xs: 28,
-                  md: 31,
+                  xs: 30,
+                  sm: 34,
+                  md: 38,
                 },
                 fontWeight: 950,
                 lineHeight: 1.08,
@@ -146,7 +138,10 @@ export default function LoginPage() {
                 mt: 1.4,
                 mb: 3.5,
                 color: colors.muted,
-                fontSize: 12,
+                fontSize: {
+                  xs: 13,
+                  md: 14,
+                },
                 fontWeight: 500,
                 lineHeight: 1.6,
               }}
@@ -157,7 +152,9 @@ export default function LoginPage() {
 
             <Box
               component="form"
-              onSubmit={(event) => event.preventDefault()}
+              onSubmit={(event) => {
+                event.preventDefault();
+              }}
               sx={{
                 display: "flex",
                 flexDirection: "column",
@@ -167,14 +164,14 @@ export default function LoginPage() {
               <Field
                 label="Correo electrónico"
                 placeholder="admin@assethub.com"
-                icon={<FaUserAlt size={12} />}
+                icon={<FaUserAlt size={13} />}
                 autoComplete="email"
               />
 
               <Field
                 label="Contraseña"
                 placeholder="Ingresa tu contraseña"
-                icon={<FaLock size={12} />}
+                icon={<FaLock size={13} />}
                 type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
                 endAdornment={
@@ -184,17 +181,19 @@ export default function LoginPage() {
                     aria-label={
                       showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
                     }
-                    onClick={() => setShowPassword((current) => !current)}
+                    onClick={() => {
+                      setShowPassword((current) => !current);
+                    }}
                     sx={{
-                      width: 28,
-                      height: 28,
+                      width: 30,
+                      height: 30,
                       color: "#7a8883",
                     }}
                   >
                     {showPassword ? (
-                      <FaEyeSlash size={12} />
+                      <FaEyeSlash size={13} />
                     ) : (
-                      <FaEye size={12} />
+                      <FaEye size={13} />
                     )}
                   </IconButton>
                 }
@@ -217,6 +216,7 @@ export default function LoginPage() {
                         p: 0.25,
                         mr: 0.6,
                         color: "#aab7b2",
+
                         "&.Mui-checked": {
                           color: colors.green,
                         },
@@ -226,9 +226,10 @@ export default function LoginPage() {
                   label="Recordar sesión"
                   sx={{
                     m: 0,
+
                     "& .MuiFormControlLabel-label": {
                       color: colors.muted,
-                      fontSize: 10.5,
+                      fontSize: 11.5,
                       fontWeight: 500,
                     },
                   }}
@@ -241,9 +242,10 @@ export default function LoginPage() {
                     p: 0,
                     minWidth: 0,
                     color: colors.green,
-                    fontSize: 10.5,
+                    fontSize: 11.5,
                     fontWeight: 700,
                     textTransform: "none",
+
                     "&:hover": {
                       bgcolor: "transparent",
                       textDecoration: "underline",
@@ -259,17 +261,18 @@ export default function LoginPage() {
                 type="submit"
                 fullWidth
                 variant="contained"
-                endIcon={<FaArrowRightToBracket size={12} />}
+                endIcon={<FaArrowRightToBracket size={13} />}
                 sx={{
                   mt: 0.7,
-                  minHeight: 46,
+                  minHeight: 48,
                   borderRadius: "6px",
                   bgcolor: colors.green,
                   color: colors.white,
-                  fontSize: 11.5,
+                  fontSize: 12.5,
                   fontWeight: 900,
                   textTransform: "none",
                   boxShadow: "0 10px 20px rgba(22,76,56,0.25)",
+
                   "&:hover": {
                     bgcolor: colors.greenDark,
                     boxShadow: "0 13px 26px rgba(22,76,56,0.32)",
@@ -290,7 +293,7 @@ export default function LoginPage() {
             <Typography
               sx={{
                 color: colors.muted,
-                fontSize: 10,
+                fontSize: 11,
                 textAlign: "center",
                 mb: 1.3,
               }}
@@ -307,9 +310,10 @@ export default function LoginPage() {
                 flexWrap: "wrap",
               }}
             >
-              <SupportLink icon={<FaHeadset size={11} />} label="Soporte" />
+              <SupportLink icon={<FaHeadset size={12} />} label="Soporte" />
+
               <SupportLink
-                icon={<FaBookOpen size={11} />}
+                icon={<FaBookOpen size={12} />}
                 label="Guía de usuario"
               />
             </Box>
@@ -325,9 +329,10 @@ function NarrativePanel() {
     <Box
       sx={{
         position: "relative",
-        minHeight: 670,
+        minHeight: "100dvh",
         p: {
-          md: 5,
+          md: 6,
+          lg: 8,
         },
         display: {
           xs: "none",
@@ -341,17 +346,17 @@ function NarrativePanel() {
             rgba(7, 49, 37, 0.34),
             rgba(7, 59, 45, 0.88)
           ),
-          url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=85")
+          url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=90")
         `,
         backgroundSize: "cover",
         backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
       }}
     >
       <Box
         sx={{
           position: "absolute",
           inset: 0,
-
           pointerEvents: "none",
         }}
       />
@@ -362,21 +367,23 @@ function NarrativePanel() {
           zIndex: 1,
           mt: "auto",
           mb: "auto",
+          width: "100%",
+          maxWidth: 480,
         }}
       >
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
-            gap: 1.3,
-            mb: 4,
+            gap: 1.5,
+            mb: 5,
           }}
         >
           <Box
             sx={{
-              width: 48,
-              height: 48,
-              borderRadius: "7px",
+              width: 54,
+              height: 54,
+              borderRadius: "8px",
               display: "grid",
               placeItems: "center",
               bgcolor: "rgba(255,255,255,0.16)",
@@ -384,13 +391,13 @@ function NarrativePanel() {
               backdropFilter: "blur(8px)",
             }}
           >
-            <FaTractor size={19} />
+            <FaTractor size={22} />
           </Box>
 
           <Box>
             <Typography
               sx={{
-                fontSize: 18,
+                fontSize: 22,
                 fontWeight: 950,
                 lineHeight: 1,
               }}
@@ -402,7 +409,7 @@ function NarrativePanel() {
               sx={{
                 mt: 0.45,
                 color: "#b7f7da",
-                fontSize: 7.5,
+                fontSize: 8.5,
                 fontWeight: 900,
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
@@ -415,10 +422,13 @@ function NarrativePanel() {
 
         <Typography
           sx={{
-            maxWidth: 360,
-            fontSize: 29,
+            maxWidth: 460,
+            fontSize: {
+              md: 38,
+              lg: 46,
+            },
             fontWeight: 950,
-            lineHeight: 1.1,
+            lineHeight: 1.08,
             letterSpacing: "-0.04em",
           }}
         >
@@ -427,10 +437,13 @@ function NarrativePanel() {
 
         <Typography
           sx={{
-            mt: 1.8,
-            maxWidth: 350,
+            mt: 2,
+            maxWidth: 440,
             color: "rgba(255,255,255,0.88)",
-            fontSize: 11.5,
+            fontSize: {
+              md: 13,
+              lg: 15,
+            },
             fontWeight: 550,
             lineHeight: 1.65,
           }}
@@ -441,7 +454,7 @@ function NarrativePanel() {
 
         <Box
           sx={{
-            mt: 3,
+            mt: 3.5,
             display: "flex",
             alignItems: "center",
             gap: 1.2,
@@ -449,13 +462,13 @@ function NarrativePanel() {
           }}
         >
           <StatusChip
-            icon={<FaCircleCheck size={9} />}
+            icon={<FaCircleCheck size={10} />}
             label="Sistema en línea"
             accent={colors.orange}
           />
 
           <StatusChip
-            icon={<FaShieldAlt size={9} />}
+            icon={<FaShieldAlt size={10} />}
             label="Seguridad bancaria"
           />
         </Box>
@@ -468,8 +481,8 @@ function NarrativePanel() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          color: "rgba(255,255,255,0.42)",
-          fontSize: 7,
+          color: "rgba(255,255,255,0.52)",
+          fontSize: 8,
           fontWeight: 700,
           letterSpacing: "0.11em",
           textTransform: "uppercase",
@@ -511,8 +524,8 @@ function StatusChip({
   return (
     <Box
       sx={{
-        px: 1.3,
-        py: 0.75,
+        px: 1.5,
+        py: 0.8,
         display: "flex",
         alignItems: "center",
         gap: 0.7,
@@ -520,7 +533,7 @@ function StatusChip({
         bgcolor: "rgba(255,255,255,0.12)",
         border: "1px solid rgba(255,255,255,0.1)",
         backdropFilter: "blur(8px)",
-        color: "rgba(255,255,255,0.78)",
+        color: "rgba(255,255,255,0.82)",
       }}
     >
       <Box
@@ -536,7 +549,7 @@ function StatusChip({
       <Typography
         sx={{
           color: "inherit",
-          fontSize: 8.5,
+          fontSize: 9.5,
           fontWeight: 750,
         }}
       >
@@ -556,9 +569,10 @@ function SupportLink({ icon, label }: { icon: ReactNode; label: string }) {
         p: 0,
         minWidth: 0,
         color: colors.green,
-        fontSize: 10,
+        fontSize: 11,
         fontWeight: 800,
         textTransform: "none",
+
         "&:hover": {
           bgcolor: "transparent",
           textDecoration: "underline",
@@ -595,7 +609,7 @@ function Field({
           display: "block",
           mb: 0.7,
           color: colors.text,
-          fontSize: 8.5,
+          fontSize: 9.5,
           fontWeight: 950,
           textTransform: "uppercase",
           letterSpacing: "0.06em",
@@ -632,31 +646,37 @@ function Field({
         }}
         sx={{
           "& .MuiOutlinedInput-root": {
-            minHeight: 45,
+            minHeight: 48,
             borderRadius: "6px",
             bgcolor: colors.inputBg,
             color: colors.text,
             fontWeight: 650,
+
             "& fieldset": {
               borderColor: colors.border,
             },
+
             "&:hover fieldset": {
               borderColor: "#a6b5af",
             },
+
             "&.Mui-focused": {
               bgcolor: colors.white,
               boxShadow: "0 0 0 3px rgba(22,76,56,0.08)",
             },
+
             "&.Mui-focused fieldset": {
               borderColor: colors.green,
               borderWidth: 1.2,
             },
           },
+
           "& .MuiInputBase-input": {
             color: colors.text,
-            fontSize: 11.5,
+            fontSize: 12.5,
             fontWeight: 650,
-            py: 1.15,
+            py: 1.2,
+
             "&::placeholder": {
               color: "#8b9893",
               opacity: 1,
