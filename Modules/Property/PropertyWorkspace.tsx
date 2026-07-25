@@ -7,20 +7,14 @@ import {
   FaCalendarAlt,
   FaCheckCircle,
   FaClipboardCheck,
-  FaDownload,
   FaExclamationTriangle,
   FaFileContract,
-  FaFilter,
   FaHome,
   FaMapMarkedAlt,
   FaMoneyBillWave,
   FaPlusCircle,
   FaReceipt,
   FaRulerCombined,
-  FaSignature,
-  FaSyncAlt,
-  FaUniversity,
-  FaUserTie,
 } from "react-icons/fa";
 
 import type { WorkspaceConfig } from "@/components/WorkspaceShared/workspaceTypes";
@@ -32,7 +26,6 @@ import {
   Chip,
   Divider,
   FormControl,
-  IconButton,
   LinearProgress,
   MenuItem,
   Paper,
@@ -41,7 +34,11 @@ import {
   Typography,
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
-import AddPropertyDialog, { PropertyForm } from "@/components/AddPropertyDialog/AddPropertyDialog";
+import {
+  AddPropertyModal,
+  type AddPropertyFormValues,
+} from "@/components/AddPropertyModal";
+import { PaymentHistoryTable } from "@/components/PaymentHistoryTable";
 
 type AccountStatus = "Al día" | "Pendiente" | "Atrasado" | "Pagado";
 
@@ -233,17 +230,6 @@ const paymentMethods = [
   "Cheque",
 ];
 
-const emptyPropertyForm: PropertyForm = {
-  name: "",
-  code: "",
-  location: "",
-  size: "",
-  price: "",
-  ownerName: "",
-  ownerPhone: "",
-  ownerDocument: "",
-};
-
 const inputSx: SxProps<Theme> = {
   "& .MuiOutlinedInput-root": {
     borderRadius: 2.5,
@@ -337,9 +323,6 @@ export function PropertyWorkspace() {
   const [paymentNote, setPaymentNote] = useState("Abono de cuota");
   const [error, setError] = useState("");
   const [isPropertyDialogOpen, setIsPropertyDialogOpen] = useState(false);
-  const [propertyForm, setPropertyForm] =
-    useState<PropertyForm>(emptyPropertyForm);
-  const [propertyFormError, setPropertyFormError] = useState("");
 
   const selectedProperty = useMemo(() => {
     return properties.find((property) => property.id === selectedPropertyId);
@@ -366,57 +349,18 @@ export function PropertyWorkspace() {
     return properties.filter((property) => property.status === "Pagado").length;
   }, [properties]);
 
-  const handlePropertyFormChange = (
-    field: keyof PropertyForm,
-    value: string,
-  ) => {
-    setPropertyForm((current) => ({ ...current, [field]: value }));
-  };
-
-  const handleClosePropertyDialog = () => {
-    setIsPropertyDialogOpen(false);
-    setPropertyFormError("");
-    setPropertyForm(emptyPropertyForm);
-  };
-
-  const handleCreateProperty = () => {
-    setPropertyFormError("");
-
-    const name = propertyForm.name.trim();
-    const code = propertyForm.code.trim().toUpperCase();
-    const location = propertyForm.location.trim();
-    const size = propertyForm.size.trim();
-    const ownerName = propertyForm.ownerName.trim();
-    const price = Number(propertyForm.price);
-
-    if (!name || !code || !location || !size || !ownerName) {
-      setPropertyFormError(
-        "Completa nombre, código, ubicación, medida y cliente propietario.",
-      );
-      return;
-    }
-
-    if (!Number.isFinite(price) || price <= 0) {
-      setPropertyFormError("Ingresa un precio de venta mayor a cero.");
-      return;
-    }
-
-    if (properties.some((property) => property.code.toUpperCase() === code)) {
-      setPropertyFormError("Ya existe una propiedad con ese código.");
-      return;
-    }
-
+  const handleCreateProperty = (formValues: AddPropertyFormValues): void => {
     const newProperty: PropertyItem = {
       id: crypto.randomUUID(),
-      name,
-      code,
-      location,
-      size,
-      price,
+      name: formValues.name.trim(),
+      code: formValues.code.trim().toUpperCase(),
+      location: formValues.location.trim(),
+      size: formValues.size.trim(),
+      price: Number(formValues.price),
       paid: 0,
-      ownerName,
-      ownerPhone: propertyForm.ownerPhone.trim(),
-      ownerDocument: propertyForm.ownerDocument.trim(),
+      ownerName: formValues.ownerName.trim(),
+      ownerPhone: formValues.ownerPhone.trim(),
+      ownerDocument: formValues.ownerDocument.trim(),
       buyerName: "Pendiente de asignar",
       buyerEmail: "Sin comprador",
       dueDate: "Sin fecha",
@@ -425,9 +369,9 @@ export function PropertyWorkspace() {
     };
 
     setProperties((currentProperties) => [newProperty, ...currentProperties]);
-    setSelectedPropertyId(newProperty.id);
 
-    handleClosePropertyDialog();
+    setSelectedPropertyId(newProperty.id);
+    setIsPropertyDialogOpen(false);
   };
 
   const handleAssignBuyer = () => {
@@ -524,6 +468,63 @@ export function PropertyWorkspace() {
     setPayments((currentPayments) => [newPayment, ...currentPayments]);
     setPaymentAmount("500");
     setPaymentNote("Abono de cuota");
+  };
+
+  const handleOpenPaymentFilters = (): void => {
+    console.log("Abrir filtros de abonos");
+  };
+
+  const handleDownloadPayments = (): void => {
+    if (payments.length === 0) {
+      return;
+    }
+
+    const headers = [
+      "Fecha",
+      "Propiedad",
+      "Comprador",
+      "Método",
+      "Nota",
+      "Monto",
+    ];
+
+    const rows = payments.map((payment) => [
+      payment.date,
+      payment.propertyName,
+      payment.buyerName,
+      payment.method,
+      payment.note,
+      payment.amount.toFixed(2),
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map((row) =>
+        row
+          .map((value) => {
+            const escapedValue = String(value).replaceAll('"', '""');
+            return `"${escapedValue}"`;
+          })
+          .join(","),
+      )
+      .join("\n");
+
+    const blob = new Blob([`\uFEFF${csvContent}`], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `historial-abonos-${new Date()
+      .toISOString()
+      .slice(0, 10)}.csv`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -802,15 +803,19 @@ export function PropertyWorkspace() {
             </SectionCard>
           </Box>
 
-          <PaymentHistoryTable payments={payments} totalPaid={totalPaid} />
-
-          <AddPropertyDialog
+          <PaymentHistoryTable
+            payments={payments}
+            totalPaid={totalPaid}
+            onFilter={handleOpenPaymentFilters}
+            onDownload={handleDownloadPayments}
+          />
+          <AddPropertyModal
             open={isPropertyDialogOpen}
-            form={propertyForm}
-            error={propertyFormError}
-            onChange={handlePropertyFormChange}
-            onClose={handleClosePropertyDialog}
-            onSubmit={handleCreateProperty}
+            existingCodes={properties.map((property) => property.code)}
+            onClose={() => {
+              setIsPropertyDialogOpen(false);
+            }}
+            onSave={handleCreateProperty}
           />
         </Box>
       </Box>
@@ -1101,9 +1106,7 @@ function SectionHeader({
             textTransform: "uppercase",
             letterSpacing: "0.04em",
             whiteSpace: "nowrap",
-            boxShadow: onAction
-              ? "0 8px 18px rgba(37, 99, 235, 0.2)"
-              : "none",
+            boxShadow: onAction ? "0 8px 18px rgba(37, 99, 235, 0.2)" : "none",
             "&:hover": {
               bgcolor: onAction ? "#172554" : colors.primarySoft,
             },
@@ -1426,324 +1429,6 @@ function AccountSummary({ property }: { property?: PropertyItem }) {
   );
 }
 
-function PaymentHistoryTable({
-  payments,
-  totalPaid,
-}: {
-  payments: PaymentRecord[];
-  totalPaid: number;
-}) {
-  return (
-    <SectionCard>
-      <Box
-        sx={{
-          p: {
-            xs: 1.8,
-            md: 2.5,
-          },
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 2,
-          borderBottom: `1px solid ${colors.cardBorder}`,
-          bgcolor: "#ffffff",
-        }}
-      >
-        <Box
-          sx={{ display: "flex", gap: 1.2, alignItems: "center", minWidth: 0 }}
-        >
-          <Box
-            sx={{
-              width: 32,
-              height: 32,
-              borderRadius: "16px",
-              display: "grid",
-              placeItems: "center",
-              bgcolor: colors.primarySoft,
-              color: colors.primaryLight,
-              flexShrink: 0,
-            }}
-          >
-            <FaSyncAlt size={14} />
-          </Box>
-
-          <Box sx={{ minWidth: 0 }}>
-            <Typography
-              sx={{
-                fontWeight: 950,
-                fontSize: {
-                  xs: 16,
-                  md: 18,
-                },
-                color: colors.text,
-              }}
-            >
-              Historial de abonos
-            </Typography>
-
-            <Typography sx={{ fontSize: 12, color: colors.muted }}>
-              Pagos realizados por comprador y propiedad
-            </Typography>
-          </Box>
-        </Box>
-
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <SmallIconButton>
-            <FaFilter />
-          </SmallIconButton>
-
-          <SmallIconButton>
-            <FaDownload />
-          </SmallIconButton>
-        </Box>
-      </Box>
-
-      {payments.length === 0 ? (
-        <Box
-          sx={{
-            p: 4,
-            textAlign: "center",
-            bgcolor: "#fbfdfc",
-          }}
-        >
-          <Typography
-            sx={{ color: colors.text, fontWeight: 900, fontSize: 14 }}
-          >
-            Todavía no hay abonos registrados.
-          </Typography>
-
-          <Typography sx={{ color: colors.muted, fontSize: 13, mt: 0.5 }}>
-            Cuando registres un abono, aparecerá aquí.
-          </Typography>
-        </Box>
-      ) : (
-        <Box
-          sx={{
-            width: "100%",
-            overflowX: "auto",
-            WebkitOverflowScrolling: "touch",
-          }}
-        >
-          <Box
-            component="table"
-            sx={{
-              width: "100%",
-              borderCollapse: "separate",
-              borderSpacing: 0,
-              minWidth: {
-                xs: 820,
-                md: 920,
-              },
-            }}
-          >
-            <Box
-              component="thead"
-              sx={{
-                "& th": {
-                  px: 2.5,
-                  py: 1.6,
-                  bgcolor: colors.tableHead,
-                  color: colors.muted,
-                  fontSize: 11,
-                  fontWeight: 950,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.04em",
-                  textAlign: "left",
-                  borderBottom: `1px solid ${colors.cardBorder}`,
-                  whiteSpace: "nowrap",
-                },
-                "& th:first-of-type": {
-                  pl: 3,
-                },
-                "& th:last-of-type": {
-                  pr: 3,
-                  textAlign: "right",
-                },
-              }}
-            >
-              <tr>
-                <th>Fecha</th>
-                <th>Propiedad</th>
-                <th>Comprador</th>
-                <th>Método</th>
-                <th>Nota</th>
-                <th>Monto</th>
-              </tr>
-            </Box>
-
-            <Box
-              component="tbody"
-              sx={{
-                "& tr": {
-                  transition: "background-color 0.16s ease",
-                },
-                "& tr:nth-of-type(even)": {
-                  bgcolor: "#fbfdfc",
-                },
-                "& tr:hover": {
-                  bgcolor: "#eff6ff",
-                },
-                "& td": {
-                  px: 2.5,
-                  py: 1.8,
-                  borderBottom: `1px solid ${colors.cardBorder}`,
-                  fontSize: 13,
-                  color: colors.text,
-                  verticalAlign: "middle",
-                  whiteSpace: "nowrap",
-                },
-                "& tr:last-of-type td": {
-                  borderBottom: "none",
-                },
-                "& td:first-of-type": {
-                  pl: 3,
-                },
-                "& td:last-of-type": {
-                  pr: 3,
-                  textAlign: "right",
-                },
-              }}
-            >
-              {payments.map((payment) => (
-                <tr key={payment.id}>
-                  <td>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 0.25,
-                      }}
-                    >
-                      <Typography sx={{ fontSize: 13, fontWeight: 850 }}>
-                        {payment.date}
-                      </Typography>
-
-                      <Typography sx={{ fontSize: 11, color: colors.muted }}>
-                        Recibo #{payment.id.slice(-4).toUpperCase()}
-                      </Typography>
-                    </Box>
-                  </td>
-
-                  <td>
-                    <Box
-                      sx={{ display: "flex", alignItems: "center", gap: 1.2 }}
-                    >
-                      <Box
-                        sx={{
-                          width: 30,
-                          height: 30,
-                          borderRadius: "16px",
-                          display: "grid",
-                          placeItems: "center",
-                          bgcolor: colors.primarySoft,
-                          color: colors.primaryLight,
-                          flexShrink: 0,
-                        }}
-                      >
-                        <FaHome size={13} />
-                      </Box>
-
-                      <Typography
-                        sx={{
-                          fontSize: 13,
-                          color: colors.text,
-                          fontWeight: 950,
-                        }}
-                      >
-                        {payment.propertyName}
-                      </Typography>
-                    </Box>
-                  </td>
-
-                  <td>
-                    <Typography
-                      sx={{ fontSize: 13, color: colors.text, fontWeight: 950 }}
-                    >
-                      {payment.buyerName}
-                    </Typography>
-                  </td>
-
-                  <td>
-                    <Chip
-                      label={payment.method}
-                      size="small"
-                      sx={{
-                        height: 24,
-                        px: 0.5,
-                        fontSize: 11,
-                        fontWeight: 900,
-                        bgcolor: colors.greenSoft,
-                        color: colors.green,
-                        border: "1px solid #bbf7d0",
-                        "& .MuiChip-label": {
-                          px: 1,
-                        },
-                      }}
-                    />
-                  </td>
-
-                  <td>
-                    <Typography sx={{ fontSize: 13, color: colors.muted }}>
-                      {payment.note}
-                    </Typography>
-                  </td>
-
-                  <td>
-                    <Typography
-                      sx={{
-                        color: colors.green,
-                        fontVariantNumeric: "tabular-nums",
-                        fontWeight: 950,
-                        fontSize: 13,
-                      }}
-                    >
-                      {formatCurrency(payment.amount)}
-                    </Typography>
-                  </td>
-                </tr>
-              ))}
-            </Box>
-          </Box>
-        </Box>
-      )}
-
-      <Box
-        sx={{
-          px: {
-            xs: 1.8,
-            md: 3,
-          },
-          py: 1.8,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 2,
-          bgcolor: "#f8fafc",
-          borderTop: `1px solid ${colors.cardBorder}`,
-        }}
-      >
-        <Typography sx={{ fontSize: 12, color: colors.muted, fontWeight: 700 }}>
-          {payments.length} abonos registrados
-        </Typography>
-
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography
-            sx={{ fontSize: 12, color: colors.muted, fontWeight: 700 }}
-          >
-            Total abonado:
-          </Typography>
-
-          <Typography
-            sx={{ fontSize: 15, color: colors.green, fontWeight: 950 }}
-          >
-            {formatCurrency(totalPaid)}
-          </Typography>
-        </Box>
-      </Box>
-    </SectionCard>
-  );
-}
-
 function FieldLabel({ children }: { children: ReactNode }) {
   return (
     <Typography
@@ -1786,31 +1471,5 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
         {value}
       </Typography>
     </Box>
-  );
-}
-
-function SmallIconButton({ children }: { children: ReactNode }) {
-  return (
-    <IconButton
-      size="small"
-      sx={{
-        width: 36,
-        height: 36,
-        border: `1px solid ${colors.cardBorder}`,
-        borderRadius: "16px",
-        color: colors.muted,
-        bgcolor: "#ffffff",
-        transition: "all 0.16s ease",
-        flexShrink: 0,
-        "&:hover": {
-          bgcolor: colors.primarySoft,
-          color: colors.primary,
-          borderColor: "#bfdbfe",
-          transform: "translateY(-1px)",
-        },
-      }}
-    >
-      {children}
-    </IconButton>
   );
 }
