@@ -65,7 +65,6 @@ export function FormModal({
       onClose={handleClose}
       fullWidth
       maxWidth={false}
-      disableEscapeKeyDown={isSubmitting}
       scroll="paper"
       slotProps={{
         paper: {
@@ -77,7 +76,6 @@ export function FormModal({
             },
             maxWidth: `${maxWidth}px`,
 
-            // Mobile: el modal no supera la pantalla
             maxHeight: {
               xs: "calc(100dvh - 24px)",
               sm: "calc(100dvh - 64px)",
@@ -94,10 +92,8 @@ export function FormModal({
             overflow: "hidden",
             bgcolor: "#ffffff",
             border: `1px solid ${colors.border}`,
-            boxShadow:
-              "0 28px 80px rgba(15, 23, 42, 0.24)",
+            boxShadow: "0 28px 80px rgba(15, 23, 42, 0.24)",
 
-            // Permite separar header, content y footer
             display: "flex",
             flexDirection: "column",
           },
@@ -122,7 +118,6 @@ export function FormModal({
           overflow: "hidden",
         }}
       >
-        {/* Header fijo */}
         <Box
           sx={{
             position: "relative",
@@ -251,7 +246,6 @@ export function FormModal({
           </Box>
         </Box>
 
-        {/* Solo esta parte hace scroll */}
         <DialogContent
           dividers={false}
           sx={{
@@ -296,7 +290,6 @@ export function FormModal({
           {children}
         </DialogContent>
 
-        {/* Footer fijo */}
         <DialogActions
           sx={{
             flexShrink: 0,
@@ -312,7 +305,6 @@ export function FormModal({
             bgcolor: "#f8fbfa",
             borderTop: `1px solid ${colors.border}`,
 
-            // En móvil los botones ocupan el ancho
             flexDirection: {
               xs: "column-reverse",
               sm: "row",
@@ -362,11 +354,7 @@ export function FormModal({
             fullWidth
             startIcon={
               isSubmitting ? (
-                <CircularProgress
-                  size={15}
-                  thickness={5}
-                  color="inherit"
-                />
+                <CircularProgress size={15} thickness={5} color="inherit" />
               ) : (
                 submitIcon
               )
@@ -384,13 +372,11 @@ export function FormModal({
               fontSize: 12,
               fontWeight: 900,
               textTransform: "none",
-              boxShadow:
-                "0 8px 18px rgba(6, 78, 59, 0.2)",
+              boxShadow: "0 8px 18px rgba(6, 78, 59, 0.2)",
 
               "&:hover": {
                 bgcolor: colors.primaryLight,
-                boxShadow:
-                  "0 10px 22px rgba(6, 78, 59, 0.28)",
+                boxShadow: "0 10px 22px rgba(6, 78, 59, 0.28)",
               },
             }}
           >
