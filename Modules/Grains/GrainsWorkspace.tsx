@@ -1,71 +1,36 @@
 "use client";
 
-import {
-  useMemo,
-  useState,
-  type FormEvent,
-  type ReactNode,
-} from "react";
+import { useMemo, useState, type ReactNode } from "react";
 
 import {
-  FaBoxOpen,
   FaCheckCircle,
-  FaEdit,
-  FaExclamationTriangle,
   FaFileInvoiceDollar,
   FaLeaf,
-  FaPlus,
   FaSeedling,
-  FaTimes,
   FaWarehouse,
 } from "react-icons/fa";
 
 import {
   Box,
-  Button,
   Card,
   Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  FormControlLabel,
-  FormHelperText,
-  IconButton,
-  InputAdornment,
-  LinearProgress,
-  MenuItem,
   Paper,
-  Radio,
-  RadioGroup,
-  TextField,
   Typography,
 } from "@mui/material";
 
 import type { SxProps, Theme } from "@mui/material/styles";
 
 import AppShell from "@/components/AppShell/AppShell";
+import { AddGrainModal } from "@/components/AddGrainModal";
+import {
+  GrainInventory,
+  type GrainProduct,
+  type GrainStatus,
+} from "@/components/GrainInventory";
 import { RegisterSaleCard } from "@/components/RegisterSaleCard";
 import { SalesHistoryTable } from "@/components/SalesHistoryTable";
 
 import type { WorkspaceConfig } from "@/components/WorkspaceShared/workspaceTypes";
-import { AddGrainModal } from "@/components/AddGrainModal";
-
-type GrainStatus = "inStock" | "lowStock";
-
-type GrainProduct = {
-  id: string;
-  name: string;
-  unit: string;
-  stock: number;
-  minStock: number;
-  price: number;
-  code: string;
-  accent: string;
-  silo?: string;
-  status?: GrainStatus;
-};
 
 type GrainSale = {
   id: string;
@@ -141,6 +106,8 @@ const initialProducts: GrainProduct[] = [
     accent: "#22c55e",
     silo: "Silo Alpha-1",
     status: "inStock",
+    imageUrl:
+      "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=700&q=80",
   },
   {
     id: "beans",
@@ -153,6 +120,8 @@ const initialProducts: GrainProduct[] = [
     accent: "#f97316",
     silo: "Silo Alpha-2",
     status: "inStock",
+    imageUrl:
+      "https://images.unsplash.com/photo-1515543904379-3d757afe72e4?auto=format&fit=crop&w=700&q=80",
   },
   {
     id: "corn",
@@ -165,6 +134,8 @@ const initialProducts: GrainProduct[] = [
     accent: "#f97316",
     silo: "Silo Beta-1",
     status: "inStock",
+    imageUrl:
+      "https://images.unsplash.com/photo-1551754655-cd27e38d2076?auto=format&fit=crop&w=700&q=80",
   },
   {
     id: "sugar",
@@ -177,6 +148,8 @@ const initialProducts: GrainProduct[] = [
     accent: "#3b82f6",
     silo: "Bodega principal",
     status: "inStock",
+    imageUrl:
+      "https://images.unsplash.com/photo-1581441363689-1f3c3c414635?auto=format&fit=crop&w=700&q=80",
   },
 ];
 
@@ -202,10 +175,6 @@ const initialSales: GrainSale[] = [
     date: "9/7/26, 10:35 a. m.",
   },
 ];
-
-
-
-
 
 const paymentMethods = [
   "Efectivo",
@@ -248,9 +217,8 @@ export function GrainsWorkspace() {
 
   const [quantity, setQuantity] = useState("1");
 
-  const [paymentMethod, setPaymentMethod] = useState(
-    paymentMethods[0],
-  );
+  const [paymentMethod, setPaymentMethod] =
+    useState(paymentMethods[0]);
 
   const [error, setError] = useState("");
 
@@ -328,15 +296,27 @@ export function GrainsWorkspace() {
     };
 
     setProducts((currentProducts) =>
-      currentProducts.map((product) =>
-        product.id === selectedProduct.id
-          ? {
-              ...product,
-              stock:
-                product.stock - numericQuantity,
-            }
-          : product,
-      ),
+      currentProducts.map((product) => {
+        if (product.id !== selectedProduct.id) {
+          return product;
+        }
+
+        const newStock =
+          product.stock - numericQuantity;
+
+        return {
+          ...product,
+          stock: newStock,
+          status:
+            newStock <= product.minStock
+              ? "lowStock"
+              : "inStock",
+          accent:
+            newStock <= product.minStock
+              ? colors.danger
+              : product.accent,
+        };
+      }),
     );
 
     setSales((currentSales) => [
@@ -369,6 +349,9 @@ export function GrainsWorkspace() {
           ? colors.danger
           : "#22c55e",
       status: formValues.status,
+      silo: "Bodega principal",
+      imageUrl:
+        "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=700&q=80",
     };
 
     setProducts((currentProducts) => [
@@ -378,6 +361,12 @@ export function GrainsWorkspace() {
 
     setSelectedProductId(newProduct.id);
     setIsAddGrainOpen(false);
+  };
+
+  const handleEditProduct = (
+    product: GrainProduct,
+  ): void => {
+    console.log("Editar producto:", product);
   };
 
   return (
@@ -400,6 +389,9 @@ export function GrainsWorkspace() {
       >
         <Box
           sx={{
+            width: "100%",
+            maxWidth: 1440,
+            mx: "auto",
             display: "flex",
             flexDirection: "column",
             gap: 3,
@@ -412,6 +404,7 @@ export function GrainsWorkspace() {
               display: "grid",
               gridTemplateColumns: {
                 xs: "1fr",
+                sm: "repeat(2, minmax(0, 1fr))",
                 md: "repeat(3, minmax(0, 1fr))",
               },
               gap: 2.5,
@@ -461,67 +454,13 @@ export function GrainsWorkspace() {
               minWidth: 0,
             }}
           >
-            <SectionCard>
-              <SectionHeader
-                icon={<FaBoxOpen />}
-                title="Inventario de granos"
-                action={
-                  <Button
-                    type="button"
-                    variant="contained"
-                    size="small"
-                    startIcon={<FaPlus size={11} />}
-                    onClick={() => {
-                      setIsAddGrainOpen(true);
-                    }}
-                    sx={{
-                      minHeight: 34,
-                      px: 1.75,
-                      borderRadius: "8px",
-                      bgcolor: colors.primary,
-                      color: colors.cardBg,
-                      fontSize: 10,
-                      fontWeight: 900,
-                      letterSpacing: "0.03em",
-                      textTransform: "uppercase",
-                      boxShadow: "none",
-
-                      "&:hover": {
-                        bgcolor: colors.primaryLight,
-                        boxShadow: "none",
-                      },
-                    }}
-                  >
-                    Nuevo ingreso
-                  </Button>
-                }
-              />
-
-              <Box sx={{ p: 2.5 }}>
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: {
-                      xs: "1fr",
-                      md: "repeat(2, minmax(0, 1fr))",
-                    },
-                    gap: {
-                      xs: 1.5,
-                      md: 2,
-                    },
-                    width: "100%",
-                    minWidth: 0,
-                  }}
-                >
-                  {products.map((product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                    />
-                  ))}
-                </Box>
-              </Box>
-            </SectionCard>
+            <GrainInventory
+              products={products}
+              onAddProduct={() => {
+                setIsAddGrainOpen(true);
+              }}
+              onEditProduct={handleEditProduct}
+            />
 
             <SectionCard sx={{ height: "100%" }}>
               <RegisterSaleCard
@@ -538,7 +477,9 @@ export function GrainsWorkspace() {
                   setSelectedProductId
                 }
                 onQuantityChange={setQuantity}
-                onPaymentMethodChange={setPaymentMethod}
+                onPaymentMethodChange={
+                  setPaymentMethod
+                }
                 onRegisterSale={handleRegisterSale}
               />
             </SectionCard>
@@ -577,18 +518,16 @@ export function GrainsWorkspace() {
         </Box>
       </Box>
 
-<AddGrainModal
-  open={isAddGrainOpen}
-  onClose={() => {
-    setIsAddGrainOpen(false);
-  }}
-  onSave={handleAddGrain}
-/>
-
+      <AddGrainModal
+        open={isAddGrainOpen}
+        onClose={() => {
+          setIsAddGrainOpen(false);
+        }}
+        onSave={handleAddGrain}
+      />
     </AppShell>
   );
 }
-
 
 function HeroHeader() {
   return (
@@ -602,7 +541,7 @@ function HeroHeader() {
           md: 3,
         },
         borderRadius: "16px",
-        color: "white",
+        color: "#ffffff",
         background:
           "linear-gradient(135deg, #064e3b 0%, #14532d 58%, #1f6f4a 100%)",
         minHeight: 116,
@@ -614,6 +553,7 @@ function HeroHeader() {
         sx={{
           position: "relative",
           zIndex: 2,
+          minWidth: 0,
         }}
       >
         <Chip
@@ -621,8 +561,7 @@ function HeroHeader() {
           size="small"
           sx={{
             mb: 1.25,
-            bgcolor:
-              "rgba(255,255,255,0.15)",
+            bgcolor: "rgba(255,255,255,0.15)",
             color: "#d1fae5",
             fontWeight: 900,
             fontSize: 11,
@@ -631,7 +570,10 @@ function HeroHeader() {
 
         <Typography
           sx={{
-            fontSize: 22,
+            fontSize: {
+              xs: 22,
+              sm: 26,
+            },
             fontWeight: 950,
             lineHeight: 1.1,
           }}
@@ -644,7 +586,11 @@ function HeroHeader() {
             mt: 0.5,
             maxWidth: 760,
             color: "#d1fae5",
-            fontSize: 14,
+            fontSize: {
+              xs: 12,
+              sm: 14,
+            },
+            lineHeight: 1.5,
           }}
         >
           {grainsConfig.subtitle}
@@ -659,8 +605,7 @@ function HeroHeader() {
             md: 50,
           },
           bottom: -30,
-          color:
-            "rgba(255,255,255,0.11)",
+          color: "rgba(255,255,255,0.11)",
           fontSize: {
             xs: 110,
             md: 150,
@@ -674,6 +619,15 @@ function HeroHeader() {
   );
 }
 
+type MetricCardProps = {
+  icon: ReactNode;
+  iconBg: string;
+  iconColor: string;
+  label: string;
+  value: string;
+  detail: string;
+};
+
 function MetricCard({
   icon,
   iconBg,
@@ -681,14 +635,7 @@ function MetricCard({
   label,
   value,
   detail,
-}: {
-  icon: ReactNode;
-  iconBg: string;
-  iconColor: string;
-  label: string;
-  value: string;
-  detail: string;
-}) {
+}: MetricCardProps) {
   return (
     <Card
       elevation={0}
@@ -724,11 +671,11 @@ function MetricCard({
             {icon}
           </Box>
 
-          <Box>
+          <Box sx={{ minWidth: 0 }}>
             <Typography
               sx={{
-                fontSize: 11,
                 color: colors.text,
+                fontSize: 11,
                 fontWeight: 900,
                 textTransform: "uppercase",
               }}
@@ -738,10 +685,11 @@ function MetricCard({
 
             <Typography
               sx={{
-                fontSize: 18,
-                color: colors.text,
-                fontWeight: 950,
                 mt: 0.25,
+                color: colors.text,
+                fontSize: 18,
+                fontWeight: 950,
+                overflowWrap: "anywhere",
               }}
             >
               {value}
@@ -749,8 +697,8 @@ function MetricCard({
 
             <Typography
               sx={{
-                fontSize: 12,
                 color: colors.muted,
+                fontSize: 12,
               }}
             >
               {detail}
@@ -762,21 +710,24 @@ function MetricCard({
   );
 }
 
+type SectionCardProps = {
+  children: ReactNode;
+  sx?: SxProps<Theme>;
+};
+
 function SectionCard({
   children,
   sx,
-}: {
-  children: ReactNode;
-  sx?: SxProps<Theme>;
-}) {
+}: SectionCardProps) {
   return (
     <Card
       elevation={0}
       sx={{
+        minWidth: 0,
+        overflow: "hidden",
         borderRadius: "16px",
         border: `1px solid ${colors.cardBorder}`,
         bgcolor: colors.cardBg,
-        overflow: "hidden",
         boxShadow:
           "0 10px 28px rgba(15, 23, 42, 0.06)",
         ...sx,
@@ -784,289 +735,5 @@ function SectionCard({
     >
       {children}
     </Card>
-  );
-}
-
-function SectionHeader({
-  icon,
-  title,
-  action,
-}: {
-  icon: ReactNode;
-  title: string;
-  action?: ReactNode;
-}) {
-  return (
-    <Box
-      sx={{
-        px: 2.5,
-        py: 2,
-        bgcolor: "#ffffff",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        gap: 2,
-      }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          gap: 1.2,
-          alignItems: "center",
-        }}
-      >
-        <Box
-          sx={{
-            width: 30,
-            height: 30,
-            borderRadius: "10px",
-            display: "grid",
-            placeItems: "center",
-            color: colors.primaryLight,
-            bgcolor: colors.primarySoft,
-          }}
-        >
-          {icon}
-        </Box>
-
-        <Typography
-          sx={{
-            fontWeight: 950,
-            fontSize: 14,
-            color: colors.text,
-          }}
-        >
-          {title}
-        </Typography>
-      </Box>
-
-      {action}
-    </Box>
-  );
-}
-
-function ProductCard({
-  product,
-}: {
-  product: GrainProduct;
-}) {
-  const stockPercent =
-    product.minStock > 0
-      ? Math.min(
-          100,
-          (product.stock /
-            Math.max(
-              product.minStock * 4,
-              product.stock,
-            )) *
-            100,
-        )
-      : 100;
-
-  const isLowStock =
-    product.status === "lowStock" ||
-    product.stock <= product.minStock;
-
-  const warningColor = isLowStock
-    ? colors.danger
-    : product.accent;
-
-  return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: 2,
-        borderRadius: "16px",
-        border: `1px solid ${colors.cardBorder}`,
-        bgcolor: "#ffffff",
-        transition: "all 0.18s ease",
-
-        "&:hover": {
-          transform: "translateY(-2px)",
-          borderColor: "#b7c7c2",
-          boxShadow:
-            "0 12px 26px rgba(15, 23, 42, 0.08)",
-        },
-      }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 1.4,
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            gap: 1.5,
-          }}
-        >
-          <Box>
-            <Box
-              sx={{
-                display: "flex",
-                gap: 0.75,
-                alignItems: "center",
-              }}
-            >
-              <Typography
-                sx={{
-                  fontSize: 13,
-                  color: colors.text,
-                  fontWeight: 950,
-                }}
-              >
-                {product.name}
-              </Typography>
-
-              {isLowStock ? (
-                <FaExclamationTriangle
-                  size={12}
-                  color={colors.danger}
-                />
-              ) : (
-                <FaCheckCircle
-                  size={12}
-                  color={colors.primaryLight}
-                />
-              )}
-            </Box>
-
-            <Typography
-              sx={{
-                fontSize: 11,
-                color: colors.softMuted,
-                fontWeight: 700,
-              }}
-            >
-              {product.code}
-            </Typography>
-          </Box>
-
-          <IconButton
-            size="small"
-            aria-label={`Editar ${product.name}`}
-            sx={{
-              width: 30,
-              height: 30,
-              bgcolor: "#f8fafc",
-              border: `1px solid ${colors.cardBorder}`,
-              color: colors.muted,
-
-              "&:hover": {
-                bgcolor: colors.primarySoft,
-                color: colors.primary,
-              },
-            }}
-          >
-            <FaEdit size={12} />
-          </IconButton>
-        </Box>
-
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            gap: 1,
-          }}
-        >
-          <Typography
-            sx={{
-              fontSize: 11,
-              color: colors.muted,
-              fontWeight: 800,
-            }}
-          >
-            UNIDAD:{" "}
-            <Box
-              component="span"
-              sx={{
-                color: colors.text,
-                fontWeight: 950,
-              }}
-            >
-              {product.unit}
-            </Box>
-          </Typography>
-
-          <Typography
-            sx={{
-              fontSize: 11,
-              color: colors.orange,
-              fontWeight: 800,
-            }}
-          >
-            PRECIO:{" "}
-            <Box
-              component="span"
-              sx={{ fontWeight: 950 }}
-            >
-              {formatCurrency(product.price)}
-            </Box>
-          </Typography>
-        </Box>
-
-        <Box>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              mb: 0.7,
-            }}
-          >
-            <Typography
-              sx={{
-                fontSize: 10.5,
-                fontWeight: 950,
-              }}
-            >
-              STOCK ACTUAL
-            </Typography>
-
-            <Typography
-              sx={{
-                fontSize: 10.5,
-                fontWeight: 950,
-                color: isLowStock
-                  ? colors.danger
-                  : colors.text,
-              }}
-            >
-              {product.stock}
-            </Typography>
-          </Box>
-
-          <LinearProgress
-            variant="determinate"
-            value={stockPercent}
-            sx={{
-              height: 7,
-              borderRadius: 999,
-              bgcolor: "#e5e7eb",
-
-              "& .MuiLinearProgress-bar": {
-                bgcolor: warningColor,
-                borderRadius: 999,
-              },
-            }}
-          />
-
-          <Typography
-            sx={{
-              mt: 0.65,
-              fontSize: 9.5,
-              color: colors.softMuted,
-              fontWeight: 700,
-              textAlign: "right",
-            }}
-          >
-            Mínimo: {product.minStock}
-          </Typography>
-        </Box>
-      </Box>
-    </Paper>
   );
 }

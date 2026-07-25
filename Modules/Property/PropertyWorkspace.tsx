@@ -374,35 +374,6 @@ export function PropertyWorkspace() {
     setIsPropertyDialogOpen(false);
   };
 
-  const handleAssignBuyer = () => {
-    setError("");
-
-    if (!selectedProperty) {
-      setError("Selecciona una propiedad válida.");
-      return;
-    }
-
-    if (!buyerName.trim()) {
-      setError("Ingresa el nombre del comprador.");
-      return;
-    }
-
-    setProperties((currentProperties) =>
-      currentProperties.map((property) =>
-        property.id === selectedProperty.id
-          ? {
-              ...property,
-              buyerName: buyerName.trim(),
-              buyerEmail: "Comprador registrado",
-              status: property.status === "Pagado" ? "Pagado" : "Pendiente",
-            }
-          : property,
-      ),
-    );
-
-    setBuyerName("");
-  };
-
   const handleRegisterPayment = () => {
     setError("");
 

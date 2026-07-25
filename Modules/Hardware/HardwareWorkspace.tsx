@@ -7,13 +7,9 @@ import {
 } from "react";
 
 import {
-  FaBoxOpen,
   FaBoxes,
-  FaCheckCircle,
   FaClipboardCheck,
-  FaEdit,
   FaExclamationTriangle,
-  FaPlus,
   FaRegClock,
   FaTools,
   FaWrench,
@@ -21,12 +17,8 @@ import {
 
 import {
   Box,
-  Button,
   Card,
   Chip,
-  Divider,
-  IconButton,
-  LinearProgress,
   Paper,
   Typography,
 } from "@mui/material";
@@ -37,27 +29,21 @@ import type {
 } from "@mui/material/styles";
 
 import AppShell from "@/components/AppShell/AppShell";
-import { RegisterSaleCard } from "@/components/RegisterSaleCard";
-import { SalesHistoryTable } from "@/components/SalesHistoryTable";
 
 import {
   AddHardwareProductModal,
   type AddHardwareProductValues,
 } from "@/components/AddHardwareProductModal";
 
-import type { WorkspaceConfig } from "@/components/WorkspaceShared/workspaceTypes";
+import {
+  HardwareInventory,
+  type HardwareProduct,
+} from "@/components/HardwareInventory";
 
-type HardwareProduct = {
-  id: string;
-  name: string;
-  detail: string;
-  category?: string;
-  code: string;
-  stock: number;
-  minStock: number;
-  price: number;
-  accent: string;
-};
+import { RegisterSaleCard } from "@/components/RegisterSaleCard";
+import { SalesHistoryTable } from "@/components/SalesHistoryTable";
+
+import type { WorkspaceConfig } from "@/components/WorkspaceShared/workspaceTypes";
 
 type HardwareSale = {
   id: string;
@@ -100,8 +86,7 @@ const hardwareConfig: WorkspaceConfig = {
   heroSecondary: "#19d3d8",
   invoice: "#FER-2026-014",
   customer: "Carlos Mendoza",
-  customerEmail:
-    "carlos.mendoza@assethub.com",
+  customerEmail: "carlos.mendoza@assethub.com",
   agent: "M. Torres",
   terminal: "Caja Ferretería 01",
   customerMode: "quick",
@@ -132,6 +117,9 @@ const initialProducts: HardwareProduct[] = [
     minStock: 5,
     price: 79.9,
     accent: "#f59e0b",
+    status: "inStock",
+    imageUrl:
+      "https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=700&q=80",
   },
   {
     id: "screws",
@@ -143,6 +131,9 @@ const initialProducts: HardwareProduct[] = [
     minStock: 25,
     price: 9,
     accent: "#0891b2",
+    status: "inStock",
+    imageUrl:
+      "https://images.unsplash.com/photo-1609205807107-e8ec2120f9de?auto=format&fit=crop&w=700&q=80",
   },
   {
     id: "hammer",
@@ -154,18 +145,23 @@ const initialProducts: HardwareProduct[] = [
     minStock: 8,
     price: 12.75,
     accent: "#0f766e",
+    status: "inStock",
+    imageUrl:
+      "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?auto=format&fit=crop&w=700&q=80",
   },
   {
     id: "cement",
     name: "Bolsa de cemento",
     detail: "42.5 kg",
-    category:
-      "Materiales de construcción",
+    category: "Materiales de construcción",
     code: "FER-CEM-425",
     stock: 22,
     minStock: 20,
     price: 8.5,
     accent: "#dc2626",
+    status: "inStock",
+    imageUrl:
+      "https://images.unsplash.com/photo-1517089596392-fb9a9033e05b?auto=format&fit=crop&w=700&q=80",
   },
 ];
 
@@ -224,16 +220,12 @@ function createHardwareProductCode(
     100 + Math.random() * 900,
   );
 
-  return `FER-${
-    normalizedName || "PROD"
-  }-${randomCode}`;
+  return `FER-${normalizedName || "PROD"}-${randomCode}`;
 }
 
 export function HardwareWorkspace() {
   const [products, setProducts] =
-    useState<HardwareProduct[]>(
-      initialProducts,
-    );
+    useState<HardwareProduct[]>(initialProducts);
 
   const [sales, setSales] =
     useState<HardwareSale[]>(initialSales);
@@ -350,16 +342,29 @@ export function HardwareWorkspace() {
     };
 
     setProducts((currentProducts) =>
-      currentProducts.map((product) =>
-        product.id === selectedProduct.id
-          ? {
-              ...product,
-              stock:
-                product.stock -
-                numericQuantity,
-            }
-          : product,
-      ),
+      currentProducts.map((product) => {
+        if (
+          product.id !== selectedProduct.id
+        ) {
+          return product;
+        }
+
+        const newStock =
+          product.stock - numericQuantity;
+
+        return {
+          ...product,
+          stock: newStock,
+          status:
+            newStock <= product.minStock
+              ? "lowStock"
+              : "inStock",
+          accent:
+            newStock <= product.minStock
+              ? colors.danger
+              : product.accent,
+        };
+      }),
     );
 
     setSales((currentSales) => [
@@ -385,22 +390,28 @@ export function HardwareWorkspace() {
       formValues.price,
     );
 
-    const newProduct: HardwareProduct = {
-      id: crypto.randomUUID(),
-      name: formValues.name.trim(),
-      detail: formValues.detail.trim(),
-      category: formValues.category,
-      code: createHardwareProductCode(
-        formValues.name,
-      ),
-      stock,
-      minStock,
-      price,
-      accent:
-        formValues.status === "lowStock"
-          ? colors.danger
-          : colors.primaryLight,
-    };
+    const isLowStock =
+      formValues.status === "lowStock" ||
+      stock <= minStock;
+
+const newProduct: HardwareProduct = {
+  id: crypto.randomUUID(),
+  name: formValues.name.trim(),
+  detail: formValues.detail.trim(),
+  category: formValues.category,
+  code: createHardwareProductCode(formValues.name),
+  stock,
+  minStock,
+  price,
+  accent: isLowStock
+    ? colors.danger
+    : colors.primaryLight,
+  status: isLowStock
+    ? "lowStock"
+    : "inStock",
+  imageUrl:
+    "https://images.unsplash.com/photo-1581783898377-1c85bf937427?auto=format&fit=crop&w=700&q=80",
+};
 
     setProducts((currentProducts) => [
       newProduct,
@@ -409,6 +420,15 @@ export function HardwareWorkspace() {
 
     setSelectedProductId(newProduct.id);
     setIsAddProductModalOpen(false);
+  };
+
+  const handleEditProduct = (
+    product: HardwareProduct,
+  ): void => {
+    console.log(
+      "Editar producto de ferretería:",
+      product,
+    );
   };
 
   return (
@@ -468,9 +488,7 @@ export function HardwareWorkspace() {
             }}
           >
             <MetricCard
-              icon={
-                <FaClipboardCheck />
-              }
+              icon={<FaClipboardCheck />}
               iconBg={colors.greenSoft}
               iconColor={colors.green}
               label="Ventas registradas"
@@ -483,9 +501,7 @@ export function HardwareWorkspace() {
             <MetricCard
               icon={<FaBoxes />}
               iconBg={colors.primarySoft}
-              iconColor={
-                colors.primaryLight
-              }
+              iconColor={colors.primaryLight}
               label="Productos en stock"
               value={totalStock.toString()}
               detail={`${products.length} productos activos`}
@@ -530,84 +546,17 @@ export function HardwareWorkspace() {
               minWidth: 0,
             }}
           >
-            <SectionCard>
-              <SectionHeader
-                icon={<FaBoxOpen />}
-                title="Inventario de ferretería"
-                action={
-                  <Button
-                    type="button"
-                    variant="contained"
-                    size="small"
-                    startIcon={
-                      <FaPlus size={11} />
-                    }
-                    onClick={() => {
-                      setIsAddProductModalOpen(
-                        true,
-                      );
-                    }}
-                    sx={{
-                      minHeight: 34,
-                      px: 1.75,
-                      borderRadius: "8px",
-                      bgcolor:
-                        colors.primary,
-                      color: "#ffffff",
-                      fontSize: 10,
-                      fontWeight: 900,
-                      textTransform: "none",
-                      boxShadow: "none",
-
-                      "&:hover": {
-                        bgcolor:
-                          colors.primaryDark,
-                        boxShadow: "none",
-                      },
-                    }}
-                  >
-                    Nuevo producto
-                  </Button>
-                }
-              />
-
-              <Divider />
-
-              <Box
-                sx={{
-                  p: {
-                    xs: 1.5,
-                    sm: 2,
-                    md: 2.5,
-                  },
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: {
-                      xs: "1fr",
-                      md: "repeat(2, minmax(0, 1fr))",
-                    },
-                    gap: {
-                      xs: 1.5,
-                      md: 2,
-                    },
-                    width: "100%",
-                    minWidth: 0,
-                  }}
-                >
-                  {products.map(
-                    (product) => (
-                      <ProductCard
-                        key={product.id}
-                        product={product}
-                      />
-                    ),
-                  )}
-                </Box>
-              </Box>
-            </SectionCard>
+            <HardwareInventory
+              products={products}
+              onAddProduct={() => {
+                setIsAddProductModalOpen(
+                  true,
+                );
+              }}
+              onEditProduct={
+                handleEditProduct
+              }
+            />
 
             <SectionCard
               sx={{ height: "100%" }}
@@ -651,8 +600,21 @@ export function HardwareWorkspace() {
           <SalesHistoryTable
             sales={sales}
             totalSold={totalSold}
+            title="Historial de ventas"
+            subtitle="Productos vendidos, cantidades, precios y métodos de pago"
             productIcon={
               <FaWrench size={13} />
+            }
+            getRecordLabel={(sale) =>
+              `Venta #${sale.id
+                .slice(-4)
+                .toUpperCase()}`
+            }
+            getQuantityLabel={(sale) =>
+              `${sale.quantity}`
+            }
+            getProductSecondaryText={() =>
+              "Producto de ferretería"
             }
             colors={{
               primary: colors.primary,
@@ -699,7 +661,7 @@ function HeroHeader() {
           md: 3,
         },
         borderRadius: "16px",
-        color: "white",
+        color: "#ffffff",
         background:
           "linear-gradient(135deg, #78350f 0%, #f59e0b 55%, #0891b2 100%)",
         minHeight: {
@@ -715,6 +677,7 @@ function HeroHeader() {
           position: "relative",
           zIndex: 2,
           maxWidth: "100%",
+          minWidth: 0,
         }}
       >
         <Chip
@@ -786,6 +749,15 @@ function HeroHeader() {
   );
 }
 
+type MetricCardProps = {
+  icon: ReactNode;
+  iconBg: string;
+  iconColor: string;
+  label: string;
+  value: string;
+  detail: string;
+};
+
 function MetricCard({
   icon,
   iconBg,
@@ -793,14 +765,7 @@ function MetricCard({
   label,
   value,
   detail,
-}: {
-  icon: ReactNode;
-  iconBg: string;
-  iconColor: string;
-  label: string;
-  value: string;
-  detail: string;
-}) {
+}: MetricCardProps) {
   return (
     <Card
       elevation={0}
@@ -882,13 +847,15 @@ function MetricCard({
   );
 }
 
+type SectionCardProps = {
+  children: ReactNode;
+  sx?: SxProps<Theme>;
+};
+
 function SectionCard({
   children,
   sx,
-}: {
-  children: ReactNode;
-  sx?: SxProps<Theme>;
-}) {
+}: SectionCardProps) {
   return (
     <Card
       elevation={0}
@@ -905,323 +872,5 @@ function SectionCard({
     >
       {children}
     </Card>
-  );
-}
-
-function SectionHeader({
-  icon,
-  title,
-  action,
-}: {
-  icon: ReactNode;
-  title: string;
-  action?: ReactNode;
-}) {
-  return (
-    <Box
-      sx={{
-        px: {
-          xs: 1.8,
-          md: 2.5,
-        },
-        py: 2,
-        bgcolor: "#ffffff",
-        display: "flex",
-        justifyContent:
-          "space-between",
-        alignItems: "center",
-        gap: 2,
-      }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          gap: 1.2,
-          alignItems: "center",
-          minWidth: 0,
-        }}
-      >
-        <Box
-          sx={{
-            width: 32,
-            height: 32,
-            borderRadius: "16px",
-            display: "grid",
-            placeItems: "center",
-            color: colors.primary,
-            bgcolor: colors.primarySoft,
-            flexShrink: 0,
-          }}
-        >
-          {icon}
-        </Box>
-
-        <Typography
-          sx={{
-            fontWeight: 950,
-            fontSize: {
-              xs: 16,
-              md: 18,
-            },
-            color: colors.text,
-            overflowWrap: "anywhere",
-          }}
-        >
-          {title}
-        </Typography>
-      </Box>
-
-      {action}
-    </Box>
-  );
-}
-
-function ProductCard({
-  product,
-}: {
-  product: HardwareProduct;
-}) {
-  const stockPercent = Math.min(
-    100,
-    product.stock,
-  );
-
-  const isLowStock =
-    product.stock <= product.minStock;
-
-  const barColor = isLowStock
-    ? colors.danger
-    : product.accent;
-
-  return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: {
-          xs: 1.8,
-          md: 2,
-        },
-        borderRadius: "16px",
-        border: `1px solid ${colors.cardBorder}`,
-        bgcolor: "#ffffff",
-        width: "100%",
-        minWidth: 0,
-        transition:
-          "all 0.18s ease",
-
-        "&:hover": {
-          transform: {
-            xs: "none",
-            md: "translateY(-2px)",
-          },
-          borderColor: "#b7c7c2",
-          boxShadow:
-            "0 12px 26px rgba(15, 23, 42, 0.08)",
-        },
-      }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 1.4,
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent:
-              "space-between",
-            alignItems: "flex-start",
-            gap: 1.5,
-          }}
-        >
-          <Box sx={{ minWidth: 0 }}>
-            <Box
-              sx={{
-                display: "flex",
-                gap: 0.75,
-                alignItems: "center",
-              }}
-            >
-              <Typography
-                sx={{
-                  fontWeight: 950,
-                  fontSize: 14.5,
-                  color: colors.text,
-                }}
-              >
-                {product.name}
-              </Typography>
-
-              {isLowStock ? (
-                <FaExclamationTriangle
-                  size={12}
-                  color={colors.danger}
-                />
-              ) : (
-                <FaCheckCircle
-                  size={12}
-                  color={colors.green}
-                />
-              )}
-            </Box>
-
-            <Typography
-              sx={{
-                fontSize: 11,
-                color: colors.softMuted,
-                fontWeight: 700,
-              }}
-            >
-              {product.code}
-            </Typography>
-
-            {product.category && (
-              <Typography
-                sx={{
-                  mt: 0.25,
-                  fontSize: 10,
-                  color: colors.muted,
-                  fontWeight: 650,
-                }}
-              >
-                {product.category}
-              </Typography>
-            )}
-          </Box>
-
-          <IconButton
-            size="small"
-            aria-label={`Editar ${product.name}`}
-            sx={{
-              width: 30,
-              height: 30,
-              bgcolor: "#f8fafc",
-              border: `1px solid ${colors.cardBorder}`,
-              color: colors.muted,
-              flexShrink: 0,
-
-              "&:hover": {
-                bgcolor:
-                  colors.primarySoft,
-                color: colors.primary,
-              },
-            }}
-          >
-            <FaEdit size={12} />
-          </IconButton>
-        </Box>
-
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent:
-              "space-between",
-            gap: 1,
-            flexWrap: "wrap",
-          }}
-        >
-          <Typography
-            sx={{
-              fontSize: 11,
-              color: colors.muted,
-              fontWeight: 800,
-            }}
-          >
-            DETALLE:{" "}
-            <Box
-              component="span"
-              sx={{
-                color: colors.text,
-                fontWeight: 950,
-              }}
-            >
-              {product.detail}
-            </Box>
-          </Typography>
-
-          <Typography
-            sx={{
-              fontSize: 11,
-              color: colors.primary,
-              fontWeight: 800,
-            }}
-          >
-            PRECIO:{" "}
-            <Box
-              component="span"
-              sx={{
-                fontWeight: 950,
-              }}
-            >
-              {formatCurrency(
-                product.price,
-              )}
-            </Box>
-          </Typography>
-        </Box>
-
-        <Box>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent:
-                "space-between",
-              mb: 0.7,
-            }}
-          >
-            <Typography
-              sx={{
-                fontSize: 10.5,
-                fontWeight: 950,
-              }}
-            >
-              STOCK ACTUAL
-            </Typography>
-
-            <Typography
-              sx={{
-                fontSize: 10.5,
-                fontWeight: 950,
-                color: isLowStock
-                  ? colors.danger
-                  : colors.text,
-              }}
-            >
-              {product.stock}
-            </Typography>
-          </Box>
-
-          <LinearProgress
-            variant="determinate"
-            value={stockPercent}
-            sx={{
-              height: 7,
-              borderRadius: 999,
-              bgcolor: "#e5e7eb",
-
-              "& .MuiLinearProgress-bar":
-                {
-                  bgcolor: barColor,
-                  borderRadius: 999,
-                },
-            }}
-          />
-
-          <Typography
-            sx={{
-              mt: 0.6,
-              textAlign: "right",
-              color: colors.softMuted,
-              fontSize: 9.5,
-              fontWeight: 700,
-            }}
-          >
-            Mínimo: {product.minStock}
-          </Typography>
-        </Box>
-      </Box>
-    </Paper>
   );
 }
