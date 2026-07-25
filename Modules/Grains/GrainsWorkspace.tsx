@@ -1,7 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import type { ReactNode } from "react";
+import {
+  useMemo,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
+
 import {
   FaBoxOpen,
   FaCheckCircle,
@@ -9,25 +14,45 @@ import {
   FaExclamationTriangle,
   FaFileInvoiceDollar,
   FaLeaf,
+  FaPlus,
   FaSeedling,
+  FaTimes,
   FaWarehouse,
 } from "react-icons/fa";
 
-import AppShell from "@/components/AppShell/AppShell";
-import type { WorkspaceConfig } from "@/components/WorkspaceShared/workspaceTypes";
 import {
   Box,
+  Button,
   Card,
   Chip,
-  Divider,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  FormControlLabel,
+  FormHelperText,
   IconButton,
+  InputAdornment,
   LinearProgress,
+  MenuItem,
   Paper,
+  Radio,
+  RadioGroup,
+  TextField,
   Typography,
 } from "@mui/material";
+
 import type { SxProps, Theme } from "@mui/material/styles";
+
+import AppShell from "@/components/AppShell/AppShell";
 import { RegisterSaleCard } from "@/components/RegisterSaleCard";
 import { SalesHistoryTable } from "@/components/SalesHistoryTable";
+
+import type { WorkspaceConfig } from "@/components/WorkspaceShared/workspaceTypes";
+import { AddGrainModal } from "@/components/AddGrainModal";
+
+type GrainStatus = "inStock" | "lowStock";
 
 type GrainProduct = {
   id: string;
@@ -38,6 +63,8 @@ type GrainProduct = {
   price: number;
   code: string;
   accent: string;
+  silo?: string;
+  status?: GrainStatus;
 };
 
 type GrainSale = {
@@ -49,6 +76,15 @@ type GrainSale = {
   total: number;
   paymentMethod: string;
   date: string;
+};
+
+type AddGrainFormValues = {
+  name: string;
+  unit: string;
+  stock: string;
+  price: string;
+  minStock: string;
+  status: GrainStatus;
 };
 
 const colors = {
@@ -103,6 +139,8 @@ const initialProducts: GrainProduct[] = [
     price: 18.5,
     code: "GRN-ARR-2026",
     accent: "#22c55e",
+    silo: "Silo Alpha-1",
+    status: "inStock",
   },
   {
     id: "beans",
@@ -113,6 +151,8 @@ const initialProducts: GrainProduct[] = [
     price: 4.25,
     code: "GRN-FRJ-1011",
     accent: "#f97316",
+    silo: "Silo Alpha-2",
+    status: "inStock",
   },
   {
     id: "corn",
@@ -123,6 +163,8 @@ const initialProducts: GrainProduct[] = [
     price: 15.75,
     code: "GRN-MAZ-2050",
     accent: "#f97316",
+    silo: "Silo Beta-1",
+    status: "inStock",
   },
   {
     id: "sugar",
@@ -133,56 +175,101 @@ const initialProducts: GrainProduct[] = [
     price: 12.4,
     code: "GRN-AZU-3301",
     accent: "#3b82f6",
+    silo: "Bodega principal",
+    status: "inStock",
   },
 ];
 
-const paymentMethods = ["Efectivo", "Tarjeta", "Transferencia"];
+const initialSales: GrainSale[] = [
+  {
+    id: "sale-1",
+    productName: "Frijol rojo",
+    unit: "Saco",
+    quantity: 4,
+    unitPrice: 4.25,
+    total: 17,
+    paymentMethod: "Efectivo",
+    date: "9/7/26, 10:36 a. m.",
+  },
+  {
+    id: "sale-2",
+    productName: "Frijol rojo",
+    unit: "Saco",
+    quantity: 5,
+    unitPrice: 4.25,
+    total: 21.25,
+    paymentMethod: "Efectivo",
+    date: "9/7/26, 10:35 a. m.",
+  },
+];
 
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat("en-US", {
+
+
+
+
+const paymentMethods = [
+  "Efectivo",
+  "Tarjeta",
+  "Transferencia",
+];
+
+const formatCurrency = (value: number): string => {
+  return new Intl.NumberFormat("es-US", {
     style: "currency",
     currency: "USD",
   }).format(value);
 };
 
-export function GrainsWorkspace() {
-  const [products, setProducts] = useState<GrainProduct[]>(initialProducts);
-  const [sales, setSales] = useState<GrainSale[]>([
-    {
-      id: "sale-1",
-      productName: "Frijol rojo",
-      unit: "Saco",
-      quantity: 4,
-      unitPrice: 4.25,
-      total: 17,
-      paymentMethod: "Efectivo",
-      date: "9/7/26, 10:36 a. m.",
-    },
-    {
-      id: "sale-2",
-      productName: "Frijol rojo",
-      unit: "Saco",
-      quantity: 5,
-      unitPrice: 4.25,
-      total: 21.25,
-      paymentMethod: "Efectivo",
-      date: "9/7/26, 10:35 a. m.",
-    },
-  ]);
+function createProductCode(name: string): string {
+  const normalizedName = name
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 10);
 
-  const [selectedProductId, setSelectedProductId] = useState("beans");
+  const year = new Date().getFullYear();
+  const randomCode = Math.floor(1000 + Math.random() * 9000);
+
+  return `GRN-${normalizedName || "PROD"}-${year}-${randomCode}`;
+}
+
+export function GrainsWorkspace() {
+  const [products, setProducts] =
+    useState<GrainProduct[]>(initialProducts);
+
+  const [sales, setSales] =
+    useState<GrainSale[]>(initialSales);
+
+  const [selectedProductId, setSelectedProductId] =
+    useState("beans");
+
   const [quantity, setQuantity] = useState("1");
-  const [paymentMethod, setPaymentMethod] = useState(paymentMethods[0]);
+
+  const [paymentMethod, setPaymentMethod] = useState(
+    paymentMethods[0],
+  );
+
   const [error, setError] = useState("");
 
+  const [isAddGrainOpen, setIsAddGrainOpen] =
+    useState(false);
+
   const selectedProduct = useMemo(() => {
-    return products.find((product) => product.id === selectedProductId);
+    return products.find(
+      (product) => product.id === selectedProductId,
+    );
   }, [products, selectedProductId]);
 
   const numericQuantity = Number(quantity);
 
   const saleTotal = useMemo(() => {
-    if (!selectedProduct || Number.isNaN(numericQuantity)) {
+    if (
+      !selectedProduct ||
+      Number.isNaN(numericQuantity)
+    ) {
       return 0;
     }
 
@@ -190,14 +277,20 @@ export function GrainsWorkspace() {
   }, [selectedProduct, numericQuantity]);
 
   const totalSold = useMemo(() => {
-    return sales.reduce((total, sale) => total + sale.total, 0);
+    return sales.reduce(
+      (total, sale) => total + sale.total,
+      0,
+    );
   }, [sales]);
 
   const totalInventory = useMemo(() => {
-    return products.reduce((total, product) => total + product.stock, 0);
+    return products.reduce(
+      (total, product) => total + product.stock,
+      0,
+    );
   }, [products]);
 
-  const handleRegisterSale = () => {
+  const handleRegisterSale = (): void => {
     setError("");
 
     if (!selectedProduct) {
@@ -205,13 +298,18 @@ export function GrainsWorkspace() {
       return;
     }
 
-    if (!numericQuantity || numericQuantity <= 0) {
-      setError("Ingresa una cantidad mayor a cero.");
+    if (
+      Number.isNaN(numericQuantity) ||
+      numericQuantity <= 0
+    ) {
+      setError("Ingresa una cantidad mayor que cero.");
       return;
     }
 
     if (numericQuantity > selectedProduct.stock) {
-      setError("No hay suficiente inventario disponible para esta venta.");
+      setError(
+        "No hay suficiente inventario disponible para esta venta.",
+      );
       return;
     }
 
@@ -234,14 +332,52 @@ export function GrainsWorkspace() {
         product.id === selectedProduct.id
           ? {
               ...product,
-              stock: product.stock - numericQuantity,
+              stock:
+                product.stock - numericQuantity,
             }
           : product,
       ),
     );
 
-    setSales((currentSales) => [newSale, ...currentSales]);
+    setSales((currentSales) => [
+      newSale,
+      ...currentSales,
+    ]);
+
     setQuantity("1");
+  };
+
+  const handleAddGrain = (
+    formValues: AddGrainFormValues,
+  ): void => {
+    const numericStock = Number(formValues.stock);
+    const numericPrice = Number(formValues.price);
+    const numericMinStock = Number(
+      formValues.minStock,
+    );
+
+    const newProduct: GrainProduct = {
+      id: crypto.randomUUID(),
+      name: formValues.name.trim(),
+      unit: formValues.unit,
+      stock: numericStock,
+      minStock: numericMinStock,
+      price: numericPrice,
+      code: createProductCode(formValues.name),
+      accent:
+        formValues.status === "lowStock"
+          ? colors.danger
+          : "#22c55e",
+      status: formValues.status,
+    };
+
+    setProducts((currentProducts) => [
+      newProduct,
+      ...currentProducts,
+    ]);
+
+    setSelectedProductId(newProduct.id);
+    setIsAddGrainOpen(false);
   };
 
   return (
@@ -250,13 +386,25 @@ export function GrainsWorkspace() {
         sx={{
           width: "100%",
           minHeight: "calc(100vh - 48px)",
-          px: { xs: 2, md: 4 },
-          py: { xs: 2.5, md: 3 },
+          px: {
+            xs: 2,
+            md: 4,
+          },
+          py: {
+            xs: 2.5,
+            md: 3,
+          },
           bgcolor: colors.pageBg,
           color: colors.text,
         }}
       >
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
+          }}
+        >
           <HeroHeader />
 
           <Box
@@ -283,7 +431,7 @@ export function GrainsWorkspace() {
               iconBg={colors.orangeSoft}
               iconColor={colors.orange}
               label="Inventario disponible"
-              value={`${totalInventory}`}
+              value={totalInventory.toString()}
               detail="Unidades en stock"
             />
 
@@ -293,12 +441,12 @@ export function GrainsWorkspace() {
               iconColor={colors.primaryLight}
               label="Productos activos"
               value={products.length.toString()}
-              detail="Módulos independientes"
+              detail="Productos registrados"
             />
           </Box>
 
           <Box
-              sx={{
+            sx={{
               display: "grid",
               gridTemplateColumns: {
                 xs: "1fr",
@@ -317,11 +465,41 @@ export function GrainsWorkspace() {
               <SectionHeader
                 icon={<FaBoxOpen />}
                 title="Inventario de granos"
-                action="VER TODO"
+                action={
+                  <Button
+                    type="button"
+                    variant="contained"
+                    size="small"
+                    startIcon={<FaPlus size={11} />}
+                    onClick={() => {
+                      setIsAddGrainOpen(true);
+                    }}
+                    sx={{
+                      minHeight: 34,
+                      px: 1.75,
+                      borderRadius: "8px",
+                      bgcolor: colors.primary,
+                      color: colors.cardBg,
+                      fontSize: 10,
+                      fontWeight: 900,
+                      letterSpacing: "0.03em",
+                      textTransform: "uppercase",
+                      boxShadow: "none",
+
+                      "&:hover": {
+                        bgcolor: colors.primaryLight,
+                        boxShadow: "none",
+                      },
+                    }}
+                  >
+                    Nuevo ingreso
+                  </Button>
+                }
               />
+
               <Box sx={{ p: 2.5 }}>
                 <Box
-                    sx={{
+                  sx={{
                     display: "grid",
                     gridTemplateColumns: {
                       xs: "1fr",
@@ -336,7 +514,10 @@ export function GrainsWorkspace() {
                   }}
                 >
                   {products.map((product) => (
-                    <ProductCard key={product.id} product={product} />
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                    />
                   ))}
                 </Box>
               </Box>
@@ -353,7 +534,9 @@ export function GrainsWorkspace() {
                 paymentMethods={paymentMethods}
                 saleTotal={saleTotal}
                 error={error}
-                onSelectedProductChange={setSelectedProductId}
+                onSelectedProductChange={
+                  setSelectedProductId
+                }
                 onQuantityChange={setQuantity}
                 onPaymentMethodChange={setPaymentMethod}
                 onRegisterSale={handleRegisterSale}
@@ -368,17 +551,23 @@ export function GrainsWorkspace() {
             subtitle="Últimas ventas registradas en el módulo de granos"
             productIcon={<FaSeedling size={13} />}
             getRecordLabel={(sale) =>
-              `Venta #${sale.id.slice(-4).toUpperCase()}`
+              `Venta #${sale.id
+                .slice(-4)
+                .toUpperCase()}`
             }
-            getQuantityLabel={(sale) => `${sale.quantity} ${sale.unit}`}
-            getProductSecondaryText={() => "Producto vendido"}
+            getQuantityLabel={(sale) =>
+              `${sale.quantity} ${sale.unit}`
+            }
+            getProductSecondaryText={() =>
+              "Producto vendido"
+            }
             colors={{
               border: colors.cardBorder,
               text: colors.text,
               muted: colors.muted,
               primary: colors.orange,
               primarySoft: colors.orangeSoft,
-              tableHead: "#f8fafc",
+              tableHead: colors.tableHead,
               rowHover: "#f0fdf4",
               paymentBg: colors.primarySoft,
               paymentText: colors.primary,
@@ -387,9 +576,19 @@ export function GrainsWorkspace() {
           />
         </Box>
       </Box>
+
+<AddGrainModal
+  open={isAddGrainOpen}
+  onClose={() => {
+    setIsAddGrainOpen(false);
+  }}
+  onSave={handleAddGrain}
+/>
+
     </AppShell>
   );
 }
+
 
 function HeroHeader() {
   return (
@@ -398,7 +597,10 @@ function HeroHeader() {
       sx={{
         position: "relative",
         overflow: "hidden",
-        p: { xs: 2.5, md: 3 },
+        p: {
+          xs: 2.5,
+          md: 3,
+        },
         borderRadius: "16px",
         color: "white",
         background:
@@ -408,20 +610,32 @@ function HeroHeader() {
         alignItems: "center",
       }}
     >
-      <Box sx={{ position: "relative", zIndex: 2 }}>
+      <Box
+        sx={{
+          position: "relative",
+          zIndex: 2,
+        }}
+      >
         <Chip
           label={grainsConfig.badge}
           size="small"
           sx={{
             mb: 1.25,
-            bgcolor: "rgba(255,255,255,0.15)",
+            bgcolor:
+              "rgba(255,255,255,0.15)",
             color: "#d1fae5",
             fontWeight: 900,
             fontSize: 11,
           }}
         />
 
-        <Typography sx={{ fontSize: 22, fontWeight: 950, lineHeight: 1.1 }}>
+        <Typography
+          sx={{
+            fontSize: 22,
+            fontWeight: 950,
+            lineHeight: 1.1,
+          }}
+        >
           {grainsConfig.title}
         </Typography>
 
@@ -440,10 +654,17 @@ function HeroHeader() {
       <Box
         sx={{
           position: "absolute",
-          right: { xs: -16, md: 50 },
+          right: {
+            xs: -16,
+            md: 50,
+          },
           bottom: -30,
-          color: "rgba(255,255,255,0.11)",
-          fontSize: { xs: 110, md: 150 },
+          color:
+            "rgba(255,255,255,0.11)",
+          fontSize: {
+            xs: 110,
+            md: 150,
+          },
           transform: "rotate(-8deg)",
         }}
       >
@@ -475,11 +696,18 @@ function MetricCard({
         borderRadius: "16px",
         border: `1px solid ${colors.cardBorder}`,
         bgcolor: colors.cardBg,
-        boxShadow: "0 8px 22px rgba(15, 23, 42, 0.05)",
+        boxShadow:
+          "0 8px 22px rgba(15, 23, 42, 0.05)",
       }}
     >
       <Box sx={{ p: 2.25 }}>
-        <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            alignItems: "center",
+          }}
+        >
           <Box
             sx={{
               width: 44,
@@ -519,7 +747,12 @@ function MetricCard({
               {value}
             </Typography>
 
-            <Typography sx={{ fontSize: 12, color: colors.muted }}>
+            <Typography
+              sx={{
+                fontSize: 12,
+                color: colors.muted,
+              }}
+            >
               {detail}
             </Typography>
           </Box>
@@ -544,7 +777,8 @@ function SectionCard({
         border: `1px solid ${colors.cardBorder}`,
         bgcolor: colors.cardBg,
         overflow: "hidden",
-        boxShadow: "0 10px 28px rgba(15, 23, 42, 0.06)",
+        boxShadow:
+          "0 10px 28px rgba(15, 23, 42, 0.06)",
         ...sx,
       }}
     >
@@ -560,7 +794,7 @@ function SectionHeader({
 }: {
   icon: ReactNode;
   title: string;
-  action?: string;
+  action?: ReactNode;
 }) {
   return (
     <Box
@@ -574,12 +808,18 @@ function SectionHeader({
         gap: 2,
       }}
     >
-      <Box sx={{ display: "flex", gap: 1.2, alignItems: "center" }}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: 1.2,
+          alignItems: "center",
+        }}
+      >
         <Box
           sx={{
             width: 30,
             height: 30,
-            borderRadius: "16px",
+            borderRadius: "10px",
             display: "grid",
             placeItems: "center",
             color: colors.primaryLight,
@@ -589,31 +829,47 @@ function SectionHeader({
           {icon}
         </Box>
 
-        <Typography sx={{ fontWeight: 950, fontSize: 14,            color: colors.text }}>{title}</Typography>
-      </Box>
-
-      {action && (
         <Typography
           sx={{
-            fontSize: 11,
             fontWeight: 950,
-            color: colors.primary,
-            cursor: "pointer",
-            textTransform: "uppercase",
-            letterSpacing: "0.04em",
+            fontSize: 14,
+            color: colors.text,
           }}
         >
-          {action}
+          {title}
         </Typography>
-      )}
+      </Box>
+
+      {action}
     </Box>
   );
 }
 
-function ProductCard({ product }: { product: GrainProduct }) {
-  const stockPercent = Math.min(100, product.stock);
-  const isLowStock = product.stock <= product.minStock;
-  const warningColor = isLowStock ? colors.danger : product.accent;
+function ProductCard({
+  product,
+}: {
+  product: GrainProduct;
+}) {
+  const stockPercent =
+    product.minStock > 0
+      ? Math.min(
+          100,
+          (product.stock /
+            Math.max(
+              product.minStock * 4,
+              product.stock,
+            )) *
+            100,
+        )
+      : 100;
+
+  const isLowStock =
+    product.status === "lowStock" ||
+    product.stock <= product.minStock;
+
+  const warningColor = isLowStock
+    ? colors.danger
+    : product.accent;
 
   return (
     <Paper
@@ -624,14 +880,22 @@ function ProductCard({ product }: { product: GrainProduct }) {
         border: `1px solid ${colors.cardBorder}`,
         bgcolor: "#ffffff",
         transition: "all 0.18s ease",
+
         "&:hover": {
           transform: "translateY(-2px)",
           borderColor: "#b7c7c2",
-          boxShadow: "0 12px 26px rgba(15, 23, 42, 0.08)",
+          boxShadow:
+            "0 12px 26px rgba(15, 23, 42, 0.08)",
         },
       }}
     >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.4 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 1.4,
+        }}
+      >
         <Box
           sx={{
             display: "flex",
@@ -641,17 +905,33 @@ function ProductCard({ product }: { product: GrainProduct }) {
           }}
         >
           <Box>
-            <Box sx={{ display: "flex", gap: 0.75, alignItems: "center" }}>
+            <Box
+              sx={{
+                display: "flex",
+                gap: 0.75,
+                alignItems: "center",
+              }}
+            >
               <Typography
-                sx={{ fontSize: 13, color: colors.text, fontWeight: 950 }}
+                sx={{
+                  fontSize: 13,
+                  color: colors.text,
+                  fontWeight: 950,
+                }}
               >
                 {product.name}
               </Typography>
 
               {isLowStock ? (
-                <FaExclamationTriangle size={12} color={colors.danger} />
+                <FaExclamationTriangle
+                  size={12}
+                  color={colors.danger}
+                />
               ) : (
-                <FaCheckCircle size={12} color={colors.primaryLight} />
+                <FaCheckCircle
+                  size={12}
+                  color={colors.primaryLight}
+                />
               )}
             </Box>
 
@@ -668,12 +948,14 @@ function ProductCard({ product }: { product: GrainProduct }) {
 
           <IconButton
             size="small"
+            aria-label={`Editar ${product.name}`}
             sx={{
               width: 30,
               height: 30,
               bgcolor: "#f8fafc",
               border: `1px solid ${colors.cardBorder}`,
               color: colors.muted,
+
               "&:hover": {
                 bgcolor: colors.primarySoft,
                 color: colors.primary,
@@ -692,19 +974,36 @@ function ProductCard({ product }: { product: GrainProduct }) {
           }}
         >
           <Typography
-            sx={{ fontSize: 11, color: colors.muted, fontWeight: 800 }}
+            sx={{
+              fontSize: 11,
+              color: colors.muted,
+              fontWeight: 800,
+            }}
           >
             UNIDAD:{" "}
-            <Box component="span" sx={{ color: colors.text, fontWeight: 950 }}>
+            <Box
+              component="span"
+              sx={{
+                color: colors.text,
+                fontWeight: 950,
+              }}
+            >
               {product.unit}
             </Box>
           </Typography>
 
           <Typography
-            sx={{ fontSize: 11, color: colors.orange, fontWeight: 800 }}
+            sx={{
+              fontSize: 11,
+              color: colors.orange,
+              fontWeight: 800,
+            }}
           >
             PRECIO:{" "}
-            <Box component="span" sx={{ fontWeight: 950 }}>
+            <Box
+              component="span"
+              sx={{ fontWeight: 950 }}
+            >
               {formatCurrency(product.price)}
             </Box>
           </Typography>
@@ -718,11 +1017,24 @@ function ProductCard({ product }: { product: GrainProduct }) {
               mb: 0.7,
             }}
           >
-            <Typography sx={{ fontSize: 10.5, fontWeight: 950 }}>
+            <Typography
+              sx={{
+                fontSize: 10.5,
+                fontWeight: 950,
+              }}
+            >
               STOCK ACTUAL
             </Typography>
 
-            <Typography sx={{ fontSize: 10.5, fontWeight: 950 }}>
+            <Typography
+              sx={{
+                fontSize: 10.5,
+                fontWeight: 950,
+                color: isLowStock
+                  ? colors.danger
+                  : colors.text,
+              }}
+            >
               {product.stock}
             </Typography>
           </Box>
@@ -734,12 +1046,25 @@ function ProductCard({ product }: { product: GrainProduct }) {
               height: 7,
               borderRadius: 999,
               bgcolor: "#e5e7eb",
+
               "& .MuiLinearProgress-bar": {
                 bgcolor: warningColor,
                 borderRadius: 999,
               },
             }}
           />
+
+          <Typography
+            sx={{
+              mt: 0.65,
+              fontSize: 9.5,
+              color: colors.softMuted,
+              fontWeight: 700,
+              textAlign: "right",
+            }}
+          >
+            Mínimo: {product.minStock}
+          </Typography>
         </Box>
       </Box>
     </Paper>

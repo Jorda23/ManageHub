@@ -18,11 +18,8 @@ import {
   FaCashRegister,
   FaChartLine,
   FaCheckCircle,
-  FaDownload,
   FaExclamationTriangle,
   FaHome,
-  FaMoneyBillWave,
-  FaPlus,
   FaReceipt,
   FaTools,
   FaTractor,
@@ -249,61 +246,6 @@ const activities: ActivityItem[] = [
   },
 ];
 
-const commitments: CommitmentItem[] = [
-  {
-    date: "26 JUL",
-    title: "Cobro de Lote A-12",
-    detail: "Valeria Gómez",
-    amount: "$500.00",
-  },
-  {
-    date: "28 JUL",
-    title: "Reposición de cemento",
-    detail: "Inventario de ferretería",
-  },
-  {
-    date: "30 JUL",
-    title: "Seguimiento de Casa R-04",
-    detail: "Propietario por confirmar",
-  },
-  {
-    date: "31 JUL",
-    title: "Cierre mensual",
-    detail: "Consolidación de ventas e ingresos",
-  },
-];
-
-const quickActions: QuickAction[] = [
-  {
-    label: "Registrar venta",
-    detail: "Ferretería",
-    href: "/sell/hardware",
-    icon: FaCashRegister,
-    accent: colors.warning,
-  },
-  {
-    label: "Registrar venta",
-    detail: "Granos básicos",
-    href: "/sell/grains",
-    icon: FaTractor,
-    accent: colors.teal,
-  },
-  {
-    label: "Registrar abono",
-    detail: "Terrenos",
-    href: "/sell/property",
-    icon: FaMoneyBillWave,
-    accent: colors.info,
-  },
-  {
-    label: "Agregar propiedad",
-    detail: "Nuevo terreno",
-    href: "/sell/property",
-    icon: FaPlus,
-    accent: colors.purple,
-  },
-];
-
 export default function MainDashboard() {
   return (
     <AppShell active="dashboard">
@@ -492,30 +434,6 @@ function DashboardHero() {
             {formattedDate}. Consulta el estado general de ventas, inventarios,
             propiedades y próximos compromisos.
           </Typography>
-        </Box>
-
-        <Box
-          sx={{
-            display: "flex",
-            gap: 1.2,
-            flexWrap: "wrap",
-            justifyContent: { xs: "flex-start", md: "flex-end" },
-          }}
-        >
-          <Button
-            variant="outlined"
-            startIcon={<FaChartLine size={12} />}
-            sx={buttonStyles("outlined")}
-          >
-            Ver análisis
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<FaDownload size={12} />}
-            sx={buttonStyles("contained")}
-          >
-            Exportar reporte
-          </Button>
         </Box>
       </Box>
     </Card>
