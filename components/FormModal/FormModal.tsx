@@ -4,6 +4,7 @@ import type { FormEvent, ReactNode } from "react";
 import {
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -49,7 +50,7 @@ export function FormModal({
   maxWidth = 600,
   onClose,
   onSubmit,
-}: FormModalProps) {
+}: Readonly<FormModalProps>) {
   const handleClose = (): void => {
     if (isSubmitting) {
       return;
@@ -60,52 +61,80 @@ export function FormModal({
 
   return (
     <Dialog
-  open={open}
-  onClose={handleClose}
-  fullWidth
-  maxWidth={false}
-  slotProps={{
-    paper: {
-      elevation: 0,
-      sx: {
-        width: {
-          xs: "calc(100% - 32px)",
-          sm: "calc(100% - 64px)",
-        },
-        maxWidth: `${maxWidth}px`,
-        m: {
-          xs: 2,
-          sm: 4,
-        },
-        borderRadius: "16px",
-        overflow: "hidden",
-        bgcolor: "#ffffff",
-        border: `1px solid ${colors.border}`,
-        boxShadow: "0 28px 80px rgba(15, 23, 42, 0.24)",
-      },
-    },
+      open={open}
+      onClose={handleClose}
+      fullWidth
+      maxWidth={false}
+      disableEscapeKeyDown={isSubmitting}
+      scroll="paper"
+      slotProps={{
+        paper: {
+          elevation: 0,
+          sx: {
+            width: {
+              xs: "calc(100% - 24px)",
+              sm: "calc(100% - 64px)",
+            },
+            maxWidth: `${maxWidth}px`,
 
-    backdrop: {
-      sx: {
-        bgcolor: "rgba(15, 23, 42, 0.56)",
-        backdropFilter: "blur(5px)",
-      },
-    },
-  }}
->
+            // Mobile: el modal no supera la pantalla
+            maxHeight: {
+              xs: "calc(100dvh - 24px)",
+              sm: "calc(100dvh - 64px)",
+            },
+
+            m: {
+              xs: 1.5,
+              sm: 4,
+            },
+            borderRadius: {
+              xs: "14px",
+              sm: "16px",
+            },
+            overflow: "hidden",
+            bgcolor: "#ffffff",
+            border: `1px solid ${colors.border}`,
+            boxShadow:
+              "0 28px 80px rgba(15, 23, 42, 0.24)",
+
+            // Permite separar header, content y footer
+            display: "flex",
+            flexDirection: "column",
+          },
+        },
+        backdrop: {
+          sx: {
+            bgcolor: "rgba(15, 23, 42, 0.56)",
+            backdropFilter: "blur(5px)",
+          },
+        },
+      }}
+    >
       <Box
         component="form"
         noValidate
         onSubmit={onSubmit}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          minHeight: 0,
+          maxHeight: "inherit",
+          overflow: "hidden",
+        }}
       >
+        {/* Header fijo */}
         <Box
           sx={{
             position: "relative",
+            flexShrink: 0,
             px: {
-              xs: 2.5,
+              xs: 2,
               sm: 3.5,
             },
-            py: 2.75,
+            py: {
+              xs: 2,
+              sm: 2.75,
+            },
             bgcolor: "#f8fbfa",
             borderBottom: `1px solid ${colors.border}`,
           }}
@@ -126,22 +155,31 @@ export function FormModal({
               display: "flex",
               alignItems: "flex-start",
               justifyContent: "space-between",
-              gap: 2,
+              gap: 1.5,
             }}
           >
             <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
-                gap: 1.5,
+                gap: {
+                  xs: 1,
+                  sm: 1.5,
+                },
                 minWidth: 0,
               }}
             >
               {icon && (
                 <Box
                   sx={{
-                    width: 42,
-                    height: 42,
+                    width: {
+                      xs: 38,
+                      sm: 42,
+                    },
+                    height: {
+                      xs: 38,
+                      sm: 42,
+                    },
                     borderRadius: "12px",
                     display: "grid",
                     placeItems: "center",
@@ -160,7 +198,7 @@ export function FormModal({
                   sx={{
                     color: colors.text,
                     fontSize: {
-                      xs: 18,
+                      xs: 16,
                       sm: 20,
                     },
                     fontWeight: 950,
@@ -173,10 +211,13 @@ export function FormModal({
                 {description && (
                   <Typography
                     sx={{
-                      mt: 0.5,
+                      mt: 0.4,
                       color: colors.muted,
-                      fontSize: 12,
-                      lineHeight: 1.5,
+                      fontSize: {
+                        xs: 10.5,
+                        sm: 12,
+                      },
+                      lineHeight: 1.45,
                     }}
                   >
                     {description}
@@ -210,30 +251,79 @@ export function FormModal({
           </Box>
         </Box>
 
+        {/* Solo esta parte hace scroll */}
         <DialogContent
+          dividers={false}
           sx={{
+            flex: "1 1 auto",
+            minHeight: 0,
+            overflowY: "auto",
+            overscrollBehavior: "contain",
+            WebkitOverflowScrolling: "touch",
+
             px: {
-              xs: 2.5,
+              xs: 2,
               sm: 3.5,
             },
-            pt: "28px !important",
-            pb: 3,
+            pt: {
+              xs: "20px !important",
+              sm: "28px !important",
+            },
+            pb: {
+              xs: 2.5,
+              sm: 3,
+            },
             bgcolor: "#ffffff",
+
+            "&::-webkit-scrollbar": {
+              width: 7,
+            },
+
+            "&::-webkit-scrollbar-track": {
+              bgcolor: "#f1f5f3",
+            },
+
+            "&::-webkit-scrollbar-thumb": {
+              bgcolor: "#b8c5c0",
+              borderRadius: 999,
+            },
+
+            "&::-webkit-scrollbar-thumb:hover": {
+              bgcolor: "#94a3b8",
+            },
           }}
         >
           {children}
         </DialogContent>
 
+        {/* Footer fijo */}
         <DialogActions
           sx={{
+            flexShrink: 0,
             px: {
-              xs: 2.5,
+              xs: 2,
               sm: 3.5,
             },
-            py: 2.5,
+            py: {
+              xs: 1.75,
+              sm: 2.5,
+            },
             gap: 1.25,
             bgcolor: "#f8fbfa",
             borderTop: `1px solid ${colors.border}`,
+
+            // En móvil los botones ocupan el ancho
+            flexDirection: {
+              xs: "column-reverse",
+              sm: "row",
+            },
+
+            "& > :not(style) ~ :not(style)": {
+              ml: {
+                xs: 0,
+                sm: 1.25,
+              },
+            },
           }}
         >
           <Button
@@ -241,7 +331,12 @@ export function FormModal({
             variant="outlined"
             onClick={handleClose}
             disabled={isSubmitting}
+            fullWidth
             sx={{
+              width: {
+                xs: "100%",
+                sm: "auto",
+              },
               minHeight: 42,
               px: 2.5,
               borderRadius: "9px",
@@ -264,8 +359,23 @@ export function FormModal({
             type="submit"
             variant="contained"
             disabled={isSubmitting}
-            startIcon={submitIcon}
+            fullWidth
+            startIcon={
+              isSubmitting ? (
+                <CircularProgress
+                  size={15}
+                  thickness={5}
+                  color="inherit"
+                />
+              ) : (
+                submitIcon
+              )
+            }
             sx={{
+              width: {
+                xs: "100%",
+                sm: "auto",
+              },
               minHeight: 42,
               px: 2.75,
               borderRadius: "9px",
@@ -274,15 +384,17 @@ export function FormModal({
               fontSize: 12,
               fontWeight: 900,
               textTransform: "none",
-              boxShadow: "0 8px 18px rgba(6, 78, 59, 0.2)",
+              boxShadow:
+                "0 8px 18px rgba(6, 78, 59, 0.2)",
 
               "&:hover": {
                 bgcolor: colors.primaryLight,
-                boxShadow: "0 10px 22px rgba(6, 78, 59, 0.28)",
+                boxShadow:
+                  "0 10px 22px rgba(6, 78, 59, 0.28)",
               },
             }}
           >
-            {submitLabel}
+            {isSubmitting ? "Guardando..." : submitLabel}
           </Button>
         </DialogActions>
       </Box>
