@@ -317,7 +317,6 @@ export function PropertyWorkspace() {
   const [payments, setPayments] = useState<PaymentRecord[]>(initialPayments);
 
   const [selectedPropertyId, setSelectedPropertyId] = useState("lot-a12");
-  const [buyerName, setBuyerName] = useState("");
   const [paymentAmount, setPaymentAmount] = useState("500");
   const [paymentMethod, setPaymentMethod] = useState(paymentMethods[0]);
   const [paymentNote, setPaymentNote] = useState("Abono de cuota");
@@ -441,12 +440,8 @@ export function PropertyWorkspace() {
     setPaymentNote("Abono de cuota");
   };
 
-  const handleOpenPaymentFilters = (): void => {
-    console.log("Abrir filtros de abonos");
-  };
-
-  const handleDownloadPayments = (): void => {
-    if (payments.length === 0) {
+  const handleDownloadPayments = (visiblePayments: PaymentRecord[]): void => {
+    if (visiblePayments.length === 0) {
       return;
     }
 
@@ -459,7 +454,7 @@ export function PropertyWorkspace() {
       "Monto",
     ];
 
-    const rows = payments.map((payment) => [
+    const rows = visiblePayments.map((payment) => [
       payment.date,
       payment.propertyName,
       payment.buyerName,
@@ -777,7 +772,6 @@ export function PropertyWorkspace() {
           <PaymentHistoryTable
             payments={payments}
             totalPaid={totalPaid}
-            onFilter={handleOpenPaymentFilters}
             onDownload={handleDownloadPayments}
           />
           <AddPropertyModal
