@@ -1,18 +1,28 @@
 "use client";
 
-import type { ReactNode } from "react";
+import {
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   Box,
+  Button,
   Card,
   Chip,
   IconButton,
+  InputAdornment,
+  MenuItem,
+  TextField,
   Typography,
 } from "@mui/material";
+import type { SxProps, Theme } from "@mui/material/styles";
 import {
   FaDownload,
-  FaFilter,
   FaHome,
+  FaSearch,
   FaSyncAlt,
+  FaTimes,
 } from "react-icons/fa";
 
 export type PaymentRecord = {
@@ -26,11 +36,25 @@ export type PaymentRecord = {
   note: string;
 };
 
+type PaymentFilters = {
+  search: string;
+  method: string;
+  dateFrom: string;
+  dateTo: string;
+};
+
 type PaymentHistoryTableProps = {
   payments: PaymentRecord[];
   totalPaid: number;
-  onFilter?: () => void;
-  onDownload?: () => void;
+  onDownload?: (filteredPayments: PaymentRecord[]) => void;
+  getFilterDate?: (payment: PaymentRecord) => Date | null;
+};
+
+const EMPTY_FILTERS: PaymentFilters = {
+  search: "",
+  method: "",
+  dateFrom: "",
+  dateTo: "",
 };
 
 const colors = {
@@ -47,18 +71,133 @@ const colors = {
 };
 
 const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("es-US", {
     style: "currency",
     currency: "USD",
   }).format(value);
 };
 
+const parsePaymentDate = (value: string): Date | null => {
+  const directDate = new Date(value);
+
+  if (!Number.isNaN(directDate.getTime())) {
+    return directDate;
+  }
+
+  const datePart = value.split(",")[0]?.trim();
+  const match = datePart?.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/);
+
+  if (!match) {
+    return null;
+  }
+
+  const [, monthText, dayText, yearText] = match;
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const parsedYear = Number(yearText);
+  const year = yearText.length === 2 ? 2000 + parsedYear : parsedYear;
+  const parsedDate = new Date(year, month - 1, day);
+
+  return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+};
+
+const getStartOfDay = (value: string): Date | null => {
+  if (!value) {
+    return null;
+  }
+
+  const date = new Date(`${value}T00:00:00`);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const getEndOfDay = (value: string): Date | null => {
+  if (!value) {
+    return null;
+  }
+
+  const date = new Date(`${value}T23:59:59.999`);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
 export function PaymentHistoryTable({
   payments,
   totalPaid,
-  onFilter,
   onDownload,
+  getFilterDate = (payment) => parsePaymentDate(payment.date),
 }: PaymentHistoryTableProps) {
+  const [filters, setFilters] = useState<PaymentFilters>(EMPTY_FILTERS);
+
+  const paymentMethods = useMemo(() => {
+    return Array.from(new Set(payments.map((payment) => payment.method)))
+      .filter(Boolean)
+      .sort((first, second) => first.localeCompare(second));
+  }, [payments]);
+
+  const filteredPayments = useMemo(() => {
+    const normalizedSearch = filters.search.trim().toLocaleLowerCase();
+    const dateFrom = getStartOfDay(filters.dateFrom);
+    const dateTo = getEndOfDay(filters.dateTo);
+
+    return payments.filter((payment) => {
+      const searchableText = [
+        payment.id,
+        payment.propertyId,
+        payment.propertyName,
+        payment.buyerName,
+        payment.method,
+        payment.note,
+      ]
+        .join(" ")
+        .toLocaleLowerCase();
+
+      const matchesSearch =
+        !normalizedSearch || searchableText.includes(normalizedSearch);
+      const matchesMethod =
+        !filters.method || payment.method === filters.method;
+
+      const paymentDate = getFilterDate(payment);
+      const matchesDateFrom =
+        !dateFrom || (paymentDate !== null && paymentDate >= dateFrom);
+      const matchesDateTo =
+        !dateTo || (paymentDate !== null && paymentDate <= dateTo);
+
+      return (
+        matchesSearch &&
+        matchesMethod &&
+        matchesDateFrom &&
+        matchesDateTo
+      );
+    });
+  }, [filters, getFilterDate, payments]);
+
+  const hasActiveFilters = Object.values(filters).some(Boolean);
+
+  const visibleTotalPaid = useMemo(() => {
+    if (!hasActiveFilters) {
+      return totalPaid;
+    }
+
+    return filteredPayments.reduce(
+      (total, payment) => total + payment.amount,
+      0,
+    );
+  }, [filteredPayments, hasActiveFilters, totalPaid]);
+
+  const updateFilter = <TKey extends keyof PaymentFilters>(
+    key: TKey,
+    value: PaymentFilters[TKey],
+  ) => {
+    setFilters((current) => ({
+      ...current,
+      [key]: value,
+    }));
+  };
+
+
+  const clearFilters = () => {
+    setFilters(EMPTY_FILTERS);
+  };
+
   return (
     <Card
       elevation={0}
@@ -72,31 +211,42 @@ export function PaymentHistoryTable({
       }}
     >
       <PaymentHistoryHeader
-        onFilter={onFilter}
-        onDownload={onDownload}
+        onDownload={
+          onDownload ? () => onDownload(filteredPayments) : undefined
+        }
+      />
+
+      <PaymentFiltersBar
+        filters={filters}
+        paymentMethods={paymentMethods}
+        canClear={hasActiveFilters}
+        onChange={updateFilter}
+        onClear={clearFilters}
       />
 
       {payments.length === 0 ? (
         <EmptyPaymentHistory />
+      ) : filteredPayments.length === 0 ? (
+        <EmptyFilteredPayments />
       ) : (
-        <PaymentTable payments={payments} />
+        <PaymentTable payments={filteredPayments} />
       )}
 
       <PaymentHistoryFooter
-        paymentCount={payments.length}
-        totalPaid={totalPaid}
+        paymentCount={filteredPayments.length}
+        sourcePaymentCount={payments.length}
+        totalPaid={visibleTotalPaid}
+        filtered={hasActiveFilters}
       />
     </Card>
   );
 }
 
 type PaymentHistoryHeaderProps = {
-  onFilter?: () => void;
   onDownload?: () => void;
 };
 
 function PaymentHistoryHeader({
-  onFilter,
   onDownload,
 }: PaymentHistoryHeaderProps) {
   return (
@@ -162,28 +312,240 @@ function PaymentHistoryHeader({
         </Box>
       </Box>
 
-      <Box sx={{ display: "flex", gap: 1 }}>
-        <SmallIconButton
-          ariaLabel="Filtrar abonos"
-          onClick={onFilter}
-          disabled={!onFilter}
-        >
-          <FaFilter />
-        </SmallIconButton>
-
-        <SmallIconButton
-          ariaLabel="Descargar historial de abonos"
-          onClick={onDownload}
-          disabled={!onDownload}
-        >
-          <FaDownload />
-        </SmallIconButton>
-      </Box>
+      <SmallIconButton
+        ariaLabel="Descargar historial de abonos"
+        onClick={onDownload}
+        disabled={!onDownload}
+      >
+        <FaDownload />
+      </SmallIconButton>
     </Box>
   );
 }
 
+type PaymentFiltersBarProps = {
+  filters: PaymentFilters;
+  paymentMethods: string[];
+  canClear: boolean;
+  onChange: <TKey extends keyof PaymentFilters>(
+    key: TKey,
+    value: PaymentFilters[TKey],
+  ) => void;
+  onClear: () => void;
+};
+
+function PaymentFiltersBar({
+  filters,
+  paymentMethods,
+  canClear,
+  onChange,
+  onClear,
+}: PaymentFiltersBarProps) {
+  return (
+    <Box
+      sx={{
+        p: {
+          xs: 1.5,
+          md: 2,
+        },
+        display: "grid",
+        gridTemplateColumns: {
+          xs: "1fr",
+          sm: "repeat(2, minmax(0, 1fr))",
+          lg: [
+            "minmax(260px, 2fr)",
+            "minmax(145px, 0.8fr)",
+            "minmax(145px, 0.8fr)",
+            "minmax(180px, 1fr)",
+            "auto",
+          ].join(" "),
+        },
+        gap: 1.2,
+        alignItems: "center",
+        borderBottom: `1px solid ${colors.cardBorder}`,
+        bgcolor: "#f8fafc",
+      }}
+    >
+      <TextField
+        value={filters.search}
+        onChange={(event) => onChange("search", event.target.value)}
+        placeholder="Propiedad, comprador, recibo o nota"
+        size="small"
+        fullWidth
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <FaSearch size={14} />
+              </InputAdornment>
+            ),
+          },
+          htmlInput: {
+            "aria-label": "Buscar abonos",
+          },
+        }}
+        sx={filterFieldSx}
+      />
+
+      <TextField
+        label="Desde"
+        type="date"
+        value={filters.dateFrom}
+        onChange={(event) => onChange("dateFrom", event.target.value)}
+        size="small"
+        fullWidth
+        slotProps={{
+          inputLabel: {
+            shrink: true,
+          },
+          htmlInput: {
+            "aria-label": "Fecha inicial",
+          },
+        }}
+        sx={filterFieldSx}
+      />
+
+      <TextField
+        label="Hasta"
+        type="date"
+        value={filters.dateTo}
+        onChange={(event) => onChange("dateTo", event.target.value)}
+        size="small"
+        fullWidth
+        slotProps={{
+          inputLabel: {
+            shrink: true,
+          },
+          htmlInput: {
+            "aria-label": "Fecha final",
+          },
+        }}
+        sx={filterFieldSx}
+      />
+
+      <TextField
+        select
+        label="Método de pago"
+        value={filters.method}
+        onChange={(event) => onChange("method", event.target.value)}
+        size="small"
+        fullWidth
+        slotProps={{
+          inputLabel: {
+            shrink: true,
+          },
+        }}
+        sx={filterFieldSx}
+      >
+        <MenuItem value="">Todos los métodos</MenuItem>
+
+        {paymentMethods.map((method) => (
+          <MenuItem key={method} value={method}>
+            {method}
+          </MenuItem>
+        ))}
+      </TextField>
+
+
+
+      <Button
+        type="button"
+        variant="text"
+        startIcon={<FaTimes size={12} />}
+        onClick={onClear}
+        disabled={!canClear}
+        sx={{
+          color: colors.primary,
+          fontWeight: 900,
+          textTransform: "none",
+          whiteSpace: "nowrap",
+        }}
+      >
+        Limpiar
+      </Button>
+    </Box>
+  );
+}
+
+const filterFieldSx: SxProps<Theme> = {
+  "& .MuiOutlinedInput-root": {
+    minHeight: 42,
+    bgcolor: "#ffffff",
+    borderRadius: "6px",
+    fontSize: 13,
+    color: colors.text,
+    "& fieldset": {
+      borderColor: "#b8c2cc",
+    },
+    "&:hover fieldset": {
+      borderColor: colors.muted,
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: colors.primary,
+      borderWidth: 1.5,
+    },
+  },
+  "& .MuiInputBase-input": {
+    color: `${colors.text} !important`,
+    WebkitTextFillColor: `${colors.text} !important`,
+    opacity: 1,
+  },
+  "& .MuiInputBase-input::placeholder": {
+    color: `${colors.muted} !important`,
+    WebkitTextFillColor: `${colors.muted} !important`,
+    opacity: 1,
+  },
+  "& .MuiSelect-select": {
+    color: `${colors.text} !important`,
+    WebkitTextFillColor: `${colors.text} !important`,
+  },
+  "& .MuiInputAdornment-root": {
+    color: colors.muted,
+  },
+  "& .MuiSvgIcon-root": {
+    color: colors.muted,
+  },
+  "& .MuiInputLabel-root": {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: 700,
+    bgcolor: "#ffffff",
+    px: 0.35,
+  },
+  "& .MuiInputLabel-root.Mui-focused": {
+    color: colors.primary,
+  },
+  "& input[type='date']::-webkit-calendar-picker-indicator": {
+    opacity: 0.75,
+    cursor: "pointer",
+  },
+};
+
 function EmptyPaymentHistory() {
+  return (
+    <EmptyState
+      title="Todavía no hay abonos registrados."
+      description="Cuando registres un abono, aparecerá aquí."
+    />
+  );
+}
+
+function EmptyFilteredPayments() {
+  return (
+    <EmptyState
+      title="No se encontraron abonos."
+      description="Cambia los criterios o limpia los filtros aplicados."
+    />
+  );
+}
+
+function EmptyState({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
   return (
     <Box
       sx={{
@@ -199,7 +561,7 @@ function EmptyPaymentHistory() {
           fontWeight: 900,
         }}
       >
-        Todavía no hay abonos registrados.
+        {title}
       </Typography>
 
       <Typography
@@ -209,7 +571,7 @@ function EmptyPaymentHistory() {
           fontSize: 13,
         }}
       >
-        Cuando registres un abono, aparecerá aquí.
+        {description}
       </Typography>
     </Box>
   );
@@ -276,10 +638,7 @@ function PaymentTable({
           }}
         >
           {payments.map((payment) => (
-            <PaymentTableRow
-              key={payment.id}
-              payment={payment}
-            />
+            <PaymentTableRow key={payment.id} payment={payment} />
           ))}
         </Box>
       </Box>
@@ -446,12 +805,16 @@ function PaymentTableRow({
 
 type PaymentHistoryFooterProps = {
   paymentCount: number;
+  sourcePaymentCount: number;
   totalPaid: number;
+  filtered: boolean;
 };
 
 function PaymentHistoryFooter({
   paymentCount,
+  sourcePaymentCount,
   totalPaid,
+  filtered,
 }: PaymentHistoryFooterProps) {
   return (
     <Box
@@ -477,7 +840,9 @@ function PaymentHistoryFooter({
           fontWeight: 700,
         }}
       >
-        {paymentCount} {paymentCount === 1 ? "abono registrado" : "abonos registrados"}
+        {paymentCount}{" "}
+        {paymentCount === 1 ? "abono registrado" : "abonos registrados"}
+        {filtered ? ` de ${sourcePaymentCount}` : ""}
       </Typography>
 
       <Box

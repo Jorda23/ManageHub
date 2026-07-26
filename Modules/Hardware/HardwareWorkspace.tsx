@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { useMemo, useState, type ReactNode } from "react";
 
 import {
   FaBoxes,
@@ -15,18 +11,9 @@ import {
   FaWrench,
 } from "react-icons/fa";
 
-import {
-  Box,
-  Card,
-  Chip,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Box, Card, Chip, Paper, Typography } from "@mui/material";
 
-import type {
-  SxProps,
-  Theme,
-} from "@mui/material/styles";
+import type { SxProps, Theme } from "@mui/material/styles";
 
 import AppShell from "@/components/AppShell/AppShell";
 
@@ -195,18 +182,14 @@ const paymentMethods = [
   "Transferencia",
 ];
 
-const formatCurrency = (
-  value: number,
-): string => {
+const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat("es-US", {
     style: "currency",
     currency: "USD",
   }).format(value);
 };
 
-function createHardwareProductCode(
-  name: string,
-): string {
+function createHardwareProductCode(name: string): string {
   const normalizedName = name
     .trim()
     .normalize("NFD")
@@ -216,111 +199,68 @@ function createHardwareProductCode(
     .replace(/^-|-$/g, "")
     .slice(0, 8);
 
-  const randomCode = Math.floor(
-    100 + Math.random() * 900,
-  );
+  const randomCode = Math.floor(100 + Math.random() * 900);
 
   return `FER-${normalizedName || "PROD"}-${randomCode}`;
 }
 
 export function HardwareWorkspace() {
-  const [products, setProducts] =
-    useState<HardwareProduct[]>(initialProducts);
+  const [products, setProducts] = useState<HardwareProduct[]>(initialProducts);
 
-  const [sales, setSales] =
-    useState<HardwareSale[]>(initialSales);
+  const [sales, setSales] = useState<HardwareSale[]>(initialSales);
 
-  const [
-    selectedProductId,
-    setSelectedProductId,
-  ] = useState("drill");
+  const [selectedProductId, setSelectedProductId] = useState("drill");
 
-  const [quantity, setQuantity] =
-    useState("1");
+  const [quantity, setQuantity] = useState("1");
 
-  const [paymentMethod, setPaymentMethod] =
-    useState(paymentMethods[0]);
+  const [paymentMethod, setPaymentMethod] = useState(paymentMethods[0]);
 
   const [error, setError] = useState("");
 
-  const [
-    isAddProductModalOpen,
-    setIsAddProductModalOpen,
-  ] = useState(false);
+  const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
 
   const selectedProduct = useMemo(() => {
-    return products.find(
-      (product) =>
-        product.id === selectedProductId,
-    );
+    return products.find((product) => product.id === selectedProductId);
   }, [products, selectedProductId]);
 
   const numericQuantity = Number(quantity);
 
   const saleTotal = useMemo(() => {
-    if (
-      !selectedProduct ||
-      Number.isNaN(numericQuantity)
-    ) {
+    if (!selectedProduct || Number.isNaN(numericQuantity)) {
       return 0;
     }
 
-    return (
-      selectedProduct.price *
-      numericQuantity
-    );
+    return selectedProduct.price * numericQuantity;
   }, [numericQuantity, selectedProduct]);
 
   const totalSold = useMemo(() => {
-    return sales.reduce(
-      (total, sale) =>
-        total + sale.total,
-      0,
-    );
+    return sales.reduce((total, sale) => total + sale.total, 0);
   }, [sales]);
 
   const totalStock = useMemo(() => {
-    return products.reduce(
-      (total, product) =>
-        total + product.stock,
-      0,
-    );
+    return products.reduce((total, product) => total + product.stock, 0);
   }, [products]);
 
   const lowStockCount = useMemo(() => {
-    return products.filter(
-      (product) =>
-        product.stock <= product.minStock,
-    ).length;
+    return products.filter((product) => product.stock <= product.minStock)
+      .length;
   }, [products]);
 
   const handleRegisterSale = (): void => {
     setError("");
 
     if (!selectedProduct) {
-      setError(
-        "Selecciona un producto válido.",
-      );
+      setError("Selecciona un producto válido.");
       return;
     }
 
-    if (
-      Number.isNaN(numericQuantity) ||
-      numericQuantity <= 0
-    ) {
-      setError(
-        "Ingresa una cantidad mayor a cero.",
-      );
+    if (Number.isNaN(numericQuantity) || numericQuantity <= 0) {
+      setError("Ingresa una cantidad mayor a cero.");
       return;
     }
 
-    if (
-      numericQuantity >
-      selectedProduct.stock
-    ) {
-      setError(
-        "No hay suficiente inventario disponible.",
-      );
+    if (numericQuantity > selectedProduct.stock) {
+      setError("No hay suficiente inventario disponible.");
       return;
     }
 
@@ -332,115 +272,75 @@ export function HardwareWorkspace() {
       unitPrice: selectedProduct.price,
       total: saleTotal,
       paymentMethod,
-      date: new Date().toLocaleString(
-        "es-NI",
-        {
-          dateStyle: "short",
-          timeStyle: "short",
-        },
-      ),
+      date: new Date().toLocaleString("es-NI", {
+        dateStyle: "short",
+        timeStyle: "short",
+      }),
     };
 
     setProducts((currentProducts) =>
       currentProducts.map((product) => {
-        if (
-          product.id !== selectedProduct.id
-        ) {
+        if (product.id !== selectedProduct.id) {
           return product;
         }
 
-        const newStock =
-          product.stock - numericQuantity;
+        const newStock = product.stock - numericQuantity;
 
         return {
           ...product,
           stock: newStock,
-          status:
-            newStock <= product.minStock
-              ? "lowStock"
-              : "inStock",
-          accent:
-            newStock <= product.minStock
-              ? colors.danger
-              : product.accent,
+          status: newStock <= product.minStock ? "lowStock" : "inStock",
+          accent: newStock <= product.minStock ? colors.danger : product.accent,
         };
       }),
     );
 
-    setSales((currentSales) => [
-      newSale,
-      ...currentSales,
-    ]);
+    setSales((currentSales) => [newSale, ...currentSales]);
 
     setQuantity("1");
   };
 
-  const handleAddProduct = (
-    formValues: AddHardwareProductValues,
-  ): void => {
-    const stock = Number(
-      formValues.stock,
-    );
+  const handleAddProduct = (formValues: AddHardwareProductValues): void => {
+    const stock = Number(formValues.stock);
 
-    const minStock = Number(
-      formValues.minStock,
-    );
+    const minStock = Number(formValues.minStock);
 
-    const price = Number(
-      formValues.price,
-    );
+    const price = Number(formValues.price);
 
-    const isLowStock =
-      formValues.status === "lowStock" ||
-      stock <= minStock;
+    const isLowStock = formValues.status === "lowStock" || stock <= minStock;
 
-const newProduct: HardwareProduct = {
-  id: crypto.randomUUID(),
-  name: formValues.name.trim(),
-  detail: formValues.detail.trim(),
-  category: formValues.category,
-  code: createHardwareProductCode(formValues.name),
-  stock,
-  minStock,
-  price,
-  accent: isLowStock
-    ? colors.danger
-    : colors.primaryLight,
-  status: isLowStock
-    ? "lowStock"
-    : "inStock",
-  imageUrl:
-    "https://images.unsplash.com/photo-1581783898377-1c85bf937427?auto=format&fit=crop&w=700&q=80",
-};
+    const newProduct: HardwareProduct = {
+      id: crypto.randomUUID(),
+      name: formValues.name.trim(),
+      detail: formValues.detail.trim(),
+      category: formValues.category,
+      code: createHardwareProductCode(formValues.name),
+      stock,
+      minStock,
+      price,
+      accent: isLowStock ? colors.danger : colors.primaryLight,
+      status: isLowStock ? "lowStock" : "inStock",
+      imageUrl:
+        "https://images.unsplash.com/photo-1581783898377-1c85bf937427?auto=format&fit=crop&w=700&q=80",
+    };
 
-    setProducts((currentProducts) => [
-      newProduct,
-      ...currentProducts,
-    ]);
+    setProducts((currentProducts) => [newProduct, ...currentProducts]);
 
     setSelectedProductId(newProduct.id);
     setIsAddProductModalOpen(false);
   };
 
-  const handleEditProduct = (
-    product: HardwareProduct,
-  ): void => {
-    console.log(
-      "Editar producto de ferretería:",
-      product,
-    );
+  const handleEditProduct = (product: HardwareProduct): void => {
+    console.log("Editar producto de ferretería:", product);
   };
 
   return (
-    <AppShell
-      active={hardwareConfig.category}
-    >
+    <AppShell active={hardwareConfig.category}>
       <Box
         sx={{
           width: "100%",
           maxWidth: "100vw",
-          minHeight:
-            "calc(100vh - 48px)",
+          minHeight: "calc(100vh - 48px)",
           overflowX: "hidden",
           px: {
             xs: 1.5,
@@ -493,9 +393,7 @@ const newProduct: HardwareProduct = {
               iconColor={colors.green}
               label="Ventas registradas"
               value={sales.length.toString()}
-              detail={`Total: ${formatCurrency(
-                totalSold,
-              )}`}
+              detail={`Total: ${formatCurrency(totalSold)}`}
             />
 
             <MetricCard
@@ -508,15 +406,11 @@ const newProduct: HardwareProduct = {
             />
 
             <MetricCard
-              icon={
-                <FaExclamationTriangle />
-              }
+              icon={<FaExclamationTriangle />}
               iconBg={colors.dangerSoft}
               iconColor={colors.danger}
               label="Bajo inventario"
-              value={
-                lowStockCount.toString()
-              }
+              value={lowStockCount.toString()}
               detail="Requieren revisión"
             />
 
@@ -549,50 +443,26 @@ const newProduct: HardwareProduct = {
             <HardwareInventory
               products={products}
               onAddProduct={() => {
-                setIsAddProductModalOpen(
-                  true,
-                );
+                setIsAddProductModalOpen(true);
               }}
-              onEditProduct={
-                handleEditProduct
-              }
+              onEditProduct={handleEditProduct}
             />
 
-            <SectionCard
-              sx={{ height: "100%" }}
-            >
+            <SectionCard sx={{ height: "100%" }}>
               <RegisterSaleCard
                 products={products}
-                selectedProduct={
-                  selectedProduct
-                }
-                selectedProductId={
-                  selectedProductId
-                }
+                selectedProduct={selectedProduct}
+                selectedProductId={selectedProductId}
                 quantity={quantity}
-                numericQuantity={
-                  numericQuantity
-                }
-                paymentMethod={
-                  paymentMethod
-                }
-                paymentMethods={
-                  paymentMethods
-                }
+                numericQuantity={numericQuantity}
+                paymentMethod={paymentMethod}
+                paymentMethods={paymentMethods}
                 saleTotal={saleTotal}
                 error={error}
-                onSelectedProductChange={
-                  setSelectedProductId
-                }
-                onQuantityChange={
-                  setQuantity
-                }
-                onPaymentMethodChange={
-                  setPaymentMethod
-                }
-                onRegisterSale={
-                  handleRegisterSale
-                }
+                onSelectedProductChange={setSelectedProductId}
+                onQuantityChange={setQuantity}
+                onPaymentMethodChange={setPaymentMethod}
+                onRegisterSale={handleRegisterSale}
               />
             </SectionCard>
           </Box>
@@ -602,32 +472,21 @@ const newProduct: HardwareProduct = {
             totalSold={totalSold}
             title="Historial de ventas"
             subtitle="Productos vendidos, cantidades, precios y métodos de pago"
-            productIcon={
-              <FaWrench size={13} />
-            }
+            productIcon={<FaWrench size={13} />}
             getRecordLabel={(sale) =>
-              `Venta #${sale.id
-                .slice(-4)
-                .toUpperCase()}`
+              `Venta #${sale.id.slice(-4).toUpperCase()}`
             }
-            getQuantityLabel={(sale) =>
-              `${sale.quantity}`
-            }
-            getProductSecondaryText={() =>
-              "Producto de ferretería"
-            }
+            getQuantityLabel={(sale) => `${sale.quantity}`}
+            getProductSecondaryText={() => "Producto de ferretería"}
             colors={{
               primary: colors.primary,
-              primarySoft:
-                colors.primarySoft,
+              primarySoft: colors.primarySoft,
               border: colors.cardBorder,
               text: colors.text,
               muted: colors.muted,
-              tableHead:
-                colors.tableHead,
+              tableHead: colors.tableHead,
               rowHover: "#fff7ed",
-              paymentBg:
-                colors.greenSoft,
+              paymentBg: colors.greenSoft,
               paymentText: colors.green,
               paymentBorder: "#bbf7d0",
             }}
@@ -638,9 +497,7 @@ const newProduct: HardwareProduct = {
       <AddHardwareProductModal
         open={isAddProductModalOpen}
         onClose={() => {
-          setIsAddProductModalOpen(
-            false,
-          );
+          setIsAddProductModalOpen(false);
         }}
         onSave={handleAddProduct}
       />
@@ -685,8 +542,7 @@ function HeroHeader() {
           size="small"
           sx={{
             mb: 1.25,
-            bgcolor:
-              "rgba(255,255,255,0.18)",
+            bgcolor: "rgba(255,255,255,0.18)",
             color: "#fff7ed",
             fontWeight: 900,
             fontSize: 11,
@@ -734,8 +590,7 @@ function HeroHeader() {
             xs: -26,
             md: -34,
           },
-          color:
-            "rgba(255,255,255,0.15)",
+          color: "rgba(255,255,255,0.15)",
           fontSize: {
             xs: 94,
             md: 150,
@@ -773,8 +628,7 @@ function MetricCard({
         borderRadius: "16px",
         border: `1px solid ${colors.cardBorder}`,
         bgcolor: colors.cardBg,
-        boxShadow:
-          "0 8px 22px rgba(15, 23, 42, 0.05)",
+        boxShadow: "0 8px 22px rgba(15, 23, 42, 0.05)",
       }}
     >
       <Box
@@ -810,8 +664,7 @@ function MetricCard({
               fontSize: 11,
               color: colors.text,
               fontWeight: 950,
-              textTransform:
-                "uppercase",
+              textTransform: "uppercase",
               letterSpacing: "0.03em",
             }}
           >
@@ -852,10 +705,7 @@ type SectionCardProps = {
   sx?: SxProps<Theme>;
 };
 
-function SectionCard({
-  children,
-  sx,
-}: SectionCardProps) {
+function SectionCard({ children, sx }: SectionCardProps) {
   return (
     <Card
       elevation={0}
@@ -864,8 +714,7 @@ function SectionCard({
         border: `1px solid ${colors.cardBorder}`,
         bgcolor: colors.cardBg,
         overflow: "hidden",
-        boxShadow:
-          "0 10px 28px rgba(15, 23, 42, 0.06)",
+        boxShadow: "0 10px 28px rgba(15, 23, 42, 0.06)",
         minWidth: 0,
         ...sx,
       }}
