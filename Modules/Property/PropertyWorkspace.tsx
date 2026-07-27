@@ -4,17 +4,13 @@ import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import {
   FaBuilding,
-  FaCalendarAlt,
-  FaCheckCircle,
   FaClipboardCheck,
-  FaExclamationTriangle,
   FaFileContract,
   FaHome,
   FaMapMarkedAlt,
   FaMoneyBillWave,
   FaPlusCircle,
   FaReceipt,
-  FaRulerCombined,
 } from "react-icons/fa";
 
 import type { WorkspaceConfig } from "@/components/WorkspaceShared/workspaceTypes";
@@ -26,7 +22,6 @@ import {
   Chip,
   Divider,
   FormControl,
-  LinearProgress,
   MenuItem,
   Paper,
   Select,
@@ -39,6 +34,7 @@ import {
   type AddPropertyFormValues,
 } from "@/components/AddPropertyModal";
 import { PaymentHistoryTable } from "@/components/PaymentHistoryTable";
+import { PropertyCard } from "@/components/PropertyCard";
 
 type AccountStatus = "Al día" | "Pendiente" | "Atrasado" | "Pagado";
 
@@ -1080,252 +1076,6 @@ function SectionHeader({
           {action}
         </Button>
       )}
-    </Box>
-  );
-}
-
-function PropertyCard({ property }: { property: PropertyItem }) {
-  const pendingAmount = getPendingAmount(property);
-  const progress =
-    property.price > 0
-      ? Math.min(100, (property.paid / property.price) * 100)
-      : 0;
-  const statusColors = getStatusColors(property.status);
-
-  return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: {
-          xs: 1.8,
-          md: 2,
-        },
-        borderRadius: "16px",
-        border: `1px solid ${colors.cardBorder}`,
-        bgcolor: "#ffffff",
-        width: "100%",
-        minWidth: 0,
-        transition: "all 0.18s ease",
-        "&:hover": {
-          transform: {
-            xs: "none",
-            md: "translateY(-2px)",
-          },
-          borderColor: "#b7c7c2",
-          boxShadow: "0 12px 26px rgba(15, 23, 42, 0.08)",
-        },
-      }}
-    >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.4 }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            gap: 1.5,
-          }}
-        >
-          <Box sx={{ minWidth: 0 }}>
-            <Box sx={{ display: "flex", gap: 0.75, alignItems: "center" }}>
-              <Typography
-                sx={{
-                  fontWeight: 950,
-                  fontSize: 14.5,
-                  color: colors.text,
-                }}
-              >
-                {property.name}
-              </Typography>
-
-              {property.status === "Atrasado" ? (
-                <FaExclamationTriangle size={12} color={colors.danger} />
-              ) : (
-                <FaCheckCircle size={12} color={statusColors.color} />
-              )}
-            </Box>
-
-            <Typography
-              sx={{
-                fontSize: 11,
-                color: colors.softMuted,
-                fontWeight: 700,
-              }}
-            >
-              {property.code}
-            </Typography>
-          </Box>
-
-          <Chip
-            label={property.status}
-            size="small"
-            sx={{
-              height: 24,
-              bgcolor: statusColors.bg,
-              color: statusColors.color,
-              border: `1px solid ${statusColors.border}`,
-              fontSize: 11,
-              fontWeight: 950,
-              flexShrink: 0,
-            }}
-          />
-        </Box>
-
-        <InfoLine
-          icon={<FaRulerCombined />}
-          label="Medida"
-          value={property.size}
-        />
-        <InfoLine
-          icon={<FaMapMarkedAlt />}
-          label="Ubicación"
-          value={property.location}
-        />
-        <InfoLine
-          icon={<FaBuilding />}
-          label="Cliente"
-          value={property.ownerName || "Cliente no registrado"}
-        />
-        <InfoLine
-          icon={<FaCalendarAlt />}
-          label="Próximo pago"
-          value={property.dueDate}
-        />
-
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: {
-              xs: "1fr",
-              sm: "repeat(3, minmax(0, 1fr))",
-            },
-            gap: 1,
-          }}
-        >
-          <AmountBox label="Precio" value={formatCurrency(property.price)} />
-          <AmountBox label="Abonado" value={formatCurrency(property.paid)} />
-          <AmountBox label="Pendiente" value={formatCurrency(pendingAmount)} />
-        </Box>
-
-        <Box>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              mb: 0.7,
-            }}
-          >
-            <Typography sx={{ fontSize: 10.5, fontWeight: 950 }}>
-              AVANCE DE PAGO
-            </Typography>
-
-            <Typography sx={{ fontSize: 10.5, fontWeight: 950 }}>
-              {Math.round(progress)}%
-            </Typography>
-          </Box>
-
-          <LinearProgress
-            variant="determinate"
-            value={progress}
-            sx={{
-              height: 7,
-              borderRadius: 999,
-              bgcolor: "#e5e7eb",
-              "& .MuiLinearProgress-bar": {
-                bgcolor: property.accent,
-                borderRadius: 999,
-              },
-            }}
-          />
-        </Box>
-      </Box>
-    </Paper>
-  );
-}
-
-function InfoLine({
-  icon,
-  label,
-  value,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
-      <Box
-        sx={{
-          width: 22,
-          height: 22,
-          borderRadius: "16px",
-          bgcolor: colors.primarySoft,
-          color: colors.primaryLight,
-          display: "grid",
-          placeItems: "center",
-          flexShrink: 0,
-          fontSize: 11,
-        }}
-      >
-        {icon}
-      </Box>
-
-      <Typography
-        sx={{
-          fontSize: 12,
-          color: colors.muted,
-          fontWeight: 700,
-          minWidth: 76,
-        }}
-      >
-        {label}:
-      </Typography>
-
-      <Typography
-        sx={{
-          fontSize: 12,
-          color: colors.text,
-          fontWeight: 900,
-          overflowWrap: "anywhere",
-        }}
-      >
-        {value}
-      </Typography>
-    </Box>
-  );
-}
-
-function AmountBox({ label, value }: { label: string; value: string }) {
-  return (
-    <Box
-      sx={{
-        p: 1,
-        borderRadius: "16px",
-        bgcolor: "#f8fafc",
-        border: `1px solid ${colors.cardBorder}`,
-        minWidth: 0,
-      }}
-    >
-      <Typography
-        sx={{
-          fontSize: 10,
-          color: colors.muted,
-          fontWeight: 900,
-          textTransform: "uppercase",
-        }}
-      >
-        {label}
-      </Typography>
-
-      <Typography
-        sx={{
-          fontSize: 12,
-          color: colors.text,
-          fontWeight: 950,
-          overflowWrap: "anywhere",
-        }}
-      >
-        {value}
-      </Typography>
     </Box>
   );
 }
