@@ -182,11 +182,7 @@ export function HardwareInventory({
   );
 }
 
-function InventoryHeader({
-  onAddProduct,
-}: {
-  onAddProduct: () => void;
-}) {
+function InventoryHeader({ onAddProduct }: { onAddProduct: () => void }) {
   return (
     <Box
       sx={{
@@ -370,22 +366,17 @@ function HardwareProductCard({
   onEdit?: (product: HardwareProduct) => void;
 }) {
   const isLowStock =
-    product.status === "lowStock" ||
-    product.stock <= product.minStock;
+    product.status === "lowStock" || product.stock <= product.minStock;
 
   const stockPercent =
     product.minStock > 0
       ? Math.min(
           100,
-          (product.stock /
-            Math.max(product.minStock * 4, product.stock)) *
-            100,
+          (product.stock / Math.max(product.minStock * 4, product.stock)) * 100,
         )
       : 100;
 
-  const progressColor = isLowStock
-    ? colors.danger
-    : product.accent;
+  const progressColor = isLowStock ? colors.danger : product.accent;
 
   return (
     <Paper
@@ -445,10 +436,7 @@ function HardwareProductCard({
           },
         }}
       >
-        <ProductImage
-          product={product}
-          isLowStock={isLowStock}
-        />
+        <ProductImage product={product} isLowStock={isLowStock} />
 
         <Box
           sx={{
@@ -490,10 +478,7 @@ function HardwareProductCard({
               minWidth: 0,
             }}
           >
-            <ProductInfo
-              label="Detalle"
-              value={product.detail}
-            />
+            <ProductInfo label="Detalle" value={product.detail} />
 
             <ProductInfo
               label="Precio"
@@ -643,13 +628,9 @@ function ProductImage({
             ? "rgba(254, 226, 226, 0.95)"
             : "rgba(220, 252, 231, 0.95)",
 
-          color: isLowStock
-            ? colors.danger
-            : colors.green,
+          color: isLowStock ? colors.danger : colors.green,
 
-          border: `1px solid ${
-            isLowStock ? "#fecaca" : "#bbf7d0"
-          }`,
+          border: `1px solid ${isLowStock ? "#fecaca" : "#bbf7d0"}`,
 
           fontSize: {
             xs: 6.8,
@@ -747,15 +728,9 @@ function ProductHeader({
             }}
           >
             {isLowStock ? (
-              <FaExclamationTriangle
-                size={10}
-                color={colors.danger}
-              />
+              <FaExclamationTriangle size={10} color={colors.danger} />
             ) : (
-              <FaCheckCircle
-                size={10}
-                color={colors.green}
-              />
+              <FaCheckCircle size={10} color={colors.green} />
             )}
           </Box>
         </Box>
@@ -847,12 +822,7 @@ function StockProgress({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-
-          mb: {
-            xs: 0.35,
-            sm: 0.55,
-          },
-
+          mb: 0.55,
           gap: 1,
         }}
       >
@@ -860,13 +830,11 @@ function StockProgress({
           noWrap
           sx={{
             color: colors.softMuted,
-
             fontSize: {
-              xs: 7.5,
-              sm: 8.5,
-              md: 9,
+              xs: 10,
+              sm: 10,
+              md: 11,
             },
-
             fontWeight: 950,
             textTransform: "uppercase",
           }}
@@ -876,16 +844,12 @@ function StockProgress({
 
         <Typography
           sx={{
-            color: isLowStock
-              ? colors.danger
-              : colors.text,
-
+            color: isLowStock ? colors.danger : colors.text,
             fontSize: {
-              xs: 9,
-              sm: 10,
-              md: 10.5,
+              xs: 12,
+              sm: 12,
+              md: 13,
             },
-
             fontWeight: 950,
             fontVariantNumeric: "tabular-nums",
             flexShrink: 0,
@@ -900,11 +864,10 @@ function StockProgress({
         value={stockPercent}
         sx={{
           height: {
-            xs: 4,
+            xs: 5,
             sm: 5,
             md: 6,
           },
-
           borderRadius: 999,
           bgcolor: "#e5e7eb",
 
@@ -918,19 +881,13 @@ function StockProgress({
       <Typography
         noWrap
         sx={{
-          mt: {
-            xs: 0.3,
-            sm: 0.45,
-          },
-
+          mt: 0.45,
           color: colors.softMuted,
-
           fontSize: {
-            xs: 7,
-            sm: 8,
-            md: 8.5,
+            xs: 10,
+            sm: 10,
+            md: 11,
           },
-
           fontWeight: 700,
           textAlign: "right",
         }}
@@ -964,13 +921,11 @@ function ProductInfo({
         noWrap
         sx={{
           color: colors.muted,
-
           fontSize: {
-            xs: 6.8,
-            sm: 7.5,
-            md: 8,
+            xs: 10,
+            sm: 10,
+            md: 11,
           },
-
           fontWeight: 900,
           textTransform: "uppercase",
           letterSpacing: "0.02em",
@@ -983,15 +938,13 @@ function ProductInfo({
         noWrap
         title={value}
         sx={{
-          mt: 0.1,
+          mt: 0.15,
           color: valueColor,
-
           fontSize: {
-            xs: 9,
-            sm: 10,
-            md: 10.5,
+            xs: 12,
+            sm: 12,
+            md: 13,
           },
-
           fontWeight: 950,
         }}
       >

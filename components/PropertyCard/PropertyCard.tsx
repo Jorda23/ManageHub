@@ -2,13 +2,7 @@
 
 import type { ReactNode } from "react";
 
-import {
-  Box,
-  Chip,
-  LinearProgress,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Box, Chip, LinearProgress, Paper, Typography } from "@mui/material";
 
 import {
   FaBuilding,
@@ -19,11 +13,7 @@ import {
   FaRulerCombined,
 } from "react-icons/fa";
 
-export type AccountStatus =
-  | "Al día"
-  | "Pendiente"
-  | "Atrasado"
-  | "Pagado";
+export type AccountStatus = "Al día" | "Pendiente" | "Atrasado" | "Pagado";
 
 export type PropertyItem = {
   id: string;
@@ -107,10 +97,7 @@ function getStatusColors(status: AccountStatus) {
   }
 }
 
-export function PropertyCard({
-  property,
-  onClick,
-}: PropertyCardProps) {
+export function PropertyCard({ property, onClick }: PropertyCardProps) {
   const pendingAmount = getPendingAmount(property);
 
   const progress =
@@ -126,9 +113,7 @@ export function PropertyCard({
     onClick?.(property);
   };
 
-  const handleKeyDown = (
-    event: React.KeyboardEvent<HTMLDivElement>,
-  ): void => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>): void => {
     if (!isClickable) {
       return;
     }
@@ -202,10 +187,7 @@ export function PropertyCard({
           minWidth: 0,
         }}
       >
-        <PropertyCardHeader
-          property={property}
-          statusColors={statusColors}
-        />
+        <PropertyCardHeader property={property} statusColors={statusColors} />
 
         <Box
           sx={{
@@ -264,26 +246,14 @@ export function PropertyCard({
             },
           }}
         >
-          <AmountBox
-            label="Precio"
-            value={formatCurrency(property.price)}
-          />
+          <AmountBox label="Precio" value={formatCurrency(property.price)} />
 
-          <AmountBox
-            label="Abonado"
-            value={formatCurrency(property.paid)}
-          />
+          <AmountBox label="Abonado" value={formatCurrency(property.paid)} />
 
-          <AmountBox
-            label="Pendiente"
-            value={formatCurrency(pendingAmount)}
-          />
+          <AmountBox label="Pendiente" value={formatCurrency(pendingAmount)} />
         </Box>
 
-        <PaymentProgress
-          progress={progress}
-          accent={property.accent}
-        />
+        <PaymentProgress progress={progress} accent={property.accent} />
       </Box>
     </Paper>
   );
@@ -435,47 +405,31 @@ function InfoLine({
         display: "grid",
 
         gridTemplateColumns: {
-          xs: "18px 58px minmax(0, 1fr)",
-          sm: "20px 68px minmax(0, 1fr)",
-          md: "22px 76px minmax(0, 1fr)",
+          xs: "22px 74px minmax(0, 1fr)",
+          sm: "22px 76px minmax(0, 1fr)",
         },
 
         alignItems: "center",
-
         gap: {
-          xs: 0.5,
-          sm: 0.75,
-          md: 1,
+          xs: 0.75,
+          sm: 1,
         },
-
         minWidth: 0,
       }}
     >
       <Box
         sx={{
-          width: {
-            xs: 18,
-            sm: 20,
-            md: 22,
-          },
-
-          height: {
-            xs: 18,
-            sm: 20,
-            md: 22,
-          },
-
+          width: 22,
+          height: 22,
           borderRadius: "50%",
           bgcolor: colors.primarySoft,
           color: colors.primaryLight,
           display: "grid",
           placeItems: "center",
           flexShrink: 0,
-
           fontSize: {
-            xs: 8,
-            sm: 9,
-            md: 11,
+            xs: 10,
+            sm: 11,
           },
         }}
       >
@@ -487,10 +441,9 @@ function InfoLine({
         sx={{
           color: colors.muted,
           fontWeight: 700,
-
           fontSize: {
-            xs: 8.5,
-            sm: 10,
+            xs: 11,
+            sm: 11,
             md: 12,
           },
         }}
@@ -505,10 +458,9 @@ function InfoLine({
           minWidth: 0,
           color: colors.text,
           fontWeight: 900,
-
           fontSize: {
-            xs: 8.5,
-            sm: 10,
+            xs: 11,
+            sm: 11,
             md: 12,
           },
         }}
@@ -519,30 +471,20 @@ function InfoLine({
   );
 }
 
-function AmountBox({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function AmountBox({ label, value }: { label: string; value: string }) {
   return (
     <Box
       sx={{
         minWidth: 0,
-
         p: {
-          xs: 0.65,
-          sm: 0.8,
-          md: 1,
+          xs: 0.9,
+          sm: 1,
         },
-
         borderRadius: {
-          xs: "10px",
-          sm: "12px",
+          xs: "12px",
+          sm: "14px",
           md: "16px",
         },
-
         bgcolor: "#f8fafc",
         border: `1px solid ${colors.cardBorder}`,
         overflow: "hidden",
@@ -554,10 +496,9 @@ function AmountBox({
           color: colors.muted,
           fontWeight: 900,
           textTransform: "uppercase",
-
           fontSize: {
-            xs: 6.5,
-            sm: 8,
+            xs: 9,
+            sm: 9,
             md: 10,
           },
         }}
@@ -569,13 +510,12 @@ function AmountBox({
         noWrap
         title={value}
         sx={{
-          mt: 0.1,
+          mt: 0.15,
           color: colors.text,
           fontWeight: 950,
-
           fontSize: {
-            xs: 8,
-            sm: 10,
+            xs: 11,
+            sm: 11,
             md: 12,
           },
         }}
@@ -600,13 +540,7 @@ function PaymentProgress({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-
-          mb: {
-            xs: 0.35,
-            sm: 0.5,
-            md: 0.7,
-          },
-
+          mb: 0.55,
           gap: 1,
         }}
       >
@@ -615,11 +549,10 @@ function PaymentProgress({
           sx={{
             color: colors.softMuted,
             fontWeight: 950,
-
             fontSize: {
-              xs: 6.5,
-              sm: 8,
-              md: 10.5,
+              xs: 10,
+              sm: 10,
+              md: 11,
             },
           }}
         >
@@ -631,11 +564,10 @@ function PaymentProgress({
             flexShrink: 0,
             color: accent,
             fontWeight: 950,
-
             fontSize: {
-              xs: 7,
-              sm: 8.5,
-              md: 10.5,
+              xs: 11,
+              sm: 11,
+              md: 12,
             },
           }}
         >
@@ -649,11 +581,10 @@ function PaymentProgress({
         aria-label={`Avance de pago ${Math.round(progress)}%`}
         sx={{
           height: {
-            xs: 4,
-            sm: 5,
+            xs: 6,
+            sm: 6,
             md: 7,
           },
-
           borderRadius: 999,
           bgcolor: "#e5e7eb",
 
