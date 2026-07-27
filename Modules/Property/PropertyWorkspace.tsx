@@ -38,7 +38,7 @@ import { PropertyCard } from "@/components/PropertyCard";
 
 type AccountStatus = "Al día" | "Pendiente" | "Atrasado" | "Pagado";
 
-type PropertyItem = {
+export type PropertyItem = {
   id: string;
   name: string;
   code: string;
@@ -51,6 +51,7 @@ type PropertyItem = {
   dueDate: string;
   status: AccountStatus;
   accent: string;
+  imageUrl: string;
   ownerName: string;
   ownerPhone?: string;
   ownerDocument?: string;
@@ -138,6 +139,8 @@ const initialProperties: PropertyItem[] = [
     dueDate: "10 noviembre 2026",
     status: "Pendiente",
     accent: "#2563eb",
+    imageUrl:
+      "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=900&q=80",
   },
   {
     id: "lot-b08",
@@ -153,6 +156,8 @@ const initialProperties: PropertyItem[] = [
     dueDate: "Pagado",
     status: "Pagado",
     accent: "#0f766e",
+    imageUrl:
+      "https://images.unsplash.com/photo-1473445361085-b9a07f55608b?auto=format&fit=crop&w=900&q=80",
   },
   {
     id: "lot-c21",
@@ -168,6 +173,8 @@ const initialProperties: PropertyItem[] = [
     dueDate: "Vencido hace 5 días",
     status: "Atrasado",
     accent: "#dc2626",
+    imageUrl:
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80",
   },
   {
     id: "house-r04",
@@ -183,6 +190,8 @@ const initialProperties: PropertyItem[] = [
     dueDate: "Sin fecha",
     status: "Al día",
     accent: "#7c3aed",
+    imageUrl:
+      "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=900&q=80",
   },
 ];
 
@@ -345,23 +354,25 @@ export function PropertyWorkspace() {
   }, [properties]);
 
   const handleCreateProperty = (formValues: AddPropertyFormValues): void => {
-    const newProperty: PropertyItem = {
-      id: crypto.randomUUID(),
-      name: formValues.name.trim(),
-      code: formValues.code.trim().toUpperCase(),
-      location: formValues.location.trim(),
-      size: formValues.size.trim(),
-      price: Number(formValues.price),
-      paid: 0,
-      ownerName: formValues.ownerName.trim(),
-      ownerPhone: formValues.ownerPhone.trim(),
-      ownerDocument: formValues.ownerDocument.trim(),
-      buyerName: "Pendiente de asignar",
-      buyerEmail: "Sin comprador",
-      dueDate: "Sin fecha",
-      status: "Al día",
-      accent: colors.primaryLight,
-    };
+   const newProperty: PropertyItem = {
+  id: crypto.randomUUID(),
+  name: formValues.name.trim(),
+  code: formValues.code.trim().toUpperCase(),
+  location: formValues.location.trim(),
+  size: formValues.size.trim(),
+  price: Number(formValues.price),
+  paid: 0,
+  ownerName: formValues.ownerName.trim(),
+  ownerPhone: formValues.ownerPhone.trim(),
+  ownerDocument: formValues.ownerDocument.trim(),
+  buyerName: "Pendiente de asignar",
+  buyerEmail: "Sin comprador",
+  dueDate: "Sin fecha",
+  status: "Al día",
+  accent: colors.primaryLight,
+  imageUrl:
+    "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=900&q=80",
+};
 
     setProperties((currentProperties) => [newProperty, ...currentProperties]);
 
@@ -614,25 +625,78 @@ export function PropertyWorkspace() {
                   },
                 }}
               >
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: {
-                      xs: "1fr",
-                      md: "repeat(2, minmax(0, 1fr))",
-                    },
-                    gap: {
-                      xs: 1.5,
-                      md: 2,
-                    },
-                    width: "100%",
-                    minWidth: 0,
-                  }}
-                >
-                  {properties.map((property) => (
-                    <PropertyCard key={property.id} property={property} />
-                  ))}
-                </Box>
+            <Box
+  sx={{
+    maxHeight: {
+      xs: 620,
+      sm: 680,
+      md: 720,
+      lg: 760,
+    },
+
+    overflowY: "auto",
+    overflowX: "hidden",
+    scrollbarGutter: "stable",
+
+    pr: {
+      xs: 0.5,
+      sm: 0.75,
+      md: 1,
+    },
+
+    "&::-webkit-scrollbar": {
+      width: {
+        xs: 5,
+        sm: 7,
+        md: 8,
+      },
+    },
+
+    "&::-webkit-scrollbar-track": {
+      bgcolor: "#f1f5f9",
+      borderRadius: 999,
+    },
+
+    "&::-webkit-scrollbar-thumb": {
+      bgcolor: "#cbd5e1",
+      borderRadius: 999,
+      border: "2px solid #f1f5f9",
+    },
+
+    "&::-webkit-scrollbar-thumb:hover": {
+      bgcolor: "#94a3b8",
+    },
+
+    scrollbarWidth: "thin",
+    scrollbarColor: "#cbd5e1 #f1f5f9",
+  }}
+>
+  <Box
+    sx={{
+      display: "grid",
+
+      gridTemplateColumns: {
+        xs: "minmax(0, 1fr)",
+        md: "repeat(2, minmax(0, 1fr))",
+      },
+
+      gap: {
+        xs: 1.5,
+        md: 2,
+      },
+
+      width: "100%",
+      minWidth: 0,
+    }}
+  >
+    {properties.map((property) => (
+      <PropertyCard
+        key={property.id}
+        property={property}
+      />
+    ))}
+  </Box>
+</Box>
               </Box>
             </SectionCard>
 

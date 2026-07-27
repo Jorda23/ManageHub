@@ -1,19 +1,30 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
 
-import { Box, Chip, LinearProgress, Paper, Typography } from "@mui/material";
+import {
+  Box,
+  Chip,
+  LinearProgress,
+  Paper,
+  Typography,
+} from "@mui/material";
 
 import {
   FaBuilding,
   FaCalendarAlt,
   FaCheckCircle,
   FaExclamationTriangle,
+  FaHome,
   FaMapMarkedAlt,
   FaRulerCombined,
 } from "react-icons/fa";
 
-export type AccountStatus = "Al día" | "Pendiente" | "Atrasado" | "Pagado";
+export type AccountStatus =
+  | "Al día"
+  | "Pendiente"
+  | "Atrasado"
+  | "Pagado";
 
 export type PropertyItem = {
   id: string;
@@ -28,6 +39,7 @@ export type PropertyItem = {
   dueDate: string;
   status: AccountStatus;
   accent: string;
+  imageUrl: string;
   ownerName: string;
   ownerPhone?: string;
   ownerDocument?: string;
@@ -97,7 +109,12 @@ function getStatusColors(status: AccountStatus) {
   }
 }
 
-export function PropertyCard({ property, onClick }: PropertyCardProps) {
+type StatusColors = ReturnType<typeof getStatusColors>;
+
+export function PropertyCard({
+  property,
+  onClick,
+}: PropertyCardProps) {
   const pendingAmount = getPendingAmount(property);
 
   const progress =
@@ -106,14 +123,15 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
       : 0;
 
   const statusColors = getStatusColors(property.status);
-
   const isClickable = Boolean(onClick);
 
   const handleClick = (): void => {
     onClick?.(property);
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>): void => {
+  const handleKeyDown = (
+    event: KeyboardEvent<HTMLDivElement>,
+  ): void => {
     if (!isClickable) {
       return;
     }
@@ -134,12 +152,7 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
       sx={{
         width: "100%",
         minWidth: 0,
-
-        p: {
-          xs: 1.25,
-          sm: 1.5,
-          md: 2,
-        },
+        overflow: "hidden",
 
         borderRadius: {
           xs: "12px",
@@ -149,7 +162,6 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
 
         border: `1px solid ${colors.cardBorder}`,
         bgcolor: "#ffffff",
-
         cursor: isClickable ? "pointer" : "default",
 
         transition:
@@ -160,7 +172,9 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
             xs: "none",
             md: "translateY(-2px)",
           },
+
           borderColor: "#b7c7c2",
+
           boxShadow: {
             xs: "none",
             md: "0 12px 26px rgba(15, 23, 42, 0.08)",
@@ -173,8 +187,16 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
         },
       }}
     >
+      <PropertyImage property={property} />
+
       <Box
         sx={{
+          p: {
+            xs: 1.25,
+            sm: 1.5,
+            md: 2,
+          },
+
           display: "flex",
           flexDirection: "column",
 
@@ -187,7 +209,10 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
           minWidth: 0,
         }}
       >
-        <PropertyCardHeader property={property} statusColors={statusColors} />
+        <PropertyCardHeader
+          property={property}
+          statusColors={statusColors}
+        />
 
         <Box
           sx={{
@@ -241,25 +266,144 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
 
             minWidth: 0,
 
-            "@media (max-width: 340px)": {
+            "@media (max-width: 390px)": {
               gridTemplateColumns: "1fr",
             },
           }}
         >
-          <AmountBox label="Precio" value={formatCurrency(property.price)} />
+          <AmountBox
+            label="Precio"
+            value={formatCurrency(property.price)}
+          />
 
-          <AmountBox label="Abonado" value={formatCurrency(property.paid)} />
+          <AmountBox
+            label="Abonado"
+            value={formatCurrency(property.paid)}
+          />
 
-          <AmountBox label="Pendiente" value={formatCurrency(pendingAmount)} />
+          <AmountBox
+            label="Pendiente"
+            value={formatCurrency(pendingAmount)}
+          />
         </Box>
 
-        <PaymentProgress progress={progress} accent={property.accent} />
+        <PaymentProgress
+          progress={progress}
+          accent={property.accent}
+        />
       </Box>
     </Paper>
   );
 }
 
-type StatusColors = ReturnType<typeof getStatusColors>;
+function PropertyImage({
+  property,
+}: {
+  property: PropertyItem;
+}) {
+  const hasImage = Boolean(property.imageUrl?.trim());
+
+  return (
+    <Box
+      role="img"
+      aria-label={`Imagen de ${property.name}`}
+      sx={{
+        position: "relative",
+        width: "100%",
+
+        height: {
+          xs: 150,
+          sm: 170,
+          md: 180,
+        },
+
+        bgcolor: colors.primarySoft,
+
+        backgroundImage: hasImage
+          ? `
+              linear-gradient(
+                to bottom,
+                rgba(15, 23, 42, 0.03),
+                rgba(15, 23, 42, 0.38)
+              ),
+              url("${property.imageUrl}")
+            `
+          : "linear-gradient(135deg, #dbeafe, #bfdbfe)",
+
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+
+        display: "grid",
+        placeItems: "center",
+        overflow: "hidden",
+      }}
+    >
+      {!hasImage && (
+        <Box
+          aria-hidden="true"
+          sx={{
+            display: "grid",
+            placeItems: "center",
+            color: "rgba(37, 99, 235, 0.5)",
+
+            fontSize: {
+              xs: 34,
+              sm: 40,
+            },
+          }}
+        >
+          <FaHome />
+        </Box>
+      )}
+
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          background:
+            "linear-gradient(to top, rgba(15,23,42,0.45), transparent 55%)",
+        }}
+      />
+
+      <Typography
+        noWrap
+        title={property.location}
+        sx={{
+          position: "absolute",
+
+          left: {
+            xs: 12,
+            sm: 16,
+          },
+
+          right: {
+            xs: 12,
+            sm: 16,
+          },
+
+          bottom: {
+            xs: 10,
+            sm: 14,
+          },
+
+          color: "#ffffff",
+
+          fontSize: {
+            xs: 12,
+            sm: 13,
+          },
+
+          fontWeight: 900,
+          textShadow: "0 1px 4px rgba(0,0,0,0.45)",
+        }}
+      >
+        {property.location}
+      </Typography>
+    </Box>
+  );
+}
 
 function PropertyCardHeader({
   property,
@@ -283,7 +427,12 @@ function PropertyCardHeader({
         minWidth: 0,
       }}
     >
-      <Box sx={{ minWidth: 0, flex: 1 }}>
+      <Box
+        sx={{
+          minWidth: 0,
+          flex: 1,
+        }}
+      >
         <Box
           sx={{
             display: "flex",
@@ -303,13 +452,12 @@ function PropertyCardHeader({
             sx={{
               minWidth: 0,
               color: colors.text,
-
               fontWeight: 950,
 
               fontSize: {
-                xs: 12,
-                sm: 13.5,
-                md: 14.5,
+                xs: 14,
+                sm: 14,
+                md: 15,
               },
             }}
           >
@@ -323,7 +471,7 @@ function PropertyCardHeader({
               flexShrink: 0,
 
               fontSize: {
-                xs: 10,
+                xs: 11,
                 sm: 12,
               },
             }}
@@ -344,9 +492,9 @@ function PropertyCardHeader({
             fontWeight: 700,
 
             fontSize: {
-              xs: 8.5,
-              sm: 10,
-              md: 11,
+              xs: 11,
+              sm: 11,
+              md: 12,
             },
           }}
         >
@@ -361,9 +509,9 @@ function PropertyCardHeader({
           flexShrink: 0,
 
           height: {
-            xs: 20,
-            sm: 22,
-            md: 24,
+            xs: 24,
+            sm: 24,
+            md: 26,
           },
 
           bgcolor: statusColors.background,
@@ -371,8 +519,8 @@ function PropertyCardHeader({
           border: `1px solid ${statusColors.border}`,
 
           fontSize: {
-            xs: 8,
-            sm: 9.5,
+            xs: 10,
+            sm: 10,
             md: 11,
           },
 
@@ -380,7 +528,7 @@ function PropertyCardHeader({
 
           "& .MuiChip-label": {
             px: {
-              xs: 0.7,
+              xs: 0.9,
               sm: 1,
             },
           },
@@ -410,10 +558,12 @@ function InfoLine({
         },
 
         alignItems: "center",
+
         gap: {
           xs: 0.75,
           sm: 1,
         },
+
         minWidth: 0,
       }}
     >
@@ -427,6 +577,7 @@ function InfoLine({
           display: "grid",
           placeItems: "center",
           flexShrink: 0,
+
           fontSize: {
             xs: 10,
             sm: 11,
@@ -441,6 +592,7 @@ function InfoLine({
         sx={{
           color: colors.muted,
           fontWeight: 700,
+
           fontSize: {
             xs: 11,
             sm: 11,
@@ -458,6 +610,7 @@ function InfoLine({
           minWidth: 0,
           color: colors.text,
           fontWeight: 900,
+
           fontSize: {
             xs: 11,
             sm: 11,
@@ -471,20 +624,29 @@ function InfoLine({
   );
 }
 
-function AmountBox({ label, value }: { label: string; value: string }) {
+function AmountBox({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
   return (
     <Box
       sx={{
         minWidth: 0,
+
         p: {
           xs: 0.9,
           sm: 1,
         },
+
         borderRadius: {
           xs: "12px",
           sm: "14px",
           md: "16px",
         },
+
         bgcolor: "#f8fafc",
         border: `1px solid ${colors.cardBorder}`,
         overflow: "hidden",
@@ -496,6 +658,7 @@ function AmountBox({ label, value }: { label: string; value: string }) {
           color: colors.muted,
           fontWeight: 900,
           textTransform: "uppercase",
+
           fontSize: {
             xs: 9,
             sm: 9,
@@ -513,6 +676,7 @@ function AmountBox({ label, value }: { label: string; value: string }) {
           mt: 0.15,
           color: colors.text,
           fontWeight: 950,
+
           fontSize: {
             xs: 11,
             sm: 11,
@@ -549,6 +713,7 @@ function PaymentProgress({
           sx={{
             color: colors.softMuted,
             fontWeight: 950,
+
             fontSize: {
               xs: 10,
               sm: 10,
@@ -564,6 +729,7 @@ function PaymentProgress({
             flexShrink: 0,
             color: accent,
             fontWeight: 950,
+
             fontSize: {
               xs: 11,
               sm: 11,
@@ -585,6 +751,7 @@ function PaymentProgress({
             sm: 6,
             md: 7,
           },
+
           borderRadius: 999,
           bgcolor: "#e5e7eb",
 
