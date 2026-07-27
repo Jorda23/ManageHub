@@ -73,9 +73,14 @@ export function GrainInventory({
     <Paper
       elevation={0}
       sx={{
+        width: "100%",
         minWidth: 0,
         overflow: "hidden",
-        borderRadius: "16px",
+        borderRadius: {
+          xs: "12px",
+          sm: "14px",
+          md: "16px",
+        },
         border: `1px solid ${colors.cardBorder}`,
         bgcolor: colors.cardBg,
         boxShadow: "0 10px 28px rgba(15, 23, 42, 0.06)",
@@ -86,27 +91,35 @@ export function GrainInventory({
       <Box
         sx={{
           maxHeight: {
-            xs: 480,
-            sm: 520,
+            xs: 460,
+            sm: 500,
             md: 540,
             lg: 580,
           },
           overflowY: "auto",
           overflowX: "hidden",
           scrollbarGutter: "stable",
+
           p: {
-            xs: 1.5,
-            sm: 2,
-            md: 2.5,
-          },
-          pr: {
             xs: 1,
-            sm: 1.25,
-            md: 1.5,
+            sm: 1.5,
+            md: 2,
+            lg: 2.5,
+          },
+
+          pr: {
+            xs: 0.75,
+            sm: 1,
+            md: 1.25,
+            lg: 1.5,
           },
 
           "&::-webkit-scrollbar": {
-            width: 8,
+            width: {
+              xs: 5,
+              sm: 7,
+              md: 8,
+            },
           },
 
           "&::-webkit-scrollbar-track": {
@@ -135,11 +148,14 @@ export function GrainInventory({
             sx={{
               display: "grid",
               gridTemplateColumns: {
-                xs: "1fr",
+                xs: "minmax(0, 1fr)",
+                sm: "minmax(0, 1fr)",
                 md: "repeat(2, minmax(0, 1fr))",
+                xl: "repeat(3, minmax(0, 1fr))",
               },
               gap: {
-                xs: 1.5,
+                xs: 1,
+                sm: 1.5,
                 md: 2,
               },
               width: "100%",
@@ -170,33 +186,72 @@ function InventoryHeader({
       sx={{
         position: "relative",
         zIndex: 2,
+
         px: {
-          xs: 1.5,
+          xs: 1.25,
           sm: 2,
           md: 2.5,
         },
-        py: 2,
+
+        py: {
+          xs: 1.25,
+          sm: 1.75,
+          md: 2,
+        },
+
         display: "flex",
+
+        flexDirection: {
+          xs: "column",
+          sm: "row",
+        },
+
         justifyContent: "space-between",
-        alignItems: "center",
-        gap: 2,
+
+        alignItems: {
+          xs: "stretch",
+          sm: "center",
+        },
+
+        gap: {
+          xs: 1.25,
+          sm: 2,
+        },
+
         bgcolor: "#ffffff",
         borderBottom: `1px solid ${colors.cardBorder}`,
+
+        "@media (min-width: 400px)": {
+          flexDirection: "row",
+          alignItems: "center",
+        },
       }}
     >
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
-          gap: 1.2,
+          gap: {
+            xs: 0.8,
+            sm: 1.2,
+          },
           minWidth: 0,
         }}
       >
         <Box
           sx={{
-            width: 30,
-            height: 30,
-            borderRadius: "10px",
+            width: {
+              xs: 27,
+              sm: 30,
+            },
+            height: {
+              xs: 27,
+              sm: 30,
+            },
+            borderRadius: {
+              xs: "8px",
+              sm: "10px",
+            },
             display: "grid",
             placeItems: "center",
             color: colors.primaryLight,
@@ -209,10 +264,11 @@ function InventoryHeader({
 
         <Box sx={{ minWidth: 0 }}>
           <Typography
+            noWrap
             sx={{
               color: colors.text,
               fontSize: {
-                xs: 14,
+                xs: 13,
                 sm: 16,
               },
               fontWeight: 950,
@@ -223,10 +279,14 @@ function InventoryHeader({
           </Typography>
 
           <Typography
+            noWrap
             sx={{
               mt: 0.2,
               color: colors.muted,
-              fontSize: 11,
+              fontSize: {
+                xs: 9.5,
+                sm: 11,
+              },
               lineHeight: 1.3,
             }}
           >
@@ -242,23 +302,39 @@ function InventoryHeader({
         startIcon={<FaPlus size={11} />}
         onClick={onAddProduct}
         sx={{
-          minHeight: 34,
+          minHeight: {
+            xs: 32,
+            sm: 34,
+          },
+
+          width: {
+            xs: "100%",
+            sm: "auto",
+          },
+
           px: {
             xs: 1.2,
             sm: 1.75,
           },
+
           borderRadius: "8px",
           bgcolor: colors.primary,
           color: colors.cardBg,
+
           fontSize: {
             xs: 9,
             sm: 10,
           },
+
           fontWeight: 900,
           letterSpacing: "0.03em",
           textTransform: "uppercase",
           whiteSpace: "nowrap",
           boxShadow: "none",
+
+          "@media (min-width: 400px)": {
+            width: "auto",
+          },
 
           "&:hover": {
             bgcolor: colors.primaryLight,
@@ -301,12 +377,21 @@ function GrainProductCard({
     <Paper
       elevation={0}
       sx={{
+        width: "100%",
         minWidth: 0,
         overflow: "hidden",
-        borderRadius: "16px",
+
+        borderRadius: {
+          xs: "12px",
+          sm: "14px",
+          md: "16px",
+        },
+
         border: `1px solid ${colors.cardBorder}`,
         bgcolor: "#ffffff",
-        transition: "all 0.18s ease",
+
+        transition:
+          "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease",
 
         "&:hover": {
           transform: {
@@ -314,18 +399,34 @@ function GrainProductCard({
             md: "translateY(-2px)",
           },
           borderColor: "#b7c7c2",
-          boxShadow: "0 12px 26px rgba(15, 23, 42, 0.08)",
+          boxShadow: {
+            xs: "none",
+            md: "0 12px 26px rgba(15, 23, 42, 0.08)",
+          },
         },
       }}
     >
       <Box
         sx={{
           display: "grid",
+
           gridTemplateColumns: {
-            xs: "100px minmax(0, 1fr)",
-            sm: "112px minmax(0, 1fr)",
+            xs: "76px minmax(0, 1fr)",
+            sm: "88px minmax(0, 1fr)",
+            md: "96px minmax(0, 1fr)",
+            lg: "100px minmax(0, 1fr)",
           },
-          minHeight: 150,
+
+          minHeight: {
+            xs: 126,
+            sm: 136,
+            md: 145,
+            lg: 150,
+          },
+
+          "@media (max-width: 340px)": {
+            gridTemplateColumns: "68px minmax(0, 1fr)",
+          },
         }}
       >
         <ProductImage
@@ -336,13 +437,22 @@ function GrainProductCard({
         <Box
           sx={{
             p: {
-              xs: 1.25,
-              sm: 1.5,
+              xs: 1,
+              sm: 1.25,
+              md: 1.5,
             },
+
             display: "flex",
             flexDirection: "column",
-            gap: 1.05,
+
+            gap: {
+              xs: 0.7,
+              sm: 0.9,
+              md: 1.05,
+            },
+
             minWidth: 0,
+            overflow: "hidden",
           }}
         >
           <ProductCardHeader
@@ -355,7 +465,13 @@ function GrainProductCard({
             sx={{
               display: "grid",
               gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-              gap: 1,
+
+              gap: {
+                xs: 0.6,
+                sm: 1,
+              },
+
+              minWidth: 0,
             }}
           >
             <ProductInfo
@@ -374,10 +490,18 @@ function GrainProductCard({
           {product.silo && (
             <Typography
               noWrap
+              title={`Ubicación: ${product.silo}`}
               sx={{
                 color: colors.muted,
-                fontSize: 9.5,
+
+                fontSize: {
+                  xs: 8,
+                  sm: 9,
+                  md: 9.5,
+                },
+
                 fontWeight: 700,
+                maxWidth: "100%",
               }}
             >
               Ubicación:{" "}
@@ -415,10 +539,23 @@ function ProductImage({
 }) {
   return (
     <Box
+      role="img"
+      aria-label={`Imagen de ${product.name}`}
       sx={{
         position: "relative",
-        minHeight: "100%",
+        width: "100%",
+        height: "100%",
+        minWidth: 0,
+
+        minHeight: {
+          xs: 126,
+          sm: 136,
+          md: 145,
+          lg: 150,
+        },
+
         bgcolor: "#dcece6",
+
         backgroundImage: product.imageUrl
           ? `
               linear-gradient(
@@ -429,8 +566,10 @@ function ProductImage({
               url("${product.imageUrl}")
             `
           : "linear-gradient(135deg, #e1eee9, #c8ddd5)",
+
         backgroundSize: "cover",
         backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
       }}
     >
       <Chip
@@ -438,25 +577,58 @@ function ProductImage({
         size="small"
         sx={{
           position: "absolute",
-          left: 8,
-          bottom: 8,
-          maxWidth: "calc(100% - 16px)",
-          height: 21,
+
+          left: {
+            xs: 4,
+            sm: 6,
+            md: 8,
+          },
+
+          bottom: {
+            xs: 5,
+            sm: 6,
+            md: 8,
+          },
+
+          maxWidth: {
+            xs: "calc(100% - 8px)",
+            sm: "calc(100% - 12px)",
+            md: "calc(100% - 16px)",
+          },
+
+          height: {
+            xs: 18,
+            sm: 20,
+            md: 21,
+          },
+
           bgcolor: isLowStock
             ? "rgba(254, 226, 226, 0.95)"
             : "rgba(220, 252, 231, 0.95)",
+
           color: isLowStock
             ? colors.danger
             : colors.primaryLight,
+
           border: `1px solid ${
             isLowStock ? "#fecaca" : "#bbf7d0"
           }`,
-          fontSize: 8,
+
+          fontSize: {
+            xs: 6.8,
+            sm: 7.5,
+            md: 8,
+          },
+
           fontWeight: 950,
           backdropFilter: "blur(5px)",
 
           "& .MuiChip-label": {
-            px: 0.8,
+            px: {
+              xs: 0.45,
+              sm: 0.65,
+              md: 0.8,
+            },
             overflow: "hidden",
             textOverflow: "ellipsis",
           },
@@ -481,15 +653,26 @@ function ProductCardHeader({
         display: "flex",
         justifyContent: "space-between",
         alignItems: "flex-start",
-        gap: 1,
+
+        gap: {
+          xs: 0.5,
+          sm: 1,
+        },
+
+        minWidth: 0,
       }}
     >
-      <Box sx={{ minWidth: 0 }}>
+      <Box sx={{ minWidth: 0, flex: 1 }}>
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
-            gap: 0.6,
+
+            gap: {
+              xs: 0.4,
+              sm: 0.6,
+            },
+
             minWidth: 0,
           }}
         >
@@ -498,9 +681,16 @@ function ProductCardHeader({
             title={product.name}
             sx={{
               color: colors.text,
-              fontSize: 13,
+
+              fontSize: {
+                xs: 11,
+                sm: 12,
+                md: 13,
+              },
+
               fontWeight: 950,
               minWidth: 0,
+              maxWidth: "100%",
             }}
           >
             {product.name}
@@ -533,7 +723,13 @@ function ProductCardHeader({
           sx={{
             mt: 0.15,
             color: colors.softMuted,
-            fontSize: 9.5,
+
+            fontSize: {
+              xs: 8,
+              sm: 9,
+              md: 9.5,
+            },
+
             fontWeight: 700,
           }}
         >
@@ -550,8 +746,18 @@ function ProductCardHeader({
           onEdit?.(product);
         }}
         sx={{
-          width: 29,
-          height: 29,
+          width: {
+            xs: 25,
+            sm: 27,
+            md: 29,
+          },
+
+          height: {
+            xs: 25,
+            sm: 27,
+            md: 29,
+          },
+
           bgcolor: "#f8fafc",
           border: `1px solid ${colors.cardBorder}`,
           color: colors.muted,
@@ -587,19 +793,37 @@ function StockProgress({
   isLowStock: boolean;
 }) {
   return (
-    <Box sx={{ mt: "auto" }}>
+    <Box
+      sx={{
+        mt: "auto",
+        minWidth: 0,
+      }}
+    >
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          mb: 0.55,
+
+          mb: {
+            xs: 0.35,
+            sm: 0.55,
+          },
+
+          gap: 1,
         }}
       >
         <Typography
+          noWrap
           sx={{
             color: colors.softMuted,
-            fontSize: 9,
+
+            fontSize: {
+              xs: 7.5,
+              sm: 8.5,
+              md: 9,
+            },
+
             fontWeight: 950,
             textTransform: "uppercase",
           }}
@@ -612,9 +836,16 @@ function StockProgress({
             color: isLowStock
               ? colors.danger
               : colors.text,
-            fontSize: 10.5,
+
+            fontSize: {
+              xs: 9,
+              sm: 10,
+              md: 10.5,
+            },
+
             fontWeight: 950,
             fontVariantNumeric: "tabular-nums",
+            flexShrink: 0,
           }}
         >
           {stock}
@@ -625,7 +856,12 @@ function StockProgress({
         variant="determinate"
         value={stockPercent}
         sx={{
-          height: 6,
+          height: {
+            xs: 4,
+            sm: 5,
+            md: 6,
+          },
+
           borderRadius: 999,
           bgcolor: "#e5e7eb",
 
@@ -637,10 +873,21 @@ function StockProgress({
       />
 
       <Typography
+        noWrap
         sx={{
-          mt: 0.45,
+          mt: {
+            xs: 0.3,
+            sm: 0.45,
+          },
+
           color: colors.softMuted,
-          fontSize: 8.5,
+
+          fontSize: {
+            xs: 7,
+            sm: 8,
+            md: 8.5,
+          },
+
           fontWeight: 700,
           textAlign: "right",
         }}
@@ -667,12 +914,20 @@ function ProductInfo({
       sx={{
         minWidth: 0,
         textAlign: align,
+        overflow: "hidden",
       }}
     >
       <Typography
+        noWrap
         sx={{
           color: colors.muted,
-          fontSize: 8,
+
+          fontSize: {
+            xs: 6.8,
+            sm: 7.5,
+            md: 8,
+          },
+
           fontWeight: 900,
           textTransform: "uppercase",
           letterSpacing: "0.02em",
@@ -687,7 +942,13 @@ function ProductInfo({
         sx={{
           mt: 0.1,
           color: valueColor,
-          fontSize: 10.5,
+
+          fontSize: {
+            xs: 9,
+            sm: 10,
+            md: 10.5,
+          },
+
           fontWeight: 950,
         }}
       >
@@ -701,18 +962,42 @@ function EmptyInventory() {
   return (
     <Box
       sx={{
-        py: 6,
-        px: 2,
+        py: {
+          xs: 4,
+          sm: 5,
+          md: 6,
+        },
+
+        px: {
+          xs: 1.5,
+          sm: 2,
+        },
+
         textAlign: "center",
       }}
     >
       <Box
         sx={{
-          width: 52,
-          height: 52,
+          width: {
+            xs: 44,
+            sm: 48,
+            md: 52,
+          },
+
+          height: {
+            xs: 44,
+            sm: 48,
+            md: 52,
+          },
+
           mx: "auto",
           mb: 1.5,
-          borderRadius: "16px",
+
+          borderRadius: {
+            xs: "13px",
+            sm: "16px",
+          },
+
           display: "grid",
           placeItems: "center",
           bgcolor: colors.primarySoft,
@@ -725,7 +1010,12 @@ function EmptyInventory() {
       <Typography
         sx={{
           color: colors.text,
-          fontSize: 14,
+
+          fontSize: {
+            xs: 13,
+            sm: 14,
+          },
+
           fontWeight: 900,
         }}
       >
@@ -736,7 +1026,11 @@ function EmptyInventory() {
         sx={{
           mt: 0.5,
           color: colors.muted,
-          fontSize: 12,
+
+          fontSize: {
+            xs: 10.5,
+            sm: 12,
+          },
         }}
       >
         Agrega el primer producto al inventario de granos.

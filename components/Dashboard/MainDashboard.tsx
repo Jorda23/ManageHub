@@ -66,21 +66,6 @@ type AlertItem = {
   tone: "danger" | "warning" | "info";
 };
 
-type CommitmentItem = {
-  date: string;
-  title: string;
-  detail: string;
-  amount?: string;
-};
-
-type QuickAction = {
-  label: string;
-  detail: string;
-  href: string;
-  icon: ComponentType<{ size?: number }>;
-  accent: string;
-};
-
 const colors = {
   pageBg: "#f3f7fa",
   cardBg: "#ffffff",

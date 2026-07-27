@@ -123,7 +123,6 @@ export default function AppShell({ children, active }: AppShellProps) {
         </Box>
       </Box>
 
-      <MobileBottomNav active={active} />
       <Drawer
         open={isMobileMenuOpen}
         onClose={closeMobileMenu}
@@ -158,11 +157,12 @@ function MobileTopbar({ onOpenMenu }: { onOpenMenu: () => void }) {
     <Box
       component="header"
       sx={{
+        width: "100%",
         display: {
           xs: "flex",
           lg: "none",
         },
-        position: "sticky",
+        position: "fixed",
         top: 0,
         zIndex: 20,
         minHeight: 64,
