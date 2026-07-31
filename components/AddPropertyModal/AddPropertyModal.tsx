@@ -23,6 +23,7 @@ import {
 
 import { FormModal } from "../FormModal";
 import { ModalField } from "../ModalField";
+import { ImageUploadField } from "../WorkspaceShared/ImageUploadField";
 
 export type AddPropertyFormValues = {
   name: string;
@@ -30,6 +31,7 @@ export type AddPropertyFormValues = {
   location: string;
   size: string;
   price: string;
+  imageUrl: string;
   ownerName: string;
   ownerPhone: string;
   ownerDocument: string;
@@ -63,6 +65,7 @@ const initialValues: AddPropertyFormValues = {
   location: "",
   size: "",
   price: "",
+  imageUrl: "",
   ownerName: "",
   ownerPhone: "",
   ownerDocument: "",
@@ -196,6 +199,7 @@ export function AddPropertyModal({
       code: values.code.trim().toUpperCase(),
       location: values.location.trim(),
       size: values.size.trim(),
+      imageUrl: values.imageUrl.trim(),
       ownerName: values.ownerName.trim(),
       ownerPhone: values.ownerPhone.trim(),
       ownerDocument: values.ownerDocument.trim(),
@@ -400,6 +404,20 @@ export function AddPropertyModal({
             borderTop: `1px solid ${colors.border}`,
           }}
         />
+
+        <ModalField
+          label="Imagen para la tarjeta"
+          htmlFor="property-image"
+        >
+          <ImageUploadField
+            label="Imagen del terreno"
+            value={values.imageUrl}
+            disabled={isSubmitting}
+            onChange={(imageUrl) => {
+              updateField("imageUrl", imageUrl);
+            }}
+          />
+        </ModalField>
 
         <ModalField
           label="Cliente propietario"

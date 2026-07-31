@@ -1,25 +1,27 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme } from "@mui/material/styles";
+
+import { sharedColors } from "./sharedColors";
 
 export const theme = createTheme({
   palette: {
-    mode: 'dark',
+    mode: "light",
     background: {
-      default: '#001f21',
-      paper: '#032b2d',
+      default: sharedColors.pageBg,
+      paper: sharedColors.cardBg,
     },
     primary: {
-      main: '#19d3d8',
+      main: "#0f766e",
     },
     secondary: {
-      main: '#5ee3a7',
+      main: "#2563eb",
     },
     text: {
-      primary: '#f4ffff',
-      secondary: '#a9c3c5',
+      primary: sharedColors.text,
+      secondary: sharedColors.muted,
     },
   },
   typography: {
-    fontFamily: 'Inter, Arial, sans-serif',
+    fontFamily: "Arial, Helvetica, sans-serif",
     h5: {
       fontWeight: 800,
     },

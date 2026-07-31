@@ -1,10 +1,7 @@
 "use client";
 
-import {
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { useMemo, useState, type ReactNode } from "react";
+
 import {
   Box,
   Button,
@@ -17,6 +14,11 @@ import {
   Typography,
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
+
+import {
+  buildCsvContent,
+  downloadCsvFile,
+} from "@/components/WorkspaceShared/csvDownload";
 import {
   FaDownload,
   FaHome,
@@ -25,16 +27,11 @@ import {
   FaTimes,
 } from "react-icons/fa";
 
-export type PaymentRecord = {
-  id: string;
-  propertyId: string;
-  propertyName: string;
-  buyerName: string;
-  amount: number;
-  method: string;
-  date: string;
-  note: string;
-};
+import {
+  colors,
+  formatCurrency,
+  type PaymentRecord,
+} from "@/Modules/Property/propertyWorkspaceData";
 
 type PaymentFilters = {
   search: string;
@@ -55,26 +52,6 @@ const EMPTY_FILTERS: PaymentFilters = {
   method: "",
   dateFrom: "",
   dateTo: "",
-};
-
-const colors = {
-  cardBg: "#ffffff",
-  cardBorder: "#dce5e1",
-  text: "#0f172a",
-  muted: "#64748b",
-  primary: "#1e3a8a",
-  primaryLight: "#2563eb",
-  primarySoft: "#dbeafe",
-  green: "#0f766e",
-  greenSoft: "#dcfce7",
-  tableHead: "#f1f5f9",
-};
-
-const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat("es-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(value);
 };
 
 const parsePaymentDate = (value: string): Date | null => {
@@ -177,11 +154,38 @@ export function PaymentHistoryTable({
       return totalPaid;
     }
 
-    return filteredPayments.reduce(
-      (total, payment) => total + payment.amount,
-      0,
-    );
+    return filteredPayments.reduce((total, payment) => total + payment.amount, 0);
   }, [filteredPayments, hasActiveFilters, totalPaid]);
+
+  const handleDownload = () => {
+    if (onDownload) {
+      onDownload(filteredPayments);
+      return;
+    }
+
+    const headers = [
+      "Fecha",
+      "Propiedad",
+      "Comprador",
+      "Metodo de pago",
+      "Nota",
+      "Monto",
+    ];
+
+    const rows = filteredPayments.map((payment) => [
+      payment.date,
+      payment.propertyName,
+      payment.buyerName,
+      payment.method,
+      payment.note,
+      payment.amount.toFixed(2),
+    ]);
+
+    const csvContent = buildCsvContent(headers, rows);
+    const fileDate = new Date().toISOString().slice(0, 10);
+
+    downloadCsvFile(`historial-abonos-${fileDate}.csv`, csvContent);
+  };
 
   const updateFilter = <TKey extends keyof PaymentFilters>(
     key: TKey,
@@ -192,7 +196,6 @@ export function PaymentHistoryTable({
       [key]: value,
     }));
   };
-
 
   const clearFilters = () => {
     setFilters(EMPTY_FILTERS);
@@ -211,9 +214,7 @@ export function PaymentHistoryTable({
       }}
     >
       <PaymentHistoryHeader
-        onDownload={
-          onDownload ? () => onDownload(filteredPayments) : undefined
-        }
+        onDownload={handleDownload}
       />
 
       <PaymentFiltersBar
@@ -246,9 +247,7 @@ type PaymentHistoryHeaderProps = {
   onDownload?: () => void;
 };
 
-function PaymentHistoryHeader({
-  onDownload,
-}: PaymentHistoryHeaderProps) {
+function PaymentHistoryHeader({ onDownload }: PaymentHistoryHeaderProps) {
   return (
     <Box
       sx={{
@@ -352,13 +351,7 @@ function PaymentFiltersBar({
         gridTemplateColumns: {
           xs: "1fr",
           sm: "repeat(2, minmax(0, 1fr))",
-          lg: [
-            "minmax(260px, 2fr)",
-            "minmax(145px, 0.8fr)",
-            "minmax(145px, 0.8fr)",
-            "minmax(180px, 1fr)",
-            "auto",
-          ].join(" "),
+          lg: ["minmax(260px, 2fr)", "minmax(145px, 0.8fr)", "minmax(145px, 0.8fr)", "minmax(180px, 1fr)", "auto"].join(" "),
         },
         gap: 1.2,
         alignItems: "center",
@@ -445,8 +438,6 @@ function PaymentFiltersBar({
           </MenuItem>
         ))}
       </TextField>
-
-
 
       <Button
         type="button"
@@ -577,11 +568,7 @@ function EmptyState({
   );
 }
 
-function PaymentTable({
-  payments,
-}: {
-  payments: PaymentRecord[];
-}) {
+function PaymentTable({ payments }: { payments: PaymentRecord[] }) {
   return (
     <Box
       sx={{
@@ -685,11 +672,7 @@ function PaymentTableHead() {
   );
 }
 
-function PaymentTableRow({
-  payment,
-}: {
-  payment: PaymentRecord;
-}) {
+function PaymentTableRow({ payment }: { payment: PaymentRecord }) {
   return (
     <tr>
       <td>
@@ -840,8 +823,7 @@ function PaymentHistoryFooter({
           fontWeight: 700,
         }}
       >
-        {paymentCount}{" "}
-        {paymentCount === 1 ? "abono registrado" : "abonos registrados"}
+        {paymentCount} {paymentCount === 1 ? "abono registrado" : "abonos registrados"}
         {filtered ? ` de ${sourcePaymentCount}` : ""}
       </Typography>
 

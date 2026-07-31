@@ -1,24 +1,15 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
 
 import {
   FaCheckCircle,
   FaFileInvoiceDollar,
-  FaLeaf,
   FaSeedling,
   FaWarehouse,
 } from "react-icons/fa";
 
-import {
-  Box,
-  Card,
-  Chip,
-  Paper,
-  Typography,
-} from "@mui/material";
-
-import type { SxProps, Theme } from "@mui/material/styles";
+import { Box } from "@mui/material";
 
 import AppShell from "@/components/AppShell/AppShell";
 import { AddGrainModal } from "@/components/AddGrainModal";
@@ -31,6 +22,10 @@ import { RegisterSaleCard } from "@/components/RegisterSaleCard";
 import { SalesHistoryTable } from "@/components/SalesHistoryTable";
 
 import type { WorkspaceConfig } from "@/components/WorkspaceShared/workspaceTypes";
+import { SectionCard } from "./components/SectionCard";
+import { MetricCard } from "./components/MetricCard";
+import { HeroHeader } from "./components/HeroHeader";
+import { grainsColors } from "@/theme/sharedColors";
 
 type GrainSale = {
   id: string;
@@ -46,29 +41,16 @@ type GrainSale = {
 type AddGrainFormValues = {
   name: string;
   unit: string;
+  imageUrl: string;
   stock: string;
   price: string;
   minStock: string;
   status: GrainStatus;
 };
 
-const colors = {
-  pageBg: "#f3f6f4",
-  cardBg: "#ffffff",
-  cardBorder: "#dce5e1",
-  text: "#0f172a",
-  muted: "#64748b",
-  softMuted: "#94a3b8",
-  primary: "#064e3b",
-  primaryLight: "#0f766e",
-  primarySoft: "#dcfce7",
-  orange: "#f97316",
-  orangeSoft: "#ffedd5",
-  danger: "#ef4444",
-  tableHead: "#f1f5f9",
-};
+export const colors = grainsColors;
 
-const grainsConfig: WorkspaceConfig = {
+export const grainsConfig: WorkspaceConfig = {
   category: "grains",
   badge: "Módulo de Ventas",
   title: "Ventas de Granos Básicos",
@@ -176,11 +158,7 @@ const initialSales: GrainSale[] = [
   },
 ];
 
-const paymentMethods = [
-  "Efectivo",
-  "Tarjeta",
-  "Transferencia",
-];
+const paymentMethods = ["Efectivo", "Tarjeta", "Transferencia"];
 
 const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat("es-US", {
@@ -206,38 +184,28 @@ function createProductCode(name: string): string {
 }
 
 export function GrainsWorkspace() {
-  const [products, setProducts] =
-    useState<GrainProduct[]>(initialProducts);
+  const [products, setProducts] = useState<GrainProduct[]>(initialProducts);
 
-  const [sales, setSales] =
-    useState<GrainSale[]>(initialSales);
+  const [sales, setSales] = useState<GrainSale[]>(initialSales);
 
-  const [selectedProductId, setSelectedProductId] =
-    useState("beans");
+  const [selectedProductId, setSelectedProductId] = useState("beans");
 
   const [quantity, setQuantity] = useState("1");
 
-  const [paymentMethod, setPaymentMethod] =
-    useState(paymentMethods[0]);
+  const [paymentMethod, setPaymentMethod] = useState(paymentMethods[0]);
 
   const [error, setError] = useState("");
 
-  const [isAddGrainOpen, setIsAddGrainOpen] =
-    useState(false);
+  const [isAddGrainOpen, setIsAddGrainOpen] = useState(false);
 
   const selectedProduct = useMemo(() => {
-    return products.find(
-      (product) => product.id === selectedProductId,
-    );
+    return products.find((product) => product.id === selectedProductId);
   }, [products, selectedProductId]);
 
   const numericQuantity = Number(quantity);
 
   const saleTotal = useMemo(() => {
-    if (
-      !selectedProduct ||
-      Number.isNaN(numericQuantity)
-    ) {
+    if (!selectedProduct || Number.isNaN(numericQuantity)) {
       return 0;
     }
 
@@ -245,17 +213,11 @@ export function GrainsWorkspace() {
   }, [selectedProduct, numericQuantity]);
 
   const totalSold = useMemo(() => {
-    return sales.reduce(
-      (total, sale) => total + sale.total,
-      0,
-    );
+    return sales.reduce((total, sale) => total + sale.total, 0);
   }, [sales]);
 
   const totalInventory = useMemo(() => {
-    return products.reduce(
-      (total, product) => total + product.stock,
-      0,
-    );
+    return products.reduce((total, product) => total + product.stock, 0);
   }, [products]);
 
   const handleRegisterSale = (): void => {
@@ -266,18 +228,13 @@ export function GrainsWorkspace() {
       return;
     }
 
-    if (
-      Number.isNaN(numericQuantity) ||
-      numericQuantity <= 0
-    ) {
+    if (Number.isNaN(numericQuantity) || numericQuantity <= 0) {
       setError("Ingresa una cantidad mayor que cero.");
       return;
     }
 
     if (numericQuantity > selectedProduct.stock) {
-      setError(
-        "No hay suficiente inventario disponible para esta venta.",
-      );
+      setError("No hay suficiente inventario disponible para esta venta.");
       return;
     }
 
@@ -301,40 +258,26 @@ export function GrainsWorkspace() {
           return product;
         }
 
-        const newStock =
-          product.stock - numericQuantity;
+        const newStock = product.stock - numericQuantity;
 
         return {
           ...product,
           stock: newStock,
-          status:
-            newStock <= product.minStock
-              ? "lowStock"
-              : "inStock",
-          accent:
-            newStock <= product.minStock
-              ? colors.danger
-              : product.accent,
+          status: newStock <= product.minStock ? "lowStock" : "inStock",
+          accent: newStock <= product.minStock ? colors.danger : product.accent,
         };
       }),
     );
 
-    setSales((currentSales) => [
-      newSale,
-      ...currentSales,
-    ]);
+    setSales((currentSales) => [newSale, ...currentSales]);
 
     setQuantity("1");
   };
 
-  const handleAddGrain = (
-    formValues: AddGrainFormValues,
-  ): void => {
+  const handleAddGrain = (formValues: AddGrainFormValues): void => {
     const numericStock = Number(formValues.stock);
     const numericPrice = Number(formValues.price);
-    const numericMinStock = Number(
-      formValues.minStock,
-    );
+    const numericMinStock = Number(formValues.minStock);
 
     const newProduct: GrainProduct = {
       id: crypto.randomUUID(),
@@ -344,28 +287,21 @@ export function GrainsWorkspace() {
       minStock: numericMinStock,
       price: numericPrice,
       code: createProductCode(formValues.name),
-      accent:
-        formValues.status === "lowStock"
-          ? colors.danger
-          : "#22c55e",
+      accent: formValues.status === "lowStock" ? colors.danger : "#22c55e",
       status: formValues.status,
       silo: "Bodega principal",
       imageUrl:
+        formValues.imageUrl.trim() ||
         "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=700&q=80",
     };
 
-    setProducts((currentProducts) => [
-      newProduct,
-      ...currentProducts,
-    ]);
+    setProducts((currentProducts) => [newProduct, ...currentProducts]);
 
     setSelectedProductId(newProduct.id);
     setIsAddGrainOpen(false);
   };
 
-  const handleEditProduct = (
-    product: GrainProduct,
-  ): void => {
+  const handleEditProduct = (product: GrainProduct): void => {
     console.log("Editar producto:", product);
   };
 
@@ -473,13 +409,9 @@ export function GrainsWorkspace() {
                 paymentMethods={paymentMethods}
                 saleTotal={saleTotal}
                 error={error}
-                onSelectedProductChange={
-                  setSelectedProductId
-                }
+                onSelectedProductChange={setSelectedProductId}
                 onQuantityChange={setQuantity}
-                onPaymentMethodChange={
-                  setPaymentMethod
-                }
+                onPaymentMethodChange={setPaymentMethod}
                 onRegisterSale={handleRegisterSale}
               />
             </SectionCard>
@@ -492,16 +424,10 @@ export function GrainsWorkspace() {
             subtitle="Últimas ventas registradas en el módulo de granos"
             productIcon={<FaSeedling size={13} />}
             getRecordLabel={(sale) =>
-              `Venta #${sale.id
-                .slice(-4)
-                .toUpperCase()}`
+              `Venta #${sale.id.slice(-4).toUpperCase()}`
             }
-            getQuantityLabel={(sale) =>
-              `${sale.quantity} ${sale.unit}`
-            }
-            getProductSecondaryText={() =>
-              "Producto vendido"
-            }
+            getQuantityLabel={(sale) => `${sale.quantity} ${sale.unit}`}
+            getProductSecondaryText={() => "Producto vendido"}
             colors={{
               border: colors.cardBorder,
               text: colors.text,
@@ -526,214 +452,5 @@ export function GrainsWorkspace() {
         onSave={handleAddGrain}
       />
     </AppShell>
-  );
-}
-
-function HeroHeader() {
-  return (
-    <Paper
-      elevation={0}
-      sx={{
-        position: "relative",
-        overflow: "hidden",
-        p: {
-          xs: 2.5,
-          md: 3,
-        },
-        borderRadius: "16px",
-        color: "#ffffff",
-        background:
-          "linear-gradient(135deg, #064e3b 0%, #14532d 58%, #1f6f4a 100%)",
-        minHeight: 116,
-        display: "flex",
-        alignItems: "center",
-      }}
-    >
-      <Box
-        sx={{
-          position: "relative",
-          zIndex: 2,
-          minWidth: 0,
-        }}
-      >
-        <Chip
-          label={grainsConfig.badge}
-          size="small"
-          sx={{
-            mb: 1.25,
-            bgcolor: "rgba(255,255,255,0.15)",
-            color: "#d1fae5",
-            fontWeight: 900,
-            fontSize: 11,
-          }}
-        />
-
-        <Typography
-          sx={{
-            fontSize: {
-              xs: 22,
-              sm: 26,
-            },
-            fontWeight: 950,
-            lineHeight: 1.1,
-          }}
-        >
-          {grainsConfig.title}
-        </Typography>
-
-        <Typography
-          sx={{
-            mt: 0.5,
-            maxWidth: 760,
-            color: "#d1fae5",
-            fontSize: {
-              xs: 12,
-              sm: 14,
-            },
-            lineHeight: 1.5,
-          }}
-        >
-          {grainsConfig.subtitle}
-        </Typography>
-      </Box>
-
-      <Box
-        sx={{
-          position: "absolute",
-          right: {
-            xs: -16,
-            md: 50,
-          },
-          bottom: -30,
-          color: "rgba(255,255,255,0.11)",
-          fontSize: {
-            xs: 110,
-            md: 150,
-          },
-          transform: "rotate(-8deg)",
-        }}
-      >
-        <FaLeaf />
-      </Box>
-    </Paper>
-  );
-}
-
-type MetricCardProps = {
-  icon: ReactNode;
-  iconBg: string;
-  iconColor: string;
-  label: string;
-  value: string;
-  detail: string;
-};
-
-function MetricCard({
-  icon,
-  iconBg,
-  iconColor,
-  label,
-  value,
-  detail,
-}: MetricCardProps) {
-  return (
-    <Card
-      elevation={0}
-      sx={{
-        borderRadius: "16px",
-        border: `1px solid ${colors.cardBorder}`,
-        bgcolor: colors.cardBg,
-        boxShadow:
-          "0 8px 22px rgba(15, 23, 42, 0.05)",
-      }}
-    >
-      <Box sx={{ p: 2.25 }}>
-        <Box
-          sx={{
-            display: "flex",
-            gap: 2,
-            alignItems: "center",
-          }}
-        >
-          <Box
-            sx={{
-              width: 44,
-              height: 44,
-              borderRadius: "16px",
-              display: "grid",
-              placeItems: "center",
-              bgcolor: iconBg,
-              color: iconColor,
-              fontSize: 19,
-              flexShrink: 0,
-            }}
-          >
-            {icon}
-          </Box>
-
-          <Box sx={{ minWidth: 0 }}>
-            <Typography
-              sx={{
-                color: colors.text,
-                fontSize: 11,
-                fontWeight: 900,
-                textTransform: "uppercase",
-              }}
-            >
-              {label}
-            </Typography>
-
-            <Typography
-              sx={{
-                mt: 0.25,
-                color: colors.text,
-                fontSize: 18,
-                fontWeight: 950,
-                overflowWrap: "anywhere",
-              }}
-            >
-              {value}
-            </Typography>
-
-            <Typography
-              sx={{
-                color: colors.muted,
-                fontSize: 12,
-              }}
-            >
-              {detail}
-            </Typography>
-          </Box>
-        </Box>
-      </Box>
-    </Card>
-  );
-}
-
-type SectionCardProps = {
-  children: ReactNode;
-  sx?: SxProps<Theme>;
-};
-
-function SectionCard({
-  children,
-  sx,
-}: SectionCardProps) {
-  return (
-    <Card
-      elevation={0}
-      sx={{
-        minWidth: 0,
-        overflow: "hidden",
-        borderRadius: "16px",
-        border: `1px solid ${colors.cardBorder}`,
-        bgcolor: colors.cardBg,
-        boxShadow:
-          "0 10px 28px rgba(15, 23, 42, 0.06)",
-        ...sx,
-      }}
-    >
-      {children}
-    </Card>
   );
 }

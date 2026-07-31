@@ -21,12 +21,15 @@ import {
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 
+import { ImageUploadField } from "../WorkspaceShared/ImageUploadField";
+
 export type PropertyForm = {
   name: string;
   code: string;
   location: string;
   size: string;
   price: string;
+  imageUrl: string;
   ownerName: string;
   ownerPhone: string;
   ownerDocument: string;
@@ -223,6 +226,14 @@ export default function AddPropertyDialog({
               />
             </FormField>
           </FieldGrid>
+
+          <Box sx={{ mt: 2.5 }}>
+            <ImageUploadField
+              label="Imagen para la tarjeta"
+              value={form.imageUrl}
+              onChange={(imageUrl) => onChange("imageUrl", imageUrl)}
+            />
+          </Box>
         </Box>
       </DialogContent>
 

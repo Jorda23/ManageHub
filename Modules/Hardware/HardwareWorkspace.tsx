@@ -1,19 +1,16 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
 
 import {
   FaBoxes,
   FaClipboardCheck,
   FaExclamationTriangle,
   FaRegClock,
-  FaTools,
   FaWrench,
 } from "react-icons/fa";
 
-import { Box, Card, Chip, Paper, Typography } from "@mui/material";
-
-import type { SxProps, Theme } from "@mui/material/styles";
+import { Box } from "@mui/material";
 
 import AppShell from "@/components/AppShell/AppShell";
 
@@ -29,8 +26,12 @@ import {
 
 import { RegisterSaleCard } from "@/components/RegisterSaleCard";
 import { SalesHistoryTable } from "@/components/SalesHistoryTable";
+import { HardwareWorkspaceHero } from "@/Modules/Hardware/components/HardwareWorkspaceHero";
+import { hardwareColors } from "@/theme/sharedColors";
 
 import type { WorkspaceConfig } from "@/components/WorkspaceShared/workspaceTypes";
+import { SectionCard } from "./components/SectionCard";
+import { MetricCard } from "./components/MetricCard";
 
 type HardwareSale = {
   id: string;
@@ -43,25 +44,7 @@ type HardwareSale = {
   date: string;
 };
 
-const colors = {
-  pageBg: "#f3f6f8",
-  cardBg: "#ffffff",
-  cardBorder: "#dce5e1",
-  text: "#0f172a",
-  muted: "#64748b",
-  softMuted: "#94a3b8",
-  primary: "#92400e",
-  primaryDark: "#78350f",
-  primaryLight: "#f59e0b",
-  primarySoft: "#ffedd5",
-  blue: "#0891b2",
-  blueSoft: "#cffafe",
-  green: "#0f766e",
-  greenSoft: "#dcfce7",
-  danger: "#dc2626",
-  dangerSoft: "#fee2e2",
-  tableHead: "#f1f5f9",
-};
+export const colors = hardwareColors;
 
 const hardwareConfig: WorkspaceConfig = {
   category: "hardware",
@@ -321,6 +304,7 @@ export function HardwareWorkspace() {
       accent: isLowStock ? colors.danger : colors.primaryLight,
       status: isLowStock ? "lowStock" : "inStock",
       imageUrl:
+        formValues.imageUrl.trim() ||
         "https://images.unsplash.com/photo-1581783898377-1c85bf937427?auto=format&fit=crop&w=700&q=80",
     };
 
@@ -371,7 +355,11 @@ export function HardwareWorkspace() {
             },
           }}
         >
-          <HeroHeader />
+          <HardwareWorkspaceHero
+            badge={hardwareConfig.badge}
+            title={hardwareConfig.title}
+            subtitle={hardwareConfig.subtitle}
+          />
 
           <Box
             sx={{
@@ -505,221 +493,5 @@ export function HardwareWorkspace() {
   );
 }
 
-function HeroHeader() {
-  return (
-    <Paper
-      elevation={0}
-      sx={{
-        position: "relative",
-        overflow: "hidden",
-        p: {
-          xs: 2,
-          sm: 2.5,
-          md: 3,
-        },
-        borderRadius: "16px",
-        color: "#ffffff",
-        background:
-          "linear-gradient(135deg, #78350f 0%, #f59e0b 55%, #0891b2 100%)",
-        minHeight: {
-          xs: 130,
-          md: 118,
-        },
-        display: "flex",
-        alignItems: "center",
-      }}
-    >
-      <Box
-        sx={{
-          position: "relative",
-          zIndex: 2,
-          maxWidth: "100%",
-          minWidth: 0,
-        }}
-      >
-        <Chip
-          label={hardwareConfig.badge}
-          size="small"
-          sx={{
-            mb: 1.25,
-            bgcolor: "rgba(255,255,255,0.18)",
-            color: "#fff7ed",
-            fontWeight: 900,
-            fontSize: 11,
-          }}
-        />
 
-        <Typography
-          sx={{
-            fontSize: {
-              xs: 22,
-              sm: 26,
-              md: 34,
-            },
-            lineHeight: 1.1,
-            fontWeight: 950,
-          }}
-        >
-          {hardwareConfig.title}
-        </Typography>
 
-        <Typography
-          sx={{
-            mt: 0.75,
-            maxWidth: 760,
-            color: "#fff7ed",
-            fontSize: {
-              xs: 12.5,
-              sm: 14,
-            },
-            lineHeight: 1.45,
-          }}
-        >
-          {hardwareConfig.subtitle}
-        </Typography>
-      </Box>
-
-      <Box
-        sx={{
-          position: "absolute",
-          right: {
-            xs: -28,
-            md: 48,
-          },
-          bottom: {
-            xs: -26,
-            md: -34,
-          },
-          color: "rgba(255,255,255,0.15)",
-          fontSize: {
-            xs: 94,
-            md: 150,
-          },
-          transform: "rotate(-8deg)",
-        }}
-      >
-        <FaTools />
-      </Box>
-    </Paper>
-  );
-}
-
-type MetricCardProps = {
-  icon: ReactNode;
-  iconBg: string;
-  iconColor: string;
-  label: string;
-  value: string;
-  detail: string;
-};
-
-function MetricCard({
-  icon,
-  iconBg,
-  iconColor,
-  label,
-  value,
-  detail,
-}: MetricCardProps) {
-  return (
-    <Card
-      elevation={0}
-      sx={{
-        borderRadius: "16px",
-        border: `1px solid ${colors.cardBorder}`,
-        bgcolor: colors.cardBg,
-        boxShadow: "0 8px 22px rgba(15, 23, 42, 0.05)",
-      }}
-    >
-      <Box
-        sx={{
-          p: {
-            xs: 1.8,
-            md: 2.25,
-          },
-          display: "flex",
-          gap: 2,
-          alignItems: "center",
-        }}
-      >
-        <Box
-          sx={{
-            width: 44,
-            height: 44,
-            borderRadius: "16px",
-            display: "grid",
-            placeItems: "center",
-            bgcolor: iconBg,
-            color: iconColor,
-            fontSize: 19,
-            flexShrink: 0,
-          }}
-        >
-          {icon}
-        </Box>
-
-        <Box sx={{ minWidth: 0 }}>
-          <Typography
-            sx={{
-              fontSize: 11,
-              color: colors.text,
-              fontWeight: 950,
-              textTransform: "uppercase",
-              letterSpacing: "0.03em",
-            }}
-          >
-            {label}
-          </Typography>
-
-          <Typography
-            sx={{
-              fontSize: {
-                xs: 20,
-                md: 22,
-              },
-              fontWeight: 950,
-              lineHeight: 1.1,
-              color: colors.text,
-              overflowWrap: "anywhere",
-            }}
-          >
-            {value}
-          </Typography>
-
-          <Typography
-            sx={{
-              fontSize: 12,
-              color: colors.muted,
-            }}
-          >
-            {detail}
-          </Typography>
-        </Box>
-      </Box>
-    </Card>
-  );
-}
-
-type SectionCardProps = {
-  children: ReactNode;
-  sx?: SxProps<Theme>;
-};
-
-function SectionCard({ children, sx }: SectionCardProps) {
-  return (
-    <Card
-      elevation={0}
-      sx={{
-        borderRadius: "16px",
-        border: `1px solid ${colors.cardBorder}`,
-        bgcolor: colors.cardBg,
-        overflow: "hidden",
-        boxShadow: "0 10px 28px rgba(15, 23, 42, 0.06)",
-        minWidth: 0,
-        ...sx,
-      }}
-    >
-      {children}
-    </Card>
-  );
-}

@@ -21,6 +21,11 @@ import {
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 
+import {
+  buildCsvContent,
+  downloadCsvFile,
+} from "@/components/WorkspaceShared/csvDownload";
+
 export type BaseSale = {
   id: string;
   productName: string;
@@ -215,6 +220,38 @@ export function SalesHistoryTable<TSale extends BaseSale>({
     ? filteredTotal
     : totalSold;
 
+  const handleDownload = () => {
+    if (onDownload) {
+      onDownload(filteredSales);
+      return;
+    }
+
+    const headers = [
+      "Registro",
+      "Fecha",
+      "Producto",
+      "Cantidad",
+      "Precio unitario",
+      "Metodo de pago",
+      "Total",
+    ];
+
+    const rows = filteredSales.map((sale) => [
+      getRecordLabel(sale),
+      sale.date,
+      sale.productName,
+      getQuantityLabel(sale),
+      sale.unitPrice.toFixed(2),
+      sale.paymentMethod,
+      sale.total.toFixed(2),
+    ]);
+
+    const csvContent = buildCsvContent(headers, rows);
+    const fileDate = new Date().toISOString().slice(0, 10);
+
+    downloadCsvFile(`historial-ventas-${fileDate}.csv`, csvContent);
+  };
+
   const clearFilters = () => {
     setSearch("");
     setPaymentMethod("");
@@ -300,11 +337,7 @@ export function SalesHistoryTable<TSale extends BaseSale>({
 
         <ActionButton
           label="Descargar historial"
-          onClick={
-            onDownload
-              ? () => onDownload(filteredSales)
-              : undefined
-          }
+          onClick={handleDownload}
           colors={colors}
         >
           <FaDownload />

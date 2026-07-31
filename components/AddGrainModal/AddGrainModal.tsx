@@ -29,6 +29,7 @@ import {
 
 import { FormModal } from "../FormModal";
 import { ModalField } from "../ModalField";
+import { ImageUploadField } from "../WorkspaceShared/ImageUploadField";
 
 export type GrainStatus =
   | "inStock"
@@ -37,6 +38,7 @@ export type GrainStatus =
 export type AddGrainFormValues = {
   name: string;
   unit: string;
+  imageUrl: string;
   stock: string;
   minStock: string;
   price: string;
@@ -68,6 +70,7 @@ const colors = {
 const initialValues: AddGrainFormValues = {
   name: "",
   unit: "Quintal",
+  imageUrl: "",
   stock: "",
   minStock: "",
   price: "",
@@ -330,6 +333,20 @@ export function AddGrainModal({
             </TextField>
           </ModalField>
         </Box>
+
+        <ModalField
+          label="Imagen para la tarjeta"
+          htmlFor="grain-image"
+        >
+          <ImageUploadField
+            label="Imagen del grano"
+            value={values.imageUrl}
+            disabled={isSubmitting}
+            onChange={(imageUrl) => {
+              updateField("imageUrl", imageUrl);
+            }}
+          />
+        </ModalField>
 
         <Box
           sx={{
