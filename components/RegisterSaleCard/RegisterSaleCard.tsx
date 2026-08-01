@@ -51,7 +51,14 @@ const colors = {
 
 const inputSx: SxProps<Theme> = {
   "& .MuiOutlinedInput-root": {
-    borderRadius: "16px",
+    minHeight: {
+      xs: 44,
+      sm: 46,
+    },
+    borderRadius: {
+      xs: "12px",
+      sm: "16px",
+    },
     bgcolor: "#fbfdfc",
     fontSize: 14,
     fontWeight: 600,
@@ -70,10 +77,24 @@ const inputSx: SxProps<Theme> = {
       borderWidth: 1.5,
     },
   },
+
+  "& input": {
+    px: {
+      xs: 1.5,
+      sm: 1.75,
+    },
+  },
 };
 
 const selectSx: SxProps<Theme> = {
-  borderRadius: "16px",
+  minHeight: {
+    xs: 44,
+    sm: 46,
+  },
+  borderRadius: {
+    xs: "12px",
+    sm: "16px",
+  },
   bgcolor: "#fbfdfc",
   fontSize: 14,
   fontWeight: 600,
@@ -91,14 +112,23 @@ const selectSx: SxProps<Theme> = {
     borderColor: colors.primaryLight,
     borderWidth: 1.5,
   },
+
+  "& .MuiSelect-select": {
+    display: "flex",
+    alignItems: "center",
+    px: {
+      xs: 1.5,
+      sm: 1.75,
+    },
+    py: 1.25,
+  },
 };
 
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat("en-US", {
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
   }).format(value);
-};
 
 export function RegisterSaleCard<TProduct extends SaleProduct>({
   products,
@@ -120,27 +150,46 @@ export function RegisterSaleCard<TProduct extends SaleProduct>({
   return (
     <Box
       sx={{
-        height: "100%",
+        width: "100%",
+        height: {
+          xs: "auto",
+          lg: "100%",
+        },
+        minWidth: 0,
         bgcolor: "#ffffff",
+        overflow: "hidden",
       }}
     >
       <Box
         sx={{
           px: {
-            xs: 1.8,
-            md: 2.5,
+            xs: 2,
+            sm: 2.5,
+            md: 3,
           },
-          py: 2,
+          py: {
+            xs: 1.75,
+            sm: 2,
+          },
           display: "flex",
           alignItems: "center",
-          gap: 1.2,
+          gap: 1.25,
         }}
       >
         <Box
           sx={{
-            width: 32,
-            height: 32,
-            borderRadius: "16px",
+            width: {
+              xs: 34,
+              sm: 38,
+            },
+            height: {
+              xs: 34,
+              sm: 38,
+            },
+            borderRadius: {
+              xs: "12px",
+              sm: "16px",
+            },
             display: "grid",
             placeItems: "center",
             color: colors.primary,
@@ -155,11 +204,14 @@ export function RegisterSaleCard<TProduct extends SaleProduct>({
           component="h2"
           sx={{
             m: 0,
+            minWidth: 0,
             fontWeight: 950,
             fontSize: {
-              xs: 16,
-              md: 18,
+              xs: 17,
+              sm: 18,
+              md: 20,
             },
+            lineHeight: 1.2,
             color: colors.text,
           }}
         >
@@ -172,43 +224,71 @@ export function RegisterSaleCard<TProduct extends SaleProduct>({
       <Box
         sx={{
           p: {
-            xs: 1.8,
-            md: 2.5,
+            xs: 2,
+            sm: 2.5,
+            md: 3,
           },
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "minmax(0, 1fr)",
+            md: "repeat(2, minmax(0, 1fr))",
+          },
+          gap: {
+            xs: 2,
+            md: 2.25,
+          },
+          alignItems: "start",
         }}
       >
         {error && (
           <Box
             role="alert"
             sx={{
+              gridColumn: "1 / -1",
               px: 1.5,
-              py: 1,
-              borderRadius: "16px",
+              py: 1.15,
+              borderRadius: {
+                xs: "12px",
+                sm: "16px",
+              },
               bgcolor: colors.dangerSoft,
               border: "1px solid #fecaca",
               color: colors.danger,
               fontSize: 12,
               fontWeight: 800,
+              overflowWrap: "anywhere",
             }}
           >
             {error}
           </Box>
         )}
 
-        <Box>
+        <Box
+          sx={{
+            minWidth: 0,
+            gridColumn: {
+              xs: "auto",
+              md: "1 / -1",
+            },
+          }}
+        >
           <FieldLabel>Producto</FieldLabel>
 
           <FormControl fullWidth size="small">
             <Select
               value={selectedProductId}
+              displayEmpty
               onChange={(event) =>
                 onSelectedProductChange(event.target.value)
               }
               sx={selectSx}
             >
+              {!products.length && (
+                <MenuItem value="" disabled>
+                  No hay productos disponibles
+                </MenuItem>
+              )}
+
               {products.map((product) => (
                 <MenuItem key={product.id} value={product.id}>
                   {productOptionLabel(product)}
@@ -218,7 +298,7 @@ export function RegisterSaleCard<TProduct extends SaleProduct>({
           </FormControl>
         </Box>
 
-        <Box>
+        <Box sx={{ minWidth: 0 }}>
           <FieldLabel>Cantidad</FieldLabel>
 
           <TextField
@@ -230,6 +310,7 @@ export function RegisterSaleCard<TProduct extends SaleProduct>({
               htmlInput: {
                 min: 1,
                 step: 1,
+                inputMode: "numeric",
               },
             }}
             fullWidth
@@ -237,7 +318,7 @@ export function RegisterSaleCard<TProduct extends SaleProduct>({
           />
         </Box>
 
-        <Box>
+        <Box sx={{ minWidth: 0 }}>
           <FieldLabel>Método de pago</FieldLabel>
 
           <FormControl fullWidth size="small">
@@ -257,39 +338,112 @@ export function RegisterSaleCard<TProduct extends SaleProduct>({
           </FormControl>
         </Box>
 
-        <SaleSummary
-          productName={
-            selectedProduct
-              ? productSummaryLabel(selectedProduct)
-              : "-"
-          }
-          unitPrice={selectedProduct?.price ?? 0}
-          quantity={numericQuantity}
-          total={saleTotal}
-        />
-
-        <Button
-          fullWidth
-          variant="contained"
-          startIcon={<FaPlusCircle />}
-          onClick={onRegisterSale}
+        <Box
           sx={{
-            py: 1.35,
-            borderRadius: 2.5,
-            bgcolor: colors.primary,
-            fontWeight: 900,
-            textTransform: "none",
-            boxShadow: "0 12px 24px rgba(245, 158, 11, 0.22)",
-            color: "white",
-
-            "&:hover": {
-              bgcolor: "#78350f",
-              boxShadow: "0 14px 28px rgba(245, 158, 11, 0.28)",
-            },
+            gridColumn: "1 / -1",
+            minWidth: 0,
           }}
         >
-          Registrar venta
-        </Button>
+          <SaleSummary
+            productName={
+              selectedProduct
+                ? productSummaryLabel(selectedProduct)
+                : "-"
+            }
+            unitPrice={selectedProduct?.price ?? 0}
+            quantity={numericQuantity}
+            total={saleTotal}
+          />
+        </Box>
+
+<Button
+  fullWidth
+  variant="contained"
+  startIcon={<FaPlusCircle />}
+  onClick={onRegisterSale}
+  disabled={!selectedProductId || numericQuantity < 1}
+  sx={{
+    gridColumn: "1 / -1",
+    width: "100%",
+    minHeight: {
+      xs: 52,
+      sm: 48,
+    },
+    px: {
+      xs: 2,
+      sm: 3,
+    },
+    py: {
+      xs: 1.4,
+      sm: 1.2,
+    },
+    borderRadius: {
+      xs: "14px",
+      sm: "12px",
+    },
+
+    bgcolor: colors.primary,
+    color: "#ffffff",
+    fontSize: {
+      xs: 15,
+      sm: 14,
+      md: 15,
+    },
+    lineHeight: 1.2,
+    fontWeight: 900,
+    textTransform: "none",
+    whiteSpace: "nowrap",
+
+    boxShadow: {
+      xs: "0 8px 18px rgba(146, 64, 14, 0.2)",
+      sm: "0 10px 22px rgba(146, 64, 14, 0.22)",
+    },
+
+    transition:
+      "background-color 160ms ease, box-shadow 160ms ease, transform 120ms ease",
+
+    "& .MuiButton-startIcon": {
+      mr: {
+        xs: 1,
+        sm: 0.8,
+      },
+
+      "& svg": {
+        width: {
+          xs: 19,
+          sm: 17,
+        },
+        height: {
+          xs: 19,
+          sm: 17,
+        },
+      },
+    },
+
+    "&:hover": {
+      bgcolor: "#78350f",
+      boxShadow: "0 12px 24px rgba(146, 64, 14, 0.26)",
+    },
+
+    "&:active": {
+      transform: "scale(0.985)",
+      boxShadow: "0 5px 12px rgba(146, 64, 14, 0.2)",
+    },
+
+    "&:focus-visible": {
+      outline: "3px solid rgba(245, 158, 11, 0.35)",
+      outlineOffset: 2,
+    },
+
+    "&.Mui-disabled": {
+      bgcolor: "#e2e8f0",
+      color: "#94a3b8",
+      boxShadow: "none",
+    },
+  }}
+>
+  Registrar venta
+</Button>
       </Box>
     </Box>
   );
@@ -309,13 +463,27 @@ function SaleSummary({
   return (
     <Box
       sx={{
-        p: 2,
-        borderRadius: "16px",
+        p: {
+          xs: 1.5,
+          sm: 2,
+        },
+        borderRadius: {
+          xs: "12px",
+          sm: "16px",
+        },
         bgcolor: "#f8fafc",
         border: `1px solid ${colors.cardBorder}`,
+        minWidth: 0,
       }}
     >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.1 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 1.1,
+          minWidth: 0,
+        }}
+      >
         <SummaryRow label="Producto" value={productName} />
 
         <SummaryRow
@@ -330,20 +498,49 @@ function SaleSummary({
         <Box
           sx={{
             display: "flex",
+            flexDirection: {
+              xs: "column",
+              sm: "row",
+            },
             justifyContent: "space-between",
-            gap: 2,
-            alignItems: "center",
+            alignItems: {
+              xs: "stretch",
+              sm: "center",
+            },
+            gap: {
+              xs: 0.25,
+              sm: 2,
+            },
           }}
         >
-          <Typography sx={{ fontSize: 20, fontWeight: 950 }}>
+          <Typography
+            sx={{
+              fontSize: {
+                xs: 15,
+                sm: 18,
+                md: 20,
+              },
+              fontWeight: 950,
+            }}
+          >
             Total
           </Typography>
 
           <Typography
             sx={{
-              fontSize: 20,
+              fontSize: {
+                xs: 24,
+                sm: 22,
+                md: 24,
+              },
+              lineHeight: 1.15,
               fontWeight: 950,
               color: colors.primary,
+              textAlign: {
+                xs: "left",
+                sm: "right",
+              },
+              overflowWrap: "anywhere",
             }}
           >
             {formatCurrency(total)}
@@ -361,7 +558,10 @@ function FieldLabel({ children }: { children: ReactNode }) {
       sx={{
         display: "block",
         mb: 0.75,
-        fontSize: 11,
+        fontSize: {
+          xs: 10,
+          sm: 11,
+        },
         color: colors.text,
         fontWeight: 950,
         textTransform: "uppercase",
@@ -383,14 +583,23 @@ function SummaryRow({
   return (
     <Box
       sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        gap: 2,
+        display: "grid",
+        gridTemplateColumns: {
+          xs: "minmax(0, 0.8fr) minmax(0, 1.2fr)",
+          sm: "minmax(0, 1fr) minmax(0, 1.4fr)",
+        },
+        alignItems: "start",
+        gap: 1.5,
+        minWidth: 0,
       }}
     >
       <Typography
         sx={{
-          fontSize: 13,
+          minWidth: 0,
+          fontSize: {
+            xs: 12,
+            sm: 13,
+          },
           color: colors.muted,
           fontWeight: 600,
         }}
@@ -400,7 +609,11 @@ function SummaryRow({
 
       <Typography
         sx={{
-          fontSize: 13,
+          minWidth: 0,
+          fontSize: {
+            xs: 12,
+            sm: 13,
+          },
           color: colors.text,
           fontWeight: 950,
           textAlign: "right",
