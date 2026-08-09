@@ -28,10 +28,7 @@ import {
 } from "react-icons/fa";
 
 import AppShell from "@/components/AppShell/AppShell";
-import {
-  saleCategories,
-  type SaleCategory,
-} from "@/components/SaleWorkspace/saleWorkspaceData";
+import { saleCategories, type SaleCategory } from "@/components/SaleWorkspace/saleWorkspaceData";
 import type {
   IconType,
   WorkspaceAnalysisItem,
@@ -145,11 +142,7 @@ export function WorkspaceLayout({ config }: WorkspaceLayoutProps) {
             }}
           >
             {config.metrics.map((metric) => (
-              <MetricCard
-                key={metric.label}
-                {...metric}
-                accent={config.heroAccent}
-              />
+              <MetricCard key={metric.label} {...metric} accent={config.heroAccent} />
             ))}
           </Box>
 
@@ -202,24 +195,17 @@ export function WorkspaceLayout({ config }: WorkspaceLayoutProps) {
                           icon={categoryIcon(item)}
                           label={categoryLabel(item)}
                           hint={categoryHint(item)}
-                          accent={
-                            item === category ? config.heroAccent : "#607383"
-                          }
+                          accent={item === category ? config.heroAccent : "#607383"}
                         />
                       ))}
                     </Box>
                   </Box>
 
                   <Box>
-                    <SectionLabel>
-                      {category === "property" ? "Comprador" : "Cliente"}
-                    </SectionLabel>
+                    <SectionLabel>{category === "property" ? "Comprador" : "Cliente"}</SectionLabel>
 
                     {config.customerMode === "directory" ? (
-                      <CustomerDirectory
-                        config={config}
-                        accent={config.heroAccent}
-                      />
+                      <CustomerDirectory config={config} accent={config.heroAccent} />
                     ) : (
                       <QuickCustomer config={config} />
                     )}
@@ -243,9 +229,7 @@ export function WorkspaceLayout({ config }: WorkspaceLayoutProps) {
                     >
                       <FaPlus size={12} />
                       <Typography sx={{ fontSize: 13, fontWeight: 900 }}>
-                        {category === "property"
-                          ? "Agregar propiedad"
-                          : "Agregar item"}
+                        {category === "property" ? "Agregar propiedad" : "Agregar item"}
                       </Typography>
                     </Stack>
                   }
@@ -262,11 +246,7 @@ export function WorkspaceLayout({ config }: WorkspaceLayoutProps) {
 
               <GlassCard>
                 <SectionHeader
-                  title={
-                    category === "property"
-                      ? "Método de abono"
-                      : "Método de pago"
-                  }
+                  title={category === "property" ? "Método de abono" : "Método de pago"}
                   subtitle={
                     category === "property"
                       ? "Registra el abono usando el método seleccionado."
@@ -285,22 +265,14 @@ export function WorkspaceLayout({ config }: WorkspaceLayoutProps) {
                   }}
                 >
                   {config.payments.map((payment) => (
-                    <PaymentTile
-                      key={payment.title}
-                      {...payment}
-                      accent={config.heroAccent}
-                    />
+                    <PaymentTile key={payment.title} {...payment} accent={config.heroAccent} />
                   ))}
                 </Box>
               </GlassCard>
 
               <GlassCard>
                 <SectionHeader
-                  title={
-                    category === "property"
-                      ? "Análisis de pagos"
-                      : "Análisis de ventas"
-                  }
+                  title={category === "property" ? "Análisis de pagos" : "Análisis de ventas"}
                   subtitle={
                     category === "property"
                       ? "Consulta cómo se están moviendo los abonos por período."
@@ -310,11 +282,7 @@ export function WorkspaceLayout({ config }: WorkspaceLayoutProps) {
 
                 <Stack spacing={1.5}>
                   {config.salesAnalysis.map((item) => (
-                    <AnalysisRow
-                      key={item.label}
-                      item={item}
-                      accent={config.heroAccent}
-                    />
+                    <AnalysisRow key={item.label} item={item} accent={config.heroAccent} />
                   ))}
                 </Stack>
               </GlassCard>
@@ -371,12 +339,7 @@ export function WorkspaceLayout({ config }: WorkspaceLayoutProps) {
 
                 <Stack spacing={1.4} sx={{ mt: 2 }}>
                   {config.workflowItems.map((item, index) => (
-                    <Stack
-                      key={item}
-                      direction="row"
-                      spacing={1.2}
-                      sx={{ alignItems: "center" }}
-                    >
+                    <Stack key={item} direction="row" spacing={1.2} sx={{ alignItems: "center" }}>
                       <Box
                         sx={{
                           width: 24,
@@ -415,13 +378,7 @@ export function WorkspaceLayout({ config }: WorkspaceLayoutProps) {
   );
 }
 
-function CustomerDirectory({
-  config,
-  accent,
-}: {
-  config: WorkspaceConfig;
-  accent: string;
-}) {
+function CustomerDirectory({ config, accent }: { config: WorkspaceConfig; accent: string }) {
   return (
     <Box
       sx={{
@@ -510,16 +467,12 @@ function CustomerDirectory({
                 {customer.name}
               </Typography>
 
-              <Typography sx={{ fontSize: 11.5, color: "#607383" }}>
-                {customer.detail}
-              </Typography>
+              <Typography sx={{ fontSize: 11.5, color: "#607383" }}>{customer.detail}</Typography>
             </Box>
 
             <Stack spacing={0.4} sx={{ alignItems: "flex-end" }}>
               <StatusChip status={customer.status} />
-              <Typography sx={{ fontSize: 11, color: "#607383" }}>
-                {customer.amount}
-              </Typography>
+              <Typography sx={{ fontSize: 11, color: "#607383" }}>{customer.amount}</Typography>
             </Stack>
           </Box>
         ))}
@@ -583,18 +536,13 @@ function QuickCustomer({ config }: { config: WorkspaceConfig }) {
 
       <Divider sx={{ my: 1.6, borderColor: "#e1e8ee" }} />
 
-      <Stack
-        direction="row"
-        sx={{ justifyContent: "space-between", alignItems: "center" }}
-      >
+      <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
         <Box>
           <Typography sx={{ fontSize: 12, fontWeight: 900, color: "#001f33" }}>
             {config.customer}
           </Typography>
 
-          <Typography sx={{ fontSize: 12, color: "#607383" }}>
-            {config.customerEmail}
-          </Typography>
+          <Typography sx={{ fontSize: 12, color: "#607383" }}>{config.customerEmail}</Typography>
         </Box>
 
         <Chip
@@ -631,21 +579,13 @@ function ItemsTableHeader({ category }: { category: SaleCategory }) {
         {category === "property" ? "Propiedad" : "Descripción"}
       </Typography>
       <Typography sx={tableHeaderSx}>Cant.</Typography>
-      <Typography sx={tableHeaderSx}>
-        {category === "property" ? "Valor" : "Unit"}
-      </Typography>
+      <Typography sx={tableHeaderSx}>{category === "property" ? "Valor" : "Unit"}</Typography>
       <Typography sx={tableHeaderSx}>Total</Typography>
     </Box>
   );
 }
 
-function AnalysisRow({
-  item,
-  accent,
-}: {
-  item: WorkspaceAnalysisItem;
-  accent: string;
-}) {
+function AnalysisRow({ item, accent }: { item: WorkspaceAnalysisItem; accent: string }) {
   return (
     <Box
       sx={{
@@ -655,14 +595,9 @@ function AnalysisRow({
         bgcolor: "#ffffff",
       }}
     >
-      <Stack
-        direction="row"
-        sx={{ justifyContent: "space-between", alignItems: "center" }}
-      >
+      <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
         <Box>
-          <Typography
-            sx={{ fontSize: 12, color: "#607383", fontWeight: 900 }}
-          >
+          <Typography sx={{ fontSize: 12, color: "#607383", fontWeight: 900 }}>
             {item.label}
           </Typography>
 
@@ -670,9 +605,7 @@ function AnalysisRow({
             {item.value}
           </Typography>
 
-          <Typography
-            sx={{ fontSize: 11.5, color: "#607383", fontWeight: 600 }}
-          >
+          <Typography sx={{ fontSize: 11.5, color: "#607383", fontWeight: 600 }}>
             {item.detail}
           </Typography>
         </Box>
@@ -738,9 +671,7 @@ function SectionHeader({
       }}
     >
       <Box>
-        <Typography sx={{ color: "#001f33", fontSize: 17, fontWeight: 950 }}>
-          {title}
-        </Typography>
+        <Typography sx={{ color: "#001f33", fontSize: 17, fontWeight: 950 }}>{title}</Typography>
 
         <Typography
           sx={{
@@ -759,13 +690,7 @@ function SectionHeader({
   );
 }
 
-function GlassCard({
-  children,
-  sx,
-}: {
-  children: React.ReactNode;
-  sx?: object;
-}) {
+function GlassCard({ children, sx }: { children: React.ReactNode; sx?: object }) {
   return (
     <Card
       sx={{
@@ -804,9 +729,7 @@ function MetricCard({
         sx={{ justifyContent: "space-between", alignItems: "flex-start" }}
       >
         <Box>
-          <Typography sx={{ color: "#607383", fontSize: 12, fontWeight: 900 }}>
-            {label}
-          </Typography>
+          <Typography sx={{ color: "#607383", fontSize: 12, fontWeight: 900 }}>{label}</Typography>
 
           <Typography
             sx={{
@@ -889,9 +812,7 @@ function CategoryTile({
           borderRadius: "16px",
           p: 1.75,
           height: "140px",
-          border: active
-            ? `1px solid ${alpha(accent, 0.65)}`
-            : "1px solid #dfe7ee",
+          border: active ? `1px solid ${alpha(accent, 0.65)}` : "1px solid #dfe7ee",
           bgcolor: active ? alpha(accent, 0.12) : "#f8fafc",
           boxShadow: active ? `0 0 0 1px ${alpha(accent, 0.14)} inset` : "none",
           transition: "0.18s ease",
@@ -917,17 +838,11 @@ function CategoryTile({
           </Box>
 
           <Box>
-            <Typography
-              sx={{ fontSize: 14, fontWeight: 950, color: "#001f33" }}
-            >
+            <Typography sx={{ fontSize: 14, fontWeight: 950, color: "#001f33" }}>
               {label}
             </Typography>
 
-            <Typography
-              sx={{ fontSize: 12, color: "#607383", fontWeight: 600 }}
-            >
-              {hint}
-            </Typography>
+            <Typography sx={{ fontSize: 12, color: "#607383", fontWeight: 600 }}>{hint}</Typography>
           </Box>
         </Stack>
       </Box>
@@ -935,16 +850,7 @@ function CategoryTile({
   );
 }
 
-function ItemRow({
-  name,
-  detail,
-  code,
-  qty,
-  unit,
-  total,
-  accent,
-  icon: Icon,
-}: WorkspaceProduct) {
+function ItemRow({ name, detail, code, qty, unit, total, accent, icon: Icon }: WorkspaceProduct) {
   return (
     <Box
       sx={{
@@ -963,11 +869,7 @@ function ItemRow({
         bgcolor: "#f8fafc",
       }}
     >
-      <Stack
-        direction="row"
-        spacing={1.35}
-        sx={{ alignItems: "center", minWidth: 0 }}
-      >
+      <Stack direction="row" spacing={1.35} sx={{ alignItems: "center", minWidth: 0 }}>
         <Box
           sx={{
             width: 42,
@@ -997,9 +899,7 @@ function ItemRow({
             {name} {detail}
           </Typography>
 
-          <Typography sx={{ fontSize: 11, color: accent, fontWeight: 900 }}>
-            {code}
-          </Typography>
+          <Typography sx={{ fontSize: 11, color: accent, fontWeight: 900 }}>{code}</Typography>
         </Box>
       </Stack>
 
@@ -1022,9 +922,7 @@ function PaymentTile({
       sx={{
         p: 1.8,
         borderRadius: 3,
-        border: active
-          ? `1px solid ${alpha(accent, 0.6)}`
-          : "1px solid #dfe7ee",
+        border: active ? `1px solid ${alpha(accent, 0.6)}` : "1px solid #dfe7ee",
         bgcolor: active ? alpha(accent, 0.11) : "#f8fafc",
       }}
     >
@@ -1044,9 +942,7 @@ function PaymentTile({
         </Box>
 
         <Box>
-          <Typography sx={{ fontSize: 15, fontWeight: 950, color: "#001f33" }}>
-            {title}
-          </Typography>
+          <Typography sx={{ fontSize: 15, fontWeight: 950, color: "#001f33" }}>{title}</Typography>
 
           <Typography sx={{ color: "#607383", fontSize: 12, fontWeight: 600 }}>
             {subtitle}
@@ -1057,13 +953,7 @@ function PaymentTile({
   );
 }
 
-function SummaryCard({
-  config,
-  accent,
-}: {
-  config: WorkspaceConfig;
-  accent: string;
-}) {
+function SummaryCard({ config, accent }: { config: WorkspaceConfig; accent: string }) {
   const isProperty = config.category === "property";
 
   return (
@@ -1071,17 +961,11 @@ function SummaryCard({
       <Box
         sx={{
           p: 2.2,
-          background: `linear-gradient(180deg, ${alpha(
-            accent,
-            0.15,
-          )}, rgba(255,255,255,0) 100%)`,
+          background: `linear-gradient(180deg, ${alpha(accent, 0.15)}, rgba(255,255,255,0) 100%)`,
           borderBottom: "1px solid #e1e8ee",
         }}
       >
-        <Stack
-          direction="row"
-          sx={{ justifyContent: "space-between", alignItems: "flex-start" }}
-        >
+        <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "flex-start" }}>
           <Box>
             <Typography sx={{ color: "#607383", fontSize: 11, fontWeight: 950 }}>
               {config.summaryLabel}
@@ -1125,10 +1009,7 @@ function SummaryCard({
             mb: 1.6,
           }}
         >
-          <SummaryInfo
-            label={isProperty ? "Comprador" : "Cliente"}
-            value={config.customer}
-          />
+          <SummaryInfo label={isProperty ? "Comprador" : "Cliente"} value={config.customer} />
           <SummaryInfo label="Agente" value={config.agent} />
           <SummaryInfo label="Terminal" value={config.terminal} />
           <SummaryInfo label="Total" value={config.summaryTotal} />
@@ -1145,23 +1026,16 @@ function SummaryCard({
               sx={{ justifyContent: "space-between", alignItems: "center" }}
             >
               <Box sx={{ minWidth: 0 }}>
-                <Typography
-                  sx={{ fontSize: 13, fontWeight: 950, color: "#001f33" }}
-                  noWrap
-                >
+                <Typography sx={{ fontSize: 13, fontWeight: 950, color: "#001f33" }} noWrap>
                   {product.qty}x {product.name}
                 </Typography>
 
-                <Typography
-                  sx={{ color: "#607383", fontSize: 11, fontWeight: 600 }}
-                >
+                <Typography sx={{ color: "#607383", fontSize: 11, fontWeight: 600 }}>
                   {product.code}
                 </Typography>
               </Box>
 
-              <Typography
-                sx={{ color: product.accent, fontWeight: 950, fontSize: 14 }}
-              >
+              <Typography sx={{ color: product.accent, fontWeight: 950, fontSize: 14 }}>
                 {product.total}
               </Typography>
             </Stack>
@@ -1184,9 +1058,7 @@ function SummaryCard({
 
         {config.paymentState ? (
           <>
-            <Divider
-              sx={{ my: 2, borderStyle: "dashed", borderColor: "#dfe7ee" }}
-            />
+            <Divider sx={{ my: 2, borderStyle: "dashed", borderColor: "#dfe7ee" }} />
 
             <Box
               sx={{
@@ -1204,9 +1076,7 @@ function SummaryCard({
                   alignItems: "center",
                 }}
               >
-                <Typography
-                  sx={{ fontSize: 13, fontWeight: 950, color: "#001f33" }}
-                >
+                <Typography sx={{ fontSize: 13, fontWeight: 950, color: "#001f33" }}>
                   Estado de cuenta
                 </Typography>
 
@@ -1214,37 +1084,23 @@ function SummaryCard({
               </Stack>
 
               <Stack spacing={1.1}>
-                <SummaryInfo
-                  label="Fecha límite"
-                  value={config.dueDate ?? "Sin fecha"}
-                />
+                <SummaryInfo label="Fecha límite" value={config.dueDate ?? "Sin fecha"} />
                 <SummaryInfo
                   label="Monto total"
                   value={config.totalAmount ?? config.summaryTotal}
                 />
-                <SummaryInfo
-                  label="Monto abonado"
-                  value={config.paidAmount ?? "$0.00"}
-                />
+                <SummaryInfo label="Monto abonado" value={config.paidAmount ?? "$0.00"} />
                 <SummaryInfo
                   label="Saldo pendiente"
-                  value={formatCurrencyDifference(
-                    config.totalAmount,
-                    config.paidAmount,
-                  )}
+                  value={formatCurrencyDifference(config.totalAmount, config.paidAmount)}
                 />
               </Stack>
             </Box>
           </>
         ) : null}
 
-        <Stack
-          direction="row"
-          sx={{ mt: 1.8, justifyContent: "space-between" }}
-        >
-          <Typography sx={{ color: accent, fontSize: 15, fontWeight: 950 }}>
-            TOTAL
-          </Typography>
+        <Stack direction="row" sx={{ mt: 1.8, justifyContent: "space-between" }}>
+          <Typography sx={{ color: accent, fontSize: 15, fontWeight: 950 }}>TOTAL</Typography>
 
           <Typography sx={{ color: accent, fontSize: 24, fontWeight: 950 }}>
             {config.summaryTotal}
@@ -1322,11 +1178,7 @@ function SummaryCard({
   );
 }
 
-function StatusChip({
-  status,
-}: {
-  status: "Pagado" | "Pendiente" | "Atrasado" | "Al día";
-}) {
+function StatusChip({ status }: { status: "Pagado" | "Pendiente" | "Atrasado" | "Al día" }) {
   const statusConfig = {
     Pagado: {
       bg: alpha("#16a34a", 0.12),
@@ -1362,13 +1214,9 @@ function StatusChip({
 function SummaryInfo({ label, value }: { label: string; value: string }) {
   return (
     <Box>
-      <Typography sx={{ color: "#607383", fontSize: 11, fontWeight: 900 }}>
-        {label}
-      </Typography>
+      <Typography sx={{ color: "#607383", fontSize: 11, fontWeight: 900 }}>{label}</Typography>
 
-      <Typography
-        sx={{ fontSize: 12.5, fontWeight: 900, mt: 0.15, color: "#001f33" }}
-      >
+      <Typography sx={{ fontSize: 12.5, fontWeight: 900, mt: 0.15, color: "#001f33" }}>
         {value}
       </Typography>
     </Box>
@@ -1378,13 +1226,9 @@ function SummaryInfo({ label, value }: { label: string; value: string }) {
 function TotalsRow({ label, value }: { label: string; value: string }) {
   return (
     <Stack direction="row" sx={{ justifyContent: "space-between" }}>
-      <Typography sx={{ color: "#607383", fontSize: 13, fontWeight: 700 }}>
-        {label}
-      </Typography>
+      <Typography sx={{ color: "#607383", fontSize: 13, fontWeight: 700 }}>{label}</Typography>
 
-      <Typography sx={{ fontSize: 13.5, fontWeight: 950, color: "#001f33" }}>
-        {value}
-      </Typography>
+      <Typography sx={{ fontSize: 13.5, fontWeight: 950, color: "#001f33" }}>{value}</Typography>
     </Stack>
   );
 }

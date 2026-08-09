@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   FaBoxes,
@@ -19,17 +19,23 @@ import {
   type AddHardwareProductValues,
 } from "@/components/AddHardwareProductModal";
 
-import {
-  HardwareInventory,
-  type HardwareProduct,
-} from "@/components/HardwareInventory";
+import { HardwareInventory, type HardwareProduct } from "@/components/HardwareInventory";
 
 import { RegisterSaleCard } from "@/components/RegisterSaleCard";
 import { SalesHistoryTable } from "@/components/SalesHistoryTable";
+
 import { HardwareWorkspaceHero } from "@/Modules/Hardware/components/HardwareWorkspaceHero";
+
+import {
+  useCreateHardwareProduct,
+  useHardwareProducts,
+  useRegisterHardwareSale,
+} from "@/hook/useHardware";
+
 import { hardwareColors } from "@/theme/sharedColors";
 
 import type { WorkspaceConfig } from "@/components/WorkspaceShared/workspaceTypes";
+
 import { SectionCard } from "./components/SectionCard";
 import { MetricCard } from "./components/MetricCard";
 
@@ -50,8 +56,7 @@ const hardwareConfig: WorkspaceConfig = {
   category: "hardware",
   badge: "Ferretería",
   title: "Ventas de Ferretería",
-  subtitle:
-    "Control de productos, cantidades, precios, inventario e historial de ventas.",
+  subtitle: "Control de productos, cantidades, precios, inventario e historial de ventas.",
   heroAccent: "#f59e0b",
   heroSecondary: "#19d3d8",
   invoice: "#FER-2026-014",
@@ -76,65 +81,6 @@ const hardwareConfig: WorkspaceConfig = {
   ],
 };
 
-const initialProducts: HardwareProduct[] = [
-  {
-    id: "drill",
-    name: "Taladro inalámbrico",
-    detail: "18V Kit",
-    category: "Herramientas eléctricas",
-    code: "FER-TAL-442",
-    stock: 18,
-    minStock: 5,
-    price: 79.9,
-    accent: "#f59e0b",
-    status: "inStock",
-    imageUrl:
-      "https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=700&q=80",
-  },
-  {
-    id: "screws",
-    name: "Caja de tornillos",
-    detail: "100 unidades",
-    category: "Tornillería",
-    code: "FER-TOR-210",
-    stock: 140,
-    minStock: 25,
-    price: 9,
-    accent: "#0891b2",
-    status: "inStock",
-    imageUrl:
-      "https://images.unsplash.com/photo-1609205807107-e8ec2120f9de?auto=format&fit=crop&w=700&q=80",
-  },
-  {
-    id: "hammer",
-    name: "Martillo de acero",
-    detail: "Mango goma",
-    category: "Herramientas manuales",
-    code: "FER-MAR-091",
-    stock: 36,
-    minStock: 8,
-    price: 12.75,
-    accent: "#0f766e",
-    status: "inStock",
-    imageUrl:
-      "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?auto=format&fit=crop&w=700&q=80",
-  },
-  {
-    id: "cement",
-    name: "Bolsa de cemento",
-    detail: "42.5 kg",
-    category: "Materiales de construcción",
-    code: "FER-CEM-425",
-    stock: 22,
-    minStock: 20,
-    price: 8.5,
-    accent: "#dc2626",
-    status: "inStock",
-    imageUrl:
-      "https://images.unsplash.com/photo-1517089596392-fb9a9033e05b?auto=format&fit=crop&w=700&q=80",
-  },
-];
-
 const initialSales: HardwareSale[] = [
   {
     id: "sale-001",
@@ -158,12 +104,7 @@ const initialSales: HardwareSale[] = [
   },
 ];
 
-const paymentMethods = [
-  "Efectivo",
-  "Tarjeta",
-  "Crédito local",
-  "Transferencia",
-];
+const paymentMethods = ["Efectivo", "Tarjeta", "Crédito local", "Transferencia"];
 
 const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat("es-US", {
@@ -172,27 +113,21 @@ const formatCurrency = (value: number): string => {
   }).format(value);
 };
 
-function createHardwareProductCode(name: string): string {
-  const normalizedName = name
-    .trim()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toUpperCase()
-    .replace(/[^A-Z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 8);
-
-  const randomCode = Math.floor(100 + Math.random() * 900);
-
-  return `FER-${normalizedName || "PROD"}-${randomCode}`;
-}
-
 export function HardwareWorkspace() {
-  const [products, setProducts] = useState<HardwareProduct[]>(initialProducts);
+  const {
+    data: hardwareProducts = [],
+    isLoading: isLoadingProducts,
+    isError: isProductsError,
+  } = useHardwareProducts();
+
+  const { mutateAsync: createHardwareProduct, isPending: isCreatingProduct } =
+    useCreateHardwareProduct();
+
+  const { mutateAsync: registerHardwareSale } = useRegisterHardwareSale();
 
   const [sales, setSales] = useState<HardwareSale[]>(initialSales);
 
-  const [selectedProductId, setSelectedProductId] = useState("drill");
+  const [selectedProductId, setSelectedProductId] = useState("");
 
   const [quantity, setQuantity] = useState("1");
 
@@ -201,6 +136,53 @@ export function HardwareWorkspace() {
   const [error, setError] = useState("");
 
   const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
+
+  const products = useMemo<HardwareProduct[]>(() => {
+    return hardwareProducts.map((product) => {
+      const isLowStock =
+        product.inventoryStatus === "LowStock" || product.stock <= product.minimumStock;
+
+      return {
+        id: product.id,
+
+        name: product.name,
+
+        detail: product.detail,
+
+        category: product.category,
+
+        code: product.code,
+
+        stock: product.stock,
+
+        minStock: product.minimumStock,
+
+        price: product.unitPrice,
+
+        status: isLowStock ? "lowStock" : "inStock",
+
+        accent: isLowStock ? colors.danger : colors.primaryLight,
+
+        imageUrl: product.imageUrl ?? "",
+      };
+    });
+  }, [hardwareProducts]);
+
+  useEffect(() => {
+    if (products.length > 0 && !selectedProductId) {
+      setSelectedProductId(products[0].id);
+    }
+  }, [products, selectedProductId]);
+
+  useEffect(() => {
+    if (
+      selectedProductId &&
+      products.length > 0 &&
+      !products.some((product) => product.id === selectedProductId)
+    ) {
+      setSelectedProductId(products[0].id);
+    }
+  }, [products, selectedProductId]);
 
   const selectedProduct = useMemo(() => {
     return products.find((product) => product.id === selectedProductId);
@@ -225,11 +207,10 @@ export function HardwareWorkspace() {
   }, [products]);
 
   const lowStockCount = useMemo(() => {
-    return products.filter((product) => product.stock <= product.minStock)
-      .length;
+    return products.filter((product) => product.stock <= product.minStock).length;
   }, [products]);
 
-  const handleRegisterSale = (): void => {
+  const handleRegisterSale = async (): Promise<void> => {
     setError("");
 
     if (!selectedProduct) {
@@ -247,71 +228,98 @@ export function HardwareWorkspace() {
       return;
     }
 
-    const newSale: HardwareSale = {
-      id: crypto.randomUUID(),
-      productId: selectedProduct.id,
-      productName: selectedProduct.name,
-      quantity: numericQuantity,
-      unitPrice: selectedProduct.price,
-      total: saleTotal,
-      paymentMethod,
-      date: new Date().toLocaleString("es-NI", {
-        dateStyle: "short",
-        timeStyle: "short",
-      }),
-    };
+    try {
+      const response = await registerHardwareSale({
+        productId: selectedProduct.id,
 
-    setProducts((currentProducts) =>
-      currentProducts.map((product) => {
-        if (product.id !== selectedProduct.id) {
-          return product;
-        }
+        quantity: numericQuantity,
 
-        const newStock = product.stock - numericQuantity;
+        paymentMethod,
+      });
 
-        return {
-          ...product,
-          stock: newStock,
-          status: newStock <= product.minStock ? "lowStock" : "inStock",
-          accent: newStock <= product.minStock ? colors.danger : product.accent,
-        };
-      }),
-    );
+      const newSale: HardwareSale = {
+        id: crypto.randomUUID(),
 
-    setSales((currentSales) => [newSale, ...currentSales]);
+        productId: selectedProduct.id,
 
-    setQuantity("1");
+        productName: selectedProduct.name,
+
+        quantity: response.quantity,
+
+        unitPrice: selectedProduct.price,
+
+        total: response.total,
+
+        paymentMethod,
+
+        date: new Date().toLocaleString("es-NI", {
+          dateStyle: "short",
+          timeStyle: "short",
+        }),
+      };
+
+      setSales((currentSales) => [newSale, ...currentSales]);
+
+      setQuantity("1");
+    } catch {
+      setError("No se pudo registrar la venta.");
+    }
   };
 
-  const handleAddProduct = (formValues: AddHardwareProductValues): void => {
-    const stock = Number(formValues.stock);
+  const handleAddProduct = async (formValues: AddHardwareProductValues): Promise<void> => {
+    setError("");
 
-    const minStock = Number(formValues.minStock);
+    const initialStock = Number(formValues.initialStock);
 
-    const price = Number(formValues.price);
+    const minimumStock = Number(formValues.minimumStock);
 
-    const isLowStock = formValues.status === "lowStock" || stock <= minStock;
+    const unitPrice = Number(formValues.unitPrice);
 
-    const newProduct: HardwareProduct = {
-      id: crypto.randomUUID(),
-      name: formValues.name.trim(),
-      detail: formValues.detail.trim(),
-      category: formValues.category,
-      code: createHardwareProductCode(formValues.name),
-      stock,
-      minStock,
-      price,
-      accent: isLowStock ? colors.danger : colors.primaryLight,
-      status: isLowStock ? "lowStock" : "inStock",
-      imageUrl:
-        formValues.imageUrl.trim() ||
-        "https://images.unsplash.com/photo-1581783898377-1c85bf937427?auto=format&fit=crop&w=700&q=80",
-    };
+    if (Number.isNaN(initialStock) || initialStock < 0) {
+      setError("El stock inicial debe ser válido.");
+      return;
+    }
 
-    setProducts((currentProducts) => [newProduct, ...currentProducts]);
+    if (Number.isNaN(minimumStock) || minimumStock < 0) {
+      setError("El stock mínimo debe ser válido.");
+      return;
+    }
 
-    setSelectedProductId(newProduct.id);
-    setIsAddProductModalOpen(false);
+    if (minimumStock > initialStock) {
+      setError("El stock mínimo no puede ser mayor al stock inicial.");
+      return;
+    }
+
+    if (Number.isNaN(unitPrice) || unitPrice <= 0) {
+      setError("El precio unitario debe ser mayor que cero.");
+      return;
+    }
+
+    try {
+      const response = await createHardwareProduct({
+        name: formValues.name.trim(),
+
+        detail: formValues.detail.trim(),
+
+        category: formValues.category.trim(),
+
+        initialStock,
+
+        minimumStock,
+
+        unitPrice,
+
+        inventoryStatus: formValues.inventoryStatus,
+
+        imageUrl: formValues.imageUrl.trim() || null,
+      });
+
+      setSelectedProductId(response.id);
+
+      setIsAddProductModalOpen(false);
+    } catch {
+      setError("No se pudo crear el producto.");
+    }
   };
 
   const handleEditProduct = (product: HardwareProduct): void => {
@@ -323,32 +331,44 @@ export function HardwareWorkspace() {
       <Box
         sx={{
           width: "100%",
+
           maxWidth: "100vw",
+
           minHeight: "calc(100vh - 48px)",
+
           overflowX: "hidden",
+
           px: {
             xs: 1.5,
             sm: 2,
             md: 4,
           },
+
           py: {
             xs: 2,
             md: 3,
           },
+
           bgcolor: colors.pageBg,
+
           color: colors.text,
         }}
       >
         <Box
           sx={{
             width: "100%",
+
             maxWidth: {
               xs: "100%",
               xl: 1320,
             },
+
             mx: "auto",
+
             display: "flex",
+
             flexDirection: "column",
+
             gap: {
               xs: 2,
               md: 3,
@@ -364,11 +384,15 @@ export function HardwareWorkspace() {
           <Box
             sx={{
               display: "grid",
+
               gridTemplateColumns: {
                 xs: "1fr",
+
                 sm: "repeat(2, minmax(0, 1fr))",
+
                 lg: "repeat(4, minmax(0, 1fr))",
               },
+
               gap: {
                 xs: 1.5,
                 md: 2,
@@ -377,37 +401,57 @@ export function HardwareWorkspace() {
           >
             <MetricCard
               icon={<FaClipboardCheck />}
+
               iconBg={colors.greenSoft}
+
               iconColor={colors.green}
+
               label="Ventas registradas"
+
               value={sales.length.toString()}
+
               detail={`Total: ${formatCurrency(totalSold)}`}
             />
 
             <MetricCard
               icon={<FaBoxes />}
+
               iconBg={colors.primarySoft}
+
               iconColor={colors.primaryLight}
+
               label="Productos en stock"
+
               value={totalStock.toString()}
+
               detail={`${products.length} productos activos`}
             />
 
             <MetricCard
               icon={<FaExclamationTriangle />}
+
               iconBg={colors.dangerSoft}
+
               iconColor={colors.danger}
+
               label="Bajo inventario"
+
               value={lowStockCount.toString()}
+
               detail="Requieren revisión"
             />
 
             <MetricCard
               icon={<FaRegClock />}
+
               iconBg={colors.blueSoft}
+
               iconColor={colors.blue}
+
               label="Tiempo en caja"
+
               value="2m 11s"
+
               detail="Atención promedio"
             />
           </Box>
@@ -415,41 +459,65 @@ export function HardwareWorkspace() {
           <Box
             sx={{
               display: "grid",
+
               gridTemplateColumns: {
                 xs: "1fr",
+
                 lg: "minmax(0, 2fr) minmax(340px, 1fr)",
               },
+
               gap: {
                 xs: 2,
                 md: 2.5,
               },
+
               alignItems: "start",
+
               width: "100%",
+
               minWidth: 0,
             }}
           >
             <HardwareInventory
               products={products}
+
               onAddProduct={() => {
                 setIsAddProductModalOpen(true);
               }}
+
               onEditProduct={handleEditProduct}
             />
 
-            <SectionCard sx={{ height: "100%" }}>
+            <SectionCard
+              sx={{
+                height: "100%",
+              }}
+            >
               <RegisterSaleCard
                 products={products}
+
                 selectedProduct={selectedProduct}
+
                 selectedProductId={selectedProductId}
+
                 quantity={quantity}
+
                 numericQuantity={numericQuantity}
+
                 paymentMethod={paymentMethod}
+
                 paymentMethods={paymentMethods}
+
                 saleTotal={saleTotal}
+
                 error={error}
+
                 onSelectedProductChange={setSelectedProductId}
+
                 onQuantityChange={setQuantity}
+
                 onPaymentMethodChange={setPaymentMethod}
+
                 onRegisterSale={handleRegisterSale}
               />
             </SectionCard>
@@ -457,25 +525,40 @@ export function HardwareWorkspace() {
 
           <SalesHistoryTable
             sales={sales}
+
             totalSold={totalSold}
+
             title="Historial de ventas"
+
             subtitle="Productos vendidos, cantidades, precios y métodos de pago"
+
             productIcon={<FaWrench size={13} />}
-            getRecordLabel={(sale) =>
-              `Venta #${sale.id.slice(-4).toUpperCase()}`
-            }
+
+            getRecordLabel={(sale) => `Venta #${sale.id.slice(-4).toUpperCase()}`}
+
             getQuantityLabel={(sale) => `${sale.quantity}`}
+
             getProductSecondaryText={() => "Producto de ferretería"}
+
             colors={{
               primary: colors.primary,
+
               primarySoft: colors.primarySoft,
+
               border: colors.cardBorder,
+
               text: colors.text,
+
               muted: colors.muted,
+
               tableHead: colors.tableHead,
+
               rowHover: "#fff7ed",
+
               paymentBg: colors.greenSoft,
+
               paymentText: colors.green,
+
               paymentBorder: "#bbf7d0",
             }}
           />
@@ -484,14 +567,15 @@ export function HardwareWorkspace() {
 
       <AddHardwareProductModal
         open={isAddProductModalOpen}
+
         onClose={() => {
-          setIsAddProductModalOpen(false);
+          if (!isCreatingProduct) {
+            setIsAddProductModalOpen(false);
+          }
         }}
+
         onSave={handleAddProduct}
       />
     </AppShell>
   );
 }
-
-
-

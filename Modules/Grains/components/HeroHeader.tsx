@@ -1,16 +1,8 @@
-
 "use client";
 
-import {
-  FaLeaf,
-} from "react-icons/fa";
+import { FaLeaf } from "react-icons/fa";
 
-import {
-  Box,
-  Chip,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Box, Chip, Paper, Typography } from "@mui/material";
 import { grainsConfig } from "../GrainsWorkspace";
 
 export function HeroHeader() {
@@ -26,8 +18,7 @@ export function HeroHeader() {
         },
         borderRadius: "16px",
         color: "#ffffff",
-        background:
-          "linear-gradient(135deg, #064e3b 0%, #14532d 58%, #1f6f4a 100%)",
+        background: "linear-gradient(135deg, #064e3b 0%, #14532d 58%, #1f6f4a 100%)",
         minHeight: 116,
         display: "flex",
         alignItems: "center",

@@ -6,19 +6,11 @@ export function escapeCsvCell(value: CsvCell): string {
   return `"${text.replaceAll('"', '""')}"`;
 }
 
-export function buildCsvContent(
-  headers: string[],
-  rows: CsvCell[][],
-): string {
-  return [headers, ...rows]
-    .map((row) => row.map(escapeCsvCell).join(","))
-    .join("\n");
+export function buildCsvContent(headers: string[], rows: CsvCell[][]): string {
+  return [headers, ...rows].map((row) => row.map(escapeCsvCell).join(",")).join("\n");
 }
 
-export function downloadCsvFile(
-  filename: string,
-  csvContent: string,
-): void {
+export function downloadCsvFile(filename: string, csvContent: string): void {
   const blob = new Blob([`\uFEFF${csvContent}`], {
     type: "text/csv;charset=utf-8;",
   });

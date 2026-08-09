@@ -15,17 +15,8 @@ import {
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 
-import {
-  buildCsvContent,
-  downloadCsvFile,
-} from "@/components/WorkspaceShared/csvDownload";
-import {
-  FaDownload,
-  FaHome,
-  FaSearch,
-  FaSyncAlt,
-  FaTimes,
-} from "react-icons/fa";
+import { buildCsvContent, downloadCsvFile } from "@/components/WorkspaceShared/csvDownload";
+import { FaDownload, FaHome, FaSearch, FaSyncAlt, FaTimes } from "react-icons/fa";
 
 import {
   colors,
@@ -127,23 +118,14 @@ export function PaymentHistoryTable({
         .join(" ")
         .toLocaleLowerCase();
 
-      const matchesSearch =
-        !normalizedSearch || searchableText.includes(normalizedSearch);
-      const matchesMethod =
-        !filters.method || payment.method === filters.method;
+      const matchesSearch = !normalizedSearch || searchableText.includes(normalizedSearch);
+      const matchesMethod = !filters.method || payment.method === filters.method;
 
       const paymentDate = getFilterDate(payment);
-      const matchesDateFrom =
-        !dateFrom || (paymentDate !== null && paymentDate >= dateFrom);
-      const matchesDateTo =
-        !dateTo || (paymentDate !== null && paymentDate <= dateTo);
+      const matchesDateFrom = !dateFrom || (paymentDate !== null && paymentDate >= dateFrom);
+      const matchesDateTo = !dateTo || (paymentDate !== null && paymentDate <= dateTo);
 
-      return (
-        matchesSearch &&
-        matchesMethod &&
-        matchesDateFrom &&
-        matchesDateTo
-      );
+      return matchesSearch && matchesMethod && matchesDateFrom && matchesDateTo;
     });
   }, [filters, getFilterDate, payments]);
 
@@ -163,14 +145,7 @@ export function PaymentHistoryTable({
       return;
     }
 
-    const headers = [
-      "Fecha",
-      "Propiedad",
-      "Comprador",
-      "Metodo de pago",
-      "Nota",
-      "Monto",
-    ];
+    const headers = ["Fecha", "Propiedad", "Comprador", "Metodo de pago", "Nota", "Monto"];
 
     const rows = filteredPayments.map((payment) => [
       payment.date,
@@ -213,9 +188,7 @@ export function PaymentHistoryTable({
         boxShadow: "0 10px 28px rgba(15, 23, 42, 0.06)",
       }}
     >
-      <PaymentHistoryHeader
-        onDownload={handleDownload}
-      />
+      <PaymentHistoryHeader onDownload={handleDownload} />
 
       <PaymentFiltersBar
         filters={filters}
@@ -326,10 +299,7 @@ type PaymentFiltersBarProps = {
   filters: PaymentFilters;
   paymentMethods: string[];
   canClear: boolean;
-  onChange: <TKey extends keyof PaymentFilters>(
-    key: TKey,
-    value: PaymentFilters[TKey],
-  ) => void;
+  onChange: <TKey extends keyof PaymentFilters>(key: TKey, value: PaymentFilters[TKey]) => void;
   onClear: () => void;
 };
 
@@ -351,7 +321,13 @@ function PaymentFiltersBar({
         gridTemplateColumns: {
           xs: "1fr",
           sm: "repeat(2, minmax(0, 1fr))",
-          lg: ["minmax(260px, 2fr)", "minmax(145px, 0.8fr)", "minmax(145px, 0.8fr)", "minmax(180px, 1fr)", "auto"].join(" "),
+          lg: [
+            "minmax(260px, 2fr)",
+            "minmax(145px, 0.8fr)",
+            "minmax(145px, 0.8fr)",
+            "minmax(180px, 1fr)",
+            "auto",
+          ].join(" "),
         },
         gap: 1.2,
         alignItems: "center",
@@ -530,13 +506,7 @@ function EmptyFilteredPayments() {
   );
 }
 
-function EmptyState({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
+function EmptyState({ title, description }: { title: string; description: string }) {
   return (
     <Box
       sx={{
@@ -683,9 +653,7 @@ function PaymentTableRow({ payment }: { payment: PaymentRecord }) {
             gap: 0.25,
           }}
         >
-          <Typography sx={{ fontSize: 13, fontWeight: 850 }}>
-            {payment.date}
-          </Typography>
+          <Typography sx={{ fontSize: 13, fontWeight: 850 }}>{payment.date}</Typography>
 
           <Typography sx={{ fontSize: 11, color: colors.muted }}>
             Recibo #{payment.id.slice(-4).toUpperCase()}
@@ -866,12 +834,7 @@ type SmallIconButtonProps = {
   disabled?: boolean;
 };
 
-function SmallIconButton({
-  children,
-  ariaLabel,
-  onClick,
-  disabled = false,
-}: SmallIconButtonProps) {
+function SmallIconButton({ children, ariaLabel, onClick, disabled = false }: SmallIconButtonProps) {
   return (
     <IconButton
       type="button"

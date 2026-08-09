@@ -1,2 +1,2 @@
-export * from './saleWorkspaceData';
-export * from './SaleWorkspace'
+export * from "./saleWorkspaceData";
+export * from "./SaleWorkspace";

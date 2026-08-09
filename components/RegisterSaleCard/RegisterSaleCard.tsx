@@ -278,9 +278,7 @@ export function RegisterSaleCard<TProduct extends SaleProduct>({
             <Select
               value={selectedProductId}
               displayEmpty
-              onChange={(event) =>
-                onSelectedProductChange(event.target.value)
-              }
+              onChange={(event) => onSelectedProductChange(event.target.value)}
               sx={selectSx}
             >
               {!products.length && (
@@ -324,9 +322,7 @@ export function RegisterSaleCard<TProduct extends SaleProduct>({
           <FormControl fullWidth size="small">
             <Select
               value={paymentMethod}
-              onChange={(event) =>
-                onPaymentMethodChange(event.target.value)
-              }
+              onChange={(event) => onPaymentMethodChange(event.target.value)}
               sx={selectSx}
             >
               {paymentMethods.map((method) => (
@@ -345,105 +341,100 @@ export function RegisterSaleCard<TProduct extends SaleProduct>({
           }}
         >
           <SaleSummary
-            productName={
-              selectedProduct
-                ? productSummaryLabel(selectedProduct)
-                : "-"
-            }
+            productName={selectedProduct ? productSummaryLabel(selectedProduct) : "-"}
             unitPrice={selectedProduct?.price ?? 0}
             quantity={numericQuantity}
             total={saleTotal}
           />
         </Box>
 
-<Button
-  fullWidth
-  variant="contained"
-  startIcon={<FaPlusCircle />}
-  onClick={onRegisterSale}
-  disabled={!selectedProductId || numericQuantity < 1}
-  sx={{
-    gridColumn: "1 / -1",
-    width: "100%",
-    minHeight: {
-      xs: 52,
-      sm: 48,
-    },
-    px: {
-      xs: 2,
-      sm: 3,
-    },
-    py: {
-      xs: 1.4,
-      sm: 1.2,
-    },
-    borderRadius: {
-      xs: "14px",
-      sm: "12px",
-    },
+        <Button
+          fullWidth
+          variant="contained"
+          startIcon={<FaPlusCircle />}
+          onClick={onRegisterSale}
+          disabled={!selectedProductId || numericQuantity < 1}
+          sx={{
+            gridColumn: "1 / -1",
+            width: "100%",
+            minHeight: {
+              xs: 52,
+              sm: 48,
+            },
+            px: {
+              xs: 2,
+              sm: 3,
+            },
+            py: {
+              xs: 1.4,
+              sm: 1.2,
+            },
+            borderRadius: {
+              xs: "14px",
+              sm: "12px",
+            },
 
-    bgcolor: colors.primary,
-    color: "#ffffff",
-    fontSize: {
-      xs: 15,
-      sm: 14,
-      md: 15,
-    },
-    lineHeight: 1.2,
-    fontWeight: 900,
-    textTransform: "none",
-    whiteSpace: "nowrap",
+            bgcolor: colors.primary,
+            color: "#ffffff",
+            fontSize: {
+              xs: 15,
+              sm: 14,
+              md: 15,
+            },
+            lineHeight: 1.2,
+            fontWeight: 900,
+            textTransform: "none",
+            whiteSpace: "nowrap",
 
-    boxShadow: {
-      xs: "0 8px 18px rgba(146, 64, 14, 0.2)",
-      sm: "0 10px 22px rgba(146, 64, 14, 0.22)",
-    },
+            boxShadow: {
+              xs: "0 8px 18px rgba(146, 64, 14, 0.2)",
+              sm: "0 10px 22px rgba(146, 64, 14, 0.22)",
+            },
 
-    transition:
-      "background-color 160ms ease, box-shadow 160ms ease, transform 120ms ease",
+            transition: "background-color 160ms ease, box-shadow 160ms ease, transform 120ms ease",
 
-    "& .MuiButton-startIcon": {
-      mr: {
-        xs: 1,
-        sm: 0.8,
-      },
+            "& .MuiButton-startIcon": {
+              mr: {
+                xs: 1,
+                sm: 0.8,
+              },
 
-      "& svg": {
-        width: {
-          xs: 19,
-          sm: 17,
-        },
-        height: {
-          xs: 19,
-          sm: 17,
-        },
-      },
-    },
+              "& svg": {
+                width: {
+                  xs: 19,
+                  sm: 17,
+                },
+                height: {
+                  xs: 19,
+                  sm: 17,
+                },
+              },
+            },
 
-    "&:hover": {
-      bgcolor: "#78350f",
-      boxShadow: "0 12px 24px rgba(146, 64, 14, 0.26)",
-    },
+            "&:hover": {
+              bgcolor: "#78350f",
+              boxShadow: "0 12px 24px rgba(146, 64, 14, 0.26)",
+            },
 
-    "&:active": {
-      transform: "scale(0.985)",
-      boxShadow: "0 5px 12px rgba(146, 64, 14, 0.2)",
-    },
+            "&:active": {
+              transform: "scale(0.985)",
+              boxShadow: "0 5px 12px rgba(146, 64, 14, 0.2)",
+            },
 
-    "&:focus-visible": {
-      outline: "3px solid rgba(245, 158, 11, 0.35)",
-      outlineOffset: 2,
-    },
+            "&:focus-visible": {
+              outline: "3px solid rgba(245, 158, 11, 0.35)",
+              outlineOffset: 2,
+            },
 
-    "&.Mui-disabled": {
-      bgcolor: "#e2e8f0",
-      color: "#94a3b8",
-      boxShadow: "none",
-    },
-  }}
->
-  Registrar venta
-</Button>
+            "&.Mui-disabled": {
+              bgcolor: "#e2e8f0",
+              color: "#94a3b8",
+              boxShadow: "none",
+            },
+          }}
+        >
+          Registrar venta
+        </Button>
       </Box>
     </Box>
   );
@@ -486,10 +477,7 @@ function SaleSummary({
       >
         <SummaryRow label="Producto" value={productName} />
 
-        <SummaryRow
-          label="Precio unitario"
-          value={formatCurrency(unitPrice)}
-        />
+        <SummaryRow label="Precio unitario" value={formatCurrency(unitPrice)} />
 
         <SummaryRow label="Cantidad" value={`${quantity || 0}`} />
 
@@ -573,13 +561,7 @@ function FieldLabel({ children }: { children: ReactNode }) {
   );
 }
 
-function SummaryRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
     <Box
       sx={{

@@ -29,7 +29,7 @@ export const theme = createTheme({
       fontWeight: 800,
     },
     button: {
-      textTransform: 'none',
+      textTransform: "none",
       fontWeight: 700,
     },
   },

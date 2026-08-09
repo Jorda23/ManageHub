@@ -1,12 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import {
-  FaMapMarkedAlt,
-  FaPlusCircle,
-  FaTimes,
-  FaUserTie,
-} from "react-icons/fa";
+import { FaMapMarkedAlt, FaPlusCircle, FaTimes, FaUserTie } from "react-icons/fa";
 import {
   Box,
   Button,
@@ -155,10 +150,7 @@ export default function AddPropertyDialog({
         <Box sx={{ px: { xs: 2, sm: 2.5 }, py: 2.25 }}>
           {error ? <ErrorMessage>{error}</ErrorMessage> : null}
 
-          <SectionTitle
-            icon={<FaUserTie size={12} />}
-            title="Datos del cliente propietario"
-          />
+          <SectionTitle icon={<FaUserTie size={12} />} title="Datos del cliente propietario" />
           <FieldGrid sx={{ mb: 2.5 }}>
             <FormField label="Nombre del cliente *">
               <PropertyTextField
@@ -183,10 +175,7 @@ export default function AddPropertyDialog({
             </FormField>
           </FieldGrid>
 
-          <SectionTitle
-            icon={<FaMapMarkedAlt size={12} />}
-            title="Datos del terreno"
-          />
+          <SectionTitle icon={<FaMapMarkedAlt size={12} />} title="Datos del terreno" />
           <FieldGrid>
             <FormField label="Nombre del terreno *">
               <PropertyTextField

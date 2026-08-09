@@ -224,9 +224,7 @@ export function PropertyPaymentSection({
             <Select
               value={selectedPropertyId}
               displayEmpty
-              onChange={(event) =>
-                onSelectedPropertyChange(String(event.target.value))
-              }
+              onChange={(event) => onSelectedPropertyChange(String(event.target.value))}
               sx={selectSx}
               renderValue={(value) => {
                 if (!value) {
@@ -244,13 +242,9 @@ export function PropertyPaymentSection({
                   );
                 }
 
-                const property = properties.find(
-                  (item) => item.id === String(value),
-                );
+                const property = properties.find((item) => item.id === String(value));
 
-                return property
-                  ? `${property.name} - ${property.ownerName}`
-                  : String(value);
+                return property ? `${property.name} - ${property.ownerName}` : String(value);
               }}
             >
               <MenuItem value="" disabled>
@@ -306,9 +300,7 @@ export function PropertyPaymentSection({
             <Select
               value={paymentMethod}
               displayEmpty
-              onChange={(event) =>
-                onPaymentMethodChange(String(event.target.value))
-              }
+              onChange={(event) => onPaymentMethodChange(String(event.target.value))}
               sx={selectSx}
               renderValue={(value) => {
                 if (!value) {
@@ -409,8 +401,7 @@ export function PropertyPaymentSection({
             textTransform: "none",
             whiteSpace: "nowrap",
             boxShadow: "0 10px 22px rgba(37, 99, 235, 0.22)",
-            transition:
-              "background-color 160ms ease, box-shadow 160ms ease, transform 120ms ease",
+            transition: "background-color 160ms ease, box-shadow 160ms ease, transform 120ms ease",
 
             "& .MuiButton-startIcon": {
               mr: {
@@ -517,26 +508,13 @@ function AccountSummary({ property }: { property?: PropertyItem }) {
       >
         <SummaryRow label="Terreno" value={property.name} />
 
-        <SummaryRow
-          label="Cliente propietario"
-          value={property.ownerName}
-        />
+        <SummaryRow label="Cliente propietario" value={property.ownerName} />
 
-        <SummaryRow
-          label="Valor total"
-          value={formatCurrency(property.price)}
-        />
+        <SummaryRow label="Valor total" value={formatCurrency(property.price)} />
 
-        <SummaryRow
-          label="Abonado"
-          value={formatCurrency(property.paid)}
-        />
+        <SummaryRow label="Abonado" value={formatCurrency(property.paid)} />
 
-        <SummaryRow
-          label="Saldo pendiente"
-          value={formatCurrency(pendingAmount)}
-          highlighted
-        />
+        <SummaryRow label="Saldo pendiente" value={formatCurrency(pendingAmount)} highlighted />
 
         <Divider sx={{ my: 0.5 }} />
 

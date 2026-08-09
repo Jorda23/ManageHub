@@ -185,12 +185,7 @@ export const initialPayments: PaymentRecord[] = [
   },
 ];
 
-export const paymentMethods = [
-  "Efectivo",
-  "Transferencia",
-  "Depósito bancario",
-  "Cheque",
-];
+export const paymentMethods = ["Efectivo", "Transferencia", "Depósito bancario", "Cheque"];
 
 export function formatCurrency(value: number): string {
   return new Intl.NumberFormat("en-US", {

@@ -7,11 +7,7 @@ type PropertyHeroHeaderProps = {
   subtitle: string;
 };
 
-export function PropertyHeroHeader({
-  badge,
-  title,
-  subtitle,
-}: PropertyHeroHeaderProps) {
+export function PropertyHeroHeader({ badge, title, subtitle }: PropertyHeroHeaderProps) {
   return (
     <Paper
       elevation={0}
@@ -25,8 +21,7 @@ export function PropertyHeroHeader({
         },
         borderRadius: "16px",
         color: "white",
-        background:
-          "linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #0f766e 100%)",
+        background: "linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #0f766e 100%)",
         minHeight: {
           xs: 130,
           md: 118,

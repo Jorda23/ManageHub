@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  useState,
-  type FormEvent,
-} from "react";
+import { useState, type FormEvent } from "react";
 
 import {
   Box,
@@ -17,45 +14,31 @@ import {
   Typography,
 } from "@mui/material";
 
-import type {
-  SxProps,
-  Theme,
-} from "@mui/material/styles";
+import type { SxProps, Theme } from "@mui/material/styles";
 
-import {
-  FaPlus,
-  FaTools,
-} from "react-icons/fa";
+import { FaPlus, FaTools } from "react-icons/fa";
 
 import { FormModal } from "../FormModal";
 import { ModalField } from "../ModalField";
 import { ImageUploadField } from "../WorkspaceShared/ImageUploadField";
 
-export type HardwareStockStatus =
-  | "inStock"
-  | "lowStock";
-
 export type AddHardwareProductValues = {
   name: string;
   detail: string;
   category: string;
+  initialStock: string;
+  minimumStock: string;
+  unitPrice: string;
+  inventoryStatus: string;
   imageUrl: string;
-  stock: string;
-  minStock: string;
-  price: string;
-  status: HardwareStockStatus;
 };
 
-type AddHardwareProductErrors = Partial<
-  Record<keyof AddHardwareProductValues, string>
->;
+type AddHardwareProductErrors = Partial<Record<keyof AddHardwareProductValues, string>>;
 
 type AddHardwareProductModalProps = {
   open: boolean;
   onClose: () => void;
-  onSave: (
-    values: AddHardwareProductValues,
-  ) => void | Promise<void>;
+  onSave: (values: AddHardwareProductValues) => void | Promise<void>;
 };
 
 const colors = {
@@ -72,11 +55,11 @@ const initialValues: AddHardwareProductValues = {
   name: "",
   detail: "",
   category: "",
+  initialStock: "",
+  minimumStock: "",
+  unitPrice: "",
+  inventoryStatus: "Available",
   imageUrl: "",
-  stock: "",
-  minStock: "",
-  price: "",
-  status: "inStock",
 };
 
 const categoryOptions = [
@@ -95,27 +78,17 @@ export function AddHardwareProductModal({
   onClose,
   onSave,
 }: Readonly<AddHardwareProductModalProps>) {
-  const [values, setValues] =
-    useState<AddHardwareProductValues>(
-      initialValues,
-    );
+  const [values, setValues] = useState<AddHardwareProductValues>(initialValues);
 
-  const [errors, setErrors] =
-    useState<AddHardwareProductErrors>({});
+  const [errors, setErrors] = useState<AddHardwareProductErrors>({});
 
-  const [isPriceFocused, setIsPriceFocused] =
-    useState(false);
+  const [isPriceFocused, setIsPriceFocused] = useState(false);
 
-  const [isSubmitting, setIsSubmitting] =
-    useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const showPriceSymbol =
-    isPriceFocused ||
-    values.price.trim() !== "";
+  const showPriceSymbol = isPriceFocused || values.unitPrice.trim() !== "";
 
-  const updateField = <
-    K extends keyof AddHardwareProductValues,
-  >(
+  const updateField = <K extends keyof AddHardwareProductValues>(
     field: K,
     value: AddHardwareProductValues[K],
   ): void => {
@@ -134,7 +107,6 @@ export function AddHardwareProductModal({
     setValues(initialValues);
     setErrors({});
     setIsPriceFocused(false);
-    setIsSubmitting(false);
   };
 
   const handleClose = (): void => {
@@ -150,61 +122,41 @@ export function AddHardwareProductModal({
     const nextErrors: AddHardwareProductErrors = {};
 
     if (!values.name.trim()) {
-      nextErrors.name =
-        "Ingresa el nombre del producto";
+      nextErrors.name = "Ingresa el nombre del producto";
     }
 
     if (!values.detail.trim()) {
-      nextErrors.detail =
-        "Ingresa una descripción o presentación";
+      nextErrors.detail = "Ingresa una descripción o presentación";
     }
 
-    if (!values.category) {
-      nextErrors.category =
-        "Selecciona una categoría";
+    if (!values.category.trim()) {
+      nextErrors.category = "Selecciona una categoría";
     }
 
-    const stock = Number(values.stock);
+    const initialStock = Number(values.initialStock);
 
-    if (
-      values.stock.trim() === "" ||
-      Number.isNaN(stock) ||
-      stock <= 0
-    ) {
-      nextErrors.stock =
-        "Ingresa un stock mayor que cero";
+    if (values.initialStock.trim() === "" || Number.isNaN(initialStock) || initialStock < 0) {
+      nextErrors.initialStock = "Ingresa un stock inicial válido";
     }
 
-    const minStock = Number(
-      values.minStock,
-    );
+    const minimumStock = Number(values.minimumStock);
 
-    if (
-      values.minStock.trim() === "" ||
-      Number.isNaN(minStock) ||
-      minStock < 0
-    ) {
-      nextErrors.minStock =
-        "Ingresa un stock mínimo válido";
+    if (values.minimumStock.trim() === "" || Number.isNaN(minimumStock) || minimumStock < 0) {
+      nextErrors.minimumStock = "Ingresa un stock mínimo válido";
     }
 
-    if (
-      stock > 0 &&
-      minStock > stock
-    ) {
-      nextErrors.minStock =
-        "No puede superar el stock inicial";
+    if (initialStock >= 0 && minimumStock > initialStock) {
+      nextErrors.minimumStock = "No puede superar el stock inicial";
     }
 
-    const price = Number(values.price);
+    const unitPrice = Number(values.unitPrice);
 
-    if (
-      values.price.trim() === "" ||
-      Number.isNaN(price) ||
-      price <= 0
-    ) {
-      nextErrors.price =
-        "Ingresa un precio mayor que cero";
+    if (values.unitPrice.trim() === "" || Number.isNaN(unitPrice) || unitPrice <= 0) {
+      nextErrors.unitPrice = "Ingresa un precio mayor que cero";
+    }
+
+    if (!values.inventoryStatus) {
+      nextErrors.inventoryStatus = "Selecciona el estado del inventario";
     }
 
     setErrors(nextErrors);
@@ -212,18 +164,36 @@ export function AddHardwareProductModal({
     return Object.keys(nextErrors).length === 0;
   };
 
-  const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>,
-  ): Promise<void> => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
 
     if (!validate()) {
       return;
     }
 
+    const normalizedValues: AddHardwareProductValues = {
+      name: values.name.trim(),
+
+      detail: values.detail.trim(),
+
+      category: values.category.trim(),
+
+      initialStock: values.initialStock.trim(),
+
+      minimumStock: values.minimumStock.trim(),
+
+      unitPrice: values.unitPrice.trim(),
+
+      inventoryStatus: values.inventoryStatus,
+
+      imageUrl: values.imageUrl.trim(),
+    };
+
     try {
       setIsSubmitting(true);
-      await onSave(values);
+
+      await onSave(normalizedValues);
+
       resetForm();
     } finally {
       setIsSubmitting(false);
@@ -250,19 +220,13 @@ export function AddHardwareProductModal({
           gap: 2.5,
         }}
       >
-        <ModalField
-          label="Nombre del producto"
-          htmlFor="hardware-product-name"
-        >
+        <ModalField label="Nombre del producto" htmlFor="hardware-product-name">
           <TextField
             id="hardware-product-name"
             name="name"
             value={values.name}
             onChange={(event) => {
-              updateField(
-                "name",
-                event.target.value,
-              );
+              updateField("name", event.target.value);
             }}
             placeholder="Ej. Taladro inalámbrico"
             error={Boolean(errors.name)}
@@ -290,19 +254,13 @@ export function AddHardwareProductModal({
             gap: 2,
           }}
         >
-          <ModalField
-            label="Detalle o presentación"
-            htmlFor="hardware-product-detail"
-          >
+          <ModalField label="Detalle o presentación" htmlFor="hardware-product-detail">
             <TextField
               id="hardware-product-detail"
               name="detail"
               value={values.detail}
               onChange={(event) => {
-                updateField(
-                  "detail",
-                  event.target.value,
-                );
+                updateField("detail", event.target.value);
               }}
               placeholder="Ej. 18V Kit"
               error={Boolean(errors.detail)}
@@ -313,19 +271,13 @@ export function AddHardwareProductModal({
             />
           </ModalField>
 
-          <ModalField
-            label="Categoría"
-            htmlFor="hardware-product-category"
-          >
+          <ModalField label="Categoría" htmlFor="hardware-product-category">
             <TextField
               id="hardware-product-category"
               name="category"
               value={values.category}
               onChange={(event) => {
-                updateField(
-                  "category",
-                  event.target.value,
-                );
+                updateField("category", event.target.value);
               }}
               select
               fullWidth
@@ -346,10 +298,7 @@ export function AddHardwareProductModal({
               sx={fieldStyles}
             >
               {categoryOptions.map((category) => (
-                <MenuItem
-                  key={category}
-                  value={category}
-                >
+                <MenuItem key={category} value={category}>
                   {category}
                 </MenuItem>
               ))}
@@ -357,10 +306,7 @@ export function AddHardwareProductModal({
           </ModalField>
         </Box>
 
-        <ModalField
-          label="Imagen para la tarjeta"
-          htmlFor="hardware-product-image"
-        >
+        <ModalField label="Imagen para la tarjeta" htmlFor="hardware-product-image">
           <ImageUploadField
             label="Imagen del producto"
             value={values.imageUrl}
@@ -381,24 +327,18 @@ export function AddHardwareProductModal({
             gap: 2,
           }}
         >
-          <ModalField
-            label="Stock inicial"
-            htmlFor="hardware-product-stock"
-          >
+          <ModalField label="Stock inicial" htmlFor="hardware-product-initial-stock">
             <TextField
-              id="hardware-product-stock"
-              name="stock"
+              id="hardware-product-initial-stock"
+              name="initialStock"
               type="number"
-              value={values.stock}
+              value={values.initialStock}
               onChange={(event) => {
-                updateField(
-                  "stock",
-                  event.target.value,
-                );
+                updateField("initialStock", event.target.value);
               }}
               placeholder="0"
-              error={Boolean(errors.stock)}
-              helperText={errors.stock}
+              error={Boolean(errors.initialStock)}
+              helperText={errors.initialStock}
               disabled={isSubmitting}
               fullWidth
               slotProps={{
@@ -411,24 +351,18 @@ export function AddHardwareProductModal({
             />
           </ModalField>
 
-          <ModalField
-            label="Stock mínimo"
-            htmlFor="hardware-product-min-stock"
-          >
+          <ModalField label="Stock mínimo" htmlFor="hardware-product-minimum-stock">
             <TextField
-              id="hardware-product-min-stock"
-              name="minStock"
+              id="hardware-product-minimum-stock"
+              name="minimumStock"
               type="number"
-              value={values.minStock}
+              value={values.minimumStock}
               onChange={(event) => {
-                updateField(
-                  "minStock",
-                  event.target.value,
-                );
+                updateField("minimumStock", event.target.value);
               }}
               placeholder="0"
-              error={Boolean(errors.minStock)}
-              helperText={errors.minStock}
+              error={Boolean(errors.minimumStock)}
+              helperText={errors.minimumStock}
               disabled={isSubmitting}
               fullWidth
               slotProps={{
@@ -441,20 +375,14 @@ export function AddHardwareProductModal({
             />
           </ModalField>
 
-          <ModalField
-            label="Precio unitario"
-            htmlFor="hardware-product-price"
-          >
+          <ModalField label="Precio unitario" htmlFor="hardware-product-unit-price">
             <TextField
-              id="hardware-product-price"
-              name="price"
+              id="hardware-product-unit-price"
+              name="unitPrice"
               type="number"
-              value={values.price}
+              value={values.unitPrice}
               onChange={(event) => {
-                updateField(
-                  "price",
-                  event.target.value,
-                );
+                updateField("unitPrice", event.target.value);
               }}
               onFocus={() => {
                 setIsPriceFocused(true);
@@ -463,8 +391,8 @@ export function AddHardwareProductModal({
                 setIsPriceFocused(false);
               }}
               placeholder="0.00"
-              error={Boolean(errors.price)}
-              helperText={errors.price}
+              error={Boolean(errors.unitPrice)}
+              helperText={errors.unitPrice}
               disabled={isSubmitting}
               fullWidth
               slotProps={{
@@ -473,12 +401,9 @@ export function AddHardwareProductModal({
                   step: "0.01",
                 },
                 input: {
-                  startAdornment:
-                    showPriceSymbol ? (
-                      <InputAdornment position="start">
-                        $
-                      </InputAdornment>
-                    ) : undefined,
+                  startAdornment: showPriceSymbol ? (
+                    <InputAdornment position="start">$</InputAdornment>
+                  ) : undefined,
                 },
               }}
               sx={fieldStyles}
@@ -489,12 +414,13 @@ export function AddHardwareProductModal({
         <FormControl
           component="fieldset"
           disabled={isSubmitting}
+          error={Boolean(errors.inventoryStatus)}
         >
           <Typography
             component="legend"
             sx={{
               mb: 1,
-              color: colors.text,
+              color: errors.inventoryStatus ? colors.danger : colors.text,
               fontSize: 10,
               fontWeight: 950,
               letterSpacing: "0.08em",
@@ -506,14 +432,10 @@ export function AddHardwareProductModal({
 
           <RadioGroup
             row
-            name="status"
-            value={values.status}
+            name="inventoryStatus"
+            value={values.inventoryStatus}
             onChange={(event) => {
-              updateField(
-                "status",
-                event.target
-                  .value as HardwareStockStatus,
-              );
+              updateField("inventoryStatus", event.target.value);
             }}
             sx={{
               display: "grid",
@@ -525,23 +447,32 @@ export function AddHardwareProductModal({
             }}
           >
             <StatusOption
-              value="inStock"
+              value="Available"
               label="En stock"
               description="Producto disponible"
-              selected={
-                values.status === "inStock"
-              }
+              selected={values.inventoryStatus === "Available"}
             />
 
             <StatusOption
-              value="lowStock"
+              value="LowStock"
               label="Stock bajo"
               description="Requiere reposición"
-              selected={
-                values.status === "lowStock"
-              }
+              selected={values.inventoryStatus === "LowStock"}
             />
           </RadioGroup>
+
+          {errors.inventoryStatus && (
+            <Typography
+              sx={{
+                mt: 0.75,
+                color: colors.danger,
+                fontSize: 10.5,
+                fontWeight: 650,
+              }}
+            >
+              {errors.inventoryStatus}
+            </Typography>
+          )}
         </FormControl>
       </Box>
     </FormModal>
@@ -568,8 +499,7 @@ const fieldStyles: SxProps<Theme> = {
 
     "&.Mui-focused": {
       bgcolor: "#ffffff",
-      boxShadow:
-        "0 0 0 3px rgba(146, 64, 14, 0.09)",
+      boxShadow: "0 0 0 3px rgba(146, 64, 14, 0.09)",
     },
 
     "&.Mui-focused fieldset": {
@@ -588,8 +518,9 @@ const fieldStyles: SxProps<Theme> = {
 
   "& .MuiInputBase-input": {
     color: `${colors.text} !important`,
-    WebkitTextFillColor:
-      `${colors.text} !important`,
+
+    WebkitTextFillColor: `${colors.text} !important`,
+
     py: 1.35,
 
     "&::placeholder": {
@@ -599,18 +530,19 @@ const fieldStyles: SxProps<Theme> = {
     },
 
     "&:-webkit-autofill": {
-      WebkitBoxShadow:
-        "0 0 0 1000px #ffffff inset",
-      WebkitTextFillColor:
-        `${colors.text} !important`,
+      WebkitBoxShadow: "0 0 0 1000px #ffffff inset",
+
+      WebkitTextFillColor: `${colors.text} !important`,
+
       caretColor: colors.text,
     },
   },
 
   "& .MuiSelect-select": {
     color: `${colors.text} !important`,
-    WebkitTextFillColor:
-      `${colors.text} !important`,
+
+    WebkitTextFillColor: `${colors.text} !important`,
+
     py: 1.35,
   },
 
@@ -626,6 +558,7 @@ const fieldStyles: SxProps<Theme> = {
     minHeight: 16,
     ml: 0,
     mt: 0.55,
+    color: colors.danger,
     fontSize: 10.5,
     fontWeight: 650,
   },
@@ -634,17 +567,15 @@ const fieldStyles: SxProps<Theme> = {
     MozAppearance: "textfield",
   },
 
-  "& input[type='number']::-webkit-outer-spin-button":
-    {
-      WebkitAppearance: "none",
-      margin: 0,
-    },
+  "& input[type='number']::-webkit-outer-spin-button": {
+    WebkitAppearance: "none",
+    margin: 0,
+  },
 
-  "& input[type='number']::-webkit-inner-spin-button":
-    {
-      WebkitAppearance: "none",
-      margin: 0,
-    },
+  "& input[type='number']::-webkit-inner-spin-button": {
+    WebkitAppearance: "none",
+    margin: 0,
+  },
 };
 
 const menuPaperStyles: SxProps<Theme> = {
@@ -652,9 +583,10 @@ const menuPaperStyles: SxProps<Theme> = {
   maxHeight: 280,
   borderRadius: "10px",
   bgcolor: "#ffffff",
+
   border: `1px solid ${colors.border}`,
-  boxShadow:
-    "0 14px 34px rgba(15, 23, 42, 0.16)",
+
+  boxShadow: "0 14px 34px rgba(15, 23, 42, 0.16)",
 
   "& .MuiMenuItem-root": {
     minHeight: 42,
@@ -668,6 +600,7 @@ const menuPaperStyles: SxProps<Theme> = {
 
     "&.Mui-selected": {
       bgcolor: colors.primarySoft,
+
       color: colors.primary,
 
       "&:hover": {
@@ -683,7 +616,7 @@ function StatusOption({
   description,
   selected,
 }: {
-  value: HardwareStockStatus;
+  value: string;
   label: string;
   description: string;
   selected: boolean;
@@ -708,7 +641,9 @@ function StatusOption({
           <Typography
             sx={{
               color: colors.text,
+
               fontSize: 11,
+
               fontWeight: 850,
             }}
           >
@@ -718,7 +653,9 @@ function StatusOption({
           <Typography
             sx={{
               mt: 0.15,
+
               color: colors.muted,
+
               fontSize: 9.5,
             }}
           >
@@ -731,24 +668,19 @@ function StatusOption({
         px: 1.5,
         py: 0.65,
         minHeight: 54,
+
         borderRadius: "9px",
-        border: `1px solid ${
-          selected
-            ? colors.primary
-            : colors.border
-        }`,
-        bgcolor: selected
-          ? "#fff7ed"
-          : "#ffffff",
+
+        border: `1px solid ${selected ? colors.primary : colors.border}`,
+
+        bgcolor: selected ? "#fff7ed" : "#ffffff",
+
         transition: "all 0.18s ease",
 
         "&:hover": {
-          borderColor: selected
-            ? colors.primary
-            : "#c58a52",
-          bgcolor: selected
-            ? "#fff7ed"
-            : "#fffbf5",
+          borderColor: selected ? colors.primary : "#c58a52",
+
+          bgcolor: selected ? "#fff7ed" : "#fffbf5",
         },
 
         "& .MuiFormControlLabel-label": {

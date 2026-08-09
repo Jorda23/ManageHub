@@ -1,1 +1,1 @@
-export * from './AddHardwareProductModal'
+export * from "./AddHardwareProductModal";

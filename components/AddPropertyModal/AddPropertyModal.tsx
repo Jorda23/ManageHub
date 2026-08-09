@@ -1,25 +1,12 @@
 "use client";
 
-import {
-  useState,
- FormEvent,
-} from "react";
+import { FormEvent, useState } from "react";
 
-import {
-  Box,
-  InputAdornment,
-  TextField,
-} from "@mui/material";
+import { Box, InputAdornment, TextField } from "@mui/material";
 
-import type {
-  SxProps,
-  Theme,
-} from "@mui/material/styles";
+import type { SxProps, Theme } from "@mui/material/styles";
 
-import {
-  FaBuilding,
-  FaPlusCircle,
-} from "react-icons/fa";
+import { FaBuilding, FaPlusCircle } from "react-icons/fa";
 
 import { FormModal } from "../FormModal";
 import { ModalField } from "../ModalField";
@@ -27,27 +14,22 @@ import { ImageUploadField } from "../WorkspaceShared/ImageUploadField";
 
 export type AddPropertyFormValues = {
   name: string;
-  code: string;
+  projectName: string;
+  measure: string;
   location: string;
-  size: string;
-  price: string;
-  imageUrl: string;
   ownerName: string;
-  ownerPhone: string;
-  ownerDocument: string;
+  totalPrice: string;
+  initialPayment: string;
+  nextPaymentDate: string;
+  imageUrl: string;
 };
 
-type AddPropertyFormErrors = Partial<
-  Record<keyof AddPropertyFormValues, string>
->;
+type AddPropertyFormErrors = Partial<Record<keyof AddPropertyFormValues, string>>;
 
 type AddPropertyModalProps = {
   open: boolean;
-  existingCodes?: string[];
   onClose: () => void;
-  onSave: (
-    values: AddPropertyFormValues,
-  ) => void | Promise<void>;
+  onSave: (values: AddPropertyFormValues) => void | Promise<void>;
 };
 
 const colors = {
@@ -61,43 +43,32 @@ const colors = {
 
 const initialValues: AddPropertyFormValues = {
   name: "",
-  code: "",
+  projectName: "",
+  measure: "",
   location: "",
-  size: "",
-  price: "",
-  imageUrl: "",
   ownerName: "",
-  ownerPhone: "",
-  ownerDocument: "",
+  totalPrice: "",
+  initialPayment: "",
+  nextPaymentDate: "",
+  imageUrl: "",
 };
 
-export function AddPropertyModal({
-  open,
-  existingCodes = [],
-  onClose,
-  onSave,
-}: Readonly<AddPropertyModalProps>) {
-  const [values, setValues] =
-    useState<AddPropertyFormValues>(
-      initialValues,
-    );
+export function AddPropertyModal({ open, onClose, onSave }: Readonly<AddPropertyModalProps>) {
+  const [values, setValues] = useState<AddPropertyFormValues>(initialValues);
 
-  const [errors, setErrors] =
-    useState<AddPropertyFormErrors>({});
+  const [errors, setErrors] = useState<AddPropertyFormErrors>({});
 
-  const [isPriceFocused, setIsPriceFocused] =
-    useState(false);
+  const [isTotalPriceFocused, setIsTotalPriceFocused] = useState(false);
 
-  const [isSubmitting, setIsSubmitting] =
-    useState(false);
+  const [isInitialPaymentFocused, setIsInitialPaymentFocused] = useState(false);
 
-  const showPriceSymbol =
-    isPriceFocused ||
-    values.price.trim() !== "";
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const updateField = <
-    K extends keyof AddPropertyFormValues,
-  >(
+  const showTotalPriceSymbol = isTotalPriceFocused || values.totalPrice.trim() !== "";
+
+  const showInitialPaymentSymbol = isInitialPaymentFocused || values.initialPayment.trim() !== "";
+
+  const updateField = <K extends keyof AddPropertyFormValues>(
     field: K,
     value: AddPropertyFormValues[K],
   ): void => {
@@ -115,7 +86,8 @@ export function AddPropertyModal({
   const resetForm = (): void => {
     setValues(initialValues);
     setErrors({});
-    setIsPriceFocused(false);
+    setIsTotalPriceFocused(false);
+    setIsInitialPaymentFocused(false);
   };
 
   const handleClose = (): void => {
@@ -130,53 +102,40 @@ export function AddPropertyModal({
   const validate = (): boolean => {
     const nextErrors: AddPropertyFormErrors = {};
 
-    const normalizedCode = values.code
-      .trim()
-      .toUpperCase();
-
     if (!values.name.trim()) {
-      nextErrors.name =
-        "Ingresa el nombre de la propiedad";
+      nextErrors.name = "Ingresa el nombre de la propiedad";
     }
 
-    if (!normalizedCode) {
-      nextErrors.code =
-        "Ingresa el código de la propiedad";
-    } else if (
-      existingCodes.some(
-        (code) =>
-          code.trim().toUpperCase() ===
-          normalizedCode,
-      )
-    ) {
-      nextErrors.code =
-        "Ya existe una propiedad con ese código";
+    if (!values.projectName.trim()) {
+      nextErrors.projectName = "Ingresa el nombre del proyecto";
+    }
+
+    if (!values.measure.trim()) {
+      nextErrors.measure = "Ingresa la medida de la propiedad";
     }
 
     if (!values.location.trim()) {
-      nextErrors.location =
-        "Ingresa la ubicación";
-    }
-
-    if (!values.size.trim()) {
-      nextErrors.size =
-        "Ingresa la medida de la propiedad";
-    }
-
-    const price = Number(values.price);
-
-    if (
-      values.price.trim() === "" ||
-      !Number.isFinite(price) ||
-      price <= 0
-    ) {
-      nextErrors.price =
-        "Ingresa un precio mayor que cero";
+      nextErrors.location = "Ingresa la ubicación";
     }
 
     if (!values.ownerName.trim()) {
-      nextErrors.ownerName =
-        "Ingresa el nombre del propietario";
+      nextErrors.ownerName = "Ingresa el nombre del propietario";
+    }
+
+    const totalPrice = Number(values.totalPrice);
+
+    if (values.totalPrice.trim() === "" || !Number.isFinite(totalPrice) || totalPrice <= 0) {
+      nextErrors.totalPrice = "Ingresa un precio total mayor que cero";
+    }
+
+    const initialPayment = Number(values.initialPayment || "0");
+
+    if (!Number.isFinite(initialPayment) || initialPayment < 0) {
+      nextErrors.initialPayment = "Ingresa un abono inicial válido";
+    }
+
+    if (Number.isFinite(totalPrice) && initialPayment > totalPrice) {
+      nextErrors.initialPayment = "El abono inicial no puede ser mayor al precio total";
     }
 
     setErrors(nextErrors);
@@ -184,9 +143,7 @@ export function AddPropertyModal({
     return Object.keys(nextErrors).length === 0;
   };
 
-  const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>,
-  ): Promise<void> => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
 
     if (!validate()) {
@@ -194,20 +151,22 @@ export function AddPropertyModal({
     }
 
     const normalizedValues: AddPropertyFormValues = {
-      ...values,
       name: values.name.trim(),
-      code: values.code.trim().toUpperCase(),
+      projectName: values.projectName.trim(),
+      measure: values.measure.trim(),
       location: values.location.trim(),
-      size: values.size.trim(),
-      imageUrl: values.imageUrl.trim(),
       ownerName: values.ownerName.trim(),
-      ownerPhone: values.ownerPhone.trim(),
-      ownerDocument: values.ownerDocument.trim(),
+      totalPrice: values.totalPrice.trim(),
+      initialPayment: values.initialPayment.trim() || "0",
+      nextPaymentDate: values.nextPaymentDate,
+      imageUrl: values.imageUrl.trim(),
     };
 
     try {
       setIsSubmitting(true);
+
       await onSave(normalizedValues);
+
       resetForm();
     } finally {
       setIsSubmitting(false);
@@ -218,7 +177,7 @@ export function AddPropertyModal({
     <FormModal
       open={open}
       title="Agregar propiedad"
-      description="Registra el terreno o propiedad y los datos de su propietario."
+      description="Registra el terreno o propiedad y su información de pago."
       icon={<FaBuilding size={18} />}
       submitLabel="Guardar propiedad"
       submitIcon={<FaPlusCircle size={12} />}
@@ -239,24 +198,18 @@ export function AddPropertyModal({
             display: "grid",
             gridTemplateColumns: {
               xs: "1fr",
-              sm: "minmax(0, 1.5fr) minmax(180px, 0.8fr)",
+              sm: "1fr 1fr",
             },
             gap: 2,
           }}
         >
-          <ModalField
-            label="Nombre de la propiedad"
-            htmlFor="property-name"
-          >
+          <ModalField label="Nombre de la propiedad" htmlFor="property-name">
             <TextField
               id="property-name"
               name="name"
               value={values.name}
               onChange={(event) => {
-                updateField(
-                  "name",
-                  event.target.value,
-                );
+                updateField("name", event.target.value);
               }}
               placeholder="Ej. Lote A-12"
               error={Boolean(errors.name)}
@@ -268,57 +221,23 @@ export function AddPropertyModal({
             />
           </ModalField>
 
-          <ModalField
-            label="Código"
-            htmlFor="property-code"
-          >
+          <ModalField label="Proyecto" htmlFor="property-project">
             <TextField
-              id="property-code"
-              name="code"
-              value={values.code}
+              id="property-project"
+              name="projectName"
+              value={values.projectName}
               onChange={(event) => {
-                updateField(
-                  "code",
-                  event.target.value.toUpperCase(),
-                );
+                updateField("projectName", event.target.value);
               }}
-              placeholder="PRP-LT-012"
-              error={Boolean(errors.code)}
-              helperText={errors.code}
+              placeholder="Ej. Residencial Las Colinas"
+              error={Boolean(errors.projectName)}
+              helperText={errors.projectName}
               disabled={isSubmitting}
               fullWidth
-              slotProps={{
-                htmlInput: {
-                  maxLength: 20,
-                },
-              }}
               sx={fieldStyles}
             />
           </ModalField>
         </Box>
-
-        <ModalField
-          label="Ubicación"
-          htmlFor="property-location"
-        >
-          <TextField
-            id="property-location"
-            name="location"
-            value={values.location}
-            onChange={(event) => {
-              updateField(
-                "location",
-                event.target.value,
-              );
-            }}
-            placeholder="Ej. Residencial Las Colinas"
-            error={Boolean(errors.location)}
-            helperText={errors.location}
-            disabled={isSubmitting}
-            fullWidth
-            sx={fieldStyles}
-          />
-        </ModalField>
 
         <Box
           sx={{
@@ -330,110 +249,50 @@ export function AddPropertyModal({
             gap: 2,
           }}
         >
-          <ModalField
-            label="Medida"
-            htmlFor="property-size"
-          >
+          <ModalField label="Medida" htmlFor="property-measure">
             <TextField
-              id="property-size"
-              name="size"
-              value={values.size}
+              id="property-measure"
+              name="measure"
+              value={values.measure}
               onChange={(event) => {
-                updateField(
-                  "size",
-                  event.target.value,
-                );
+                updateField("measure", event.target.value);
               }}
               placeholder="Ej. 450 m²"
-              error={Boolean(errors.size)}
-              helperText={errors.size}
+              error={Boolean(errors.measure)}
+              helperText={errors.measure}
               disabled={isSubmitting}
               fullWidth
               sx={fieldStyles}
             />
           </ModalField>
 
-          <ModalField
-            label="Precio de venta"
-            htmlFor="property-price"
-          >
+          <ModalField label="Ubicación" htmlFor="property-location">
             <TextField
-              id="property-price"
-              name="price"
-              type="number"
-              value={values.price}
+              id="property-location"
+              name="location"
+              value={values.location}
               onChange={(event) => {
-                updateField(
-                  "price",
-                  event.target.value,
-                );
+                updateField("location", event.target.value);
               }}
-              onFocus={() => {
-                setIsPriceFocused(true);
-              }}
-              onBlur={() => {
-                setIsPriceFocused(false);
-              }}
-              placeholder="0.00"
-              error={Boolean(errors.price)}
-              helperText={errors.price}
+              placeholder="Ej. Las Colinas, Managua"
+              error={Boolean(errors.location)}
+              helperText={errors.location}
               disabled={isSubmitting}
               fullWidth
-              slotProps={{
-                htmlInput: {
-                  min: 0,
-                  step: "0.01",
-                },
-                input: {
-                  startAdornment:
-                    showPriceSymbol ? (
-                      <InputAdornment position="start">
-                        $
-                      </InputAdornment>
-                    ) : undefined,
-                },
-              }}
               sx={fieldStyles}
             />
           </ModalField>
         </Box>
 
-        <Box
-          sx={{
-            pt: 0.5,
-            borderTop: `1px solid ${colors.border}`,
-          }}
-        />
-
-        <ModalField
-          label="Imagen para la tarjeta"
-          htmlFor="property-image"
-        >
-          <ImageUploadField
-            label="Imagen del terreno"
-            value={values.imageUrl}
-            disabled={isSubmitting}
-            onChange={(imageUrl) => {
-              updateField("imageUrl", imageUrl);
-            }}
-          />
-        </ModalField>
-
-        <ModalField
-          label="Cliente propietario"
-          htmlFor="property-owner-name"
-        >
+        <ModalField label="Propietario" htmlFor="property-owner-name">
           <TextField
             id="property-owner-name"
             name="ownerName"
             value={values.ownerName}
             onChange={(event) => {
-              updateField(
-                "ownerName",
-                event.target.value,
-              );
+              updateField("ownerName", event.target.value);
             }}
-            placeholder="Nombre completo"
+            placeholder="Ej. Valeria Gómez"
             error={Boolean(errors.ownerName)}
             helperText={errors.ownerName}
             disabled={isSubmitting}
@@ -452,54 +311,114 @@ export function AddPropertyModal({
             gap: 2,
           }}
         >
-          <ModalField
-            label="Teléfono"
-            htmlFor="property-owner-phone"
-          >
+          <ModalField label="Precio total" htmlFor="property-total-price">
             <TextField
-              id="property-owner-phone"
-              name="ownerPhone"
-              value={values.ownerPhone}
+              id="property-total-price"
+              name="totalPrice"
+              type="number"
+              value={values.totalPrice}
               onChange={(event) => {
-                updateField(
-                  "ownerPhone",
-                  event.target.value,
-                );
+                updateField("totalPrice", event.target.value);
               }}
-              placeholder="Ej. 8888-8888"
+              onFocus={() => {
+                setIsTotalPriceFocused(true);
+              }}
+              onBlur={() => {
+                setIsTotalPriceFocused(false);
+              }}
+              placeholder="0.00"
+              error={Boolean(errors.totalPrice)}
+              helperText={errors.totalPrice}
               disabled={isSubmitting}
               fullWidth
               slotProps={{
                 htmlInput: {
-                  inputMode: "tel",
-                  maxLength: 20,
+                  min: 0,
+                  step: "0.01",
+                },
+                input: {
+                  startAdornment: showTotalPriceSymbol ? (
+                    <InputAdornment position="start">$</InputAdornment>
+                  ) : undefined,
                 },
               }}
               sx={fieldStyles}
             />
           </ModalField>
 
-          <ModalField
-            label="Documento"
-            htmlFor="property-owner-document"
-          >
+          <ModalField label="Abono inicial" htmlFor="property-initial-payment">
             <TextField
-              id="property-owner-document"
-              name="ownerDocument"
-              value={values.ownerDocument}
+              id="property-initial-payment"
+              name="initialPayment"
+              type="number"
+              value={values.initialPayment}
               onChange={(event) => {
-                updateField(
-                  "ownerDocument",
-                  event.target.value,
-                );
+                updateField("initialPayment", event.target.value);
               }}
-              placeholder="Cédula o identificación"
+              onFocus={() => {
+                setIsInitialPaymentFocused(true);
+              }}
+              onBlur={() => {
+                setIsInitialPaymentFocused(false);
+              }}
+              placeholder="0.00"
+              error={Boolean(errors.initialPayment)}
+              helperText={errors.initialPayment}
               disabled={isSubmitting}
               fullWidth
+              slotProps={{
+                htmlInput: {
+                  min: 0,
+                  step: "0.01",
+                },
+                input: {
+                  startAdornment: showInitialPaymentSymbol ? (
+                    <InputAdornment position="start">$</InputAdornment>
+                  ) : undefined,
+                },
+              }}
               sx={fieldStyles}
             />
           </ModalField>
         </Box>
+
+        <ModalField label="Próximo pago" htmlFor="property-next-payment-date">
+          <TextField
+            id="property-next-payment-date"
+            name="nextPaymentDate"
+            type="date"
+            value={values.nextPaymentDate}
+            onChange={(event) => {
+              updateField("nextPaymentDate", event.target.value);
+            }}
+            disabled={isSubmitting}
+            fullWidth
+            slotProps={{
+              inputLabel: {
+                shrink: true,
+              },
+            }}
+            sx={fieldStyles}
+          />
+        </ModalField>
+
+        <Box
+          sx={{
+            pt: 0.5,
+            borderTop: `1px solid ${colors.border}`,
+          }}
+        />
+
+        <ModalField label="Imagen para la tarjeta" htmlFor="property-image">
+          <ImageUploadField
+            label="Imagen del terreno"
+            value={values.imageUrl}
+            disabled={isSubmitting}
+            onChange={(imageUrl) => {
+              updateField("imageUrl", imageUrl);
+            }}
+          />
+        </ModalField>
       </Box>
     </FormModal>
   );
@@ -525,8 +444,7 @@ const fieldStyles: SxProps<Theme> = {
 
     "&.Mui-focused": {
       bgcolor: "#ffffff",
-      boxShadow:
-        "0 0 0 3px rgba(37, 99, 235, 0.09)",
+      boxShadow: "0 0 0 3px rgba(37, 99, 235, 0.09)",
     },
 
     "&.Mui-focused fieldset": {
@@ -545,8 +463,9 @@ const fieldStyles: SxProps<Theme> = {
 
   "& .MuiInputBase-input": {
     color: `${colors.text} !important`,
-    WebkitTextFillColor:
-      `${colors.text} !important`,
+
+    WebkitTextFillColor: `${colors.text} !important`,
+
     py: 1.35,
 
     "&::placeholder": {
@@ -556,10 +475,10 @@ const fieldStyles: SxProps<Theme> = {
     },
 
     "&:-webkit-autofill": {
-      WebkitBoxShadow:
-        "0 0 0 1000px #ffffff inset",
-      WebkitTextFillColor:
-        `${colors.text} !important`,
+      WebkitBoxShadow: "0 0 0 1000px #ffffff inset",
+
+      WebkitTextFillColor: `${colors.text} !important`,
+
       caretColor: colors.text,
     },
   },
@@ -581,15 +500,13 @@ const fieldStyles: SxProps<Theme> = {
     MozAppearance: "textfield",
   },
 
-  "& input[type='number']::-webkit-outer-spin-button":
-    {
-      WebkitAppearance: "none",
-      margin: 0,
-    },
+  "& input[type='number']::-webkit-outer-spin-button": {
+    WebkitAppearance: "none",
+    margin: 0,
+  },
 
-  "& input[type='number']::-webkit-inner-spin-button":
-    {
-      WebkitAppearance: "none",
-      margin: 0,
-    },
+  "& input[type='number']::-webkit-inner-spin-button": {
+    WebkitAppearance: "none",
+    margin: 0,
+  },
 };

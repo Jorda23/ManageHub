@@ -40,14 +40,7 @@ type MetricCardProps = {
   detail: string;
 };
 
-function MetricCard({
-  icon,
-  iconBg,
-  iconColor,
-  label,
-  value,
-  detail,
-}: MetricCardProps) {
+function MetricCard({ icon, iconBg, iconColor, label, value, detail }: MetricCardProps) {
   return (
     <Card
       elevation={0}

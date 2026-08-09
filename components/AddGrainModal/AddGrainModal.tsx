@@ -1,60 +1,33 @@
 "use client";
 
-import {
-  useState,
-  type FormEvent,
-} from "react";
+import { useState, type FormEvent } from "react";
 
-import {
-  Box,
-  FormControl,
-  FormControlLabel,
-  InputAdornment,
-  MenuItem,
-  Radio,
-  RadioGroup,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, InputAdornment, MenuItem, TextField } from "@mui/material";
 
-import type {
-  SxProps,
-  Theme,
-} from "@mui/material/styles";
+import type { SxProps, Theme } from "@mui/material/styles";
 
-import {
-  FaPlus,
-  FaSeedling,
-} from "react-icons/fa";
+import { FaPlus, FaSeedling } from "react-icons/fa";
 
 import { FormModal } from "../FormModal";
 import { ModalField } from "../ModalField";
 import { ImageUploadField } from "../WorkspaceShared/ImageUploadField";
 
-export type GrainStatus =
-  | "inStock"
-  | "lowStock";
-
 export type AddGrainFormValues = {
   name: string;
   unit: string;
+  location: string;
+  initialStock: string;
+  minimumStock: string;
+  unitPrice: string;
   imageUrl: string;
-  stock: string;
-  minStock: string;
-  price: string;
-  status: GrainStatus;
 };
 
-type AddGrainFormErrors = Partial<
-  Record<keyof AddGrainFormValues, string>
->;
+type AddGrainFormErrors = Partial<Record<keyof AddGrainFormValues, string>>;
 
 type AddGrainModalProps = {
   open: boolean;
   onClose: () => void;
-  onSave: (
-    values: AddGrainFormValues,
-  ) => void | Promise<void>;
+  onSave: (values: AddGrainFormValues) => void | Promise<void>;
 };
 
 const colors = {
@@ -70,48 +43,27 @@ const colors = {
 const initialValues: AddGrainFormValues = {
   name: "",
   unit: "Quintal",
+  location: "",
+  initialStock: "",
+  minimumStock: "",
+  unitPrice: "",
   imageUrl: "",
-  stock: "",
-  minStock: "",
-  price: "",
-  status: "inStock",
 };
 
+const unitOptions = ["Libra", "Kilogramo", "Saco", "Quintal"];
 
+export function AddGrainModal({ open, onClose, onSave }: Readonly<AddGrainModalProps>) {
+  const [values, setValues] = useState<AddGrainFormValues>(initialValues);
 
-const unitOptions = [
-  "Libra",
-  "Kilogramo",
-  "Saco",
-  "Quintal",
-];
+  const [errors, setErrors] = useState<AddGrainFormErrors>({});
 
-export function AddGrainModal({
-  open,
-  onClose,
-  onSave,
-}: Readonly<AddGrainModalProps>) {
-  const [values, setValues] =
-    useState<AddGrainFormValues>(
-      initialValues,
-    );
+  const [isPriceFocused, setIsPriceFocused] = useState(false);
 
-  const [errors, setErrors] =
-    useState<AddGrainFormErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [isPriceFocused, setIsPriceFocused] =
-    useState(false);
+  const showPriceSymbol = isPriceFocused || values.unitPrice.trim() !== "";
 
-  const [isSubmitting, setIsSubmitting] =
-    useState(false);
-
-  const showPriceSymbol =
-    isPriceFocused ||
-    values.price.trim() !== "";
-
-  const updateField = <
-    K extends keyof AddGrainFormValues,
-  >(
+  const updateField = <K extends keyof AddGrainFormValues>(
     field: K,
     value: AddGrainFormValues[K],
   ): void => {
@@ -130,7 +82,6 @@ export function AddGrainModal({
     setValues(initialValues);
     setErrors({});
     setIsPriceFocused(false);
-    setIsSubmitting(false);
   };
 
   const handleClose = (): void => {
@@ -146,83 +97,66 @@ export function AddGrainModal({
     const nextErrors: AddGrainFormErrors = {};
 
     if (!values.name.trim()) {
-      nextErrors.name =
-        "Ingresa el nombre del producto";
+      nextErrors.name = "Ingresa el nombre del producto";
     }
 
-
-    if (!values.unit) {
-      nextErrors.unit =
-        "Selecciona una unidad";
+    if (!values.unit.trim()) {
+      nextErrors.unit = "Selecciona una unidad";
     }
 
-    const stock = Number(values.stock);
-
-    if (
-      values.stock.trim() === "" ||
-      Number.isNaN(stock) ||
-      stock <= 0
-    ) {
-      nextErrors.stock =
-        "Ingresa un stock mayor que cero";
+    if (!values.location.trim()) {
+      nextErrors.location = "Ingresa la ubicación";
     }
 
-    const minStock = Number(
-      values.minStock,
-    );
+    const initialStock = Number(values.initialStock);
 
-    if (
-      values.minStock.trim() === "" ||
-      Number.isNaN(minStock) ||
-      minStock < 0
-    ) {
-      nextErrors.minStock =
-        "Ingresa un stock mínimo válido";
+    if (values.initialStock.trim() === "" || Number.isNaN(initialStock) || initialStock < 0) {
+      nextErrors.initialStock = "Ingresa un stock inicial válido";
     }
 
-    if (
-      stock > 0 &&
-      minStock > stock
-    ) {
-      nextErrors.minStock =
-        "No puede superar el stock inicial";
+    const minimumStock = Number(values.minimumStock);
+
+    if (values.minimumStock.trim() === "" || Number.isNaN(minimumStock) || minimumStock < 0) {
+      nextErrors.minimumStock = "Ingresa un stock mínimo válido";
     }
 
-    const price = Number(values.price);
-
-    if (
-      values.price.trim() === "" ||
-      Number.isNaN(price) ||
-      price <= 0
-    ) {
-      nextErrors.price =
-        "Ingresa un precio mayor que cero";
+    if (initialStock >= 0 && minimumStock > initialStock) {
+      nextErrors.minimumStock = "No puede superar el stock inicial";
     }
 
-    if (!values.status) {
-      nextErrors.status =
-        "Selecciona el estado del inventario";
+    const unitPrice = Number(values.unitPrice);
+
+    if (values.unitPrice.trim() === "" || Number.isNaN(unitPrice) || unitPrice <= 0) {
+      nextErrors.unitPrice = "Ingresa un precio mayor que cero";
     }
 
     setErrors(nextErrors);
 
-    return (
-      Object.keys(nextErrors).length === 0
-    );
+    return Object.keys(nextErrors).length === 0;
   };
 
-  const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>,
-  ): Promise<void> => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
 
     if (!validate()) {
       return;
     }
 
+    const normalizedValues: AddGrainFormValues = {
+      name: values.name.trim(),
+      unit: values.unit,
+      location: values.location.trim(),
+      initialStock: values.initialStock.trim(),
+      minimumStock: values.minimumStock.trim(),
+      unitPrice: values.unitPrice.trim(),
+      imageUrl: values.imageUrl.trim(),
+    };
+
     try {
       setIsSubmitting(true);
-      await onSave(values);
+
+      await onSave(normalizedValues);
+
       resetForm();
     } finally {
       setIsSubmitting(false);
@@ -249,19 +183,13 @@ export function AddGrainModal({
           gap: 2.5,
         }}
       >
-        <ModalField
-          label="Nombre del producto"
-          htmlFor="grain-name"
-        >
+        <ModalField label="Nombre del producto" htmlFor="grain-name">
           <TextField
             id="grain-name"
             name="name"
             value={values.name}
             onChange={(event) => {
-              updateField(
-                "name",
-                event.target.value,
-              );
+              updateField("name", event.target.value);
             }}
             placeholder="Ej. Maíz amarillo"
             error={Boolean(errors.name)}
@@ -270,11 +198,6 @@ export function AddGrainModal({
             fullWidth
             autoFocus
             autoComplete="off"
-            slotProps={{
-              htmlInput: {
-                autoComplete: "off",
-              },
-            }}
             sx={fieldStyles}
           />
         </ModalField>
@@ -289,20 +212,13 @@ export function AddGrainModal({
             gap: 2,
           }}
         >
-
-          <ModalField
-            label="Unidad"
-            htmlFor="grain-unit"
-          >
+          <ModalField label="Unidad" htmlFor="grain-unit">
             <TextField
               id="grain-unit"
               name="unit"
               value={values.unit}
               onChange={(event) => {
-                updateField(
-                  "unit",
-                  event.target.value,
-                );
+                updateField("unit", event.target.value);
               }}
               select
               fullWidth
@@ -323,21 +239,32 @@ export function AddGrainModal({
               sx={fieldStyles}
             >
               {unitOptions.map((unit) => (
-                <MenuItem
-                  key={unit}
-                  value={unit}
-                >
+                <MenuItem key={unit} value={unit}>
                   {unit}
                 </MenuItem>
               ))}
             </TextField>
           </ModalField>
+
+          <ModalField label="Ubicación" htmlFor="grain-location">
+            <TextField
+              id="grain-location"
+              name="location"
+              value={values.location}
+              onChange={(event) => {
+                updateField("location", event.target.value);
+              }}
+              placeholder="Ej. Bodega principal"
+              error={Boolean(errors.location)}
+              helperText={errors.location}
+              disabled={isSubmitting}
+              fullWidth
+              sx={fieldStyles}
+            />
+          </ModalField>
         </Box>
 
-        <ModalField
-          label="Imagen para la tarjeta"
-          htmlFor="grain-image"
-        >
+        <ModalField label="Imagen para la tarjeta" htmlFor="grain-image">
           <ImageUploadField
             label="Imagen del grano"
             value={values.imageUrl}
@@ -358,24 +285,18 @@ export function AddGrainModal({
             gap: 2,
           }}
         >
-          <ModalField
-            label="Stock inicial"
-            htmlFor="grain-stock"
-          >
+          <ModalField label="Stock inicial" htmlFor="grain-initial-stock">
             <TextField
-              id="grain-stock"
-              name="stock"
+              id="grain-initial-stock"
+              name="initialStock"
               type="number"
-              value={values.stock}
+              value={values.initialStock}
               onChange={(event) => {
-                updateField(
-                  "stock",
-                  event.target.value,
-                );
+                updateField("initialStock", event.target.value);
               }}
               placeholder="0.00"
-              error={Boolean(errors.stock)}
-              helperText={errors.stock}
+              error={Boolean(errors.initialStock)}
+              helperText={errors.initialStock}
               disabled={isSubmitting}
               fullWidth
               slotProps={{
@@ -388,26 +309,18 @@ export function AddGrainModal({
             />
           </ModalField>
 
-          <ModalField
-            label="Stock mínimo"
-            htmlFor="grain-min-stock"
-          >
+          <ModalField label="Stock mínimo" htmlFor="grain-minimum-stock">
             <TextField
-              id="grain-min-stock"
-              name="minStock"
+              id="grain-minimum-stock"
+              name="minimumStock"
               type="number"
-              value={values.minStock}
+              value={values.minimumStock}
               onChange={(event) => {
-                updateField(
-                  "minStock",
-                  event.target.value,
-                );
+                updateField("minimumStock", event.target.value);
               }}
               placeholder="0.00"
-              error={Boolean(
-                errors.minStock,
-              )}
-              helperText={errors.minStock}
+              error={Boolean(errors.minimumStock)}
+              helperText={errors.minimumStock}
               disabled={isSubmitting}
               fullWidth
               slotProps={{
@@ -420,20 +333,14 @@ export function AddGrainModal({
             />
           </ModalField>
 
-          <ModalField
-            label="Precio unitario"
-            htmlFor="grain-price"
-          >
+          <ModalField label="Precio unitario" htmlFor="grain-unit-price">
             <TextField
-              id="grain-price"
-              name="price"
+              id="grain-unit-price"
+              name="unitPrice"
               type="number"
-              value={values.price}
+              value={values.unitPrice}
               onChange={(event) => {
-                updateField(
-                  "price",
-                  event.target.value,
-                );
+                updateField("unitPrice", event.target.value);
               }}
               onFocus={() => {
                 setIsPriceFocused(true);
@@ -442,8 +349,8 @@ export function AddGrainModal({
                 setIsPriceFocused(false);
               }}
               placeholder="0.00"
-              error={Boolean(errors.price)}
-              helperText={errors.price}
+              error={Boolean(errors.unitPrice)}
+              helperText={errors.unitPrice}
               disabled={isSubmitting}
               fullWidth
               slotProps={{
@@ -452,92 +359,15 @@ export function AddGrainModal({
                   step: "0.01",
                 },
                 input: {
-                  startAdornment:
-                    showPriceSymbol ? (
-                      <InputAdornment position="start">
-                        $
-                      </InputAdornment>
-                    ) : undefined,
+                  startAdornment: showPriceSymbol ? (
+                    <InputAdornment position="start">$</InputAdornment>
+                  ) : undefined,
                 },
               }}
               sx={fieldStyles}
             />
           </ModalField>
         </Box>
-
-        <FormControl
-          component="fieldset"
-          disabled={isSubmitting}
-          error={Boolean(errors.status)}
-        >
-          <Typography
-            component="legend"
-            sx={{
-              mb: 1,
-              color: errors.status
-                ? colors.danger
-                : colors.text,
-              fontSize: 10,
-              fontWeight: 950,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-            }}
-          >
-            Estado del inventario
-          </Typography>
-
-          <RadioGroup
-            row
-            name="status"
-            value={values.status}
-            onChange={(event) => {
-              updateField(
-                "status",
-                event.target
-                  .value as GrainStatus,
-              );
-            }}
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                sm: "1fr 1fr",
-              },
-              gap: 1.5,
-            }}
-          >
-            <StatusOption
-              value="inStock"
-              label="En stock"
-              description="Inventario disponible"
-              selected={
-                values.status === "inStock"
-              }
-            />
-
-            <StatusOption
-              value="lowStock"
-              label="Stock bajo"
-              description="Requiere reposición"
-              selected={
-                values.status === "lowStock"
-              }
-            />
-          </RadioGroup>
-
-          {errors.status && (
-            <Typography
-              sx={{
-                mt: 0.75,
-                color: colors.danger,
-                fontSize: 10.5,
-                fontWeight: 650,
-              }}
-            >
-              {errors.status}
-            </Typography>
-          )}
-        </FormControl>
       </Box>
     </FormModal>
   );
@@ -563,8 +393,7 @@ const fieldStyles: SxProps<Theme> = {
 
     "&.Mui-focused": {
       bgcolor: "#ffffff",
-      boxShadow:
-        "0 0 0 3px rgba(6, 78, 59, 0.08)",
+      boxShadow: "0 0 0 3px rgba(6, 78, 59, 0.08)",
     },
 
     "&.Mui-focused fieldset": {
@@ -583,29 +412,33 @@ const fieldStyles: SxProps<Theme> = {
 
   "& .MuiInputBase-input": {
     color: `${colors.text} !important`,
-    WebkitTextFillColor:
-      `${colors.text} !important`,
+
+    WebkitTextFillColor: `${colors.text} !important`,
+
     py: 1.35,
 
     "&::placeholder": {
       color: "#94a3b8",
+
       WebkitTextFillColor: "#94a3b8",
+
       opacity: 1,
     },
 
     "&:-webkit-autofill": {
-      WebkitBoxShadow:
-        "0 0 0 1000px #ffffff inset",
-      WebkitTextFillColor:
-        `${colors.text} !important`,
+      WebkitBoxShadow: "0 0 0 1000px #ffffff inset",
+
+      WebkitTextFillColor: `${colors.text} !important`,
+
       caretColor: colors.text,
     },
   },
 
   "& .MuiSelect-select": {
     color: `${colors.text} !important`,
-    WebkitTextFillColor:
-      `${colors.text} !important`,
+
+    WebkitTextFillColor: `${colors.text} !important`,
+
     py: 1.35,
   },
 
@@ -621,6 +454,7 @@ const fieldStyles: SxProps<Theme> = {
     minHeight: 16,
     ml: 0,
     mt: 0.55,
+    color: colors.danger,
     fontSize: 10.5,
     fontWeight: 650,
   },
@@ -629,17 +463,15 @@ const fieldStyles: SxProps<Theme> = {
     MozAppearance: "textfield",
   },
 
-  "& input[type='number']::-webkit-outer-spin-button":
-    {
-      WebkitAppearance: "none",
-      margin: 0,
-    },
+  "& input[type='number']::-webkit-outer-spin-button": {
+    WebkitAppearance: "none",
+    margin: 0,
+  },
 
-  "& input[type='number']::-webkit-inner-spin-button":
-    {
-      WebkitAppearance: "none",
-      margin: 0,
-    },
+  "& input[type='number']::-webkit-inner-spin-button": {
+    WebkitAppearance: "none",
+    margin: 0,
+  },
 };
 
 const menuPaperStyles: SxProps<Theme> = {
@@ -647,9 +479,10 @@ const menuPaperStyles: SxProps<Theme> = {
   maxHeight: 280,
   borderRadius: "10px",
   bgcolor: "#ffffff",
+
   border: `1px solid ${colors.border}`,
-  boxShadow:
-    "0 14px 34px rgba(15, 23, 42, 0.16)",
+
+  boxShadow: "0 14px 34px rgba(15, 23, 42, 0.16)",
 
   "& .MuiMenuItem-root": {
     minHeight: 42,
@@ -663,6 +496,7 @@ const menuPaperStyles: SxProps<Theme> = {
 
     "&.Mui-selected": {
       bgcolor: colors.primarySoft,
+
       color: colors.primary,
 
       "&:hover": {
@@ -671,85 +505,3 @@ const menuPaperStyles: SxProps<Theme> = {
     },
   },
 };
-
-function StatusOption({
-  value,
-  label,
-  description,
-  selected,
-}: {
-  value: GrainStatus;
-  label: string;
-  description: string;
-  selected: boolean;
-}) {
-  return (
-    <FormControlLabel
-      value={value}
-      control={
-        <Radio
-          size="small"
-          sx={{
-            color: "#cbd5e1",
-
-            "&.Mui-checked": {
-              color: colors.primary,
-            },
-          }}
-        />
-      }
-      label={
-        <Box>
-          <Typography
-            sx={{
-              color: colors.text,
-              fontSize: 11,
-              fontWeight: 850,
-            }}
-          >
-            {label}
-          </Typography>
-
-          <Typography
-            sx={{
-              mt: 0.15,
-              color: colors.muted,
-              fontSize: 9.5,
-            }}
-          >
-            {description}
-          </Typography>
-        </Box>
-      }
-      sx={{
-        m: 0,
-        px: 1.5,
-        py: 0.65,
-        minHeight: 54,
-        borderRadius: "9px",
-        border: `1px solid ${
-          selected
-            ? colors.primary
-            : colors.border
-        }`,
-        bgcolor: selected
-          ? "#ecfdf5"
-          : "#ffffff",
-        transition: "all 0.18s ease",
-
-        "&:hover": {
-          borderColor: selected
-            ? colors.primary
-            : "#9eb0a9",
-          bgcolor: selected
-            ? "#ecfdf5"
-            : "#f8faf9",
-        },
-
-        "& .MuiFormControlLabel-label": {
-          flex: 1,
-        },
-      }}
-    />
-  );
-}

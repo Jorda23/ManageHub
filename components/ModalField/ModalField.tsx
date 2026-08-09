@@ -9,11 +9,7 @@ type ModalFieldProps = {
   children: ReactNode;
 };
 
-export function ModalField({
-  label,
-  htmlFor,
-  children,
-}: ModalFieldProps) {
+export function ModalField({ label, htmlFor, children }: ModalFieldProps) {
   return (
     <Box>
       <Typography

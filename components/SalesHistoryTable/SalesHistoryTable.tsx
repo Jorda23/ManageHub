@@ -1,13 +1,7 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
-import {
-  FaCalendarAlt,
-  FaDownload,
-  FaFilter,
-  FaSearch,
-  FaSyncAlt,
-} from "react-icons/fa";
+import { FaCalendarAlt, FaDownload, FaFilter, FaSearch, FaSyncAlt } from "react-icons/fa";
 import {
   Box,
   Button,
@@ -21,10 +15,7 @@ import {
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 
-import {
-  buildCsvContent,
-  downloadCsvFile,
-} from "@/components/WorkspaceShared/csvDownload";
+import { buildCsvContent, downloadCsvFile } from "@/components/WorkspaceShared/csvDownload";
 
 export type BaseSale = {
   id: string;
@@ -128,8 +119,7 @@ export function SalesHistoryTable<TSale extends BaseSale>({
   totalLabel = "Total vendido:",
   colors: customColors,
   productIcon,
-  getRecordLabel = (sale) =>
-    `Ticket #${sale.id.slice(-4).toUpperCase()}`,
+  getRecordLabel = (sale) => `Ticket #${sale.id.slice(-4).toUpperCase()}`,
   getQuantityLabel = (sale) => `${sale.quantity}`,
   getProductSecondaryText,
   getFilterDate = (sale) => parseSaleDate(sale.date),
@@ -147,9 +137,7 @@ export function SalesHistoryTable<TSale extends BaseSale>({
   };
 
   const paymentMethods = useMemo(() => {
-    return Array.from(
-      new Set(sales.map((sale) => sale.paymentMethod)),
-    )
+    return Array.from(new Set(sales.map((sale) => sale.paymentMethod)))
       .filter(Boolean)
       .sort((a, b) => a.localeCompare(b));
   }, [sales]);
@@ -160,11 +148,9 @@ export function SalesHistoryTable<TSale extends BaseSale>({
     const to = endOfDay(dateTo);
 
     return sales.filter((sale) => {
-      const normalizedProductName =
-        sale.productName.toLocaleLowerCase();
+      const normalizedProductName = sale.productName.toLocaleLowerCase();
       const normalizedId = sale.id.toLocaleLowerCase();
-      const normalizedPaymentMethod =
-        sale.paymentMethod.toLocaleLowerCase();
+      const normalizedPaymentMethod = sale.paymentMethod.toLocaleLowerCase();
 
       const matchesSearch =
         !normalizedSearch ||
@@ -172,53 +158,25 @@ export function SalesHistoryTable<TSale extends BaseSale>({
         normalizedId.includes(normalizedSearch) ||
         normalizedPaymentMethod.includes(normalizedSearch);
 
-      const matchesPayment =
-        !paymentMethod ||
-        sale.paymentMethod === paymentMethod;
+      const matchesPayment = !paymentMethod || sale.paymentMethod === paymentMethod;
 
       const saleDate = getFilterDate(sale);
 
-      const matchesFrom =
-        !from ||
-        (saleDate !== null && saleDate >= from);
+      const matchesFrom = !from || (saleDate !== null && saleDate >= from);
 
-      const matchesTo =
-        !to ||
-        (saleDate !== null && saleDate <= to);
+      const matchesTo = !to || (saleDate !== null && saleDate <= to);
 
-      return (
-        matchesSearch &&
-        matchesPayment &&
-        matchesFrom &&
-        matchesTo
-      );
+      return matchesSearch && matchesPayment && matchesFrom && matchesTo;
     });
-  }, [
-    dateFrom,
-    dateTo,
-    getFilterDate,
-    paymentMethod,
-    sales,
-    search,
-  ]);
+  }, [dateFrom, dateTo, getFilterDate, paymentMethod, sales, search]);
 
-  const hasActiveFilters = Boolean(
-    search.trim() ||
-      paymentMethod ||
-      dateFrom ||
-      dateTo,
-  );
+  const hasActiveFilters = Boolean(search.trim() || paymentMethod || dateFrom || dateTo);
 
   const filteredTotal = useMemo(() => {
-    return filteredSales.reduce(
-      (sum, sale) => sum + sale.total,
-      0,
-    );
+    return filteredSales.reduce((sum, sale) => sum + sale.total, 0);
   }, [filteredSales]);
 
-  const visibleTotal = hasActiveFilters
-    ? filteredTotal
-    : totalSold;
+  const visibleTotal = hasActiveFilters ? filteredTotal : totalSold;
 
   const handleDownload = () => {
     if (onDownload) {
@@ -267,8 +225,7 @@ export function SalesHistoryTable<TSale extends BaseSale>({
         border: `1px solid ${colors.border}`,
         bgcolor: "#ffffff",
         overflow: "hidden",
-        boxShadow:
-          "0 10px 28px rgba(15, 23, 42, 0.06)",
+        boxShadow: "0 10px 28px rgba(15, 23, 42, 0.06)",
         minWidth: 0,
         ...sx,
       }}
@@ -335,11 +292,7 @@ export function SalesHistoryTable<TSale extends BaseSale>({
           </Box>
         </Box>
 
-        <ActionButton
-          label="Descargar historial"
-          onClick={handleDownload}
-          colors={colors}
-        >
+        <ActionButton label="Descargar historial" onClick={handleDownload} colors={colors}>
           <FaDownload />
         </ActionButton>
       </Box>
@@ -371,9 +324,7 @@ export function SalesHistoryTable<TSale extends BaseSale>({
         <TextField
           placeholder="Producto, ticket o método de pago"
           value={search}
-          onChange={(event) =>
-            setSearch(event.target.value)
-          }
+          onChange={(event) => setSearch(event.target.value)}
           size="small"
           fullWidth
           slotProps={{
@@ -395,9 +346,7 @@ export function SalesHistoryTable<TSale extends BaseSale>({
           label="Desde"
           type="date"
           value={dateFrom}
-          onChange={(event) =>
-            setDateFrom(event.target.value)
-          }
+          onChange={(event) => setDateFrom(event.target.value)}
           size="small"
           fullWidth
           slotProps={{
@@ -422,9 +371,7 @@ export function SalesHistoryTable<TSale extends BaseSale>({
           label="Hasta"
           type="date"
           value={dateTo}
-          onChange={(event) =>
-            setDateTo(event.target.value)
-          }
+          onChange={(event) => setDateTo(event.target.value)}
           size="small"
           fullWidth
           slotProps={{
@@ -449,9 +396,7 @@ export function SalesHistoryTable<TSale extends BaseSale>({
           select
           label="Método de pago"
           value={paymentMethod}
-          onChange={(event) =>
-            setPaymentMethod(event.target.value)
-          }
+          onChange={(event) => setPaymentMethod(event.target.value)}
           size="small"
           fullWidth
           slotProps={{
@@ -461,15 +406,10 @@ export function SalesHistoryTable<TSale extends BaseSale>({
           }}
           sx={filterFieldSx(colors)}
         >
-          <MenuItem value="">
-            Todos los métodos
-          </MenuItem>
+          <MenuItem value="">Todos los métodos</MenuItem>
 
           {paymentMethods.map((method) => (
-            <MenuItem
-              key={method}
-              value={method}
-            >
+            <MenuItem key={method} value={method}>
               {method}
             </MenuItem>
           ))}
@@ -515,11 +455,7 @@ export function SalesHistoryTable<TSale extends BaseSale>({
       </Box>
 
       {sales.length === 0 ? (
-        <EmptyState
-          title={emptyTitle}
-          description={emptyDescription}
-          colors={colors}
-        />
+        <EmptyState title={emptyTitle} description={emptyDescription} colors={colors} />
       ) : filteredSales.length === 0 ? (
         <EmptyState
           title="No se encontraron ventas."
@@ -587,8 +523,7 @@ export function SalesHistoryTable<TSale extends BaseSale>({
               component="tbody"
               sx={{
                 "& tr": {
-                  transition:
-                    "background-color 0.16s ease",
+                  transition: "background-color 0.16s ease",
                 },
 
                 "& tr:nth-of-type(even)": {
@@ -624,8 +559,7 @@ export function SalesHistoryTable<TSale extends BaseSale>({
               }}
             >
               {filteredSales.map((sale) => {
-                const productSecondaryText =
-                  getProductSecondaryText?.(sale);
+                const productSecondaryText = getProductSecondaryText?.(sale);
 
                 return (
                   <tr key={sale.id}>
@@ -673,8 +607,7 @@ export function SalesHistoryTable<TSale extends BaseSale>({
                               borderRadius: "16px",
                               display: "grid",
                               placeItems: "center",
-                              bgcolor:
-                                colors.primarySoft,
+                              bgcolor: colors.primarySoft,
                               color: colors.primary,
                               flexShrink: 0,
                             }}
@@ -728,9 +661,7 @@ export function SalesHistoryTable<TSale extends BaseSale>({
                           textAlign: "center",
                         }}
                       >
-                        {formatCurrency(
-                          sale.unitPrice,
-                        )}
+                        {formatCurrency(sale.unitPrice)}
                       </Typography>
                     </td>
 
@@ -761,8 +692,7 @@ export function SalesHistoryTable<TSale extends BaseSale>({
                           fontWeight: 950,
                           color: colors.primary,
                           textAlign: "right",
-                          fontVariantNumeric:
-                            "tabular-nums",
+                          fontVariantNumeric: "tabular-nums",
                         }}
                       >
                         {formatCurrency(sale.total)}
@@ -799,13 +729,8 @@ export function SalesHistoryTable<TSale extends BaseSale>({
           }}
         >
           {filteredSales.length}{" "}
-          {filteredSales.length === 1
-            ? "venta registrada"
-            : "ventas registradas"}
-
-          {hasActiveFilters
-            ? ` de ${sales.length}`
-            : ""}
+          {filteredSales.length === 1 ? "venta registrada" : "ventas registradas"}
+          {hasActiveFilters ? ` de ${sales.length}` : ""}
         </Typography>
 
         <Box
@@ -841,9 +766,7 @@ export function SalesHistoryTable<TSale extends BaseSale>({
   );
 }
 
-function filterFieldSx(
-  colors: SalesHistoryColors,
-): SxProps<Theme> {
+function filterFieldSx(colors: SalesHistoryColors): SxProps<Theme> {
   return {
     "& .MuiOutlinedInput-root": {
       minHeight: 42,
@@ -869,22 +792,19 @@ function filterFieldSx(
 
     "& .MuiInputBase-input": {
       color: `${colors.text} !important`,
-      WebkitTextFillColor:
-        `${colors.text} !important`,
+      WebkitTextFillColor: `${colors.text} !important`,
       opacity: 1,
     },
 
     "& .MuiInputBase-input::placeholder": {
       color: `${colors.muted} !important`,
-      WebkitTextFillColor:
-        `${colors.muted} !important`,
+      WebkitTextFillColor: `${colors.muted} !important`,
       opacity: 1,
     },
 
     "& .MuiSelect-select": {
       color: `${colors.text} !important`,
-      WebkitTextFillColor:
-        `${colors.text} !important`,
+      WebkitTextFillColor: `${colors.text} !important`,
     },
 
     "& .MuiInputAdornment-root": {
@@ -907,11 +827,10 @@ function filterFieldSx(
       color: colors.primary,
     },
 
-    "& input[type='date']::-webkit-calendar-picker-indicator":
-      {
-        opacity: 0.75,
-        cursor: "pointer",
-      },
+    "& input[type='date']::-webkit-calendar-picker-indicator": {
+      opacity: 0.75,
+      cursor: "pointer",
+    },
   };
 }
 
@@ -977,18 +896,10 @@ function ActionButton({
       sx={{
         width: 36,
         height: 36,
-        border: `1px solid ${
-          active
-            ? colors.primary
-            : colors.border
-        }`,
+        border: `1px solid ${active ? colors.primary : colors.border}`,
         borderRadius: "16px",
-        color: active
-          ? colors.primary
-          : colors.muted,
-        bgcolor: active
-          ? colors.primarySoft
-          : "#ffffff",
+        color: active ? colors.primary : colors.muted,
+        bgcolor: active ? colors.primarySoft : "#ffffff",
         transition: "all 0.16s ease",
         flexShrink: 0,
 

@@ -2,15 +2,7 @@
 
 import Link from "next/link";
 import type { ComponentType, ReactNode } from "react";
-import {
-  alpha,
-  Box,
-  Button,
-  Card,
-  Chip,
-  Divider,
-  Typography,
-} from "@mui/material";
+import { alpha, Box, Button, Card, Chip, Divider, Typography } from "@mui/material";
 import {
   FaArrowRight,
   FaBell,
@@ -125,8 +117,7 @@ const modules: ModuleCard[] = [
   {
     eyebrow: "FERRETERÍA",
     title: "Ventas de ferretería",
-    description:
-      "Administra productos, existencias, precios y ventas del negocio de ferretería.",
+    description: "Administra productos, existencias, precios y ventas del negocio de ferretería.",
     image:
       "https://images.unsplash.com/photo-1519520104014-df63821cb6f9?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     href: "/sell/hardware",
@@ -139,8 +130,7 @@ const modules: ModuleCard[] = [
   {
     eyebrow: "GRANOS BÁSICOS",
     title: "Ventas de granos",
-    description:
-      "Controla inventario y ventas por libra, saco, quintal o kilogramo.",
+    description: "Controla inventario y ventas por libra, saco, quintal o kilogramo.",
     image:
       "https://images.unsplash.com/photo-1645331465778-eb409d112198?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     href: "/sell/grains",
@@ -153,8 +143,7 @@ const modules: ModuleCard[] = [
   {
     eyebrow: "TERRENOS",
     title: "Propiedades y abonos",
-    description:
-      "Consulta propiedades vendidas, clientes, cuotas, saldos y pagos pendientes.",
+    description: "Consulta propiedades vendidas, clientes, cuotas, saldos y pagos pendientes.",
     image:
       "https://images.unsplash.com/photo-1672861847378-e15e90cc25ca?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     href: "/sell/property",
@@ -311,8 +300,7 @@ export default function MainDashboard() {
             </Box>
           </Box>
 
-          <Box
-          >
+          <Box>
             <ActivityCard />
           </Box>
         </Box>
@@ -416,8 +404,8 @@ function DashboardHero() {
               textTransform: "capitalize",
             }}
           >
-            {formattedDate}. Consulta el estado general de ventas, inventarios,
-            propiedades y próximos compromisos.
+            {formattedDate}. Consulta el estado general de ventas, inventarios, propiedades y
+            próximos compromisos.
           </Typography>
         </Box>
       </Box>
@@ -425,14 +413,7 @@ function DashboardHero() {
   );
 }
 
-function DashboardMetricCard({
-  label,
-  value,
-  detail,
-  icon: Icon,
-  accent,
-  tone,
-}: MetricCard) {
+function DashboardMetricCard({ label, value, detail, icon: Icon, accent, tone }: MetricCard) {
   const detailColor =
     tone === "success"
       ? colors.success
@@ -618,7 +599,9 @@ function AlertsCard() {
                     <Typography sx={{ color: colors.text, fontSize: 12.5, fontWeight: 900 }}>
                       {alert.title}
                     </Typography>
-                    <Typography sx={{ mt: 0.35, color: colors.muted, fontSize: 11.5, fontWeight: 600 }}>
+                    <Typography
+                      sx={{ mt: 0.35, color: colors.muted, fontSize: 11.5, fontWeight: 600 }}
+                    >
                       {alert.detail}
                     </Typography>
                   </Box>
@@ -631,25 +614,14 @@ function AlertsCard() {
         })}
       </Box>
 
-      <Button
-        fullWidth
-        variant="outlined"
-        sx={{ ...buttonStyles("outlined"), mt: 2 }}
-      >
+      <Button fullWidth variant="outlined" sx={{ ...buttonStyles("outlined"), mt: 2 }}>
         Ver todas las alertas
       </Button>
     </Card>
   );
 }
 
-function SectorModuleCard({
-  eyebrow,
-  title,
-  description,
-  image,
-  href,
-  stats,
-}: ModuleCard) {
+function SectorModuleCard({ eyebrow, title, description, image, href, stats }: ModuleCard) {
   return (
     <Card elevation={0} sx={{ ...cardStyles, overflow: "hidden", p: 0 }}>
       <Box
@@ -686,7 +658,13 @@ function SectorModuleCard({
               {title}
             </Typography>
             <Typography
-              sx={{ mt: 0.65, color: colors.mutedDark, fontSize: 12, fontWeight: 600, lineHeight: 1.5 }}
+              sx={{
+                mt: 0.65,
+                color: colors.mutedDark,
+                fontSize: 12,
+                fontWeight: 600,
+                lineHeight: 1.5,
+              }}
             >
               {description}
             </Typography>
@@ -707,7 +685,13 @@ function SectorModuleCard({
                 {stat.value}
               </Typography>
               <Typography
-                sx={{ mt: 0.25, color: colors.muted, fontSize: 8.5, fontWeight: 850, lineHeight: 1.25 }}
+                sx={{
+                  mt: 0.25,
+                  color: colors.muted,
+                  fontSize: 8.5,
+                  fontWeight: 850,
+                  lineHeight: 1.25,
+                }}
               >
                 {stat.label}
               </Typography>
@@ -743,7 +727,9 @@ function ActivityCard() {
                   <Typography sx={{ color: colors.text, fontSize: 12.5, fontWeight: 900 }}>
                     {activity.title}
                   </Typography>
-                  <Typography sx={{ mt: 0.25, color: colors.muted, fontSize: 11.3, fontWeight: 600 }}>
+                  <Typography
+                    sx={{ mt: 0.25, color: colors.muted, fontSize: 11.3, fontWeight: 600 }}
+                  >
                     {activity.subtitle}
                   </Typography>
                 </Box>
@@ -753,7 +739,9 @@ function ActivityCard() {
                       {activity.amount}
                     </Typography>
                   )}
-                  <Typography sx={{ mt: 0.2, color: colors.muted, fontSize: 10.5, fontWeight: 700 }}>
+                  <Typography
+                    sx={{ mt: 0.2, color: colors.muted, fontSize: 10.5, fontWeight: 700 }}
+                  >
                     {activity.time}
                   </Typography>
                 </Box>
@@ -869,9 +857,7 @@ function LegendDot({ label, accent }: { label: string; accent: string }) {
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 0.7 }}>
       <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: accent }} />
-      <Typography sx={{ color: colors.muted, fontSize: 10.8, fontWeight: 700 }}>
-        {label}
-      </Typography>
+      <Typography sx={{ color: colors.muted, fontSize: 10.8, fontWeight: 700 }}>{label}</Typography>
     </Box>
   );
 }

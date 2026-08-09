@@ -27,9 +27,7 @@ export function ImageUploadField({
     }
   }, [value]);
 
-  const handleFileChange = (
-    event: ChangeEvent<HTMLInputElement>,
-  ): void => {
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const file = event.target.files?.[0];
 
     if (!file) {

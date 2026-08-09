@@ -1,1 +1,1 @@
-export * from './AddPropertyModal'
+export * from "./AddPropertyModal";

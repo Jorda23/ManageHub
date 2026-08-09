@@ -8,23 +8,13 @@ import {
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 
-export type BusinessButtonIntent =
-  | "primary"
-  | "secondary"
-  | "success"
-  | "warning"
-  | "error";
+export type BusinessButtonIntent = "primary" | "secondary" | "success" | "warning" | "error";
 
-export type BusinessButtonAppearance =
-  | "solid"
-  | "outlined"
-  | "tonal"
-  | "ghost";
+export type BusinessButtonAppearance = "solid" | "outlined" | "tonal" | "ghost";
 
 export type BusinessButtonSize = "small" | "medium" | "large";
 
-export interface BusinessButtonProps
-  extends Omit<ButtonProps, "variant" | "color" | "size"> {
+export interface BusinessButtonProps extends Omit<ButtonProps, "variant" | "color" | "size"> {
   intent?: BusinessButtonIntent;
   appearance?: BusinessButtonAppearance;
   buttonSize?: BusinessButtonSize;
@@ -42,10 +32,7 @@ interface IntentColors {
   border: string;
 }
 
-const getIntentColors = (
-  theme: Theme,
-  intent: BusinessButtonIntent,
-): IntentColors => {
+const getIntentColors = (theme: Theme, intent: BusinessButtonIntent): IntentColors => {
   const paletteByIntent = {
     primary: theme.palette.primary,
     secondary: theme.palette.secondary,
@@ -120,9 +107,7 @@ const getAppearanceStyles = (
   return styles[appearance];
 };
 
-const getSizeStyles = (
-  buttonSize: BusinessButtonSize,
-): SxProps<Theme> => {
+const getSizeStyles = (buttonSize: BusinessButtonSize): SxProps<Theme> => {
   const styles: Record<BusinessButtonSize, SxProps<Theme>> = {
     small: {
       minHeight: 32,
@@ -218,13 +203,7 @@ export function BusinessButton({
       disableElevation
       disabled={disabled || loading}
       aria-busy={loading || undefined}
-      startIcon={
-        loading ? (
-          <CircularProgress thickness={5} color="inherit" />
-        ) : (
-          (startIcon ?? icon)
-        )
-      }
+      startIcon={loading ? <CircularProgress thickness={5} color="inherit" /> : (startIcon ?? icon)}
       endIcon={loading ? undefined : endIcon}
       sx={[
         (theme) => {
@@ -239,13 +218,7 @@ export function BusinessButton({
             whiteSpace: "nowrap",
 
             transition: theme.transitions.create(
-              [
-                "background-color",
-                "border-color",
-                "color",
-                "box-shadow",
-                "transform",
-              ],
+              ["background-color", "border-color", "color", "box-shadow", "transform"],
               {
                 duration: 160,
               },

@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  Box,
-  Button,
-  Chip,
-  IconButton,
-  LinearProgress,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Chip, IconButton, LinearProgress, Paper, Typography } from "@mui/material";
 
 import {
   FaBoxOpen,
@@ -169,11 +161,7 @@ export function HardwareInventory({
             }}
           >
             {products.map((product) => (
-              <HardwareProductCard
-                key={product.id}
-                product={product}
-                onEdit={onEditProduct}
-              />
+              <HardwareProductCard key={product.id} product={product} onEdit={onEditProduct} />
             ))}
           </Box>
         )}
@@ -365,15 +353,11 @@ function HardwareProductCard({
   product: HardwareProduct;
   onEdit?: (product: HardwareProduct) => void;
 }) {
-  const isLowStock =
-    product.status === "lowStock" || product.stock <= product.minStock;
+  const isLowStock = product.status === "lowStock" || product.stock <= product.minStock;
 
   const stockPercent =
     product.minStock > 0
-      ? Math.min(
-          100,
-          (product.stock / Math.max(product.minStock * 4, product.stock)) * 100,
-        )
+      ? Math.min(100, (product.stock / Math.max(product.minStock * 4, product.stock)) * 100)
       : 100;
 
   const progressColor = isLowStock ? colors.danger : product.accent;
@@ -395,8 +379,7 @@ function HardwareProductCard({
         border: `1px solid ${colors.cardBorder}`,
         bgcolor: "#ffffff",
 
-        transition:
-          "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease",
+        transition: "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease",
 
         "&:hover": {
           transform: {
@@ -459,11 +442,7 @@ function HardwareProductCard({
             },
           }}
         >
-          <ProductHeader
-            product={product}
-            isLowStock={isLowStock}
-            onEdit={onEdit}
-          />
+          <ProductHeader product={product} isLowStock={isLowStock} onEdit={onEdit} />
 
           <Box
             sx={{
@@ -531,13 +510,7 @@ function HardwareProductCard({
   );
 }
 
-function ProductImage({
-  product,
-  isLowStock,
-}: {
-  product: HardwareProduct;
-  isLowStock: boolean;
-}) {
+function ProductImage({ product, isLowStock }: { product: HardwareProduct; isLowStock: boolean }) {
   return (
     <Box
       role="img"
@@ -624,9 +597,7 @@ function ProductImage({
             md: 21,
           },
 
-          bgcolor: isLowStock
-            ? "rgba(254, 226, 226, 0.95)"
-            : "rgba(220, 252, 231, 0.95)",
+          bgcolor: isLowStock ? "rgba(254, 226, 226, 0.95)" : "rgba(220, 252, 231, 0.95)",
 
           color: isLowStock ? colors.danger : colors.green,
 

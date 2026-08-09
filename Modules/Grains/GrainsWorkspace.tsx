@@ -1,31 +1,29 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import {
-  FaCheckCircle,
-  FaFileInvoiceDollar,
-  FaSeedling,
-  FaWarehouse,
-} from "react-icons/fa";
+import { FaCheckCircle, FaFileInvoiceDollar, FaSeedling, FaWarehouse } from "react-icons/fa";
 
 import { Box } from "@mui/material";
 
 import AppShell from "@/components/AppShell/AppShell";
-import { AddGrainModal } from "@/components/AddGrainModal";
-import {
-  GrainInventory,
-  type GrainProduct,
-  type GrainStatus,
-} from "@/components/GrainInventory";
+
+import { AddGrainModal, type AddGrainFormValues } from "@/components/AddGrainModal";
+
+import { GrainInventory, type GrainProduct } from "@/components/GrainInventory";
+
 import { RegisterSaleCard } from "@/components/RegisterSaleCard";
 import { SalesHistoryTable } from "@/components/SalesHistoryTable";
 
 import type { WorkspaceConfig } from "@/components/WorkspaceShared/workspaceTypes";
-import { SectionCard } from "./components/SectionCard";
-import { MetricCard } from "./components/MetricCard";
-import { HeroHeader } from "./components/HeroHeader";
+
+import { useCreateGrainProduct, useGrainProducts, useRegisterGrainSale } from "@/hook/useGrains";
+
 import { grainsColors } from "@/theme/sharedColors";
+
+import { HeroHeader } from "./components/HeroHeader";
+import { MetricCard } from "./components/MetricCard";
+import { SectionCard } from "./components/SectionCard";
 
 type GrainSale = {
   id: string;
@@ -38,24 +36,13 @@ type GrainSale = {
   date: string;
 };
 
-type AddGrainFormValues = {
-  name: string;
-  unit: string;
-  imageUrl: string;
-  stock: string;
-  price: string;
-  minStock: string;
-  status: GrainStatus;
-};
-
 export const colors = grainsColors;
 
 export const grainsConfig: WorkspaceConfig = {
   category: "grains",
   badge: "Módulo de Ventas",
   title: "Ventas de Granos Básicos",
-  subtitle:
-    "Inventario independiente para granos, ventas por libra, saco, quintal o kilogramo.",
+  subtitle: "Inventario independiente para granos, ventas por libra, saco, quintal o kilogramo.",
   heroAccent: "#5ee3a7",
   heroSecondary: "#f59e0b",
   invoice: "#GRN-2026-082",
@@ -75,65 +62,6 @@ export const grainsConfig: WorkspaceConfig = {
   workflowTitle: "Flujo granos básicos",
   workflowItems: [],
 };
-
-const initialProducts: GrainProduct[] = [
-  {
-    id: "rice",
-    name: "Arroz blanco",
-    unit: "Quintal",
-    stock: 120,
-    minStock: 20,
-    price: 18.5,
-    code: "GRN-ARR-2026",
-    accent: "#22c55e",
-    silo: "Silo Alpha-1",
-    status: "inStock",
-    imageUrl:
-      "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=700&q=80",
-  },
-  {
-    id: "beans",
-    name: "Frijol rojo",
-    unit: "Saco",
-    stock: 72,
-    minStock: 15,
-    price: 4.25,
-    code: "GRN-FRJ-1011",
-    accent: "#f97316",
-    silo: "Silo Alpha-2",
-    status: "inStock",
-    imageUrl:
-      "https://images.unsplash.com/photo-1515543904379-3d757afe72e4?auto=format&fit=crop&w=700&q=80",
-  },
-  {
-    id: "corn",
-    name: "Maíz amarillo",
-    unit: "Quintal",
-    stock: 44,
-    minStock: 18,
-    price: 15.75,
-    code: "GRN-MAZ-2050",
-    accent: "#f97316",
-    silo: "Silo Beta-1",
-    status: "inStock",
-    imageUrl:
-      "https://images.unsplash.com/photo-1551754655-cd27e38d2076?auto=format&fit=crop&w=700&q=80",
-  },
-  {
-    id: "sugar",
-    name: "Azúcar sulfatada",
-    unit: "Saco",
-    stock: 88,
-    minStock: 12,
-    price: 12.4,
-    code: "GRN-AZU-3301",
-    accent: "#3b82f6",
-    silo: "Bodega principal",
-    status: "inStock",
-    imageUrl:
-      "https://images.unsplash.com/photo-1581441363689-1f3c3c414635?auto=format&fit=crop&w=700&q=80",
-  },
-];
 
 const initialSales: GrainSale[] = [
   {
@@ -167,28 +95,20 @@ const formatCurrency = (value: number): string => {
   }).format(value);
 };
 
-function createProductCode(name: string): string {
-  const normalizedName = name
-    .trim()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toUpperCase()
-    .replace(/[^A-Z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 10);
-
-  const year = new Date().getFullYear();
-  const randomCode = Math.floor(1000 + Math.random() * 9000);
-
-  return `GRN-${normalizedName || "PROD"}-${year}-${randomCode}`;
-}
-
 export function GrainsWorkspace() {
-  const [products, setProducts] = useState<GrainProduct[]>(initialProducts);
+  const {
+    data: grainProducts = [],
+    isLoading: isLoadingProducts,
+    isError: isProductsError,
+  } = useGrainProducts();
+
+  const { mutateAsync: createGrainProduct, isPending: isCreatingProduct } = useCreateGrainProduct();
+
+  const { mutateAsync: registerGrainSale, isPending: isRegisteringSale } = useRegisterGrainSale();
 
   const [sales, setSales] = useState<GrainSale[]>(initialSales);
 
-  const [selectedProductId, setSelectedProductId] = useState("beans");
+  const [selectedProductId, setSelectedProductId] = useState("");
 
   const [quantity, setQuantity] = useState("1");
 
@@ -197,6 +117,43 @@ export function GrainsWorkspace() {
   const [error, setError] = useState("");
 
   const [isAddGrainOpen, setIsAddGrainOpen] = useState(false);
+
+  const products = useMemo<GrainProduct[]>(() => {
+    return grainProducts.map((product) => {
+      const isLowStock =
+        product.inventoryStatus === "LowStock" || product.stock <= product.minimumStock;
+
+      return {
+        id: product.id,
+        code: product.code,
+        name: product.name,
+        unit: product.unit,
+        stock: product.stock,
+        minStock: product.minimumStock,
+        price: product.unitPrice,
+        silo: product.location,
+        imageUrl: product.imageUrl ?? "",
+        status: isLowStock ? "lowStock" : "inStock",
+        accent: isLowStock ? colors.danger : colors.primaryLight,
+      };
+    });
+  }, [grainProducts]);
+
+  useEffect(() => {
+    if (products.length > 0 && !selectedProductId) {
+      setSelectedProductId(products[0].id);
+    }
+  }, [products, selectedProductId]);
+
+  useEffect(() => {
+    if (
+      selectedProductId &&
+      products.length > 0 &&
+      !products.some((product) => product.id === selectedProductId)
+    ) {
+      setSelectedProductId(products[0].id);
+    }
+  }, [products, selectedProductId]);
 
   const selectedProduct = useMemo(() => {
     return products.find((product) => product.id === selectedProductId);
@@ -220,7 +177,7 @@ export function GrainsWorkspace() {
     return products.reduce((total, product) => total + product.stock, 0);
   }, [products]);
 
-  const handleRegisterSale = (): void => {
+  const handleRegisterSale = async (): Promise<void> => {
     setError("");
 
     if (!selectedProduct) {
@@ -238,67 +195,94 @@ export function GrainsWorkspace() {
       return;
     }
 
-    const newSale: GrainSale = {
-      id: crypto.randomUUID(),
-      productName: selectedProduct.name,
-      unit: selectedProduct.unit,
-      quantity: numericQuantity,
-      unitPrice: selectedProduct.price,
-      total: saleTotal,
-      paymentMethod,
-      date: new Date().toLocaleString("es-NI", {
-        dateStyle: "short",
-        timeStyle: "short",
-      }),
-    };
+    try {
+      const response = await registerGrainSale({
+        productId: selectedProduct.id,
+        quantity: numericQuantity,
+        paymentMethod,
+      });
 
-    setProducts((currentProducts) =>
-      currentProducts.map((product) => {
-        if (product.id !== selectedProduct.id) {
-          return product;
-        }
+      const newSale: GrainSale = {
+        id: crypto.randomUUID(),
 
-        const newStock = product.stock - numericQuantity;
+        productName: selectedProduct.name,
 
-        return {
-          ...product,
-          stock: newStock,
-          status: newStock <= product.minStock ? "lowStock" : "inStock",
-          accent: newStock <= product.minStock ? colors.danger : product.accent,
-        };
-      }),
-    );
+        unit: selectedProduct.unit,
 
-    setSales((currentSales) => [newSale, ...currentSales]);
+        quantity: response.quantity,
 
-    setQuantity("1");
+        unitPrice: selectedProduct.price,
+
+        total: response.total,
+
+        paymentMethod,
+
+        date: new Date().toLocaleString("es-NI", {
+          dateStyle: "short",
+          timeStyle: "short",
+        }),
+      };
+
+      setSales((currentSales) => [newSale, ...currentSales]);
+
+      setQuantity("1");
+    } catch {
+      setError("No se pudo registrar la venta.");
+    }
   };
 
-  const handleAddGrain = (formValues: AddGrainFormValues): void => {
-    const numericStock = Number(formValues.stock);
-    const numericPrice = Number(formValues.price);
-    const numericMinStock = Number(formValues.minStock);
+  const handleAddGrain = async (formValues: AddGrainFormValues): Promise<void> => {
+    setError("");
 
-    const newProduct: GrainProduct = {
-      id: crypto.randomUUID(),
-      name: formValues.name.trim(),
-      unit: formValues.unit,
-      stock: numericStock,
-      minStock: numericMinStock,
-      price: numericPrice,
-      code: createProductCode(formValues.name),
-      accent: formValues.status === "lowStock" ? colors.danger : "#22c55e",
-      status: formValues.status,
-      silo: "Bodega principal",
-      imageUrl:
-        formValues.imageUrl.trim() ||
-        "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=700&q=80",
-    };
+    const initialStock = Number(formValues.initialStock);
 
-    setProducts((currentProducts) => [newProduct, ...currentProducts]);
+    const minimumStock = Number(formValues.minimumStock);
 
-    setSelectedProductId(newProduct.id);
-    setIsAddGrainOpen(false);
+    const unitPrice = Number(formValues.unitPrice);
+
+    if (Number.isNaN(initialStock) || initialStock < 0) {
+      setError("El stock inicial debe ser válido.");
+      return;
+    }
+
+    if (Number.isNaN(minimumStock) || minimumStock < 0) {
+      setError("El stock mínimo debe ser válido.");
+      return;
+    }
+
+    if (minimumStock > initialStock) {
+      setError("El stock mínimo no puede ser mayor al stock inicial.");
+      return;
+    }
+
+    if (Number.isNaN(unitPrice) || unitPrice <= 0) {
+      setError("El precio unitario debe ser mayor que cero.");
+      return;
+    }
+
+    try {
+      const response = await createGrainProduct({
+        name: formValues.name.trim(),
+
+        unit: formValues.unit.trim(),
+
+        location: formValues.location.trim(),
+
+        initialStock,
+
+        minimumStock,
+
+        unitPrice,
+
+        imageUrl: formValues.imageUrl.trim() || null,
+      });
+
+      setSelectedProductId(response.id);
+
+      setIsAddGrainOpen(false);
+    } catch {
+      setError("No se pudo crear el producto.");
+    }
   };
 
   const handleEditProduct = (product: GrainProduct): void => {
@@ -311,25 +295,34 @@ export function GrainsWorkspace() {
         sx={{
           width: "100%",
           minHeight: "calc(100vh - 48px)",
+
           px: {
             xs: 2,
             md: 4,
           },
+
           py: {
             xs: 2.5,
             md: 3,
           },
+
           bgcolor: colors.pageBg,
+
           color: colors.text,
         }}
       >
         <Box
           sx={{
             width: "100%",
+
             maxWidth: 1440,
+
             mx: "auto",
+
             display: "flex",
+
             flexDirection: "column",
+
             gap: 3,
           }}
         >
@@ -338,38 +331,57 @@ export function GrainsWorkspace() {
           <Box
             sx={{
               display: "grid",
+
               gridTemplateColumns: {
                 xs: "1fr",
+
                 sm: "repeat(2, minmax(0, 1fr))",
+
                 md: "repeat(3, minmax(0, 1fr))",
               },
+
               gap: 2.5,
             }}
           >
             <MetricCard
               icon={<FaFileInvoiceDollar />}
+
               iconBg={colors.primarySoft}
+
               iconColor={colors.primaryLight}
+
               label="Ventas registradas"
+
               value={sales.length.toString()}
+
               detail={`Total: ${formatCurrency(totalSold)}`}
             />
 
             <MetricCard
               icon={<FaWarehouse />}
+
               iconBg={colors.orangeSoft}
+
               iconColor={colors.orange}
+
               label="Inventario disponible"
+
               value={totalInventory.toString()}
+
               detail="Unidades en stock"
             />
 
             <MetricCard
               icon={<FaCheckCircle />}
+
               iconBg={colors.primarySoft}
+
               iconColor={colors.primaryLight}
+
               label="Productos activos"
+
               value={products.length.toString()}
+
               detail="Productos registrados"
             />
           </Box>
@@ -377,41 +389,65 @@ export function GrainsWorkspace() {
           <Box
             sx={{
               display: "grid",
+
               gridTemplateColumns: {
                 xs: "1fr",
+
                 lg: "minmax(0, 2fr) minmax(340px, 1fr)",
               },
+
               gap: {
                 xs: 2,
                 md: 2.5,
               },
+
               alignItems: "start",
+
               width: "100%",
+
               minWidth: 0,
             }}
           >
             <GrainInventory
               products={products}
+
               onAddProduct={() => {
                 setIsAddGrainOpen(true);
               }}
+
               onEditProduct={handleEditProduct}
             />
 
-            <SectionCard sx={{ height: "100%" }}>
+            <SectionCard
+              sx={{
+                height: "100%",
+              }}
+            >
               <RegisterSaleCard
                 products={products}
+
                 selectedProduct={selectedProduct}
+
                 selectedProductId={selectedProductId}
+
                 quantity={quantity}
+
                 numericQuantity={numericQuantity}
+
                 paymentMethod={paymentMethod}
+
                 paymentMethods={paymentMethods}
+
                 saleTotal={saleTotal}
+
                 error={error}
+
                 onSelectedProductChange={setSelectedProductId}
+
                 onQuantityChange={setQuantity}
+
                 onPaymentMethodChange={setPaymentMethod}
+
                 onRegisterSale={handleRegisterSale}
               />
             </SectionCard>
@@ -419,25 +455,40 @@ export function GrainsWorkspace() {
 
           <SalesHistoryTable
             sales={sales}
+
             totalSold={totalSold}
+
             title="Historial de transacciones"
+
             subtitle="Últimas ventas registradas en el módulo de granos"
+
             productIcon={<FaSeedling size={13} />}
-            getRecordLabel={(sale) =>
-              `Venta #${sale.id.slice(-4).toUpperCase()}`
-            }
+
+            getRecordLabel={(sale) => `Venta #${sale.id.slice(-4).toUpperCase()}`}
+
             getQuantityLabel={(sale) => `${sale.quantity} ${sale.unit}`}
+
             getProductSecondaryText={() => "Producto vendido"}
+
             colors={{
               border: colors.cardBorder,
+
               text: colors.text,
+
               muted: colors.muted,
+
               primary: colors.orange,
+
               primarySoft: colors.orangeSoft,
+
               tableHead: colors.tableHead,
+
               rowHover: "#f0fdf4",
+
               paymentBg: colors.primarySoft,
+
               paymentText: colors.primary,
+
               paymentBorder: "#bbf7d0",
             }}
           />
@@ -446,9 +497,13 @@ export function GrainsWorkspace() {
 
       <AddGrainModal
         open={isAddGrainOpen}
+
         onClose={() => {
-          setIsAddGrainOpen(false);
+          if (!isCreatingProduct) {
+            setIsAddGrainOpen(false);
+          }
         }}
+
         onSave={handleAddGrain}
       />
     </AppShell>

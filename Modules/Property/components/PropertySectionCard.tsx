@@ -10,10 +10,7 @@ type PropertySectionCardProps = {
   sx?: SxProps<Theme>;
 };
 
-export function PropertySectionCard({
-  children,
-  sx,
-}: PropertySectionCardProps) {
+export function PropertySectionCard({ children, sx }: PropertySectionCardProps) {
   return (
     <Card
       elevation={0}

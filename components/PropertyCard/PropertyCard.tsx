@@ -31,8 +31,7 @@ type StatusColors = ReturnType<typeof getStatusColors>;
 export function PropertyCard({ property, onClick }: PropertyCardProps) {
   const pendingAmount = getPendingAmount(property);
 
-  const progress =
-    property.price > 0 ? Math.min(100, (property.paid / property.price) * 100) : 0;
+  const progress = property.price > 0 ? Math.min(100, (property.paid / property.price) * 100) : 0;
 
   const statusColors = getStatusColors(property.status);
   const isClickable = Boolean(onClick);
@@ -71,8 +70,7 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
         border: `1px solid ${colors.cardBorder}`,
         bgcolor: "#ffffff",
         cursor: isClickable ? "pointer" : "default",
-        transition:
-          "transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease",
+        transition: "transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease",
         "&:hover": {
           transform: {
             xs: "none",
@@ -215,8 +213,7 @@ function PropertyImage({ property }: { property: PropertyItem }) {
           position: "absolute",
           inset: 0,
           pointerEvents: "none",
-          background:
-            "linear-gradient(to top, rgba(15,23,42,0.45), transparent 55%)",
+          background: "linear-gradient(to top, rgba(15,23,42,0.45), transparent 55%)",
         }}
       />
 
@@ -373,15 +370,7 @@ function PropertyCardHeader({
   );
 }
 
-function InfoLine({
-  icon,
-  label,
-  value,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-}) {
+function InfoLine({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
   return (
     <Box
       sx={{
@@ -507,13 +496,7 @@ function AmountBox({ label, value }: { label: string; value: string }) {
   );
 }
 
-function PaymentProgress({
-  progress,
-  accent,
-}: {
-  progress: number;
-  accent: string;
-}) {
+function PaymentProgress({ progress, accent }: { progress: number; accent: string }) {
   return (
     <Box sx={{ minWidth: 0 }}>
       <Box

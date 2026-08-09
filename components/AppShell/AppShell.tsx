@@ -3,22 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import {
-  alpha,
-  Avatar,
-  Box,
-  Drawer,
-  IconButton,
-  Typography,
-} from "@mui/material";
-import {
-  FaBars,
-  FaBuilding,
-  FaLayerGroup,
-  FaTimes,
-  FaTools,
-  FaTractor,
-} from "react-icons/fa";
+import { alpha, Avatar, Box, Drawer, IconButton, Typography } from "@mui/material";
+import { FaBars, FaBuilding, FaLayerGroup, FaTimes, FaTools, FaTractor } from "react-icons/fa";
 
 type AppShellProps = {
   children: ReactNode;
@@ -353,12 +339,7 @@ function MobileSidebarContent({
         }}
       >
         {navItems.map((item) => (
-          <SidebarLink
-            key={item.key}
-            item={item}
-            active={active}
-            onClick={onClose}
-          />
+          <SidebarLink key={item.key} item={item} active={active} onClick={onClose} />
         ))}
       </Box>
 
@@ -404,8 +385,7 @@ function MobileBottomNav({ active }: { active?: AppShellProps["active"] }) {
           const Icon = item.icon;
 
           const isActive =
-            active === item.key ||
-            (active === "activity" && item.key === "dashboard");
+            active === item.key || (active === "activity" && item.key === "dashboard");
 
           return (
             <Link
@@ -431,12 +411,8 @@ function MobileBottomNav({ active }: { active?: AppShellProps["active"] }) {
                   bgcolor: isActive ? shellColors.primary : "transparent",
                   color: isActive ? "#ffffff" : shellColors.muted,
                   transition: "0.18s ease",
-                  border: isActive
-                    ? `1px solid ${shellColors.primary}`
-                    : "1px solid transparent",
-                  boxShadow: isActive
-                    ? "0 10px 22px rgba(18,63,99,0.22)"
-                    : "none",
+                  border: isActive ? `1px solid ${shellColors.primary}` : "1px solid transparent",
+                  boxShadow: isActive ? "0 10px 22px rgba(18,63,99,0.22)" : "none",
                 }}
               >
                 <Icon size={15} />
@@ -501,8 +477,7 @@ function SidebarLink({
 }) {
   const Icon = item.icon;
 
-  const isActive =
-    active === item.key || (active === "activity" && item.key === "dashboard");
+  const isActive = active === item.key || (active === "activity" && item.key === "dashboard");
 
   return (
     <Link
@@ -527,9 +502,7 @@ function SidebarLink({
           fontWeight: isActive ? 900 : 750,
           transition: "0.18s ease",
           "&:hover": {
-            bgcolor: isActive
-              ? shellColors.primary
-              : alpha(shellColors.primary, 0.08),
+            bgcolor: isActive ? shellColors.primary : alpha(shellColors.primary, 0.08),
             transform: {
               xs: "none",
               lg: "translateX(2px)",

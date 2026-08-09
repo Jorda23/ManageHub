@@ -32,8 +32,7 @@ export function HardwareWorkspaceHero({
         },
         borderRadius: "16px",
         color: "#ffffff",
-        background:
-          "linear-gradient(135deg, #78350f 0%, #f59e0b 55%, #0891b2 100%)",
+        background: "linear-gradient(135deg, #78350f 0%, #f59e0b 55%, #0891b2 100%)",
         minHeight: {
           xs: 130,
           md: 118,

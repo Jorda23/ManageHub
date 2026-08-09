@@ -1,6 +1,6 @@
 "use client";
 
-import {type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { Box, Card, Typography } from "@mui/material";
 import { colors } from "../HardwareWorkspace";
 
@@ -13,14 +13,7 @@ type MetricCardProps = {
   detail: string;
 };
 
-export function MetricCard({
-  icon,
-  iconBg,
-  iconColor,
-  label,
-  value,
-  detail,
-}: MetricCardProps) {
+export function MetricCard({ icon, iconBg, iconColor, label, value, detail }: MetricCardProps) {
   return (
     <Card
       elevation={0}
