@@ -1,7 +1,9 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
+
 import { FaCalendarAlt, FaDownload, FaFilter, FaSearch, FaSyncAlt } from "react-icons/fa";
+
 import {
   Box,
   Button,
@@ -13,6 +15,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+
 import type { SxProps, Theme } from "@mui/material/styles";
 
 import { buildCsvContent, downloadCsvFile } from "@/components/WorkspaceShared/csvDownload";
@@ -53,12 +56,19 @@ type SalesHistoryTableProps<TSale extends BaseSale> = {
   colors?: Partial<SalesHistoryColors>;
 
   productIcon?: ReactNode;
+
   getRecordLabel?: (sale: TSale) => string;
+
   getQuantityLabel?: (sale: TSale) => string;
+
   getProductSecondaryText?: (sale: TSale) => string | undefined;
+
   getFilterDate?: (sale: TSale) => Date | null;
 
   onDownload?: (filteredSales: TSale[]) => void;
+
+  isLoading?: boolean;
+  isError?: boolean;
 
   sx?: SxProps<Theme>;
 };
@@ -76,7 +86,7 @@ const defaultColors: SalesHistoryColors = {
   paymentBorder: "#bbf7d0",
 };
 
-const formatCurrency = (value: number) => {
+const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat("es-US", {
     style: "currency",
     currency: "USD",
@@ -112,23 +122,43 @@ const endOfDay = (value: string): Date | null => {
 export function SalesHistoryTable<TSale extends BaseSale>({
   sales,
   totalSold,
+
   title = "Historial de ventas",
+
   subtitle = "Productos vendidos, cantidades, precios y métodos de pago",
+
   emptyTitle = "Todavía no hay ventas registradas.",
+
   emptyDescription = "Cuando registres una venta, aparecerá aquí.",
+
   totalLabel = "Total vendido:",
+
   colors: customColors,
+
   productIcon,
+
   getRecordLabel = (sale) => `Ticket #${sale.id.slice(-4).toUpperCase()}`,
+
   getQuantityLabel = (sale) => `${sale.quantity}`,
+
   getProductSecondaryText,
+
   getFilterDate = (sale) => parseSaleDate(sale.date),
+
   onDownload,
+
+  isLoading = false,
+
+  isError = false,
+
   sx,
 }: SalesHistoryTableProps<TSale>) {
   const [search, setSearch] = useState("");
+
   const [paymentMethod, setPaymentMethod] = useState("");
+
   const [dateFrom, setDateFrom] = useState("");
+
   const [dateTo, setDateTo] = useState("");
 
   const colors: SalesHistoryColors = {
@@ -139,17 +169,21 @@ export function SalesHistoryTable<TSale extends BaseSale>({
   const paymentMethods = useMemo(() => {
     return Array.from(new Set(sales.map((sale) => sale.paymentMethod)))
       .filter(Boolean)
-      .sort((a, b) => a.localeCompare(b));
+      .sort((first, second) => first.localeCompare(second));
   }, [sales]);
 
   const filteredSales = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase();
+
     const from = startOfDay(dateFrom);
+
     const to = endOfDay(dateTo);
 
     return sales.filter((sale) => {
       const normalizedProductName = sale.productName.toLocaleLowerCase();
+
       const normalizedId = sale.id.toLocaleLowerCase();
+
       const normalizedPaymentMethod = sale.paymentMethod.toLocaleLowerCase();
 
       const matchesSearch =
@@ -178,9 +212,14 @@ export function SalesHistoryTable<TSale extends BaseSale>({
 
   const visibleTotal = hasActiveFilters ? filteredTotal : totalSold;
 
-  const handleDownload = () => {
+  const handleDownload = (): void => {
+    if (filteredSales.length === 0) {
+      return;
+    }
+
     if (onDownload) {
       onDownload(filteredSales);
+
       return;
     }
 
@@ -196,21 +235,28 @@ export function SalesHistoryTable<TSale extends BaseSale>({
 
     const rows = filteredSales.map((sale) => [
       getRecordLabel(sale),
+
       sale.date,
+
       sale.productName,
+
       getQuantityLabel(sale),
+
       sale.unitPrice.toFixed(2),
+
       sale.paymentMethod,
+
       sale.total.toFixed(2),
     ]);
 
     const csvContent = buildCsvContent(headers, rows);
+
     const fileDate = new Date().toISOString().slice(0, 10);
 
     downloadCsvFile(`historial-ventas-${fileDate}.csv`, csvContent);
   };
 
-  const clearFilters = () => {
+  const clearFilters = (): void => {
     setSearch("");
     setPaymentMethod("");
     setDateFrom("");
@@ -222,11 +268,17 @@ export function SalesHistoryTable<TSale extends BaseSale>({
       elevation={0}
       sx={{
         borderRadius: "16px",
+
         border: `1px solid ${colors.border}`,
+
         bgcolor: "#ffffff",
+
         overflow: "hidden",
+
         boxShadow: "0 10px 28px rgba(15, 23, 42, 0.06)",
+
         minWidth: 0,
+
         ...sx,
       }}
     >
@@ -236,45 +288,67 @@ export function SalesHistoryTable<TSale extends BaseSale>({
             xs: 1.8,
             md: 2.5,
           },
+
           display: "flex",
+
           justifyContent: "space-between",
+
           alignItems: "center",
+
           gap: 2,
+
           borderBottom: `1px solid ${colors.border}`,
+
           bgcolor: "#ffffff",
         }}
       >
         <Box
           sx={{
             display: "flex",
+
             gap: 1.2,
+
             alignItems: "center",
+
             minWidth: 0,
           }}
         >
           <Box
             sx={{
               width: 32,
+
               height: 32,
+
               borderRadius: "16px",
+
               display: "grid",
+
               placeItems: "center",
+
               bgcolor: colors.primarySoft,
+
               color: colors.primary,
+
               flexShrink: 0,
             }}
           >
             <FaSyncAlt size={14} />
           </Box>
 
-          <Box sx={{ minWidth: 0 }}>
+          <Box
+            sx={{
+              minWidth: 0,
+            }}
+          >
             <Typography
               sx={{
                 fontWeight: 950,
+
                 fontSize: {
                   xs: 16,
                   md: 18,
                 },
+
                 color: colors.text,
               }}
             >
@@ -284,6 +358,7 @@ export function SalesHistoryTable<TSale extends BaseSale>({
             <Typography
               sx={{
                 fontSize: 12,
+
                 color: colors.muted,
               }}
             >
@@ -292,7 +367,11 @@ export function SalesHistoryTable<TSale extends BaseSale>({
           </Box>
         </Box>
 
-        <ActionButton label="Descargar historial" onClick={handleDownload} colors={colors}>
+        <ActionButton
+          label="Descargar historial"
+          onClick={filteredSales.length > 0 ? handleDownload : undefined}
+          colors={colors}
+        >
           <FaDownload />
         </ActionButton>
       </Box>
@@ -303,21 +382,28 @@ export function SalesHistoryTable<TSale extends BaseSale>({
             xs: 1.5,
             md: 2,
           },
+
           display: "grid",
+
           gridTemplateColumns: {
             xs: "1fr",
+
             md: `
-              minmax(260px, 2fr)
-              minmax(145px, 0.8fr)
-              minmax(145px, 0.8fr)
-              minmax(180px, 1fr)
-              auto
-              auto
-            `,
+                minmax(260px, 2fr)
+                minmax(145px, 0.8fr)
+                minmax(145px, 0.8fr)
+                minmax(180px, 1fr)
+                auto
+                auto
+              `,
           },
+
           gap: 1.2,
+
           alignItems: "center",
+
           borderBottom: `1px solid ${colors.border}`,
+
           bgcolor: "#f8fafc",
         }}
       >
@@ -335,6 +421,7 @@ export function SalesHistoryTable<TSale extends BaseSale>({
                 </InputAdornment>
               ),
             },
+
             htmlInput: {
               "aria-label": "Buscar ventas",
             },
@@ -357,9 +444,11 @@ export function SalesHistoryTable<TSale extends BaseSale>({
                 </InputAdornment>
               ),
             },
+
             inputLabel: {
               shrink: true,
             },
+
             htmlInput: {
               "aria-label": "Fecha desde",
             },
@@ -382,9 +471,11 @@ export function SalesHistoryTable<TSale extends BaseSale>({
                 </InputAdornment>
               ),
             },
+
             inputLabel: {
               shrink: true,
             },
+
             htmlInput: {
               "aria-label": "Fecha hasta",
             },
@@ -421,16 +512,24 @@ export function SalesHistoryTable<TSale extends BaseSale>({
           startIcon={<FaFilter size={13} />}
           sx={{
             minHeight: 40,
+
             px: 2.4,
+
             borderRadius: "6px",
+
             bgcolor: colors.primary,
+
             fontWeight: 900,
+
             textTransform: "none",
+
             whiteSpace: "nowrap",
+
             boxShadow: "none",
 
             "&:hover": {
               bgcolor: colors.primary,
+
               boxShadow: "none",
             },
           }}
@@ -445,8 +544,11 @@ export function SalesHistoryTable<TSale extends BaseSale>({
           disabled={!hasActiveFilters}
           sx={{
             color: colors.primary,
+
             fontWeight: 900,
+
             textTransform: "none",
+
             whiteSpace: "nowrap",
           }}
         >
@@ -454,7 +556,19 @@ export function SalesHistoryTable<TSale extends BaseSale>({
         </Button>
       </Box>
 
-      {sales.length === 0 ? (
+      {isLoading ? (
+        <EmptyState
+          title="Cargando historial..."
+          description="Consultando las ventas registradas."
+          colors={colors}
+        />
+      ) : isError ? (
+        <EmptyState
+          title="No se pudo cargar el historial."
+          description="Ocurrió un problema al consultar las ventas."
+          colors={colors}
+        />
+      ) : sales.length === 0 ? (
         <EmptyState title={emptyTitle} description={emptyDescription} colors={colors} />
       ) : filteredSales.length === 0 ? (
         <EmptyState
@@ -466,7 +580,9 @@ export function SalesHistoryTable<TSale extends BaseSale>({
         <Box
           sx={{
             width: "100%",
+
             overflowX: "auto",
+
             WebkitOverflowScrolling: "touch",
           }}
         >
@@ -474,11 +590,14 @@ export function SalesHistoryTable<TSale extends BaseSale>({
             component="table"
             sx={{
               width: "100%",
+
               minWidth: {
                 xs: 820,
                 md: 920,
               },
+
               borderCollapse: "separate",
+
               borderSpacing: 0,
             }}
           >
@@ -487,15 +606,25 @@ export function SalesHistoryTable<TSale extends BaseSale>({
               sx={{
                 "& th": {
                   px: 2.5,
+
                   py: 1.6,
+
                   bgcolor: colors.tableHead,
+
                   color: colors.muted,
+
                   fontSize: 11,
+
                   fontWeight: 950,
+
                   textTransform: "uppercase",
+
                   letterSpacing: "0.04em",
+
                   textAlign: "left",
+
                   borderBottom: `1px solid ${colors.border}`,
+
                   whiteSpace: "nowrap",
                 },
 
@@ -505,16 +634,22 @@ export function SalesHistoryTable<TSale extends BaseSale>({
 
                 "& th:last-of-type": {
                   pr: 3,
+
                   textAlign: "right",
                 },
               }}
             >
               <tr>
                 <th>Fecha</th>
+
                 <th>Producto</th>
+
                 <th>Cantidad</th>
+
                 <th>Precio unitario</th>
+
                 <th>Pago</th>
+
                 <th>Total</th>
               </tr>
             </Box>
@@ -536,11 +671,17 @@ export function SalesHistoryTable<TSale extends BaseSale>({
 
                 "& td": {
                   px: 2.5,
+
                   py: 1.8,
+
                   borderBottom: `1px solid ${colors.border}`,
+
                   fontSize: 13,
+
                   color: colors.text,
+
                   verticalAlign: "middle",
+
                   whiteSpace: "nowrap",
                 },
 
@@ -554,6 +695,7 @@ export function SalesHistoryTable<TSale extends BaseSale>({
 
                 "& td:last-of-type": {
                   pr: 3,
+
                   textAlign: "right",
                 },
               }}
@@ -567,13 +709,16 @@ export function SalesHistoryTable<TSale extends BaseSale>({
                       <Box
                         sx={{
                           display: "flex",
+
                           flexDirection: "column",
+
                           gap: 0.25,
                         }}
                       >
                         <Typography
                           sx={{
                             fontSize: 13,
+
                             fontWeight: 850,
                           }}
                         >
@@ -583,6 +728,7 @@ export function SalesHistoryTable<TSale extends BaseSale>({
                         <Typography
                           sx={{
                             fontSize: 11,
+
                             color: colors.muted,
                           }}
                         >
@@ -595,7 +741,9 @@ export function SalesHistoryTable<TSale extends BaseSale>({
                       <Box
                         sx={{
                           display: "flex",
+
                           alignItems: "center",
+
                           gap: 1.2,
                         }}
                       >
@@ -603,12 +751,19 @@ export function SalesHistoryTable<TSale extends BaseSale>({
                           <Box
                             sx={{
                               width: 30,
+
                               height: 30,
+
                               borderRadius: "16px",
+
                               display: "grid",
+
                               placeItems: "center",
+
                               bgcolor: colors.primarySoft,
+
                               color: colors.primary,
+
                               flexShrink: 0,
                             }}
                           >
@@ -616,11 +771,17 @@ export function SalesHistoryTable<TSale extends BaseSale>({
                           </Box>
                         )}
 
-                        <Box sx={{ minWidth: 0 }}>
+                        <Box
+                          sx={{
+                            minWidth: 0,
+                          }}
+                        >
                           <Typography
                             sx={{
                               fontSize: 13,
+
                               fontWeight: 850,
+
                               overflowWrap: "anywhere",
                             }}
                           >
@@ -631,6 +792,7 @@ export function SalesHistoryTable<TSale extends BaseSale>({
                             <Typography
                               sx={{
                                 fontSize: 11,
+
                                 color: colors.muted,
                               }}
                             >
@@ -645,7 +807,9 @@ export function SalesHistoryTable<TSale extends BaseSale>({
                       <Typography
                         sx={{
                           fontSize: 13,
+
                           fontWeight: 850,
+
                           textAlign: "center",
                         }}
                       >
@@ -657,7 +821,9 @@ export function SalesHistoryTable<TSale extends BaseSale>({
                       <Typography
                         sx={{
                           fontSize: 13,
+
                           fontWeight: 850,
+
                           textAlign: "center",
                         }}
                       >
@@ -671,11 +837,17 @@ export function SalesHistoryTable<TSale extends BaseSale>({
                         size="small"
                         sx={{
                           height: 24,
+
                           px: 0.5,
+
                           fontSize: 11,
+
                           fontWeight: 900,
+
                           bgcolor: colors.paymentBg,
+
                           color: colors.paymentText,
+
                           border: `1px solid ${colors.paymentBorder}`,
 
                           "& .MuiChip-label": {
@@ -689,9 +861,13 @@ export function SalesHistoryTable<TSale extends BaseSale>({
                       <Typography
                         sx={{
                           fontSize: 13,
+
                           fontWeight: 950,
+
                           color: colors.primary,
+
                           textAlign: "right",
+
                           fontVariantNumeric: "tabular-nums",
                         }}
                       >
@@ -706,62 +882,82 @@ export function SalesHistoryTable<TSale extends BaseSale>({
         </Box>
       )}
 
-      <Box
-        sx={{
-          px: {
-            xs: 1.8,
-            md: 3,
-          },
-          py: 1.8,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 2,
-          bgcolor: "#f8fafc",
-          borderTop: `1px solid ${colors.border}`,
-        }}
-      >
-        <Typography
-          sx={{
-            fontSize: 12,
-            color: colors.muted,
-            fontWeight: 700,
-          }}
-        >
-          {filteredSales.length}{" "}
-          {filteredSales.length === 1 ? "venta registrada" : "ventas registradas"}
-          {hasActiveFilters ? ` de ${sales.length}` : ""}
-        </Typography>
-
+      {!isLoading && !isError && (
         <Box
           sx={{
+            px: {
+              xs: 1.8,
+              md: 3,
+            },
+
+            py: 1.8,
+
             display: "flex",
+
+            justifyContent: "space-between",
+
             alignItems: "center",
-            gap: 1,
+
+            gap: 2,
+
+            flexWrap: "wrap",
+
+            bgcolor: "#f8fafc",
+
+            borderTop: `1px solid ${colors.border}`,
           }}
         >
           <Typography
             sx={{
               fontSize: 12,
+
               color: colors.muted,
+
               fontWeight: 700,
             }}
           >
-            {totalLabel}
+            {filteredSales.length}{" "}
+            {filteredSales.length === 1 ? "venta registrada" : "ventas registradas"}
+            {hasActiveFilters ? ` de ${sales.length}` : ""}
           </Typography>
 
-          <Typography
+          <Box
             sx={{
-              fontSize: 15,
-              color: colors.primary,
-              fontWeight: 950,
-              fontVariantNumeric: "tabular-nums",
+              display: "flex",
+
+              alignItems: "center",
+
+              gap: 1,
             }}
           >
-            {formatCurrency(visibleTotal)}
-          </Typography>
+            <Typography
+              sx={{
+                fontSize: 12,
+
+                color: colors.muted,
+
+                fontWeight: 700,
+              }}
+            >
+              {totalLabel}
+            </Typography>
+
+            <Typography
+              sx={{
+                fontSize: 15,
+
+                color: colors.primary,
+
+                fontWeight: 950,
+
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              {formatCurrency(visibleTotal)}
+            </Typography>
+          </Box>
         </Box>
-      </Box>
+      )}
     </Paper>
   );
 }
@@ -770,13 +966,18 @@ function filterFieldSx(colors: SalesHistoryColors): SxProps<Theme> {
   return {
     "& .MuiOutlinedInput-root": {
       minHeight: 42,
+
       bgcolor: "#ffffff",
+
       borderRadius: "6px",
+
       fontSize: 13,
+
       color: colors.text,
 
       "& fieldset": {
         borderColor: "#b8c2cc",
+
         borderWidth: 1,
       },
 
@@ -786,24 +987,30 @@ function filterFieldSx(colors: SalesHistoryColors): SxProps<Theme> {
 
       "&.Mui-focused fieldset": {
         borderColor: colors.primary,
+
         borderWidth: 1.5,
       },
     },
 
     "& .MuiInputBase-input": {
       color: `${colors.text} !important`,
+
       WebkitTextFillColor: `${colors.text} !important`,
+
       opacity: 1,
     },
 
     "& .MuiInputBase-input::placeholder": {
       color: `${colors.muted} !important`,
+
       WebkitTextFillColor: `${colors.muted} !important`,
+
       opacity: 1,
     },
 
     "& .MuiSelect-select": {
       color: `${colors.text} !important`,
+
       WebkitTextFillColor: `${colors.text} !important`,
     },
 
@@ -817,9 +1024,13 @@ function filterFieldSx(colors: SalesHistoryColors): SxProps<Theme> {
 
     "& .MuiInputLabel-root": {
       color: colors.muted,
+
       fontSize: 12,
+
       fontWeight: 700,
+
       bgcolor: "#ffffff",
+
       px: 0.35,
     },
 
@@ -829,6 +1040,7 @@ function filterFieldSx(colors: SalesHistoryColors): SxProps<Theme> {
 
     "& input[type='date']::-webkit-calendar-picker-indicator": {
       opacity: 0.75,
+
       cursor: "pointer",
     },
   };
@@ -847,15 +1059,19 @@ function EmptyState({
     <Box
       sx={{
         p: 4,
+
         textAlign: "center",
+
         bgcolor: "#fbfdfc",
       }}
     >
       <Typography
         sx={{
           fontSize: 14,
+
           fontWeight: 950,
-          color: colors.muted,
+
+          color: colors.text,
         }}
       >
         {title}
@@ -864,7 +1080,9 @@ function EmptyState({
       <Typography
         sx={{
           mt: 0.5,
+
           fontSize: 13,
+
           color: colors.muted,
         }}
       >
@@ -895,23 +1113,33 @@ function ActionButton({
       disabled={!onClick}
       sx={{
         width: 36,
+
         height: 36,
+
         border: `1px solid ${active ? colors.primary : colors.border}`,
+
         borderRadius: "16px",
+
         color: active ? colors.primary : colors.muted,
+
         bgcolor: active ? colors.primarySoft : "#ffffff",
+
         transition: "all 0.16s ease",
+
         flexShrink: 0,
 
         "&:hover": {
           bgcolor: colors.primarySoft,
+
           color: colors.primary,
+
           transform: "translateY(-1px)",
         },
 
         "&.Mui-disabled": {
           color: colors.muted,
-          opacity: 1,
+
+          opacity: 0.45,
         },
       }}
     >

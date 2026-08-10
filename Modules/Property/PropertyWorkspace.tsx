@@ -16,7 +16,6 @@ import {
   colors,
   formatCurrency,
   getPendingAmount,
-  initialPayments,
   paymentMethods,
   propertyConfig,
   type PaymentRecord,
@@ -30,7 +29,13 @@ import {
   PropertyPaymentSection,
   PropertyTerrainsSection,
 } from "./components";
-import { useProperties, useCreateProperty, useRegisterPropertyPayment } from "@/hook/useProperties";
+
+import {
+  useCreateProperty,
+  useProperties,
+  usePropertyPayments,
+  useRegisterPropertyPayment,
+} from "@/hook/useProperties";
 
 export function PropertyWorkspace() {
   const {
@@ -39,12 +44,16 @@ export function PropertyWorkspace() {
     isError: isPropertiesError,
   } = useProperties();
 
+  const {
+    data: apiPayments = [],
+    isLoading: isLoadingPayments,
+    isError: isPaymentsError,
+  } = usePropertyPayments();
+
   const { mutateAsync: createProperty, isPending: isCreatingProperty } = useCreateProperty();
 
   const { mutateAsync: registerPropertyPayment, isPending: isRegisteringPayment } =
     useRegisterPropertyPayment();
-
-  const [payments, setPayments] = useState<PaymentRecord[]>(initialPayments);
 
   const [selectedPropertyId, setSelectedPropertyId] = useState("");
 
@@ -80,11 +89,12 @@ export function PropertyWorkspace() {
         ownerName: property.ownerName,
 
         ownerPhone: "",
+
         ownerDocument: "",
 
-        buyerName: "Pendiente de asignar",
+        buyerName: property.ownerName,
 
-        buyerEmail: "Sin comprador",
+        buyerEmail: "",
 
         dueDate: isPaid
           ? "Pagado"
@@ -100,6 +110,29 @@ export function PropertyWorkspace() {
       };
     });
   }, [apiProperties]);
+
+  const payments = useMemo<PaymentRecord[]>(() => {
+    return apiPayments.map((payment) => ({
+      id: payment.id,
+
+      propertyId: payment.propertyId,
+
+      propertyName: payment.propertyName,
+
+      buyerName: payment.ownerName,
+
+      amount: payment.amount,
+
+      method: payment.paymentMethod,
+
+      date: new Date(payment.createdAt).toLocaleString("es-NI", {
+        dateStyle: "short",
+        timeStyle: "short",
+      }),
+
+      note: payment.note ?? "Sin nota",
+    }));
+  }, [apiPayments]);
 
   useEffect(() => {
     if (properties.length > 0 && !selectedPropertyId) {
@@ -142,34 +175,57 @@ export function PropertyWorkspace() {
   const metrics: PropertyMetric[] = [
     {
       icon: <FaHome />,
+
       iconBg: colors.primarySoft,
+
       iconColor: colors.primaryLight,
+
       label: "Terrenos activos",
+
       value: properties.length.toString(),
+
       detail: "Captados por clientes",
     },
+
     {
       icon: <FaMoneyBillWave />,
+
       iconBg: colors.greenSoft,
+
       iconColor: colors.green,
+
       label: "Total abonado",
+
       value: formatCurrency(totalPaid),
+
       detail: "Pagos confirmados",
     },
+
     {
       icon: <FaFileContract />,
+
       iconBg: colors.orangeSoft,
+
       iconColor: colors.orange,
+
       label: "Saldo pendiente",
+
       value: formatCurrency(totalPending),
+
       detail: "Por cobrar",
     },
+
     {
       icon: <FaClipboardCheck />,
+
       iconBg: colors.purpleSoft,
+
       iconColor: colors.purple,
+
       label: "Cuentas pagadas",
+
       value: `${paidAccounts}/${properties.length}`,
+
       detail: formatCurrency(totalPortfolioValue),
     },
   ];
@@ -183,16 +239,19 @@ export function PropertyWorkspace() {
 
     if (Number.isNaN(totalPrice) || totalPrice <= 0) {
       setError("El precio total debe ser mayor que cero.");
+
       return;
     }
 
     if (Number.isNaN(initialPayment) || initialPayment < 0) {
       setError("El abono inicial debe ser válido.");
+
       return;
     }
 
     if (initialPayment > totalPrice) {
       setError("El abono inicial no puede ser mayor al precio total.");
+
       return;
     }
 
@@ -232,11 +291,13 @@ export function PropertyWorkspace() {
 
     if (!selectedProperty) {
       setError("Selecciona una propiedad válida.");
+
       return;
     }
 
     if (Number.isNaN(numericPaymentAmount) || numericPaymentAmount <= 0) {
       setError("Ingresa un monto de abono mayor a cero.");
+
       return;
     }
 
@@ -244,16 +305,18 @@ export function PropertyWorkspace() {
 
     if (pendingAmount <= 0) {
       setError("Esta cuenta ya está pagada en su totalidad.");
+
       return;
     }
 
     if (numericPaymentAmount > pendingAmount) {
       setError("El abono no puede ser mayor al saldo pendiente.");
+
       return;
     }
 
     try {
-      const response = await registerPropertyPayment({
+      await registerPropertyPayment({
         propertyId: selectedProperty.id,
 
         amount: numericPaymentAmount,
@@ -262,29 +325,6 @@ export function PropertyWorkspace() {
 
         note: paymentNote.trim() || null,
       });
-
-      const newPayment: PaymentRecord = {
-        id: crypto.randomUUID(),
-
-        propertyId: selectedProperty.id,
-
-        propertyName: selectedProperty.name,
-
-        buyerName: selectedProperty.buyerName,
-
-        amount: response.amount,
-
-        method: paymentMethod,
-
-        date: new Date().toLocaleString("es-NI", {
-          dateStyle: "short",
-          timeStyle: "short",
-        }),
-
-        note: paymentNote.trim() || "Abono registrado",
-      };
-
-      setPayments((currentPayments) => [newPayment, ...currentPayments]);
 
       setPaymentAmount("500");
 
@@ -303,10 +343,15 @@ export function PropertyWorkspace() {
 
     const rows = visiblePayments.map((payment) => [
       payment.date,
+
       payment.propertyName,
+
       payment.buyerName,
+
       payment.method,
+
       payment.note,
+
       payment.amount.toFixed(2),
     ]);
 
@@ -348,6 +393,7 @@ export function PropertyWorkspace() {
       <Box
         sx={{
           width: "100%",
+
           maxWidth: "100vw",
 
           minHeight: "calc(100vh - 48px)",
@@ -430,34 +476,54 @@ export function PropertyWorkspace() {
 
             <PropertyPaymentSection
               selectedProperty={selectedProperty}
+
               properties={properties}
+
               selectedPropertyId={selectedPropertyId}
+
               paymentAmount={paymentAmount}
+
               paymentMethod={paymentMethod}
+
               paymentMethods={paymentMethods}
+
               paymentNote={paymentNote}
+
               error={error}
+
               onSelectedPropertyChange={setSelectedPropertyId}
+
               onPaymentAmountChange={setPaymentAmount}
+
               onPaymentMethodChange={setPaymentMethod}
+
               onPaymentNoteChange={setPaymentNote}
+
               onRegisterPayment={handleRegisterPayment}
             />
           </Box>
 
           <PaymentHistoryTable
             payments={payments}
+
             totalPaid={totalPaid}
+
+            isLoading={isLoadingPayments}
+
+            isError={isPaymentsError}
+
             onDownload={handleDownloadPayments}
           />
 
           <AddPropertyModal
             open={isPropertyDialogOpen}
+
             onClose={() => {
               if (!isCreatingProperty) {
                 setIsPropertyDialogOpen(false);
               }
             }}
+
             onSave={handleCreateProperty}
           />
         </Box>

@@ -46,10 +46,33 @@ export type RegisterHardwareSaleRequest = {
 };
 
 export type RegisterHardwareSaleResponse = {
+  id: string;
   productId: string;
+  productName: string;
   quantity: number;
-  remainingStock: number;
+  unitPrice: number;
   total: number;
+  remainingStock: number;
+  paymentMethod: string;
+  createdAt: string;
+};
+
+export type HardwareSale = {
+  id: string;
+  productId: string;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+  paymentMethod: string;
+  createdAt: string;
+};
+
+export type HardwareSalesFilters = {
+  search?: string;
+  from?: string;
+  to?: string;
+  paymentMethod?: string;
 };
 
 export type CreateGrainProductRequest = {
@@ -88,10 +111,35 @@ export type RegisterGrainSaleRequest = {
 };
 
 export type RegisterGrainSaleResponse = {
+  id: string;
   productId: string;
+  productName: string;
+  unit: string;
   quantity: number;
-  remainingStock: number;
+  unitPrice: number;
   total: number;
+  remainingStock: number;
+  paymentMethod: string;
+  createdAt: string;
+};
+
+export type GrainSale = {
+  id: string;
+  productId: string;
+  productName: string;
+  unit: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+  paymentMethod: string;
+  createdAt: string;
+};
+
+export type GrainSalesFilters = {
+  search?: string;
+  from?: string;
+  to?: string;
+  paymentMethod?: string;
 };
 
 export type CreatePropertyRequest = {
@@ -136,9 +184,33 @@ export type RegisterPropertyPaymentRequest = {
 };
 
 export type RegisterPropertyPaymentResponse = {
+  id: string;
   propertyId: string;
+  propertyName: string;
+  ownerName: string;
   amount: number;
   amountPaid: number;
   pendingBalance: number;
   status: string;
+  paymentMethod: string;
+  note?: string | null;
+  createdAt: string;
+};
+
+export type PropertyPayment = {
+  id: string;
+  propertyId: string;
+  propertyName: string;
+  ownerName: string;
+  amount: number;
+  paymentMethod: string;
+  note?: string | null;
+  createdAt: string;
+};
+
+export type PropertyPaymentsFilters = {
+  search?: string;
+  from?: string;
+  to?: string;
+  paymentMethod?: string;
 };

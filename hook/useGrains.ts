@@ -1,21 +1,37 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { createGrainProduct, getGrainProducts, registerGrainSale } from "@/service/api";
+import {
+  createGrainProduct,
+  getGrainProducts,
+  getGrainSales,
+  registerGrainSale,
+} from "@/service/api";
 
 import type {
   CreateGrainProductRequest,
   CreateGrainProductResponse,
   GrainProduct,
+  GrainSale,
+  GrainSalesFilters,
   RegisterGrainSaleRequest,
   RegisterGrainSaleResponse,
 } from "@/types/api.types";
 
 const GRAIN_PRODUCTS_QUERY_KEY = ["grain-products"];
 
+const GRAIN_SALES_QUERY_KEY = ["grain-sales"];
+
 export const useGrainProducts = () => {
   return useQuery<GrainProduct[], Error>({
     queryKey: GRAIN_PRODUCTS_QUERY_KEY,
     queryFn: getGrainProducts,
+  });
+};
+
+export const useGrainSales = (filters?: GrainSalesFilters) => {
+  return useQuery<GrainSale[], Error>({
+    queryKey: [...GRAIN_SALES_QUERY_KEY, filters],
+    queryFn: () => getGrainSales(filters),
   });
 };
 
@@ -38,9 +54,14 @@ export const useRegisterGrainSale = () => {
   return useMutation<RegisterGrainSaleResponse, Error, RegisterGrainSaleRequest>({
     mutationFn: registerGrainSale,
     onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: GRAIN_PRODUCTS_QUERY_KEY,
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: GRAIN_PRODUCTS_QUERY_KEY,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: GRAIN_SALES_QUERY_KEY,
+        }),
+      ]);
     },
   });
 };

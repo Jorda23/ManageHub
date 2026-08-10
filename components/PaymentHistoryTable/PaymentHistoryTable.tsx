@@ -15,8 +15,9 @@ import {
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 
-import { buildCsvContent, downloadCsvFile } from "@/components/WorkspaceShared/csvDownload";
 import { FaDownload, FaHome, FaSearch, FaSyncAlt, FaTimes } from "react-icons/fa";
+
+import { buildCsvContent, downloadCsvFile } from "@/components/WorkspaceShared/csvDownload";
 
 import {
   colors,
@@ -34,8 +35,9 @@ type PaymentFilters = {
 type PaymentHistoryTableProps = {
   payments: PaymentRecord[];
   totalPaid: number;
+  isLoading?: boolean;
+  isError?: boolean;
   onDownload?: (filteredPayments: PaymentRecord[]) => void;
-  getFilterDate?: (payment: PaymentRecord) => Date | null;
 };
 
 const EMPTY_FILTERS: PaymentFilters = {
@@ -53,6 +55,7 @@ const parsePaymentDate = (value: string): Date | null => {
   }
 
   const datePart = value.split(",")[0]?.trim();
+
   const match = datePart?.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/);
 
   if (!match) {
@@ -60,10 +63,13 @@ const parsePaymentDate = (value: string): Date | null => {
   }
 
   const [, monthText, dayText, yearText] = match;
+
   const month = Number(monthText);
   const day = Number(dayText);
   const parsedYear = Number(yearText);
+
   const year = yearText.length === 2 ? 2000 + parsedYear : parsedYear;
+
   const parsedDate = new Date(year, month - 1, day);
 
   return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
@@ -75,6 +81,7 @@ const getStartOfDay = (value: string): Date | null => {
   }
 
   const date = new Date(`${value}T00:00:00`);
+
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
@@ -84,14 +91,16 @@ const getEndOfDay = (value: string): Date | null => {
   }
 
   const date = new Date(`${value}T23:59:59.999`);
+
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
 export function PaymentHistoryTable({
   payments,
   totalPaid,
+  isLoading = false,
+  isError = false,
   onDownload,
-  getFilterDate = (payment) => parsePaymentDate(payment.date),
 }: PaymentHistoryTableProps) {
   const [filters, setFilters] = useState<PaymentFilters>(EMPTY_FILTERS);
 
@@ -103,7 +112,9 @@ export function PaymentHistoryTable({
 
   const filteredPayments = useMemo(() => {
     const normalizedSearch = filters.search.trim().toLocaleLowerCase();
+
     const dateFrom = getStartOfDay(filters.dateFrom);
+
     const dateTo = getEndOfDay(filters.dateTo);
 
     return payments.filter((payment) => {
@@ -119,15 +130,18 @@ export function PaymentHistoryTable({
         .toLocaleLowerCase();
 
       const matchesSearch = !normalizedSearch || searchableText.includes(normalizedSearch);
+
       const matchesMethod = !filters.method || payment.method === filters.method;
 
-      const paymentDate = getFilterDate(payment);
+      const paymentDate = parsePaymentDate(payment.date);
+
       const matchesDateFrom = !dateFrom || (paymentDate !== null && paymentDate >= dateFrom);
+
       const matchesDateTo = !dateTo || (paymentDate !== null && paymentDate <= dateTo);
 
       return matchesSearch && matchesMethod && matchesDateFrom && matchesDateTo;
     });
-  }, [filters, getFilterDate, payments]);
+  }, [filters, payments]);
 
   const hasActiveFilters = Object.values(filters).some(Boolean);
 
@@ -139,13 +153,32 @@ export function PaymentHistoryTable({
     return filteredPayments.reduce((total, payment) => total + payment.amount, 0);
   }, [filteredPayments, hasActiveFilters, totalPaid]);
 
+  const updateFilter = <TKey extends keyof PaymentFilters>(
+    key: TKey,
+    value: PaymentFilters[TKey],
+  ) => {
+    setFilters((currentFilters) => ({
+      ...currentFilters,
+      [key]: value,
+    }));
+  };
+
+  const clearFilters = () => {
+    setFilters(EMPTY_FILTERS);
+  };
+
   const handleDownload = () => {
-    if (onDownload) {
-      onDownload(filteredPayments);
+    if (filteredPayments.length === 0) {
       return;
     }
 
-    const headers = ["Fecha", "Propiedad", "Comprador", "Metodo de pago", "Nota", "Monto"];
+    if (onDownload) {
+      onDownload(filteredPayments);
+
+      return;
+    }
+
+    const headers = ["Fecha", "Propiedad", "Comprador", "Método de pago", "Nota", "Monto"];
 
     const rows = filteredPayments.map((payment) => [
       payment.date,
@@ -157,23 +190,10 @@ export function PaymentHistoryTable({
     ]);
 
     const csvContent = buildCsvContent(headers, rows);
+
     const fileDate = new Date().toISOString().slice(0, 10);
 
     downloadCsvFile(`historial-abonos-${fileDate}.csv`, csvContent);
-  };
-
-  const updateFilter = <TKey extends keyof PaymentFilters>(
-    key: TKey,
-    value: PaymentFilters[TKey],
-  ) => {
-    setFilters((current) => ({
-      ...current,
-      [key]: value,
-    }));
-  };
-
-  const clearFilters = () => {
-    setFilters(EMPTY_FILTERS);
   };
 
   return (
@@ -188,7 +208,7 @@ export function PaymentHistoryTable({
         boxShadow: "0 10px 28px rgba(15, 23, 42, 0.06)",
       }}
     >
-      <PaymentHistoryHeader onDownload={handleDownload} />
+      <PaymentHistoryHeader onDownload={filteredPayments.length > 0 ? handleDownload : undefined} />
 
       <PaymentFiltersBar
         filters={filters}
@@ -198,7 +218,11 @@ export function PaymentHistoryTable({
         onClear={clearFilters}
       />
 
-      {payments.length === 0 ? (
+      {isLoading ? (
+        <PaymentHistoryLoading />
+      ) : isError ? (
+        <PaymentHistoryError />
+      ) : payments.length === 0 ? (
         <EmptyPaymentHistory />
       ) : filteredPayments.length === 0 ? (
         <EmptyFilteredPayments />
@@ -206,12 +230,14 @@ export function PaymentHistoryTable({
         <PaymentTable payments={filteredPayments} />
       )}
 
-      <PaymentHistoryFooter
-        paymentCount={filteredPayments.length}
-        sourcePaymentCount={payments.length}
-        totalPaid={visibleTotalPaid}
-        filtered={hasActiveFilters}
-      />
+      {!isLoading && !isError && (
+        <PaymentHistoryFooter
+          paymentCount={filteredPayments.length}
+          sourcePaymentCount={payments.length}
+          totalPaid={visibleTotalPaid}
+          filtered={hasActiveFilters}
+        />
+      )}
     </Card>
   );
 }
@@ -228,11 +254,17 @@ function PaymentHistoryHeader({ onDownload }: PaymentHistoryHeaderProps) {
           xs: 1.8,
           md: 2.5,
         },
+
         display: "flex",
+
         justifyContent: "space-between",
+
         alignItems: "center",
+
         gap: 2,
+
         borderBottom: `1px solid ${colors.cardBorder}`,
+
         bgcolor: "#ffffff",
       }}
     >
@@ -248,25 +280,37 @@ function PaymentHistoryHeader({ onDownload }: PaymentHistoryHeaderProps) {
           sx={{
             width: 32,
             height: 32,
+
             borderRadius: "16px",
+
             display: "grid",
+
             placeItems: "center",
+
             bgcolor: colors.primarySoft,
+
             color: colors.primaryLight,
+
             flexShrink: 0,
           }}
         >
           <FaSyncAlt size={14} />
         </Box>
 
-        <Box sx={{ minWidth: 0 }}>
+        <Box
+          sx={{
+            minWidth: 0,
+          }}
+        >
           <Typography
             sx={{
               color: colors.text,
+
               fontSize: {
                 xs: 16,
                 md: 18,
               },
+
               fontWeight: 950,
             }}
           >
@@ -276,6 +320,7 @@ function PaymentHistoryHeader({ onDownload }: PaymentHistoryHeaderProps) {
           <Typography
             sx={{
               color: colors.muted,
+
               fontSize: 12,
             }}
           >
@@ -299,7 +344,9 @@ type PaymentFiltersBarProps = {
   filters: PaymentFilters;
   paymentMethods: string[];
   canClear: boolean;
+
   onChange: <TKey extends keyof PaymentFilters>(key: TKey, value: PaymentFilters[TKey]) => void;
+
   onClear: () => void;
 };
 
@@ -317,10 +364,14 @@ function PaymentFiltersBar({
           xs: 1.5,
           md: 2,
         },
+
         display: "grid",
+
         gridTemplateColumns: {
           xs: "1fr",
+
           sm: "repeat(2, minmax(0, 1fr))",
+
           lg: [
             "minmax(260px, 2fr)",
             "minmax(145px, 0.8fr)",
@@ -329,9 +380,13 @@ function PaymentFiltersBar({
             "auto",
           ].join(" "),
         },
+
         gap: 1.2,
+
         alignItems: "center",
+
         borderBottom: `1px solid ${colors.cardBorder}`,
+
         bgcolor: "#f8fafc",
       }}
     >
@@ -349,6 +404,7 @@ function PaymentFiltersBar({
               </InputAdornment>
             ),
           },
+
           htmlInput: {
             "aria-label": "Buscar abonos",
           },
@@ -367,6 +423,7 @@ function PaymentFiltersBar({
           inputLabel: {
             shrink: true,
           },
+
           htmlInput: {
             "aria-label": "Fecha inicial",
           },
@@ -385,6 +442,7 @@ function PaymentFiltersBar({
           inputLabel: {
             shrink: true,
           },
+
           htmlInput: {
             "aria-label": "Fecha final",
           },
@@ -423,8 +481,11 @@ function PaymentFiltersBar({
         disabled={!canClear}
         sx={{
           color: colors.primary,
+
           fontWeight: 900,
+
           textTransform: "none",
+
           whiteSpace: "nowrap",
         }}
       >
@@ -437,56 +498,96 @@ function PaymentFiltersBar({
 const filterFieldSx: SxProps<Theme> = {
   "& .MuiOutlinedInput-root": {
     minHeight: 42,
+
     bgcolor: "#ffffff",
+
     borderRadius: "6px",
+
     fontSize: 13,
+
     color: colors.text,
+
     "& fieldset": {
       borderColor: "#b8c2cc",
     },
+
     "&:hover fieldset": {
       borderColor: colors.muted,
     },
+
     "&.Mui-focused fieldset": {
       borderColor: colors.primary,
+
       borderWidth: 1.5,
     },
   },
+
   "& .MuiInputBase-input": {
     color: `${colors.text} !important`,
+
     WebkitTextFillColor: `${colors.text} !important`,
+
     opacity: 1,
   },
+
   "& .MuiInputBase-input::placeholder": {
     color: `${colors.muted} !important`,
+
     WebkitTextFillColor: `${colors.muted} !important`,
+
     opacity: 1,
   },
+
   "& .MuiSelect-select": {
     color: `${colors.text} !important`,
+
     WebkitTextFillColor: `${colors.text} !important`,
   },
+
   "& .MuiInputAdornment-root": {
     color: colors.muted,
   },
+
   "& .MuiSvgIcon-root": {
     color: colors.muted,
   },
+
   "& .MuiInputLabel-root": {
     color: colors.muted,
+
     fontSize: 12,
+
     fontWeight: 700,
+
     bgcolor: "#ffffff",
+
     px: 0.35,
   },
+
   "& .MuiInputLabel-root.Mui-focused": {
     color: colors.primary,
   },
+
   "& input[type='date']::-webkit-calendar-picker-indicator": {
     opacity: 0.75,
     cursor: "pointer",
   },
 };
+
+function PaymentHistoryLoading() {
+  return (
+    <EmptyState title="Cargando historial..." description="Consultando los abonos registrados." />
+  );
+}
+
+function PaymentHistoryError() {
+  return (
+    <EmptyState
+      title="No se pudo cargar el historial."
+      description="Ocurrió un problema al consultar los abonos."
+    />
+  );
+}
 
 function EmptyPaymentHistory() {
   return (
@@ -511,14 +612,18 @@ function EmptyState({ title, description }: { title: string; description: string
     <Box
       sx={{
         p: 4,
+
         textAlign: "center",
+
         bgcolor: "#fbfdfc",
       }}
     >
       <Typography
         sx={{
           color: colors.text,
+
           fontSize: 14,
+
           fontWeight: 900,
         }}
       >
@@ -528,7 +633,9 @@ function EmptyState({ title, description }: { title: string; description: string
       <Typography
         sx={{
           mt: 0.5,
+
           color: colors.muted,
+
           fontSize: 13,
         }}
       >
@@ -543,7 +650,9 @@ function PaymentTable({ payments }: { payments: PaymentRecord[] }) {
     <Box
       sx={{
         width: "100%",
+
         overflowX: "auto",
+
         WebkitOverflowScrolling: "touch",
       }}
     >
@@ -551,11 +660,14 @@ function PaymentTable({ payments }: { payments: PaymentRecord[] }) {
         component="table"
         sx={{
           width: "100%",
+
           minWidth: {
             xs: 820,
             md: 920,
           },
+
           borderCollapse: "separate",
+
           borderSpacing: 0,
         }}
       >
@@ -567,27 +679,38 @@ function PaymentTable({ payments }: { payments: PaymentRecord[] }) {
             "& tr": {
               transition: "background-color 0.16s ease",
             },
+
             "& tr:nth-of-type(even)": {
               bgcolor: "#fbfdfc",
             },
+
             "& tr:hover": {
               bgcolor: "#eff6ff",
             },
+
             "& td": {
               px: 2.5,
               py: 1.8,
+
               color: colors.text,
+
               fontSize: 13,
+
               verticalAlign: "middle",
+
               whiteSpace: "nowrap",
+
               borderBottom: `1px solid ${colors.cardBorder}`,
             },
+
             "& tr:last-of-type td": {
               borderBottom: "none",
             },
+
             "& td:first-of-type": {
               pl: 3,
             },
+
             "& td:last-of-type": {
               pr: 3,
               textAlign: "right",
@@ -611,21 +734,33 @@ function PaymentTableHead() {
         "& th": {
           px: 2.5,
           py: 1.6,
+
           bgcolor: colors.tableHead,
+
           color: colors.muted,
+
           fontSize: 11,
+
           fontWeight: 950,
+
           textTransform: "uppercase",
+
           letterSpacing: "0.04em",
+
           textAlign: "left",
+
           whiteSpace: "nowrap",
+
           borderBottom: `1px solid ${colors.cardBorder}`,
         },
+
         "& th:first-of-type": {
           pl: 3,
         },
+
         "& th:last-of-type": {
           pr: 3,
+
           textAlign: "right",
         },
       }}
@@ -649,13 +784,29 @@ function PaymentTableRow({ payment }: { payment: PaymentRecord }) {
         <Box
           sx={{
             display: "flex",
+
             flexDirection: "column",
+
             gap: 0.25,
           }}
         >
-          <Typography sx={{ fontSize: 13, fontWeight: 850 }}>{payment.date}</Typography>
+          <Typography
+            sx={{
+              fontSize: 13,
 
-          <Typography sx={{ fontSize: 11, color: colors.muted }}>
+              fontWeight: 850,
+            }}
+          >
+            {payment.date}
+          </Typography>
+
+          <Typography
+            sx={{
+              fontSize: 11,
+
+              color: colors.muted,
+            }}
+          >
             Recibo #{payment.id.slice(-4).toUpperCase()}
           </Typography>
         </Box>
@@ -665,7 +816,9 @@ function PaymentTableRow({ payment }: { payment: PaymentRecord }) {
         <Box
           sx={{
             display: "flex",
+
             alignItems: "center",
+
             gap: 1.2,
           }}
         >
@@ -673,11 +826,17 @@ function PaymentTableRow({ payment }: { payment: PaymentRecord }) {
             sx={{
               width: 30,
               height: 30,
+
               borderRadius: "16px",
+
               display: "grid",
+
               placeItems: "center",
+
               bgcolor: colors.primarySoft,
+
               color: colors.primaryLight,
+
               flexShrink: 0,
             }}
           >
@@ -687,7 +846,9 @@ function PaymentTableRow({ payment }: { payment: PaymentRecord }) {
           <Typography
             sx={{
               color: colors.text,
+
               fontSize: 13,
+
               fontWeight: 950,
             }}
           >
@@ -700,7 +861,9 @@ function PaymentTableRow({ payment }: { payment: PaymentRecord }) {
         <Typography
           sx={{
             color: colors.text,
+
             fontSize: 13,
+
             fontWeight: 950,
           }}
         >
@@ -714,12 +877,19 @@ function PaymentTableRow({ payment }: { payment: PaymentRecord }) {
           size="small"
           sx={{
             height: 24,
+
             px: 0.5,
+
             bgcolor: colors.greenSoft,
+
             color: colors.green,
+
             border: "1px solid #bbf7d0",
+
             fontSize: 11,
+
             fontWeight: 900,
+
             "& .MuiChip-label": {
               px: 1,
             },
@@ -731,10 +901,19 @@ function PaymentTableRow({ payment }: { payment: PaymentRecord }) {
         <Typography
           sx={{
             color: colors.muted,
+
             fontSize: 13,
+
+            maxWidth: 260,
+
+            overflow: "hidden",
+
+            textOverflow: "ellipsis",
+
+            whiteSpace: "nowrap",
           }}
         >
-          {payment.note}
+          {payment.note || "Sin nota"}
         </Typography>
       </td>
 
@@ -742,8 +921,11 @@ function PaymentTableRow({ payment }: { payment: PaymentRecord }) {
         <Typography
           sx={{
             color: colors.green,
+
             fontSize: 13,
+
             fontWeight: 950,
+
             fontVariantNumeric: "tabular-nums",
           }}
         >
@@ -774,20 +956,30 @@ function PaymentHistoryFooter({
           xs: 1.8,
           md: 3,
         },
+
         py: 1.8,
+
         display: "flex",
+
         justifyContent: "space-between",
+
         alignItems: "center",
+
         gap: 2,
+
         flexWrap: "wrap",
+
         bgcolor: "#f8fafc",
+
         borderTop: `1px solid ${colors.cardBorder}`,
       }}
     >
       <Typography
         sx={{
           color: colors.muted,
+
           fontSize: 12,
+
           fontWeight: 700,
         }}
       >
@@ -798,14 +990,18 @@ function PaymentHistoryFooter({
       <Box
         sx={{
           display: "flex",
+
           alignItems: "center",
+
           gap: 1,
         }}
       >
         <Typography
           sx={{
             color: colors.muted,
+
             fontSize: 12,
+
             fontWeight: 700,
           }}
         >
@@ -815,8 +1011,11 @@ function PaymentHistoryFooter({
         <Typography
           sx={{
             color: colors.green,
+
             fontSize: 15,
+
             fontWeight: 950,
+
             fontVariantNumeric: "tabular-nums",
           }}
         >
@@ -845,18 +1044,29 @@ function SmallIconButton({ children, ariaLabel, onClick, disabled = false }: Sma
       sx={{
         width: 36,
         height: 36,
+
         borderRadius: "16px",
+
         border: `1px solid ${colors.cardBorder}`,
+
         color: colors.muted,
+
         bgcolor: "#ffffff",
+
         transition: "all 0.16s ease",
+
         flexShrink: 0,
+
         "&:hover": {
           bgcolor: colors.primarySoft,
+
           color: colors.primary,
+
           borderColor: "#bfdbfe",
+
           transform: "translateY(-1px)",
         },
+
         "&.Mui-disabled": {
           opacity: 0.45,
         },

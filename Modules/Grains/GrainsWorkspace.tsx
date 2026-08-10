@@ -13,20 +13,31 @@ import { AddGrainModal, type AddGrainFormValues } from "@/components/AddGrainMod
 import { GrainInventory, type GrainProduct } from "@/components/GrainInventory";
 
 import { RegisterSaleCard } from "@/components/RegisterSaleCard";
+
 import { SalesHistoryTable } from "@/components/SalesHistoryTable";
 
 import type { WorkspaceConfig } from "@/components/WorkspaceShared/workspaceTypes";
 
-import { useCreateGrainProduct, useGrainProducts, useRegisterGrainSale } from "@/hook/useGrains";
+import {
+  useCreateGrainProduct,
+  useGrainProducts,
+  useGrainSales,
+  useRegisterGrainSale,
+} from "@/hook/useGrains";
+
+import type { GrainSale as ApiGrainSale } from "@/types/api.types";
 
 import { grainsColors } from "@/theme/sharedColors";
 
 import { HeroHeader } from "./components/HeroHeader";
+
 import { MetricCard } from "./components/MetricCard";
+
 import { SectionCard } from "./components/SectionCard";
 
 type GrainSale = {
   id: string;
+  productId: string;
   productName: string;
   unit: string;
   quantity: number;
@@ -40,51 +51,48 @@ export const colors = grainsColors;
 
 export const grainsConfig: WorkspaceConfig = {
   category: "grains",
+
   badge: "Módulo de Ventas",
+
   title: "Ventas de Granos Básicos",
+
   subtitle: "Inventario independiente para granos, ventas por libra, saco, quintal o kilogramo.",
+
   heroAccent: "#5ee3a7",
+
   heroSecondary: "#f59e0b",
+
   invoice: "#GRN-2026-082",
+
   customer: "Alex Rivera",
+
   customerEmail: "alex.rivera@assethub.com",
+
   agent: "Jordan P.",
+
   terminal: "Bodega Granos 01",
+
   customerMode: "quick",
+
   summaryLabel: "Comprobante de venta",
+
   summaryTotal: "$58.32",
+
   summaryNote:
     "Módulo independiente para controlar inventario, ventas e historial de granos básicos.",
+
   metrics: [],
+
   products: [],
+
   payments: [],
+
   salesAnalysis: [],
+
   workflowTitle: "Flujo granos básicos",
+
   workflowItems: [],
 };
-
-const initialSales: GrainSale[] = [
-  {
-    id: "sale-1",
-    productName: "Frijol rojo",
-    unit: "Saco",
-    quantity: 4,
-    unitPrice: 4.25,
-    total: 17,
-    paymentMethod: "Efectivo",
-    date: "9/7/26, 10:36 a. m.",
-  },
-  {
-    id: "sale-2",
-    productName: "Frijol rojo",
-    unit: "Saco",
-    quantity: 5,
-    unitPrice: 4.25,
-    total: 21.25,
-    paymentMethod: "Efectivo",
-    date: "9/7/26, 10:35 a. m.",
-  },
-];
 
 const paymentMethods = ["Efectivo", "Tarjeta", "Transferencia"];
 
@@ -102,11 +110,11 @@ export function GrainsWorkspace() {
     isError: isProductsError,
   } = useGrainProducts();
 
+  const { data: apiSales = [], isLoading: isLoadingSales, isError: isSalesError } = useGrainSales();
+
   const { mutateAsync: createGrainProduct, isPending: isCreatingProduct } = useCreateGrainProduct();
 
   const { mutateAsync: registerGrainSale, isPending: isRegisteringSale } = useRegisterGrainSale();
-
-  const [sales, setSales] = useState<GrainSale[]>(initialSales);
 
   const [selectedProductId, setSelectedProductId] = useState("");
 
@@ -125,19 +133,55 @@ export function GrainsWorkspace() {
 
       return {
         id: product.id,
+
         code: product.code,
+
         name: product.name,
+
         unit: product.unit,
+
         stock: product.stock,
+
         minStock: product.minimumStock,
+
         price: product.unitPrice,
+
         silo: product.location,
+
         imageUrl: product.imageUrl ?? "",
+
         status: isLowStock ? "lowStock" : "inStock",
+
         accent: isLowStock ? colors.danger : colors.primaryLight,
       };
     });
   }, [grainProducts]);
+
+  const sales = useMemo<GrainSale[]>(() => {
+    return apiSales.map((sale: ApiGrainSale) => ({
+      id: sale.id,
+
+      productId: sale.productId,
+
+      productName: sale.productName,
+
+      unit: sale.unit,
+
+      quantity: sale.quantity,
+
+      unitPrice: sale.unitPrice,
+
+      total: sale.total,
+
+      paymentMethod: sale.paymentMethod,
+
+      date: new Date(sale.createdAt).toLocaleString("es-NI", {
+        dateStyle: "short",
+
+        timeStyle: "short",
+      }),
+    }));
+  }, [apiSales]);
 
   useEffect(() => {
     if (products.length > 0 && !selectedProductId) {
@@ -182,48 +226,30 @@ export function GrainsWorkspace() {
 
     if (!selectedProduct) {
       setError("Selecciona un producto válido.");
+
       return;
     }
 
     if (Number.isNaN(numericQuantity) || numericQuantity <= 0) {
       setError("Ingresa una cantidad mayor que cero.");
+
       return;
     }
 
     if (numericQuantity > selectedProduct.stock) {
       setError("No hay suficiente inventario disponible para esta venta.");
+
       return;
     }
 
     try {
-      const response = await registerGrainSale({
+      await registerGrainSale({
         productId: selectedProduct.id,
+
         quantity: numericQuantity,
+
         paymentMethod,
       });
-
-      const newSale: GrainSale = {
-        id: crypto.randomUUID(),
-
-        productName: selectedProduct.name,
-
-        unit: selectedProduct.unit,
-
-        quantity: response.quantity,
-
-        unitPrice: selectedProduct.price,
-
-        total: response.total,
-
-        paymentMethod,
-
-        date: new Date().toLocaleString("es-NI", {
-          dateStyle: "short",
-          timeStyle: "short",
-        }),
-      };
-
-      setSales((currentSales) => [newSale, ...currentSales]);
 
       setQuantity("1");
     } catch {
@@ -242,21 +268,25 @@ export function GrainsWorkspace() {
 
     if (Number.isNaN(initialStock) || initialStock < 0) {
       setError("El stock inicial debe ser válido.");
+
       return;
     }
 
     if (Number.isNaN(minimumStock) || minimumStock < 0) {
       setError("El stock mínimo debe ser válido.");
+
       return;
     }
 
     if (minimumStock > initialStock) {
       setError("El stock mínimo no puede ser mayor al stock inicial.");
+
       return;
     }
 
     if (Number.isNaN(unitPrice) || unitPrice <= 0) {
       setError("El precio unitario debe ser mayor que cero.");
+
       return;
     }
 
@@ -294,6 +324,7 @@ export function GrainsWorkspace() {
       <Box
         sx={{
           width: "100%",
+
           minHeight: "calc(100vh - 48px)",
 
           px: {
@@ -457,6 +488,10 @@ export function GrainsWorkspace() {
             sales={sales}
 
             totalSold={totalSold}
+
+            isLoading={isLoadingSales}
+
+            isError={isSalesError}
 
             title="Historial de transacciones"
 

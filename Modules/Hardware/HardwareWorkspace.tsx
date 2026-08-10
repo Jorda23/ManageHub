@@ -22,6 +22,7 @@ import {
 import { HardwareInventory, type HardwareProduct } from "@/components/HardwareInventory";
 
 import { RegisterSaleCard } from "@/components/RegisterSaleCard";
+
 import { SalesHistoryTable } from "@/components/SalesHistoryTable";
 
 import { HardwareWorkspaceHero } from "@/Modules/Hardware/components/HardwareWorkspaceHero";
@@ -29,6 +30,7 @@ import { HardwareWorkspaceHero } from "@/Modules/Hardware/components/HardwareWor
 import {
   useCreateHardwareProduct,
   useHardwareProducts,
+  useHardwareSales,
   useRegisterHardwareSale,
 } from "@/hook/useHardware";
 
@@ -36,7 +38,10 @@ import { hardwareColors } from "@/theme/sharedColors";
 
 import type { WorkspaceConfig } from "@/components/WorkspaceShared/workspaceTypes";
 
+import type { HardwareSale as ApiHardwareSale } from "@/types/api.types";
+
 import { SectionCard } from "./components/SectionCard";
+
 import { MetricCard } from "./components/MetricCard";
 
 type HardwareSale = {
@@ -54,55 +59,52 @@ export const colors = hardwareColors;
 
 const hardwareConfig: WorkspaceConfig = {
   category: "hardware",
+
   badge: "Ferretería",
+
   title: "Ventas de Ferretería",
+
   subtitle: "Control de productos, cantidades, precios, inventario e historial de ventas.",
+
   heroAccent: "#f59e0b",
+
   heroSecondary: "#19d3d8",
+
   invoice: "#FER-2026-014",
+
   customer: "Carlos Mendoza",
+
   customerEmail: "carlos.mendoza@assethub.com",
+
   agent: "M. Torres",
+
   terminal: "Caja Ferretería 01",
+
   customerMode: "quick",
+
   summaryLabel: "Ticket de venta",
+
   summaryTotal: "$124.90",
+
   summaryNote:
     "Módulo para ventas rápidas de productos de ferretería, control de stock e historial.",
+
   metrics: [],
+
   products: [],
+
   payments: [],
+
   salesAnalysis: [],
+
   workflowTitle: "Flujo ferretería",
+
   workflowItems: [
     "Seleccionar productos del inventario",
     "Verificar cantidades y precios",
     "Cobrar y generar recibo",
   ],
 };
-
-const initialSales: HardwareSale[] = [
-  {
-    id: "sale-001",
-    productId: "drill",
-    productName: "Taladro inalámbrico",
-    quantity: 1,
-    unitPrice: 79.9,
-    total: 79.9,
-    paymentMethod: "Efectivo",
-    date: "9/7/26, 10:30 a. m.",
-  },
-  {
-    id: "sale-002",
-    productId: "screws",
-    productName: "Caja de tornillos",
-    quantity: 3,
-    unitPrice: 9,
-    total: 27,
-    paymentMethod: "Tarjeta",
-    date: "9/7/26, 10:34 a. m.",
-  },
-];
 
 const paymentMethods = ["Efectivo", "Tarjeta", "Crédito local", "Transferencia"];
 
@@ -120,12 +122,17 @@ export function HardwareWorkspace() {
     isError: isProductsError,
   } = useHardwareProducts();
 
+  const {
+    data: apiSales = [],
+    isLoading: isLoadingSales,
+    isError: isSalesError,
+  } = useHardwareSales();
+
   const { mutateAsync: createHardwareProduct, isPending: isCreatingProduct } =
     useCreateHardwareProduct();
 
-  const { mutateAsync: registerHardwareSale } = useRegisterHardwareSale();
-
-  const [sales, setSales] = useState<HardwareSale[]>(initialSales);
+  const { mutateAsync: registerHardwareSale, isPending: isRegisteringSale } =
+    useRegisterHardwareSale();
 
   const [selectedProductId, setSelectedProductId] = useState("");
 
@@ -167,6 +174,29 @@ export function HardwareWorkspace() {
       };
     });
   }, [hardwareProducts]);
+
+  const sales = useMemo<HardwareSale[]>(() => {
+    return apiSales.map((sale: ApiHardwareSale) => ({
+      id: sale.id,
+
+      productId: sale.productId,
+
+      productName: sale.productName,
+
+      quantity: sale.quantity,
+
+      unitPrice: sale.unitPrice,
+
+      total: sale.total,
+
+      paymentMethod: sale.paymentMethod,
+
+      date: new Date(sale.createdAt).toLocaleString("es-NI", {
+        dateStyle: "short",
+        timeStyle: "short",
+      }),
+    }));
+  }, [apiSales]);
 
   useEffect(() => {
     if (products.length > 0 && !selectedProductId) {
@@ -215,50 +245,30 @@ export function HardwareWorkspace() {
 
     if (!selectedProduct) {
       setError("Selecciona un producto válido.");
+
       return;
     }
 
     if (Number.isNaN(numericQuantity) || numericQuantity <= 0) {
       setError("Ingresa una cantidad mayor a cero.");
+
       return;
     }
 
     if (numericQuantity > selectedProduct.stock) {
       setError("No hay suficiente inventario disponible.");
+
       return;
     }
 
     try {
-      const response = await registerHardwareSale({
+      await registerHardwareSale({
         productId: selectedProduct.id,
 
         quantity: numericQuantity,
 
         paymentMethod,
       });
-
-      const newSale: HardwareSale = {
-        id: crypto.randomUUID(),
-
-        productId: selectedProduct.id,
-
-        productName: selectedProduct.name,
-
-        quantity: response.quantity,
-
-        unitPrice: selectedProduct.price,
-
-        total: response.total,
-
-        paymentMethod,
-
-        date: new Date().toLocaleString("es-NI", {
-          dateStyle: "short",
-          timeStyle: "short",
-        }),
-      };
-
-      setSales((currentSales) => [newSale, ...currentSales]);
 
       setQuantity("1");
     } catch {
@@ -277,21 +287,25 @@ export function HardwareWorkspace() {
 
     if (Number.isNaN(initialStock) || initialStock < 0) {
       setError("El stock inicial debe ser válido.");
+
       return;
     }
 
     if (Number.isNaN(minimumStock) || minimumStock < 0) {
       setError("El stock mínimo debe ser válido.");
+
       return;
     }
 
     if (minimumStock > initialStock) {
       setError("El stock mínimo no puede ser mayor al stock inicial.");
+
       return;
     }
 
     if (Number.isNaN(unitPrice) || unitPrice <= 0) {
       setError("El precio unitario debe ser mayor que cero.");
+
       return;
     }
 
@@ -377,7 +391,9 @@ export function HardwareWorkspace() {
         >
           <HardwareWorkspaceHero
             badge={hardwareConfig.badge}
+
             title={hardwareConfig.title}
+
             subtitle={hardwareConfig.subtitle}
           />
 
@@ -527,6 +543,10 @@ export function HardwareWorkspace() {
             sales={sales}
 
             totalSold={totalSold}
+
+            isLoading={isLoadingSales}
+
+            isError={isSalesError}
 
             title="Historial de ventas"
 
