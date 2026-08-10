@@ -1,6 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
-const API_URL = "http://localhost:5273";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5158";
 
 const ACCESS_TOKEN_KEY = "access_token";
 
