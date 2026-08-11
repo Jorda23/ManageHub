@@ -420,9 +420,9 @@ export function GrainsWorkspace() {
             <MetricCard
               icon={<FaExclamationTriangle />}
 
-              iconBg={colors.dangerSoft}
+              iconBg={colors.orangeSoft}
 
-              iconColor={colors.danger}
+              iconColor={colors.orange}
 
               label="Bajo inventario"
 
