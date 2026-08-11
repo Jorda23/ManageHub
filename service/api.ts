@@ -24,6 +24,7 @@ import type {
   RegisterPropertyPaymentResponse,
   PropertyPayment,
   PropertyPaymentsFilters,
+  DashboardResponse,
 } from "../types/api.types";
 
 export const login = async (request: LoginRequest): Promise<LoginResponse> => {
@@ -111,4 +112,8 @@ export const getPropertyPayments = async (
   return apiClient.get<PropertyPayment[]>("/api/properties/payments", {
     params: filters,
   });
+};
+
+export const getDashboard = async (): Promise<DashboardResponse> => {
+  return apiClient.get<DashboardResponse>("/api/dashboard");
 };

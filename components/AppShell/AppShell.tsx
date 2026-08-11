@@ -67,41 +67,61 @@ export default function AppShell({ children, active }: AppShellProps) {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        height: "100dvh",
         width: "100%",
         bgcolor: shellColors.pageBg,
         overflowX: "hidden",
+        overflowY: "hidden",
       }}
     >
       <Box
         sx={{
-          minHeight: "100vh",
+          height: "100%",
           width: "100%",
           display: "grid",
           gridTemplateColumns: {
             xs: "1fr",
             lg: "272px minmax(0, 1fr)",
           },
+          minHeight: 0,
         }}
       >
         <DesktopSidebar active={active} />
 
         <Box
           sx={{
+            height: "100%",
+            minHeight: 0,
             minWidth: 0,
             pb: {
               xs: "78px",
               lg: 0,
             },
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
           }}
         >
           <MobileTopbar onOpenMenu={() => setIsMobileMenuOpen(true)} />
 
           <Box
             sx={{
+              flex: 1,
+              minHeight: 0,
               minWidth: 0,
               width: "100%",
               overflowX: "hidden",
+              overflowY: "auto",
+              WebkitOverflowScrolling: "touch",
+              overscrollBehavior: "contain",
+              pt: {
+                xs: "80px",
+                lg: 0,
+              },
+              pb: {
+                xs: "94px",
+                lg: 0,
+              },
             }}
           >
             {children}
@@ -229,11 +249,13 @@ function DesktopSidebar({ active }: { active?: AppShellProps["active"] }) {
           lg: "flex",
         },
         flexDirection: "column",
-        minHeight: "100vh",
+        height: "100%",
+        minHeight: 0,
         position: "sticky",
         top: 0,
         borderRight: `1px solid ${shellColors.border}`,
         bgcolor: shellColors.sidebarBg,
+        overflow: "hidden",
       }}
     >
       <SidebarHeader />

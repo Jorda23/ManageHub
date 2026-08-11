@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 
 import { Box, Button, Paper, Typography } from "@mui/material";
 
@@ -16,10 +16,11 @@ export function ImageUploadField({
   label,
   value,
   disabled = false,
-  helperText = "PNG, JPG o WEBP. Puedes subir una imagen desde tu equipo.",
+  helperText = "PNG, JPG o WEBP. La imagen se comprime automáticamente para guardar una versión más liviana.",
   onChange,
 }: ImageUploadFieldProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     if (!value && inputRef.current) {
@@ -38,17 +39,15 @@ export function ImageUploadField({
       return;
     }
 
-    const reader = new FileReader();
+    setIsProcessing(true);
 
-    reader.onload = () => {
-      const result = reader.result;
-
-      if (typeof result === "string") {
+    void compressImage(file)
+      .then((result) => {
         onChange(result);
-      }
-    };
-
-    reader.readAsDataURL(file);
+      })
+      .finally(() => {
+        setIsProcessing(false);
+      });
   };
 
   return (
@@ -69,7 +68,7 @@ export function ImageUploadField({
         <Button
           component="label"
           variant="outlined"
-          disabled={disabled}
+          disabled={disabled || isProcessing}
           sx={{
             borderRadius: 2,
             textTransform: "none",
@@ -83,13 +82,13 @@ export function ImageUploadField({
             },
           }}
         >
-          {value ? "Cambiar imagen" : "Subir imagen"}
+          {isProcessing ? "Optimizando..." : value ? "Cambiar imagen" : "Subir imagen"}
           <input
             ref={inputRef}
             type="file"
             accept="image/*"
             hidden
-            disabled={disabled}
+            disabled={disabled || isProcessing}
             onChange={handleFileChange}
           />
         </Button>
@@ -98,7 +97,7 @@ export function ImageUploadField({
           <Button
             type="button"
             variant="text"
-            disabled={disabled}
+            disabled={disabled || isProcessing}
             onClick={() => onChange("")}
             sx={{
               textTransform: "none",
@@ -147,4 +146,87 @@ export function ImageUploadField({
       ) : null}
     </Box>
   );
+}
+
+async function compressImage(file: File): Promise<string> {
+  const image = await loadImage(file);
+  const { width, height } = fitWithin(image.width, image.height, 1280);
+  const canvas = document.createElement("canvas");
+
+  canvas.width = width;
+  canvas.height = height;
+
+  const context = canvas.getContext("2d");
+
+  if (!context) {
+    return readAsDataUrl(file);
+  }
+
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+  context.drawImage(image, 0, 0, width, height);
+
+  const blob = await canvasToBlob(canvas, "image/webp", 0.82);
+
+  if (blob) {
+    return await readBlobAsDataUrl(blob);
+  }
+
+  return canvas.toDataURL("image/webp", 0.82);
+}
+
+function loadImage(file: File): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onerror = () => reject(new Error("No se pudo leer la imagen."));
+    reader.onload = () => {
+      const image = new Image();
+
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error("No se pudo cargar la imagen."));
+      image.src = String(reader.result);
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+function fitWithin(width: number, height: number, maxSide: number) {
+  if (width <= maxSide && height <= maxSide) {
+    return { width, height };
+  }
+
+  const scale = Math.min(maxSide / width, maxSide / height);
+
+  return {
+    width: Math.max(1, Math.round(width * scale)),
+    height: Math.max(1, Math.round(height * scale)),
+  };
+}
+
+function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality: number) {
+  return new Promise<Blob | null>((resolve) => {
+    canvas.toBlob((blob) => resolve(blob), type, quality);
+  });
+}
+
+function readBlobAsDataUrl(blob: Blob) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onerror = () => reject(new Error("No se pudo convertir la imagen."));
+    reader.onload = () => resolve(String(reader.result));
+    reader.readAsDataURL(blob);
+  });
+}
+
+function readAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onerror = () => reject(new Error("No se pudo leer la imagen."));
+    reader.onload = () => resolve(String(reader.result));
+    reader.readAsDataURL(file);
+  });
 }

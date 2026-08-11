@@ -1,8 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
-import { FaCheckCircle, FaFileInvoiceDollar, FaSeedling, FaWarehouse } from "react-icons/fa";
+import {
+  FaBoxes,
+  FaExclamationTriangle,
+  FaFileInvoiceDollar,
+  FaRegClock,
+  FaSeedling,
+} from "react-icons/fa";
 
 import { Box } from "@mui/material";
 
@@ -104,17 +110,13 @@ const formatCurrency = (value: number): string => {
 };
 
 export function GrainsWorkspace() {
-  const {
-    data: grainProducts = [],
-    isLoading: isLoadingProducts,
-    isError: isProductsError,
-  } = useGrainProducts();
+  const { data: grainProducts = [] } = useGrainProducts();
 
   const { data: apiSales = [], isLoading: isLoadingSales, isError: isSalesError } = useGrainSales();
 
   const { mutateAsync: createGrainProduct, isPending: isCreatingProduct } = useCreateGrainProduct();
 
-  const { mutateAsync: registerGrainSale, isPending: isRegisteringSale } = useRegisterGrainSale();
+  const { mutateAsync: registerGrainSale } = useRegisterGrainSale();
 
   const [selectedProductId, setSelectedProductId] = useState("");
 
@@ -183,25 +185,17 @@ export function GrainsWorkspace() {
     }));
   }, [apiSales]);
 
-  useEffect(() => {
-    if (products.length > 0 && !selectedProductId) {
-      setSelectedProductId(products[0].id);
+  const activeSelectedProductId = useMemo(() => {
+    if (selectedProductId && products.some((product) => product.id === selectedProductId)) {
+      return selectedProductId;
     }
-  }, [products, selectedProductId]);
 
-  useEffect(() => {
-    if (
-      selectedProductId &&
-      products.length > 0 &&
-      !products.some((product) => product.id === selectedProductId)
-    ) {
-      setSelectedProductId(products[0].id);
-    }
+    return products[0]?.id ?? "";
   }, [products, selectedProductId]);
 
   const selectedProduct = useMemo(() => {
-    return products.find((product) => product.id === selectedProductId);
-  }, [products, selectedProductId]);
+    return products.find((product) => product.id === activeSelectedProductId);
+  }, [activeSelectedProductId, products]);
 
   const numericQuantity = Number(quantity);
 
@@ -220,6 +214,27 @@ export function GrainsWorkspace() {
   const totalInventory = useMemo(() => {
     return products.reduce((total, product) => total + product.stock, 0);
   }, [products]);
+
+  const lowStockCount = useMemo(() => {
+    return products.filter((product) => product.stock <= product.minStock).length;
+  }, [products]);
+
+  const averageCheckoutTime = useMemo(() => {
+    if (apiSales.length < 2) {
+      return "Sin datos";
+    }
+
+    const sortedSaleTimes = apiSales
+      .map((sale) => new Date(sale.createdAt).getTime())
+      .sort((a, b) => a - b);
+
+    const intervals = sortedSaleTimes.slice(1).map((time, index) => time - sortedSaleTimes[index]);
+
+    const averageInterval =
+      intervals.reduce((total, interval) => total + interval, 0) / intervals.length;
+
+    return formatDuration(averageInterval);
+  }, [apiSales]);
 
   const handleRegisterSale = async (): Promise<void> => {
     setError("");
@@ -368,7 +383,7 @@ export function GrainsWorkspace() {
 
                 sm: "repeat(2, minmax(0, 1fr))",
 
-                md: "repeat(3, minmax(0, 1fr))",
+                lg: "repeat(4, minmax(0, 1fr))",
               },
 
               gap: 2.5,
@@ -389,31 +404,45 @@ export function GrainsWorkspace() {
             />
 
             <MetricCard
-              icon={<FaWarehouse />}
-
-              iconBg={colors.orangeSoft}
-
-              iconColor={colors.orange}
-
-              label="Inventario disponible"
-
-              value={totalInventory.toString()}
-
-              detail="Unidades en stock"
-            />
-
-            <MetricCard
-              icon={<FaCheckCircle />}
+              icon={<FaBoxes />}
 
               iconBg={colors.primarySoft}
 
               iconColor={colors.primaryLight}
 
-              label="Productos activos"
+              label="Productos en stock"
 
-              value={products.length.toString()}
+              value={totalInventory.toString()}
 
-              detail="Productos registrados"
+              detail={`${products.length} productos activos`}
+            />
+
+            <MetricCard
+              icon={<FaExclamationTriangle />}
+
+              iconBg={colors.dangerSoft}
+
+              iconColor={colors.danger}
+
+              label="Bajo inventario"
+
+              value={lowStockCount.toString()}
+
+              detail="Requieren revisión"
+            />
+
+            <MetricCard
+              icon={<FaRegClock />}
+
+              iconBg={colors.primarySoft}
+
+              iconColor={colors.primaryLight}
+
+              label="Tiempo en caja"
+
+              value={averageCheckoutTime}
+
+              detail="Atención promedio"
             />
           </Box>
 
@@ -459,7 +488,7 @@ export function GrainsWorkspace() {
 
                 selectedProduct={selectedProduct}
 
-                selectedProductId={selectedProductId}
+                selectedProductId={activeSelectedProductId}
 
                 quantity={quantity}
 
@@ -543,4 +572,16 @@ export function GrainsWorkspace() {
       />
     </AppShell>
   );
+}
+
+function formatDuration(milliseconds: number): string {
+  if (!Number.isFinite(milliseconds) || milliseconds <= 0) {
+    return "0m 00s";
+  }
+
+  const totalSeconds = Math.round(milliseconds / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${minutes}m ${String(seconds).padStart(2, "0")}s`;
 }

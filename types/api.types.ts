@@ -214,3 +214,45 @@ export type PropertyPaymentsFilters = {
   to?: string;
   paymentMethod?: string;
 };
+
+export type DashboardSummary = {
+  salesToday: number;
+  monthlyIncome: number;
+  accountsReceivable: number;
+  openAccounts: number;
+  alertsCount: number;
+  salesVsYesterdayPercent: number;
+  monthlyVsPreviousMonthPercent: number;
+};
+
+export type DashboardRecentActivity = {
+  type: string;
+  title: string;
+  subtitle: string;
+  amount: number;
+  createdAt: string;
+};
+
+export type DashboardCashFlowDay = {
+  date: string;
+  hardware: number;
+  grains: number;
+  properties: number;
+  total: number;
+};
+
+export type DashboardAlert = {
+  group: string;
+  code: string;
+  title: string;
+  message: string;
+  severity: string;
+  imageUrl: string | null;
+};
+
+export type DashboardResponse = {
+  summary: DashboardSummary;
+  recentActivity: DashboardRecentActivity[];
+  cashFlow7Days: DashboardCashFlowDay[];
+  alerts: DashboardAlert[];
+};
