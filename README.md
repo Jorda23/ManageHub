@@ -3,10 +3,6 @@
 Enterprise Hub is a responsive business management dashboard built with Next.js.  
 It includes independent modules for managing hardware store sales, basic grain sales, and property payment tracking.
 
-## Live Demo
-
-[View deployed app](https://manage-hub-gamma.vercel.app)
-
 ## Features
 
 - Responsive dashboard layout
