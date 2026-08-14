@@ -93,10 +93,6 @@ export default function AppShell({ children, active }: AppShellProps) {
             height: "100%",
             minHeight: 0,
             minWidth: 0,
-            pb: {
-              xs: "78px",
-              lg: 0,
-            },
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",

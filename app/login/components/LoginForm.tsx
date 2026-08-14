@@ -122,67 +122,6 @@ export function LoginForm() {
         </Typography>
       )}
 
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 1,
-          flexWrap: "wrap",
-        }}
-      >
-        <FormControlLabel
-          control={
-            <Checkbox
-              size="small"
-              checked={rememberSession}
-              onChange={(event) => {
-                setRememberSession(event.target.checked);
-              }}
-              sx={{
-                p: 0.25,
-                mr: 0.6,
-                color: "#aab7b2",
-
-                "&.Mui-checked": {
-                  color: colors.green,
-                },
-              }}
-            />
-          }
-          label="Recordar sesión"
-          sx={{
-            m: 0,
-
-            "& .MuiFormControlLabel-label": {
-              color: colors.muted,
-              fontSize: 11.5,
-              fontWeight: 500,
-            },
-          }}
-        />
-
-        <Button
-          type="button"
-          variant="text"
-          sx={{
-            p: 0,
-            minWidth: 0,
-            color: colors.green,
-            fontSize: 11.5,
-            fontWeight: 700,
-            textTransform: "none",
-
-            "&:hover": {
-              bgcolor: "transparent",
-              textDecoration: "underline",
-            },
-          }}
-        >
-          ¿Olvidaste tu contraseña?
-        </Button>
-      </Box>
-
       <Button
         type="submit"
         fullWidth

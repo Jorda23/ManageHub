@@ -1,10 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
-
-import { Box, Button, Card, Divider, Typography } from "@mui/material";
-
-import { FaBookOpen, FaHeadset } from "react-icons/fa";
+import { Box, Card, Typography } from "@mui/material";
 
 import { LoginForm } from "./components/LoginForm";
 import { NarrativePanel } from "./components/NarrativePanel";
@@ -138,69 +134,9 @@ export default function LoginPage() {
             </Typography>
 
             <LoginForm />
-
-            <Divider
-              sx={{
-                my: 4,
-                borderColor: "#edf1ef",
-              }}
-            />
-
-            <Typography
-              sx={{
-                color: colors.muted,
-                fontSize: 11,
-                textAlign: "center",
-                mb: 1.3,
-              }}
-            >
-              ¿Necesitas ayuda con tu acceso?
-            </Typography>
-
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 2.2,
-                flexWrap: "wrap",
-              }}
-            >
-              <SupportLink icon={<FaHeadset size={12} />} label="Soporte" />
-
-              <SupportLink icon={<FaBookOpen size={12} />} label="Guía de usuario" />
-            </Box>
           </Box>
         </Box>
       </Card>
     </Box>
-  );
-}
-
-function SupportLink({ icon, label }: { icon: ReactNode; label: string }) {
-  return (
-    <Button
-      type="button"
-      variant="text"
-      startIcon={icon}
-      sx={{
-        p: 0,
-        minWidth: 0,
-
-        color: colors.green,
-
-        fontSize: 11,
-        fontWeight: 800,
-
-        textTransform: "none",
-
-        "&:hover": {
-          bgcolor: "transparent",
-          textDecoration: "underline",
-        },
-      }}
-    >
-      {label}
-    </Button>
   );
 }
