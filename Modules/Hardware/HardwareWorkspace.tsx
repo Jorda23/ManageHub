@@ -43,6 +43,7 @@ import type { HardwareSale as ApiHardwareSale } from "@/types/api.types";
 import { SectionCard } from "./components/SectionCard";
 
 import { MetricCard } from "./components/MetricCard";
+import { LoadingState } from "@/components/LoadingState";
 
 type HardwareSale = {
   id: string;
@@ -133,6 +134,8 @@ export function HardwareWorkspace() {
 
   const { mutateAsync: registerHardwareSale, isPending: isRegisteringSale } =
     useRegisterHardwareSale();
+
+  const isLoading = isLoadingProducts || isRegisteringSale;
 
   const [selectedProductId, setSelectedProductId] = useState("");
 
@@ -342,258 +345,183 @@ export function HardwareWorkspace() {
 
   return (
     <AppShell active={hardwareConfig.category}>
-      <Box
-        sx={{
-          width: "100%",
-
-          maxWidth: "100vw",
-
-          minHeight: "calc(100vh - 48px)",
-
-          overflowX: "hidden",
-
-          px: {
-            xs: 1.5,
-            sm: 2,
-            md: 4,
-          },
-
-          py: {
-            xs: 2,
-            md: 3,
-          },
-
-          bgcolor: colors.pageBg,
-
-          color: colors.text,
-        }}
-      >
+      {isLoading ? (
+        <LoadingState message="Cargando módulo de Ferretería..." />
+      ) : (
         <Box
           sx={{
             width: "100%",
-
-            maxWidth: {
-              xs: "100%",
-              xl: 1320,
+            maxWidth: "100vw",
+            minHeight: "calc(100vh - 48px)",
+            overflowX: "hidden",
+            px: {
+              xs: 1.5,
+              sm: 2,
+              md: 4,
             },
-
-            mx: "auto",
-
-            display: "flex",
-
-            flexDirection: "column",
-
-            gap: {
+            py: {
               xs: 2,
               md: 3,
             },
+            bgcolor: colors.pageBg,
+            color: colors.text,
           }}
         >
-          <HardwareWorkspaceHero
-            badge={hardwareConfig.badge}
-
-            title={hardwareConfig.title}
-
-            subtitle={hardwareConfig.subtitle}
-          />
-
           <Box
             sx={{
-              display: "grid",
-
-              gridTemplateColumns: {
-                xs: "1fr",
-
-                sm: "repeat(2, minmax(0, 1fr))",
-
-                lg: "repeat(4, minmax(0, 1fr))",
+              width: "100%",
+              maxWidth: {
+                xs: "100%",
+                xl: 1320,
               },
-
-              gap: {
-                xs: 1.5,
-                md: 2,
-              },
-            }}
-          >
-            <MetricCard
-              icon={<FaClipboardCheck />}
-
-              iconBg={colors.greenSoft}
-
-              iconColor={colors.green}
-
-              label="Ventas registradas"
-
-              value={sales.length.toString()}
-
-              detail={`Total: ${formatCurrency(totalSold)}`}
-            />
-
-            <MetricCard
-              icon={<FaBoxes />}
-
-              iconBg={colors.primarySoft}
-
-              iconColor={colors.primaryLight}
-
-              label="Productos en stock"
-
-              value={totalStock.toString()}
-
-              detail={`${products.length} productos activos`}
-            />
-
-            <MetricCard
-              icon={<FaExclamationTriangle />}
-
-              iconBg={colors.dangerSoft}
-
-              iconColor={colors.danger}
-
-              label="Bajo inventario"
-
-              value={lowStockCount.toString()}
-
-              detail="Requieren revisión"
-            />
-
-            <MetricCard
-              icon={<FaRegClock />}
-
-              iconBg={colors.blueSoft}
-
-              iconColor={colors.blue}
-
-              label="Tiempo en caja"
-
-              value="2m 11s"
-
-              detail="Atención promedio"
-            />
-          </Box>
-
-          <Box
-            sx={{
-              display: "grid",
-
-              gridTemplateColumns: {
-                xs: "1fr",
-
-                lg: "minmax(0, 2fr) minmax(340px, 1fr)",
-              },
-
+              mx: "auto",
+              display: "flex",
+              flexDirection: "column",
               gap: {
                 xs: 2,
-                md: 2.5,
+                md: 3,
               },
-
-              alignItems: "start",
-
-              width: "100%",
-
-              minWidth: 0,
             }}
           >
-            <HardwareInventory
-              products={products}
-
-              onAddProduct={() => {
-                setIsAddProductModalOpen(true);
-              }}
-
-              onEditProduct={handleEditProduct}
+            <HardwareWorkspaceHero
+              badge={hardwareConfig.badge}
+              title={hardwareConfig.title}
+              subtitle={hardwareConfig.subtitle}
             />
 
-            <SectionCard
+            <Box
               sx={{
-                height: "100%",
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "repeat(2, minmax(0, 1fr))",
+                  lg: "repeat(4, minmax(0, 1fr))",
+                },
+                gap: {
+                  xs: 1.5,
+                  md: 2,
+                },
               }}
             >
-              <RegisterSaleCard
-                products={products}
-
-                selectedProduct={selectedProduct}
-
-                selectedProductId={selectedProductId}
-
-                quantity={quantity}
-
-                numericQuantity={numericQuantity}
-
-                paymentMethod={paymentMethod}
-
-                paymentMethods={paymentMethods}
-
-                saleTotal={saleTotal}
-
-                error={error}
-
-                onSelectedProductChange={setSelectedProductId}
-
-                onQuantityChange={setQuantity}
-
-                onPaymentMethodChange={setPaymentMethod}
-
-                onRegisterSale={handleRegisterSale}
+              <MetricCard
+                icon={<FaClipboardCheck />}
+                iconBg={colors.greenSoft}
+                iconColor={colors.green}
+                label="Ventas registradas"
+                value={sales.length.toString()}
+                detail={`Total: ${formatCurrency(totalSold)}`}
               />
-            </SectionCard>
+
+              <MetricCard
+                icon={<FaBoxes />}
+                iconBg={colors.primarySoft}
+                iconColor={colors.primaryLight}
+                label="Productos en stock"
+                value={totalStock.toString()}
+                detail={`${products.length} productos activos`}
+              />
+
+              <MetricCard
+                icon={<FaExclamationTriangle />}
+                iconBg={colors.dangerSoft}
+                iconColor={colors.danger}
+                label="Bajo inventario"
+                value={lowStockCount.toString()}
+                detail="Requieren revisión"
+              />
+
+              <MetricCard
+                icon={<FaRegClock />}
+                iconBg={colors.blueSoft}
+                iconColor={colors.blue}
+                label="Tiempo en caja"
+                value="2m 11s"
+                detail="Atención promedio"
+              />
+            </Box>
+
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  lg: "minmax(0, 2fr) minmax(340px, 1fr)",
+                },
+                gap: {
+                  xs: 2,
+                  md: 2.5,
+                },
+                alignItems: "start",
+                width: "100%",
+                minWidth: 0,
+              }}
+            >
+              <HardwareInventory
+                products={products}
+                onAddProduct={() => {
+                  setIsAddProductModalOpen(true);
+                }}
+                onEditProduct={handleEditProduct}
+              />
+
+              <SectionCard
+                sx={{
+                  height: "100%",
+                }}
+              >
+                <RegisterSaleCard
+                  products={products}
+                  selectedProduct={selectedProduct}
+                  selectedProductId={selectedProductId}
+                  quantity={quantity}
+                  numericQuantity={numericQuantity}
+                  paymentMethod={paymentMethod}
+                  paymentMethods={paymentMethods}
+                  saleTotal={saleTotal}
+                  error={error}
+                  onSelectedProductChange={setSelectedProductId}
+                  onQuantityChange={setQuantity}
+                  onPaymentMethodChange={setPaymentMethod}
+                  onRegisterSale={handleRegisterSale}
+                />
+              </SectionCard>
+            </Box>
+
+            <SalesHistoryTable
+              sales={sales}
+              totalSold={totalSold}
+              isLoading={isLoadingSales}
+              isError={isSalesError}
+              title="Historial de ventas"
+              subtitle="Productos vendidos, cantidades, precios y métodos de pago"
+              productIcon={<FaWrench size={13} />}
+              getRecordLabel={(sale) => `Venta #${sale.id.slice(-4).toUpperCase()}`}
+              getQuantityLabel={(sale) => `${sale.quantity}`}
+              getProductSecondaryText={() => "Producto de ferretería"}
+              colors={{
+                primary: colors.primary,
+                primarySoft: colors.primarySoft,
+                border: colors.cardBorder,
+                text: colors.text,
+                muted: colors.muted,
+                tableHead: colors.tableHead,
+                rowHover: "#fff7ed",
+                paymentBg: colors.greenSoft,
+                paymentText: colors.green,
+                paymentBorder: "#bbf7d0",
+              }}
+            />
           </Box>
-
-          <SalesHistoryTable
-            sales={sales}
-
-            totalSold={totalSold}
-
-            isLoading={isLoadingSales}
-
-            isError={isSalesError}
-
-            title="Historial de ventas"
-
-            subtitle="Productos vendidos, cantidades, precios y métodos de pago"
-
-            productIcon={<FaWrench size={13} />}
-
-            getRecordLabel={(sale) => `Venta #${sale.id.slice(-4).toUpperCase()}`}
-
-            getQuantityLabel={(sale) => `${sale.quantity}`}
-
-            getProductSecondaryText={() => "Producto de ferretería"}
-
-            colors={{
-              primary: colors.primary,
-
-              primarySoft: colors.primarySoft,
-
-              border: colors.cardBorder,
-
-              text: colors.text,
-
-              muted: colors.muted,
-
-              tableHead: colors.tableHead,
-
-              rowHover: "#fff7ed",
-
-              paymentBg: colors.greenSoft,
-
-              paymentText: colors.green,
-
-              paymentBorder: "#bbf7d0",
-            }}
-          />
         </Box>
-      </Box>
+      )}
 
       <AddHardwareProductModal
         open={isAddProductModalOpen}
-
         onClose={() => {
           if (!isCreatingProduct) {
             setIsAddProductModalOpen(false);
           }
         }}
-
         onSave={handleAddProduct}
       />
     </AppShell>

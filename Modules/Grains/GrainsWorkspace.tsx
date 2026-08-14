@@ -40,6 +40,7 @@ import { HeroHeader } from "./components/HeroHeader";
 import { MetricCard } from "./components/MetricCard";
 
 import { SectionCard } from "./components/SectionCard";
+import { LoadingState } from "@/components/LoadingState";
 
 type GrainSale = {
   id: string;
@@ -110,13 +111,15 @@ const formatCurrency = (value: number): string => {
 };
 
 export function GrainsWorkspace() {
-  const { data: grainProducts = [] } = useGrainProducts();
+  const { data: grainProducts = [], isLoading: isLoadingProducts } = useGrainProducts();
 
   const { data: apiSales = [], isLoading: isLoadingSales, isError: isSalesError } = useGrainSales();
 
   const { mutateAsync: createGrainProduct, isPending: isCreatingProduct } = useCreateGrainProduct();
 
   const { mutateAsync: registerGrainSale } = useRegisterGrainSale();
+
+  const isLoading = isLoadingProducts || isLoadingSales;
 
   const [selectedProductId, setSelectedProductId] = useState("");
 
@@ -336,228 +339,159 @@ export function GrainsWorkspace() {
 
   return (
     <AppShell active={grainsConfig.category}>
-      <Box
-        sx={{
-          width: "100%",
-
-          minHeight: "calc(100vh - 48px)",
-
-          px: {
-            xs: 2,
-            md: 4,
-          },
-
-          py: {
-            xs: 2.5,
-            md: 3,
-          },
-
-          bgcolor: colors.pageBg,
-
-          color: colors.text,
-        }}
-      >
+      {isLoading ? (
+        <LoadingState message="Cargando módulo de granos..." />
+      ) : (
         <Box
           sx={{
             width: "100%",
-
-            maxWidth: 1440,
-
-            mx: "auto",
-
-            display: "flex",
-
-            flexDirection: "column",
-
-            gap: 3,
+            minHeight: "calc(100vh - 48px)",
+            px: {
+              xs: 2,
+              md: 4,
+            },
+            py: {
+              xs: 2.5,
+              md: 3,
+            },
+            bgcolor: colors.pageBg,
+            color: colors.text,
           }}
         >
-          <HeroHeader />
-
           <Box
             sx={{
-              display: "grid",
-
-              gridTemplateColumns: {
-                xs: "1fr",
-
-                sm: "repeat(2, minmax(0, 1fr))",
-
-                lg: "repeat(4, minmax(0, 1fr))",
-              },
-
-              gap: 2.5,
-            }}
-          >
-            <MetricCard
-              icon={<FaFileInvoiceDollar />}
-
-              iconBg={colors.primarySoft}
-
-              iconColor={colors.primaryLight}
-
-              label="Ventas registradas"
-
-              value={sales.length.toString()}
-
-              detail={`Total: ${formatCurrency(totalSold)}`}
-            />
-
-            <MetricCard
-              icon={<FaBoxes />}
-
-              iconBg={colors.primarySoft}
-
-              iconColor={colors.primaryLight}
-
-              label="Productos en stock"
-
-              value={totalInventory.toString()}
-
-              detail={`${products.length} productos activos`}
-            />
-
-            <MetricCard
-              icon={<FaExclamationTriangle />}
-
-              iconBg={colors.orangeSoft}
-
-              iconColor={colors.orange}
-
-              label="Bajo inventario"
-
-              value={lowStockCount.toString()}
-
-              detail="Requieren revisión"
-            />
-
-            <MetricCard
-              icon={<FaRegClock />}
-
-              iconBg={colors.primarySoft}
-
-              iconColor={colors.primaryLight}
-
-              label="Tiempo en caja"
-
-              value={averageCheckoutTime}
-
-              detail="Atención promedio"
-            />
-          </Box>
-
-          <Box
-            sx={{
-              display: "grid",
-
-              gridTemplateColumns: {
-                xs: "1fr",
-
-                lg: "minmax(0, 2fr) minmax(340px, 1fr)",
-              },
-
-              gap: {
-                xs: 2,
-                md: 2.5,
-              },
-
-              alignItems: "start",
-
               width: "100%",
-
-              minWidth: 0,
+              maxWidth: 1440,
+              mx: "auto",
+              display: "flex",
+              flexDirection: "column",
+              gap: 3,
             }}
           >
-            <GrainInventory
-              products={products}
+            <HeroHeader />
 
-              onAddProduct={() => {
-                setIsAddGrainOpen(true);
-              }}
-
-              onEditProduct={handleEditProduct}
-            />
-
-            <SectionCard
+            <Box
               sx={{
-                height: "100%",
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "repeat(2, minmax(0, 1fr))",
+                  lg: "repeat(4, minmax(0, 1fr))",
+                },
+                gap: 2.5,
               }}
             >
-              <RegisterSaleCard
-                products={products}
-
-                selectedProduct={selectedProduct}
-
-                selectedProductId={activeSelectedProductId}
-
-                quantity={quantity}
-
-                numericQuantity={numericQuantity}
-
-                paymentMethod={paymentMethod}
-
-                paymentMethods={paymentMethods}
-
-                saleTotal={saleTotal}
-
-                error={error}
-
-                onSelectedProductChange={setSelectedProductId}
-
-                onQuantityChange={setQuantity}
-
-                onPaymentMethodChange={setPaymentMethod}
-
-                onRegisterSale={handleRegisterSale}
+              <MetricCard
+                icon={<FaFileInvoiceDollar />}
+                iconBg={colors.primarySoft}
+                iconColor={colors.primaryLight}
+                label="Ventas registradas"
+                value={sales.length.toString()}
+                detail={`Total: ${formatCurrency(totalSold)}`}
               />
-            </SectionCard>
+
+              <MetricCard
+                icon={<FaBoxes />}
+                iconBg={colors.primarySoft}
+                iconColor={colors.primaryLight}
+                label="Productos en stock"
+                value={totalInventory.toString()}
+                detail={`${products.length} productos activos`}
+              />
+
+              <MetricCard
+                icon={<FaExclamationTriangle />}
+                iconBg={colors.orangeSoft}
+                iconColor={colors.orange}
+                label="Bajo inventario"
+                value={lowStockCount.toString()}
+                detail="Requieren revisión"
+              />
+
+              <MetricCard
+                icon={<FaRegClock />}
+                iconBg={colors.primarySoft}
+                iconColor={colors.primaryLight}
+                label="Tiempo en caja"
+                value={averageCheckoutTime}
+                detail="Atención promedio"
+              />
+            </Box>
+
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  lg: "minmax(0, 2fr) minmax(340px, 1fr)",
+                },
+                gap: {
+                  xs: 2,
+                  md: 2.5,
+                },
+                alignItems: "start",
+                width: "100%",
+                minWidth: 0,
+              }}
+            >
+              <GrainInventory
+                products={products}
+                onAddProduct={() => {
+                  setIsAddGrainOpen(true);
+                }}
+                onEditProduct={handleEditProduct}
+              />
+
+              <SectionCard
+                sx={{
+                  height: "100%",
+                }}
+              >
+                <RegisterSaleCard
+                  products={products}
+                  selectedProduct={selectedProduct}
+                  selectedProductId={activeSelectedProductId}
+                  quantity={quantity}
+                  numericQuantity={numericQuantity}
+                  paymentMethod={paymentMethod}
+                  paymentMethods={paymentMethods}
+                  saleTotal={saleTotal}
+                  error={error}
+                  onSelectedProductChange={setSelectedProductId}
+                  onQuantityChange={setQuantity}
+                  onPaymentMethodChange={setPaymentMethod}
+                  onRegisterSale={handleRegisterSale}
+                />
+              </SectionCard>
+            </Box>
+
+            <SalesHistoryTable
+              sales={sales}
+              totalSold={totalSold}
+              isLoading={isLoadingSales}
+              isError={isSalesError}
+              title="Historial de transacciones"
+              subtitle="Últimas ventas registradas en el módulo de granos"
+              productIcon={<FaSeedling size={13} />}
+              getRecordLabel={(sale) => `Venta #${sale.id.slice(-4).toUpperCase()}`}
+              getQuantityLabel={(sale) => `${sale.quantity} ${sale.unit}`}
+              getProductSecondaryText={() => "Producto vendido"}
+              colors={{
+                border: colors.cardBorder,
+                text: colors.text,
+                muted: colors.muted,
+                primary: colors.orange,
+                primarySoft: colors.orangeSoft,
+                tableHead: colors.tableHead,
+                rowHover: "#f0fdf4",
+                paymentBg: colors.primarySoft,
+                paymentText: colors.primary,
+                paymentBorder: "#bbf7d0",
+              }}
+            />
           </Box>
-
-          <SalesHistoryTable
-            sales={sales}
-
-            totalSold={totalSold}
-
-            isLoading={isLoadingSales}
-
-            isError={isSalesError}
-
-            title="Historial de transacciones"
-
-            subtitle="Últimas ventas registradas en el módulo de granos"
-
-            productIcon={<FaSeedling size={13} />}
-
-            getRecordLabel={(sale) => `Venta #${sale.id.slice(-4).toUpperCase()}`}
-
-            getQuantityLabel={(sale) => `${sale.quantity} ${sale.unit}`}
-
-            getProductSecondaryText={() => "Producto vendido"}
-
-            colors={{
-              border: colors.cardBorder,
-
-              text: colors.text,
-
-              muted: colors.muted,
-
-              primary: colors.orange,
-
-              primarySoft: colors.orangeSoft,
-
-              tableHead: colors.tableHead,
-
-              rowHover: "#f0fdf4",
-
-              paymentBg: colors.primarySoft,
-
-              paymentText: colors.primary,
-
-              paymentBorder: "#bbf7d0",
-            }}
-          />
         </Box>
-      </Box>
+      )}
 
       <AddGrainModal
         open={isAddGrainOpen}

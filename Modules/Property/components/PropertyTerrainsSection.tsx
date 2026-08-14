@@ -6,6 +6,7 @@ import { PropertyCard } from "@/components/PropertyCard";
 import { type PropertyItem } from "../propertyWorkspaceData";
 import { PropertySectionCard } from "./PropertySectionCard";
 import { PropertySectionHeader } from "./PropertySectionHeader";
+import { EmptyState } from "@/components/EmptyState";
 
 type PropertyTerrainsSectionProps = {
   properties: PropertyItem[];
@@ -74,27 +75,35 @@ export function PropertyTerrainsSection({
           },
         }}
       >
-        <Box sx={scrollAreaSx}>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "minmax(0, 1fr)",
-                md: "repeat(2, minmax(0, 1fr))",
-              },
-              gap: {
-                xs: 1.5,
-                md: 2,
-              },
-              width: "100%",
-              minWidth: 0,
-            }}
-          >
-            {properties.map((property) => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
+        {properties.length === 0 ? (
+          <EmptyState
+            title="No hay terrenos registrados"
+            description="Agrega un terreno para comenzar a gestionar tus propiedades."
+            icon={<FaMapMarkedAlt size={40} />}
+          />
+        ) : (
+          <Box sx={scrollAreaSx}>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "minmax(0, 1fr)",
+                  md: "repeat(2, minmax(0, 1fr))",
+                },
+                gap: {
+                  xs: 1.5,
+                  md: 2,
+                },
+                width: "100%",
+                minWidth: 0,
+              }}
+            >
+              {properties.map((property) => (
+                <PropertyCard key={property.id} property={property} />
+              ))}
+            </Box>
           </Box>
-        </Box>
+        )}
       </Box>
     </PropertySectionCard>
   );

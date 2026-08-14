@@ -36,6 +36,7 @@ import {
   usePropertyPayments,
   useRegisterPropertyPayment,
 } from "@/hook/useProperties";
+import { LoadingState } from "@/components/LoadingState";
 
 export function PropertyWorkspace() {
   const {
@@ -54,6 +55,8 @@ export function PropertyWorkspace() {
 
   const { mutateAsync: registerPropertyPayment, isPending: isRegisteringPayment } =
     useRegisterPropertyPayment();
+
+  const isLoading = isLoadingProperties || isLoadingPayments;
 
   const [selectedPropertyId, setSelectedPropertyId] = useState("");
 
@@ -390,144 +393,112 @@ export function PropertyWorkspace() {
 
   return (
     <AppShell active={propertyConfig.category}>
-      <Box
-        sx={{
-          width: "100%",
-
-          maxWidth: "100vw",
-
-          minHeight: "calc(100vh - 48px)",
-
-          overflowX: "hidden",
-
-          px: {
-            xs: 1.5,
-            sm: 2,
-            md: 4,
-          },
-
-          py: {
-            xs: 2,
-            md: 3,
-          },
-
-          bgcolor: colors.pageBg,
-
-          color: colors.text,
-        }}
-      >
+      {isLoading ? (
+        <LoadingState message="Cargando módulo de propiedades..." />
+      ) : (
         <Box
           sx={{
             width: "100%",
-
-            maxWidth: {
-              xs: "100%",
-              xl: 1320,
+            maxWidth: "100vw",
+            minHeight: "calc(100vh - 48px)",
+            overflowX: "hidden",
+            px: {
+              xs: 1.5,
+              sm: 2,
+              md: 4,
             },
-
-            mx: "auto",
-
-            display: "flex",
-
-            flexDirection: "column",
-
-            gap: {
+            py: {
               xs: 2,
               md: 3,
             },
+            bgcolor: colors.pageBg,
+            color: colors.text,
           }}
         >
-          <PropertyHeroHeader
-            badge={propertyConfig.badge}
-            title={propertyConfig.title}
-            subtitle={propertyConfig.subtitle}
-          />
-
-          <PropertyMetricsGrid metrics={metrics} />
-
           <Box
             sx={{
-              display: "grid",
-
-              gridTemplateColumns: {
-                xs: "1fr",
-
-                lg: "minmax(0, 2fr) minmax(340px, 1fr)",
+              width: "100%",
+              maxWidth: {
+                xs: "100%",
+                xl: 1320,
               },
-
+              mx: "auto",
+              display: "flex",
+              flexDirection: "column",
               gap: {
                 xs: 2,
-                md: 2.5,
+                md: 3,
               },
-
-              alignItems: "start",
-
-              width: "100%",
-
-              minWidth: 0,
             }}
           >
-            <PropertyTerrainsSection
-              properties={properties}
-              onAddProperty={() => {
-                setIsPropertyDialogOpen(true);
-              }}
+            <PropertyHeroHeader
+              badge={propertyConfig.badge}
+              title={propertyConfig.title}
+              subtitle={propertyConfig.subtitle}
             />
 
-            <PropertyPaymentSection
-              selectedProperty={selectedProperty}
+            <PropertyMetricsGrid metrics={metrics} />
 
-              properties={properties}
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  lg: "minmax(0, 2fr) minmax(340px, 1fr)",
+                },
+                gap: {
+                  xs: 2,
+                  md: 2.5,
+                },
+                alignItems: "start",
+                width: "100%",
+                minWidth: 0,
+              }}
+            >
+              <PropertyTerrainsSection
+                properties={properties}
+                onAddProperty={() => {
+                  setIsPropertyDialogOpen(true);
+                }}
+              />
 
-              selectedPropertyId={selectedPropertyId}
+              <PropertyPaymentSection
+                selectedProperty={selectedProperty}
+                properties={properties}
+                selectedPropertyId={selectedPropertyId}
+                paymentAmount={paymentAmount}
+                paymentMethod={paymentMethod}
+                paymentMethods={paymentMethods}
+                paymentNote={paymentNote}
+                error={error}
+                onSelectedPropertyChange={setSelectedPropertyId}
+                onPaymentAmountChange={setPaymentAmount}
+                onPaymentMethodChange={setPaymentMethod}
+                onPaymentNoteChange={setPaymentNote}
+                onRegisterPayment={handleRegisterPayment}
+              />
+            </Box>
 
-              paymentAmount={paymentAmount}
+            <PaymentHistoryTable
+              payments={payments}
+              totalPaid={totalPaid}
+              isLoading={isLoadingPayments}
+              isError={isPaymentsError}
+              onDownload={handleDownloadPayments}
+            />
 
-              paymentMethod={paymentMethod}
-
-              paymentMethods={paymentMethods}
-
-              paymentNote={paymentNote}
-
-              error={error}
-
-              onSelectedPropertyChange={setSelectedPropertyId}
-
-              onPaymentAmountChange={setPaymentAmount}
-
-              onPaymentMethodChange={setPaymentMethod}
-
-              onPaymentNoteChange={setPaymentNote}
-
-              onRegisterPayment={handleRegisterPayment}
+            <AddPropertyModal
+              open={isPropertyDialogOpen}
+              onClose={() => {
+                if (!isCreatingProperty) {
+                  setIsPropertyDialogOpen(false);
+                }
+              }}
+              onSave={handleCreateProperty}
             />
           </Box>
-
-          <PaymentHistoryTable
-            payments={payments}
-
-            totalPaid={totalPaid}
-
-            isLoading={isLoadingPayments}
-
-            isError={isPaymentsError}
-
-            onDownload={handleDownloadPayments}
-          />
-
-          <AddPropertyModal
-            open={isPropertyDialogOpen}
-
-            onClose={() => {
-              if (!isCreatingProperty) {
-                setIsPropertyDialogOpen(false);
-              }
-            }}
-
-            onSave={handleCreateProperty}
-          />
         </Box>
-      </Box>
+      )}
     </AppShell>
   );
 }
