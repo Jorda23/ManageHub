@@ -351,16 +351,13 @@ export function HardwareWorkspace() {
         <Box
           sx={{
             width: "100%",
-            maxWidth: "100vw",
             minHeight: "calc(100vh - 48px)",
-            overflowX: "hidden",
             px: {
-              xs: 1.5,
-              sm: 2,
+              xs: 2,
               md: 4,
             },
             py: {
-              xs: 2,
+              xs: 2.5,
               md: 3,
             },
             bgcolor: colors.pageBg,
@@ -370,17 +367,11 @@ export function HardwareWorkspace() {
           <Box
             sx={{
               width: "100%",
-              maxWidth: {
-                xs: "100%",
-                xl: 1320,
-              },
+              maxWidth: 1440,
               mx: "auto",
               display: "flex",
               flexDirection: "column",
-              gap: {
-                xs: 2,
-                md: 3,
-              },
+              gap: 3,
             }}
           >
             <HardwareWorkspaceHero
@@ -395,7 +386,7 @@ export function HardwareWorkspace() {
                 gridTemplateColumns: {
                   xs: "1fr",
                   sm: "repeat(2, minmax(0, 1fr))",
-                  lg: "repeat(4, minmax(0, 1fr))",
+                  lg: "repeat(3, minmax(0, 1fr))",
                 },
                 gap: {
                   xs: 1.5,
@@ -428,15 +419,6 @@ export function HardwareWorkspace() {
                 label="Bajo inventario"
                 value={lowStockCount.toString()}
                 detail="Requieren revisión"
-              />
-
-              <MetricCard
-                icon={<FaRegClock />}
-                iconBg={colors.blueSoft}
-                iconColor={colors.blue}
-                label="Tiempo en caja"
-                value="2m 11s"
-                detail="Atención promedio"
               />
             </Box>
 

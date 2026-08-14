@@ -376,7 +376,7 @@ export function GrainsWorkspace() {
                 gridTemplateColumns: {
                   xs: "1fr",
                   sm: "repeat(2, minmax(0, 1fr))",
-                  lg: "repeat(4, minmax(0, 1fr))",
+                  lg: "repeat(3, minmax(0, 1fr))",
                 },
                 gap: 2.5,
               }}
@@ -406,15 +406,6 @@ export function GrainsWorkspace() {
                 label="Bajo inventario"
                 value={lowStockCount.toString()}
                 detail="Requieren revisión"
-              />
-
-              <MetricCard
-                icon={<FaRegClock />}
-                iconBg={colors.primarySoft}
-                iconColor={colors.primaryLight}
-                label="Tiempo en caja"
-                value={averageCheckoutTime}
-                detail="Atención promedio"
               />
             </Box>
 

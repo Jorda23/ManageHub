@@ -399,16 +399,13 @@ export function PropertyWorkspace() {
         <Box
           sx={{
             width: "100%",
-            maxWidth: "100vw",
             minHeight: "calc(100vh - 48px)",
-            overflowX: "hidden",
             px: {
-              xs: 1.5,
-              sm: 2,
+              xs: 2,
               md: 4,
             },
             py: {
-              xs: 2,
+              xs: 2.5,
               md: 3,
             },
             bgcolor: colors.pageBg,
@@ -418,17 +415,11 @@ export function PropertyWorkspace() {
           <Box
             sx={{
               width: "100%",
-              maxWidth: {
-                xs: "100%",
-                xl: 1320,
-              },
+              maxWidth: 1440,
               mx: "auto",
               display: "flex",
               flexDirection: "column",
-              gap: {
-                xs: 2,
-                md: 3,
-              },
+              gap: 3,
             }}
           >
             <PropertyHeroHeader
