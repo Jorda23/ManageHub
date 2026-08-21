@@ -19,7 +19,7 @@ import {
   getPendingAmount,
   getStatusColors,
   type PropertyItem,
-} from "@/Modules/Property/propertyWorkspaceData";
+} from "@/layouts/Property/propertyWorkspaceData";
 
 type PropertyCardProps = {
   property: PropertyItem;

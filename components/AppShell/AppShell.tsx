@@ -57,7 +57,8 @@ const shellColors = {
   navText: "#334155",
   navIcon: "#64748b",
 };
-export default function AppShell({ children, active }: AppShellProps) {
+
+export const AppShell = ({ children, active }: AppShellProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const closeMobileMenu = () => {
@@ -152,7 +153,7 @@ export default function AppShell({ children, active }: AppShellProps) {
       </Drawer>
     </Box>
   );
-}
+};
 
 function MobileTopbar({ onOpenMenu }: { onOpenMenu: () => void }) {
   return (

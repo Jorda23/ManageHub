@@ -10,7 +10,7 @@ import { FaPlus, FaSeedling } from "react-icons/fa";
 
 import { FormModal } from "../FormModal";
 import { ModalField } from "../ModalField";
-import { ImageUploadField } from "../WorkspaceShared/ImageUploadField";
+import { ImageUploadField } from "../ImageUploadField/ImageUploadField";
 
 export type AddGrainFormValues = {
   name: string;

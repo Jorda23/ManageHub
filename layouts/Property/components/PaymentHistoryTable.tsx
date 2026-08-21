@@ -18,12 +18,7 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import { FaDownload, FaHome, FaSearch, FaSyncAlt, FaTimes } from "react-icons/fa";
 
 import { buildCsvContent, downloadCsvFile } from "@/components/WorkspaceShared/csvDownload";
-
-import {
-  colors,
-  formatCurrency,
-  type PaymentRecord,
-} from "@/Modules/Property/propertyWorkspaceData";
+import { colors, formatCurrency, PaymentRecord } from "../propertyWorkspaceData";
 
 type PaymentFilters = {
   search: string;

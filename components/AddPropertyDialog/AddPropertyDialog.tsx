@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 
-import { ImageUploadField } from "../WorkspaceShared/ImageUploadField";
+import { ImageUploadField } from "../ImageUploadField/ImageUploadField";
 
 export type PropertyForm = {
   name: string;

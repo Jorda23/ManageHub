@@ -27,7 +27,6 @@ import {
   FaTruckLoading,
 } from "react-icons/fa";
 
-import AppShell from "@/components/AppShell/AppShell";
 import { saleCategories, type SaleCategory } from "@/components/SaleWorkspace/saleWorkspaceData";
 import type {
   IconType,
@@ -36,6 +35,7 @@ import type {
   WorkspaceProduct,
   WorkspacePayment,
 } from "./workspaceTypes";
+import { AppShell } from "../AppShell";
 
 type WorkspaceLayoutProps = {
   config: WorkspaceConfig;

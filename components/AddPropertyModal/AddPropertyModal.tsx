@@ -10,7 +10,7 @@ import { FaBuilding, FaPlusCircle } from "react-icons/fa";
 
 import { FormModal } from "../FormModal";
 import { ModalField } from "../ModalField";
-import { ImageUploadField } from "../WorkspaceShared/ImageUploadField";
+import { ImageUploadField } from "../ImageUploadField/ImageUploadField";
 
 export type AddPropertyFormValues = {
   name: string;
@@ -22,6 +22,7 @@ export type AddPropertyFormValues = {
   initialPayment: string;
   nextPaymentDate: string;
   imageUrl: string;
+  rucImageUrl: string;
 };
 
 type AddPropertyFormErrors = Partial<Record<keyof AddPropertyFormValues, string>>;
@@ -51,6 +52,7 @@ const initialValues: AddPropertyFormValues = {
   initialPayment: "",
   nextPaymentDate: "",
   imageUrl: "",
+  rucImageUrl: "",
 };
 
 export function AddPropertyModal({ open, onClose, onSave }: Readonly<AddPropertyModalProps>) {
@@ -160,6 +162,7 @@ export function AddPropertyModal({ open, onClose, onSave }: Readonly<AddProperty
       initialPayment: values.initialPayment.trim() || "0",
       nextPaymentDate: values.nextPaymentDate,
       imageUrl: values.imageUrl.trim(),
+      rucImageUrl: values.rucImageUrl.trim(),
     };
 
     try {
@@ -177,7 +180,7 @@ export function AddPropertyModal({ open, onClose, onSave }: Readonly<AddProperty
     <FormModal
       open={open}
       title="Agregar propiedad"
-      description="Registra el terreno o propiedad y su información de pago."
+      description="Registra el terreno o propiedad, los datos del propietario y su información de pago."
       icon={<FaBuilding size={18} />}
       submitLabel="Guardar propiedad"
       submitIcon={<FaPlusCircle size={12} />}
@@ -298,6 +301,17 @@ export function AddPropertyModal({ open, onClose, onSave }: Readonly<AddProperty
             disabled={isSubmitting}
             fullWidth
             sx={fieldStyles}
+          />
+        </ModalField>
+
+        <ModalField label="Documento RUC" htmlFor="property-ruc-image">
+          <ImageUploadField
+            label="Foto del RUC"
+            value={values.rucImageUrl}
+            disabled={isSubmitting}
+            onChange={(imageUrl) => {
+              updateField("rucImageUrl", imageUrl);
+            }}
           />
         </ModalField>
 

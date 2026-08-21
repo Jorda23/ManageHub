@@ -27,8 +27,7 @@ import type {
   DashboardResponse,
   DashboardSummary,
 } from "@/types/api.types";
-
-import AppShell from "../AppShell/AppShell";
+import { AppShell } from "../AppShell";
 
 type MetricTone = "success" | "danger" | "warning" | "info";
 

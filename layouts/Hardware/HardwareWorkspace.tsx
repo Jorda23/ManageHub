@@ -1,52 +1,44 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import {
-  FaBoxes,
-  FaExclamationTriangle,
-  FaFileInvoiceDollar,
-  FaRegClock,
-  FaSeedling,
-} from "react-icons/fa";
+import { FaBoxes, FaClipboardCheck, FaExclamationTriangle, FaWrench } from "react-icons/fa";
 
 import { Box } from "@mui/material";
 
-import AppShell from "@/components/AppShell/AppShell";
+import {
+  useCreateHardwareProduct,
+  useHardwareProducts,
+  useHardwareSales,
+  useRegisterHardwareSale,
+} from "@/hook/useHardware";
 
-import { AddGrainModal, type AddGrainFormValues } from "@/components/AddGrainModal";
+import { hardwareColors } from "@/theme/sharedColors";
 
-import { GrainInventory, type GrainProduct } from "@/components/GrainInventory";
-
-import { RegisterSaleCard } from "@/components/RegisterSaleCard";
-
-import { SalesHistoryTable } from "@/components/SalesHistoryTable";
-
+import type { HardwareSale as ApiHardwareSale } from "@/types/api.types";
 import type { WorkspaceConfig } from "@/components/WorkspaceShared/workspaceTypes";
 
 import {
-  useCreateGrainProduct,
-  useGrainProducts,
-  useGrainSales,
-  useRegisterGrainSale,
-} from "@/hook/useGrains";
+  AddHardwareProductModal,
+  type AddHardwareProductValues,
+} from "@/components/AddHardwareProductModal";
 
-import type { GrainSale as ApiGrainSale } from "@/types/api.types";
+import { HardwareInventory, type HardwareProduct } from "@/components/HardwareInventory";
 
-import { grainsColors } from "@/theme/sharedColors";
+import {
+  LoadingState,
+  MetricCard,
+  SectionCard,
+  RegisterSaleCard,
+  SalesHistoryTable,
+  AppShell,
+} from "@/components";
+import { HardwareWorkspaceHero } from "./components/HardwareWorkspaceHero";
 
-import { HeroHeader } from "./components/HeroHeader";
-
-import { MetricCard } from "./components/MetricCard";
-
-import { SectionCard } from "./components/SectionCard";
-import { LoadingState } from "@/components/LoadingState";
-
-type GrainSale = {
+type HardwareSale = {
   id: string;
   productId: string;
   productName: string;
-  unit: string;
   quantity: number;
   unitPrice: number;
   total: number;
@@ -54,39 +46,39 @@ type GrainSale = {
   date: string;
 };
 
-export const colors = grainsColors;
+export const colors = hardwareColors;
 
-export const grainsConfig: WorkspaceConfig = {
-  category: "grains",
+const hardwareConfig: WorkspaceConfig = {
+  category: "hardware",
 
-  badge: "Módulo de Ventas",
+  badge: "Ferretería",
 
-  title: "Ventas de Granos Básicos",
+  title: "Ventas de Ferretería",
 
-  subtitle: "Inventario independiente para granos, ventas por libra, saco, quintal o kilogramo.",
+  subtitle: "Control de productos, cantidades, precios, inventario e historial de ventas.",
 
-  heroAccent: "#5ee3a7",
+  heroAccent: "#f59e0b",
 
-  heroSecondary: "#f59e0b",
+  heroSecondary: "#19d3d8",
 
-  invoice: "#GRN-2026-082",
+  invoice: "#FER-2026-014",
 
-  customer: "Alex Rivera",
+  customer: "Carlos Mendoza",
 
-  customerEmail: "alex.rivera@assethub.com",
+  customerEmail: "carlos.mendoza@assethub.com",
 
-  agent: "Jordan P.",
+  agent: "M. Torres",
 
-  terminal: "Bodega Granos 01",
+  terminal: "Caja Ferretería 01",
 
   customerMode: "quick",
 
-  summaryLabel: "Comprobante de venta",
+  summaryLabel: "Ticket de venta",
 
-  summaryTotal: "$58.32",
+  summaryTotal: "$124.90",
 
   summaryNote:
-    "Módulo independiente para controlar inventario, ventas e historial de granos básicos.",
+    "Módulo para ventas rápidas de productos de ferretería, control de stock e historial.",
 
   metrics: [],
 
@@ -96,12 +88,16 @@ export const grainsConfig: WorkspaceConfig = {
 
   salesAnalysis: [],
 
-  workflowTitle: "Flujo granos básicos",
+  workflowTitle: "Flujo ferretería",
 
-  workflowItems: [],
+  workflowItems: [
+    "Seleccionar productos del inventario",
+    "Verificar cantidades y precios",
+    "Cobrar y generar recibo",
+  ],
 };
 
-const paymentMethods = ["Efectivo", "Tarjeta", "Transferencia"];
+const paymentMethods = ["Efectivo", "Tarjeta", "Crédito local", "Transferencia"];
 
 const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat("es-US", {
@@ -110,16 +106,24 @@ const formatCurrency = (value: number): string => {
   }).format(value);
 };
 
-export function GrainsWorkspace() {
-  const { data: grainProducts = [], isLoading: isLoadingProducts } = useGrainProducts();
+export function HardwareWorkspace() {
+  const {
+    data: hardwareProducts = [],
+    isLoading: isLoadingProducts,
+    isError: isProductsError,
+  } = useHardwareProducts();
 
-  const { data: apiSales = [], isLoading: isLoadingSales, isError: isSalesError } = useGrainSales();
+  const {
+    data: apiSales = [],
+    isLoading: isLoadingSales,
+    isError: isSalesError,
+  } = useHardwareSales();
 
-  const { mutateAsync: createGrainProduct, isPending: isCreatingProduct } = useCreateGrainProduct();
+  const { mutateAsync: createHardwareProduct, isPending: isCreatingProduct } =
+    useCreateHardwareProduct();
 
-  const { mutateAsync: registerGrainSale } = useRegisterGrainSale();
-
-  const isLoading = isLoadingProducts || isLoadingSales;
+  const { mutateAsync: registerHardwareSale, isPending: isRegisteringSale } =
+    useRegisterHardwareSale();
 
   const [selectedProductId, setSelectedProductId] = useState("");
 
@@ -129,21 +133,23 @@ export function GrainsWorkspace() {
 
   const [error, setError] = useState("");
 
-  const [isAddGrainOpen, setIsAddGrainOpen] = useState(false);
+  const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
 
-  const products = useMemo<GrainProduct[]>(() => {
-    return grainProducts.map((product) => {
+  const products = useMemo<HardwareProduct[]>(() => {
+    return hardwareProducts.map((product) => {
       const isLowStock =
         product.inventoryStatus === "LowStock" || product.stock <= product.minimumStock;
 
       return {
         id: product.id,
 
-        code: product.code,
-
         name: product.name,
 
-        unit: product.unit,
+        detail: product.detail,
+
+        category: product.category,
+
+        code: product.code,
 
         stock: product.stock,
 
@@ -151,26 +157,22 @@ export function GrainsWorkspace() {
 
         price: product.unitPrice,
 
-        silo: product.location,
-
-        imageUrl: product.imageUrl ?? "",
-
         status: isLowStock ? "lowStock" : "inStock",
 
         accent: isLowStock ? colors.danger : colors.primaryLight,
+
+        imageUrl: product.imageUrl ?? "",
       };
     });
-  }, [grainProducts]);
+  }, [hardwareProducts]);
 
-  const sales = useMemo<GrainSale[]>(() => {
-    return apiSales.map((sale: ApiGrainSale) => ({
+  const sales = useMemo<HardwareSale[]>(() => {
+    return apiSales.map((sale: ApiHardwareSale) => ({
       id: sale.id,
 
       productId: sale.productId,
 
       productName: sale.productName,
-
-      unit: sale.unit,
 
       quantity: sale.quantity,
 
@@ -182,23 +184,30 @@ export function GrainsWorkspace() {
 
       date: new Date(sale.createdAt).toLocaleString("es-NI", {
         dateStyle: "short",
-
         timeStyle: "short",
       }),
     }));
   }, [apiSales]);
 
-  const activeSelectedProductId = useMemo(() => {
-    if (selectedProductId && products.some((product) => product.id === selectedProductId)) {
-      return selectedProductId;
+  useEffect(() => {
+    if (products.length > 0 && !selectedProductId) {
+      setSelectedProductId(products[0].id);
     }
+  }, [products, selectedProductId]);
 
-    return products[0]?.id ?? "";
+  useEffect(() => {
+    if (
+      selectedProductId &&
+      products.length > 0 &&
+      !products.some((product) => product.id === selectedProductId)
+    ) {
+      setSelectedProductId(products[0].id);
+    }
   }, [products, selectedProductId]);
 
   const selectedProduct = useMemo(() => {
-    return products.find((product) => product.id === activeSelectedProductId);
-  }, [activeSelectedProductId, products]);
+    return products.find((product) => product.id === selectedProductId);
+  }, [products, selectedProductId]);
 
   const numericQuantity = Number(quantity);
 
@@ -208,36 +217,19 @@ export function GrainsWorkspace() {
     }
 
     return selectedProduct.price * numericQuantity;
-  }, [selectedProduct, numericQuantity]);
+  }, [numericQuantity, selectedProduct]);
 
   const totalSold = useMemo(() => {
     return sales.reduce((total, sale) => total + sale.total, 0);
   }, [sales]);
 
-  const totalInventory = useMemo(() => {
+  const totalStock = useMemo(() => {
     return products.reduce((total, product) => total + product.stock, 0);
   }, [products]);
 
   const lowStockCount = useMemo(() => {
     return products.filter((product) => product.stock <= product.minStock).length;
   }, [products]);
-
-  const averageCheckoutTime = useMemo(() => {
-    if (apiSales.length < 2) {
-      return "Sin datos";
-    }
-
-    const sortedSaleTimes = apiSales
-      .map((sale) => new Date(sale.createdAt).getTime())
-      .sort((a, b) => a - b);
-
-    const intervals = sortedSaleTimes.slice(1).map((time, index) => time - sortedSaleTimes[index]);
-
-    const averageInterval =
-      intervals.reduce((total, interval) => total + interval, 0) / intervals.length;
-
-    return formatDuration(averageInterval);
-  }, [apiSales]);
 
   const handleRegisterSale = async (): Promise<void> => {
     setError("");
@@ -249,19 +241,19 @@ export function GrainsWorkspace() {
     }
 
     if (Number.isNaN(numericQuantity) || numericQuantity <= 0) {
-      setError("Ingresa una cantidad mayor que cero.");
+      setError("Ingresa una cantidad mayor a cero.");
 
       return;
     }
 
     if (numericQuantity > selectedProduct.stock) {
-      setError("No hay suficiente inventario disponible para esta venta.");
+      setError("No hay suficiente inventario disponible.");
 
       return;
     }
 
     try {
-      await registerGrainSale({
+      await registerHardwareSale({
         productId: selectedProduct.id,
 
         quantity: numericQuantity,
@@ -275,7 +267,7 @@ export function GrainsWorkspace() {
     }
   };
 
-  const handleAddGrain = async (formValues: AddGrainFormValues): Promise<void> => {
+  const handleAddProduct = async (formValues: AddHardwareProductValues): Promise<void> => {
     setError("");
 
     const initialStock = Number(formValues.initialStock);
@@ -309,12 +301,12 @@ export function GrainsWorkspace() {
     }
 
     try {
-      const response = await createGrainProduct({
+      const response = await createHardwareProduct({
         name: formValues.name.trim(),
 
-        unit: formValues.unit.trim(),
+        detail: formValues.detail.trim(),
 
-        location: formValues.location.trim(),
+        category: formValues.category.trim(),
 
         initialStock,
 
@@ -322,25 +314,27 @@ export function GrainsWorkspace() {
 
         unitPrice,
 
+        inventoryStatus: formValues.inventoryStatus,
+
         imageUrl: formValues.imageUrl.trim() || null,
       });
 
       setSelectedProductId(response.id);
 
-      setIsAddGrainOpen(false);
+      setIsAddProductModalOpen(false);
     } catch {
       setError("No se pudo crear el producto.");
     }
   };
 
-  const handleEditProduct = (product: GrainProduct): void => {
-    console.log("Editar producto:", product);
+  const handleEditProduct = (product: HardwareProduct): void => {
+    console.log("Editar producto de ferretería:", product);
   };
 
   return (
-    <AppShell active={grainsConfig.category}>
-      {isLoading ? (
-        <LoadingState message="Cargando módulo de granos..." />
+    <AppShell active={hardwareConfig.category}>
+      {isLoadingProducts ? (
+        <LoadingState message="Cargando módulo de Ferretería..." />
       ) : (
         <Box
           sx={{
@@ -368,7 +362,11 @@ export function GrainsWorkspace() {
               gap: 3,
             }}
           >
-            <HeroHeader />
+            <HardwareWorkspaceHero
+              badge={hardwareConfig.badge}
+              title={hardwareConfig.title}
+              subtitle={hardwareConfig.subtitle}
+            />
 
             <Box
               sx={{
@@ -378,13 +376,16 @@ export function GrainsWorkspace() {
                   sm: "repeat(2, minmax(0, 1fr))",
                   lg: "repeat(3, minmax(0, 1fr))",
                 },
-                gap: 2.5,
+                gap: {
+                  xs: 1.5,
+                  md: 2,
+                },
               }}
             >
               <MetricCard
-                icon={<FaFileInvoiceDollar />}
-                iconBg={colors.primarySoft}
-                iconColor={colors.primaryLight}
+                icon={<FaClipboardCheck />}
+                iconBg={colors.greenSoft}
+                iconColor={colors.green}
                 label="Ventas registradas"
                 value={sales.length.toString()}
                 detail={`Total: ${formatCurrency(totalSold)}`}
@@ -395,14 +396,14 @@ export function GrainsWorkspace() {
                 iconBg={colors.primarySoft}
                 iconColor={colors.primaryLight}
                 label="Productos en stock"
-                value={totalInventory.toString()}
+                value={totalStock.toString()}
                 detail={`${products.length} productos activos`}
               />
 
               <MetricCard
                 icon={<FaExclamationTriangle />}
-                iconBg={colors.orangeSoft}
-                iconColor={colors.orange}
+                iconBg={colors.dangerSoft}
+                iconColor={colors.danger}
                 label="Bajo inventario"
                 value={lowStockCount.toString()}
                 detail="Requieren revisión"
@@ -425,10 +426,10 @@ export function GrainsWorkspace() {
                 minWidth: 0,
               }}
             >
-              <GrainInventory
+              <HardwareInventory
                 products={products}
                 onAddProduct={() => {
-                  setIsAddGrainOpen(true);
+                  setIsAddProductModalOpen(true);
                 }}
                 onEditProduct={handleEditProduct}
               />
@@ -441,7 +442,7 @@ export function GrainsWorkspace() {
                 <RegisterSaleCard
                   products={products}
                   selectedProduct={selectedProduct}
-                  selectedProductId={activeSelectedProductId}
+                  selectedProductId={selectedProductId}
                   quantity={quantity}
                   numericQuantity={numericQuantity}
                   paymentMethod={paymentMethod}
@@ -461,22 +462,22 @@ export function GrainsWorkspace() {
               totalSold={totalSold}
               isLoading={isLoadingSales}
               isError={isSalesError}
-              title="Historial de transacciones"
-              subtitle="Últimas ventas registradas en el módulo de granos"
-              productIcon={<FaSeedling size={13} />}
+              title="Historial de ventas"
+              subtitle="Productos vendidos, cantidades, precios y métodos de pago"
+              productIcon={<FaWrench size={13} />}
               getRecordLabel={(sale) => `Venta #${sale.id.slice(-4).toUpperCase()}`}
-              getQuantityLabel={(sale) => `${sale.quantity} ${sale.unit}`}
-              getProductSecondaryText={() => "Producto vendido"}
+              getQuantityLabel={(sale) => `${sale.quantity}`}
+              getProductSecondaryText={() => "Producto de ferretería"}
               colors={{
+                primary: colors.primary,
+                primarySoft: colors.primarySoft,
                 border: colors.cardBorder,
                 text: colors.text,
                 muted: colors.muted,
-                primary: colors.orange,
-                primarySoft: colors.orangeSoft,
                 tableHead: colors.tableHead,
-                rowHover: "#f0fdf4",
-                paymentBg: colors.primarySoft,
-                paymentText: colors.primary,
+                rowHover: "#fff7ed",
+                paymentBg: colors.greenSoft,
+                paymentText: colors.green,
                 paymentBorder: "#bbf7d0",
               }}
             />
@@ -484,29 +485,15 @@ export function GrainsWorkspace() {
         </Box>
       )}
 
-      <AddGrainModal
-        open={isAddGrainOpen}
-
+      <AddHardwareProductModal
+        open={isAddProductModalOpen}
         onClose={() => {
           if (!isCreatingProduct) {
-            setIsAddGrainOpen(false);
+            setIsAddProductModalOpen(false);
           }
         }}
-
-        onSave={handleAddGrain}
+        onSave={handleAddProduct}
       />
     </AppShell>
   );
-}
-
-function formatDuration(milliseconds: number): string {
-  if (!Number.isFinite(milliseconds) || milliseconds <= 0) {
-    return "0m 00s";
-  }
-
-  const totalSeconds = Math.round(milliseconds / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-
-  return `${minutes}m ${String(seconds).padStart(2, "0")}s`;
 }

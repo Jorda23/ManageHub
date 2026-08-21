@@ -6,11 +6,7 @@ import { Box } from "@mui/material";
 
 import { FaClipboardCheck, FaFileContract, FaHome, FaMoneyBillWave } from "react-icons/fa";
 
-import AppShell from "@/components/AppShell/AppShell";
-
 import { AddPropertyModal, type AddPropertyFormValues } from "@/components/AddPropertyModal";
-
-import { PaymentHistoryTable } from "@/components/PaymentHistoryTable";
 
 import {
   colors,
@@ -36,7 +32,9 @@ import {
   usePropertyPayments,
   useRegisterPropertyPayment,
 } from "@/hook/useProperties";
-import { LoadingState } from "@/components/LoadingState";
+import { generatePaymentInvoice } from "@/utils/generatePaymentInvoice";
+import { AppShell, LoadingState } from "@/components";
+import { PaymentHistoryTable } from "./components/PaymentHistoryTable";
 
 export function PropertyWorkspace() {
   const {
@@ -294,13 +292,11 @@ export function PropertyWorkspace() {
 
     if (!selectedProperty) {
       setError("Selecciona una propiedad válida.");
-
       return;
     }
 
     if (Number.isNaN(numericPaymentAmount) || numericPaymentAmount <= 0) {
       setError("Ingresa un monto de abono mayor a cero.");
-
       return;
     }
 
@@ -308,33 +304,133 @@ export function PropertyWorkspace() {
 
     if (pendingAmount <= 0) {
       setError("Esta cuenta ya está pagada en su totalidad.");
-
       return;
     }
 
     if (numericPaymentAmount > pendingAmount) {
       setError("El abono no puede ser mayor al saldo pendiente.");
+      return;
+    }
+
+    const invoiceWindow = window.open("", "_blank", "width=900,height=900");
+
+    if (!invoiceWindow) {
+      setError("El navegador bloqueó la ventana del recibo. Habilita las ventanas emergentes.");
 
       return;
     }
 
+    invoiceWindow.document.open();
+
+    invoiceWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Procesando pago...</title>
+      </head>
+
+      <body
+        style="
+          font-family: Arial, sans-serif;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 100vh;
+          margin: 0;
+        "
+      >
+        <div>
+          <h2>Registrando pago...</h2>
+        </div>
+      </body>
+    </html>
+  `);
+
+    invoiceWindow.document.close();
+
+    let payment;
+
+    // 1. REGISTRAR EL PAGO
     try {
-      await registerPropertyPayment({
+      payment = await registerPropertyPayment({
         propertyId: selectedProperty.id,
-
         amount: numericPaymentAmount,
-
         paymentMethod,
-
         note: paymentNote.trim() || null,
       });
+    } catch (error) {
+      console.error("Error registrando abono:", error);
 
-      setPaymentAmount("500");
+      invoiceWindow.close();
 
-      setPaymentNote("Abono de cuota");
-    } catch {
       setError("No se pudo registrar el abono.");
+
+      return;
     }
+
+    // 2. GENERAR EL RECIBO
+    try {
+      generatePaymentInvoice({
+        invoiceWindow,
+
+        invoiceNumber: payment?.id ? `REC-${payment.id}` : `REC-${Date.now()}`,
+
+        propertyName: selectedProperty.name,
+
+        propertyCode: selectedProperty.code,
+
+        buyerName: selectedProperty.ownerName,
+
+        amount: payment?.amount ?? numericPaymentAmount,
+
+        paymentMethod: payment?.paymentMethod ?? paymentMethod,
+
+        note: payment?.note ?? (paymentNote.trim() || null),
+
+        totalPrice: selectedProperty.price,
+
+        previousPaid: selectedProperty.paid,
+
+        paymentDate: payment?.createdAt ? new Date(payment.createdAt) : new Date(),
+      });
+    } catch (error) {
+      console.error("Error generando recibo:", error);
+
+      invoiceWindow.document.open();
+
+      invoiceWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Error generando recibo</title>
+        </head>
+
+        <body
+          style="
+            font-family: Arial, sans-serif;
+            padding: 40px;
+          "
+        >
+          <h2>Pago registrado correctamente</h2>
+
+          <p>
+            El pago fue guardado, pero ocurrió un
+            error generando el recibo.
+          </p>
+        </body>
+      </html>
+    `);
+
+      invoiceWindow.document.close();
+
+      setError("El pago fue registrado, pero no se pudo generar el recibo.");
+
+      return;
+    }
+
+    setPaymentAmount("500");
+
+    setPaymentNote("Abono de cuota");
   };
 
   const handleDownloadPayments = (visiblePayments: PaymentRecord[]): void => {
