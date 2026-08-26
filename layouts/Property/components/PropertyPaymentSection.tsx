@@ -1,165 +1,191 @@
 import type { ReactNode } from "react";
 
 import {
+  Alert,
   Box,
   Button,
+  CircularProgress,
   Divider,
   FormControl,
+  FormHelperText,
   MenuItem,
   Paper,
   Select,
   TextField,
   Typography,
 } from "@mui/material";
+
 import type { SxProps, Theme } from "@mui/material/styles";
+
+import { useFormik } from "formik";
+
 import { FaPlusCircle, FaReceipt } from "react-icons/fa";
 
 import {
-  colors,
   formatCurrency,
   getPendingAmount,
   getStatusColors,
+  paymentMethods,
   type PropertyItem,
-} from "../propertyWorkspaceData";
+} from "@/shared";
+
+import { useRegisterPropertyPayment } from "@/hook/useProperties";
+
+import { generatePaymentInvoice } from "@/utils/generatePaymentInvoice";
+
+import {
+  registerPropertyPaymentSchema,
+  type RegisterPropertyPaymentFormValues,
+} from "@/validations/registerPropertyPayment.schema";
+
+import { colors } from "@/theme/sharedColors";
+
 import { PropertySectionCard } from "./PropertySectionCard";
 import { PropertySectionHeader } from "./PropertySectionHeader";
 
 type PropertyPaymentSectionProps = {
-  selectedProperty?: PropertyItem;
   properties: PropertyItem[];
-  selectedPropertyId: string;
-  paymentAmount: string;
-  paymentMethod: string;
-  paymentMethods: string[];
-  paymentNote: string;
-  error: string;
-  onSelectedPropertyChange: (value: string) => void;
-  onPaymentAmountChange: (value: string) => void;
-  onPaymentMethodChange: (value: string) => void;
-  onPaymentNoteChange: (value: string) => void;
-  onRegisterPayment: () => void;
 };
 
-const inputSx: SxProps<Theme> = {
-  width: "100%",
-
-  "& .MuiOutlinedInput-root": {
-    width: "100%",
-    minHeight: {
-      xs: 44,
-      sm: 46,
-    },
-    borderRadius: {
-      xs: "12px",
-      sm: "14px",
-    },
-    bgcolor: "#fbfdfc",
-    fontSize: 14,
-    fontWeight: 600,
-    color: colors.text,
-
-    "& fieldset": {
-      borderColor: colors.cardBorder,
-    },
-
-    "&:hover fieldset": {
-      borderColor: "#94a3b8",
-    },
-
-    "&.Mui-focused fieldset": {
-      borderColor: colors.primaryLight,
-      borderWidth: 1.5,
-    },
-  },
-
-  "& .MuiInputBase-input": {
-    minWidth: 0,
-    px: {
-      xs: 1.5,
-      sm: 1.75,
-    },
-  },
-
-  "& .MuiInputBase-inputMultiline": {
-    px: 0,
-  },
+const initialValues: RegisterPropertyPaymentFormValues = {
+  propertyId: "",
+  amount: "500",
+  paymentMethod: paymentMethods[0] ?? "",
+  note: "Abono de cuota",
 };
 
-const selectSx: SxProps<Theme> = {
-  width: "100%",
-  minHeight: {
-    xs: 44,
-    sm: 46,
-  },
-  borderRadius: {
-    xs: "12px",
-    sm: "14px",
-  },
-  bgcolor: "#fbfdfc",
-  fontSize: 14,
-  fontWeight: 600,
-  color: colors.text,
+export function PropertyPaymentSection({ properties }: Readonly<PropertyPaymentSectionProps>) {
+  const { mutateAsync: registerPropertyPayment, isPending: isRegisteringPayment } =
+    useRegisterPropertyPayment();
 
-  "& fieldset": {
-    borderColor: colors.cardBorder,
-  },
+  const formik = useFormik<RegisterPropertyPaymentFormValues>({
+    initialValues,
 
-  "&:hover fieldset": {
-    borderColor: "#94a3b8",
-  },
+    validationSchema: registerPropertyPaymentSchema,
 
-  "&.Mui-focused fieldset": {
-    borderColor: colors.primaryLight,
-    borderWidth: 1.5,
-  },
+    validateOnBlur: true,
 
-  "& .MuiSelect-select": {
-    minWidth: 0,
-    display: "flex",
-    alignItems: "center",
-    px: {
-      xs: 1.5,
-      sm: 1.75,
+    validateOnChange: false,
+
+    onSubmit: async (values, helpers): Promise<void> => {
+      const selectedProperty = properties.find((property) => property.id === values.propertyId);
+
+      if (!selectedProperty) {
+        helpers.setFieldError("propertyId", "Selecciona una propiedad válida");
+
+        return;
+      }
+
+      const amount = Number(values.amount);
+
+      const pendingAmount = getPendingAmount(selectedProperty);
+
+      if (pendingAmount <= 0) {
+        helpers.setStatus("Esta cuenta ya está pagada en su totalidad.");
+
+        return;
+      }
+
+      if (amount > pendingAmount) {
+        helpers.setFieldError("amount", "El abono no puede ser mayor al saldo pendiente");
+
+        return;
+      }
+
+      helpers.setStatus(undefined);
+
+      const invoiceWindow = window.open("", "_blank", "width=900,height=900");
+
+      if (!invoiceWindow) {
+        helpers.setStatus(
+          "El navegador bloqueó la ventana del recibo. Habilita las ventanas emergentes.",
+        );
+
+        return;
+      }
+
+      renderProcessingInvoice(invoiceWindow);
+
+      try {
+        const payment = await registerPropertyPayment({
+          propertyId: selectedProperty.id,
+
+          amount,
+
+          paymentMethod: values.paymentMethod,
+
+          note: values.note.trim() || null,
+        });
+
+        try {
+          generatePaymentInvoice({
+            invoiceWindow,
+
+            invoiceNumber: payment?.id ? `REC-${payment.id}` : `REC-${Date.now()}`,
+
+            propertyName: selectedProperty.name,
+
+            propertyCode: selectedProperty.code,
+
+            buyerName: selectedProperty.ownerName,
+
+            amount: payment?.amount ?? amount,
+
+            paymentMethod: payment?.paymentMethod ?? values.paymentMethod,
+
+            note: payment?.note ?? (values.note.trim() || null),
+
+            totalPrice: selectedProperty.price,
+
+            previousPaid: selectedProperty.paid,
+
+            paymentDate: payment?.createdAt ? new Date(payment.createdAt) : new Date(),
+          });
+        } catch (error) {
+          console.error("Error generando recibo:", error);
+
+          renderInvoiceError(invoiceWindow);
+
+          helpers.setStatus("El pago fue registrado, pero no se pudo generar el recibo.");
+
+          return;
+        }
+
+        helpers.resetForm({
+          values: {
+            ...initialValues,
+            propertyId: selectedProperty.id,
+          },
+        });
+      } catch (error) {
+        console.error("Error registrando abono:", error);
+
+        invoiceWindow.close();
+
+        helpers.setStatus("No se pudo registrar el abono.");
+      }
     },
-    py: 1.25,
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-  },
-};
+  });
 
-export function PropertyPaymentSection({
-  selectedProperty,
-  properties,
-  selectedPropertyId,
-  paymentAmount,
-  paymentMethod,
-  paymentMethods,
-  paymentNote,
-  error,
-  onSelectedPropertyChange,
-  onPaymentAmountChange,
-  onPaymentMethodChange,
-  onPaymentNoteChange,
-  onRegisterPayment,
-}: PropertyPaymentSectionProps) {
-  const numericPaymentAmount = Number(paymentAmount);
+  const selectedProperty = properties.find((property) => property.id === formik.values.propertyId);
 
-  const isRegisterPaymentDisabled =
-    !selectedPropertyId ||
-    !paymentMethod ||
-    !Number.isFinite(numericPaymentAmount) ||
-    numericPaymentAmount <= 0;
+  const propertyError = formik.touched.propertyId ? formik.errors.propertyId : undefined;
+
+  const amountError = formik.touched.amount ? formik.errors.amount : undefined;
+
+  const paymentMethodError = formik.touched.paymentMethod ? formik.errors.paymentMethod : undefined;
 
   return (
     <PropertySectionCard
       sx={{
         width: "100%",
         minWidth: 0,
+
         height: {
           xs: "auto",
           lg: "100%",
         },
+
         overflow: "hidden",
       }}
     >
@@ -168,49 +194,43 @@ export function PropertyPaymentSection({
       <Divider />
 
       <Box
+        component="form"
+        onSubmit={formik.handleSubmit}
         sx={{
           width: "100%",
           minWidth: 0,
+
           p: {
             xs: 1.8,
             sm: 2.25,
             md: 2.5,
           },
+
           display: "grid",
+
           gridTemplateColumns: {
             xs: "minmax(0, 1fr)",
             md: "repeat(2, minmax(0, 1fr))",
           },
+
           gap: {
             xs: 1.75,
             md: 2,
           },
+
           alignItems: "start",
         }}
       >
-        {error ? (
-          <Box
-            role="alert"
+        {formik.status && (
+          <Alert
+            severity="error"
             sx={{
               gridColumn: "1 / -1",
-              minWidth: 0,
-              px: 1.5,
-              py: 1,
-              borderRadius: {
-                xs: "12px",
-                sm: "16px",
-              },
-              bgcolor: colors.dangerSoft,
-              border: "1px solid #fecaca",
-              color: colors.danger,
-              fontSize: 12,
-              fontWeight: 800,
-              overflowWrap: "anywhere",
             }}
           >
-            {error}
-          </Box>
-        ) : null}
+            {formik.status}
+          </Alert>
+        )}
 
         <Box
           sx={{
@@ -220,11 +240,21 @@ export function PropertyPaymentSection({
         >
           <FieldLabel>Propiedad</FieldLabel>
 
-          <FormControl fullWidth size="small">
+          <FormControl fullWidth size="small" error={Boolean(propertyError)}>
             <Select
-              value={selectedPropertyId}
+              id="propertyId"
+              name="propertyId"
+              value={formik.values.propertyId}
               displayEmpty
-              onChange={(event) => onSelectedPropertyChange(String(event.target.value))}
+              disabled={isRegisteringPayment}
+              onChange={(event) => {
+                void formik.setFieldValue("propertyId", String(event.target.value));
+
+                formik.setStatus(undefined);
+              }}
+              onBlur={() => {
+                void formik.setFieldTouched("propertyId", true);
+              }}
               sx={selectSx}
               renderValue={(value) => {
                 if (!value) {
@@ -269,6 +299,8 @@ export function PropertyPaymentSection({
                 </MenuItem>
               ))}
             </Select>
+
+            {propertyError && <FormHelperText>{propertyError}</FormHelperText>}
           </FormControl>
         </Box>
 
@@ -276,11 +308,20 @@ export function PropertyPaymentSection({
           <FieldLabel>Monto del abono</FieldLabel>
 
           <TextField
+            id="amount"
+            name="amount"
             type="number"
             size="small"
-            value={paymentAmount}
-            onChange={(event) => onPaymentAmountChange(event.target.value)}
+            value={formik.values.amount}
+            onChange={(event) => {
+              formik.handleChange(event);
+              formik.setStatus(undefined);
+            }}
+            onBlur={formik.handleBlur}
             placeholder="0.00"
+            error={Boolean(amountError)}
+            helperText={amountError}
+            disabled={isRegisteringPayment}
             slotProps={{
               htmlInput: {
                 min: 0.01,
@@ -296,11 +337,21 @@ export function PropertyPaymentSection({
         <Box sx={{ minWidth: 0 }}>
           <FieldLabel>Método de pago</FieldLabel>
 
-          <FormControl fullWidth size="small">
+          <FormControl fullWidth size="small" error={Boolean(paymentMethodError)}>
             <Select
-              value={paymentMethod}
+              id="paymentMethod"
+              name="paymentMethod"
+              value={formik.values.paymentMethod}
               displayEmpty
-              onChange={(event) => onPaymentMethodChange(String(event.target.value))}
+              disabled={isRegisteringPayment}
+              onChange={(event) => {
+                void formik.setFieldValue("paymentMethod", String(event.target.value));
+
+                formik.setStatus(undefined);
+              }}
+              onBlur={() => {
+                void formik.setFieldTouched("paymentMethod", true);
+              }}
               sx={selectSx}
               renderValue={(value) => {
                 if (!value) {
@@ -325,12 +376,14 @@ export function PropertyPaymentSection({
                 Seleccionar método
               </MenuItem>
 
-              {paymentMethods.map((method) => (
+              {paymentMethods?.map((method) => (
                 <MenuItem key={method} value={method}>
                   {method}
                 </MenuItem>
               ))}
             </Select>
+
+            {paymentMethodError && <FormHelperText>{paymentMethodError}</FormHelperText>}
           </FormControl>
         </Box>
 
@@ -343,10 +396,14 @@ export function PropertyPaymentSection({
           <FieldLabel>Nota</FieldLabel>
 
           <TextField
+            id="note"
+            name="note"
             size="small"
-            value={paymentNote}
-            onChange={(event) => onPaymentNoteChange(event.target.value)}
+            value={formik.values.note}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             placeholder="Agregar una nota opcional"
+            disabled={isRegisteringPayment}
             fullWidth
             multiline
             minRows={2}
@@ -365,42 +422,53 @@ export function PropertyPaymentSection({
         </Box>
 
         <Button
+          type="submit"
           fullWidth
           variant="contained"
-          startIcon={<FaPlusCircle />}
-          onClick={onRegisterPayment}
-          disabled={isRegisterPaymentDisabled}
+          startIcon={
+            isRegisteringPayment ? <CircularProgress size={17} color="inherit" /> : <FaPlusCircle />
+          }
+          disabled={isRegisteringPayment || !formik.values.propertyId}
           sx={{
             gridColumn: "1 / -1",
             width: "100%",
+
             minHeight: {
               xs: 52,
               sm: 48,
             },
+
             px: {
               xs: 2,
               sm: 3,
             },
+
             py: {
               xs: 1.35,
               sm: 1.2,
             },
+
             borderRadius: {
               xs: "14px",
               sm: "12px",
             },
+
             color: "#ffffff",
             bgcolor: colors.primary,
+
             fontSize: {
               xs: 15,
               sm: 14,
               md: 15,
             },
+
             lineHeight: 1.2,
             fontWeight: 800,
             textTransform: "none",
             whiteSpace: "nowrap",
+
             boxShadow: "0 10px 22px rgba(37, 99, 235, 0.22)",
+
             transition: "background-color 160ms ease, box-shadow 160ms ease, transform 120ms ease",
 
             "& .MuiButton-startIcon": {
@@ -414,6 +482,7 @@ export function PropertyPaymentSection({
                   xs: 19,
                   sm: 17,
                 },
+
                 height: {
                   xs: 19,
                   sm: 17,
@@ -428,11 +497,13 @@ export function PropertyPaymentSection({
 
             "&:active": {
               transform: "scale(0.985)",
+
               boxShadow: "0 5px 12px rgba(37, 99, 235, 0.2)",
             },
 
             "&:focus-visible": {
               outline: "3px solid rgba(37, 99, 235, 0.25)",
+
               outlineOffset: 2,
             },
 
@@ -443,11 +514,72 @@ export function PropertyPaymentSection({
             },
           }}
         >
-          Registrar abono
+          {isRegisteringPayment ? "Registrando abono..." : "Registrar abono"}
         </Button>
       </Box>
     </PropertySectionCard>
   );
+}
+
+function renderProcessingInvoice(invoiceWindow: Window): void {
+  invoiceWindow.document.open();
+
+  invoiceWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Procesando pago...</title>
+      </head>
+
+      <body
+        style="
+          font-family: Arial, sans-serif;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 100vh;
+          margin: 0;
+        "
+      >
+        <div>
+          <h2>Registrando pago...</h2>
+        </div>
+      </body>
+    </html>
+  `);
+
+  invoiceWindow.document.close();
+}
+
+function renderInvoiceError(invoiceWindow: Window): void {
+  invoiceWindow.document.open();
+
+  invoiceWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Error generando recibo</title>
+      </head>
+
+      <body
+        style="
+          font-family: Arial, sans-serif;
+          padding: 40px;
+        "
+      >
+        <h2>
+          Pago registrado correctamente
+        </h2>
+
+        <p>
+          El pago fue guardado, pero ocurrió
+          un error generando el recibo.
+        </p>
+      </body>
+    </html>
+  `);
+
+  invoiceWindow.document.close();
 }
 
 function FieldLabel({ children }: { children: ReactNode }) {
@@ -457,10 +589,12 @@ function FieldLabel({ children }: { children: ReactNode }) {
       sx={{
         display: "block",
         mb: 0.75,
+
         fontSize: {
           xs: 10,
           sm: 11,
         },
+
         color: colors.text,
         fontWeight: 950,
         textTransform: "uppercase",
@@ -478,6 +612,7 @@ function AccountSummary({ property }: { property?: PropertyItem }) {
   }
 
   const pendingAmount = getPendingAmount(property);
+
   const statusColors = getStatusColors(property.status);
 
   return (
@@ -486,15 +621,19 @@ function AccountSummary({ property }: { property?: PropertyItem }) {
       sx={{
         width: "100%",
         minWidth: 0,
+
         p: {
           xs: 1.5,
           sm: 2,
         },
+
         borderRadius: {
           xs: "12px",
           sm: "16px",
         },
+
         bgcolor: "#f8fafc",
+
         border: `1px solid ${colors.cardBorder}`,
       }}
     >
@@ -545,15 +684,21 @@ function AccountSummary({ property }: { property?: PropertyItem }) {
               px: 1,
               py: 0.45,
               borderRadius: 999,
+
               bgcolor: statusColors.bg,
+
               color: statusColors.color,
+
               border: `1px solid ${statusColors.border}`,
+
               fontSize: 11,
               lineHeight: 1.2,
               fontWeight: 950,
               textAlign: "center",
+
               overflow: "hidden",
               textOverflow: "ellipsis",
+
               whiteSpace: "nowrap",
             }}
           >
@@ -578,26 +723,33 @@ function SummaryRow({
     <Box
       sx={{
         display: "grid",
+
         gridTemplateColumns: {
           xs: "minmax(0, 0.9fr) minmax(0, 1.1fr)",
           sm: "minmax(0, 1fr) minmax(0, 1.4fr)",
         },
+
         alignItems: "start",
+
         gap: {
           xs: 1,
           sm: 2,
         },
+
         minWidth: 0,
       }}
     >
       <Typography
         sx={{
           minWidth: 0,
+
           fontSize: {
             xs: 12,
             sm: 13,
           },
+
           color: colors.muted,
+
           fontWeight: highlighted ? 700 : 600,
         }}
       >
@@ -607,13 +759,19 @@ function SummaryRow({
       <Typography
         sx={{
           minWidth: 0,
+
           fontSize: {
             xs: highlighted ? 13 : 12,
+
             sm: highlighted ? 14 : 13,
           },
+
           color: highlighted ? colors.primary : colors.text,
+
           fontWeight: 950,
+
           textAlign: "right",
+
           overflowWrap: "anywhere",
         }}
       >
@@ -622,3 +780,108 @@ function SummaryRow({
     </Box>
   );
 }
+
+const inputSx: SxProps<Theme> = {
+  width: "100%",
+
+  "& .MuiOutlinedInput-root": {
+    width: "100%",
+
+    minHeight: {
+      xs: 44,
+      sm: 46,
+    },
+
+    borderRadius: {
+      xs: "12px",
+      sm: "14px",
+    },
+
+    bgcolor: "#fbfdfc",
+
+    fontSize: 14,
+    fontWeight: 600,
+    color: colors.text,
+
+    "& fieldset": {
+      borderColor: colors.cardBorder,
+    },
+
+    "&:hover fieldset": {
+      borderColor: "#94a3b8",
+    },
+
+    "&.Mui-focused fieldset": {
+      borderColor: colors.primaryLight,
+
+      borderWidth: 1.5,
+    },
+  },
+
+  "& .MuiInputBase-input": {
+    minWidth: 0,
+
+    px: {
+      xs: 1.5,
+      sm: 1.75,
+    },
+  },
+
+  "& .MuiInputBase-inputMultiline": {
+    px: 0,
+  },
+};
+
+const selectSx: SxProps<Theme> = {
+  width: "100%",
+
+  minHeight: {
+    xs: 44,
+    sm: 46,
+  },
+
+  borderRadius: {
+    xs: "12px",
+    sm: "14px",
+  },
+
+  bgcolor: "#fbfdfc",
+
+  fontSize: 14,
+  fontWeight: 600,
+  color: colors.text,
+
+  "& fieldset": {
+    borderColor: colors.cardBorder,
+  },
+
+  "&:hover fieldset": {
+    borderColor: "#94a3b8",
+  },
+
+  "&.Mui-focused fieldset": {
+    borderColor: colors.primaryLight,
+
+    borderWidth: 1.5,
+  },
+
+  "& .MuiSelect-select": {
+    minWidth: 0,
+
+    display: "flex",
+    alignItems: "center",
+
+    px: {
+      xs: 1.5,
+      sm: 1.75,
+    },
+
+    py: 1.25,
+
+    overflow: "hidden",
+
+    textOverflow: "ellipsis",
+
+    whiteSpace: "nowrap",
+  },
+};

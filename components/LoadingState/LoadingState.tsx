@@ -2,13 +2,9 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 
 type LoadingStateProps = {
   message?: string;
-  minHeight?: number | string;
 };
 
-export function LoadingState({
-  message = "Cargando información...",
-  minHeight = 260,
-}: LoadingStateProps) {
+export function LoadingState({ message = "Cargando información..." }: LoadingStateProps) {
   return (
     <Box
       role="status"

@@ -69,3 +69,8 @@ export type WorkspaceConfig = {
   workflowTitle: string;
   workflowItems: string[];
 };
+
+export type WorkspaceHeaderConfig = Pick<
+  WorkspaceConfig,
+  "category" | "badge" | "title" | "subtitle"
+>;

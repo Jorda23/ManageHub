@@ -1,13 +1,12 @@
 import { createTheme } from "@mui/material/styles";
-
-import { sharedColors } from "./sharedColors";
+import { colors } from "./sharedColors";
 
 export const theme = createTheme({
   palette: {
     mode: "light",
     background: {
-      default: sharedColors.pageBg,
-      paper: sharedColors.cardBg,
+      default: colors.pageBg,
+      paper: colors.cardBg,
     },
     primary: {
       main: "#0f766e",
@@ -16,8 +15,8 @@ export const theme = createTheme({
       main: "#2563eb",
     },
     text: {
-      primary: sharedColors.text,
-      secondary: sharedColors.muted,
+      primary: colors.text,
+      secondary: colors.muted,
     },
   },
   typography: {

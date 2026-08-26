@@ -1,16 +1,27 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 
-import { Box, InputAdornment, TextField } from "@mui/material";
-
+import { Alert, Box, InputAdornment, TextField } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
+
+import dayjs, { type Dayjs } from "dayjs";
+
+import { useFormik } from "formik";
+
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 import { FaBuilding, FaPlusCircle } from "react-icons/fa";
 
+import { useCreateProperty } from "@/hook/useProperties";
+import { colors } from "@/theme/sharedColors";
+import { addPropertySchema } from "@/validations";
+
 import { FormModal } from "../FormModal";
-import { ModalField } from "../ModalField";
 import { ImageUploadField } from "../ImageUploadField/ImageUploadField";
+import { ModalField } from "../ModalField";
 
 export type AddPropertyFormValues = {
   name: string;
@@ -22,24 +33,14 @@ export type AddPropertyFormValues = {
   initialPayment: string;
   nextPaymentDate: string;
   imageUrl: string;
-  rucImageUrl: string;
+  identificationImageUrl: string;
+  identificationNumber: string;
 };
-
-type AddPropertyFormErrors = Partial<Record<keyof AddPropertyFormValues, string>>;
 
 type AddPropertyModalProps = {
   open: boolean;
   onClose: () => void;
-  onSave: (values: AddPropertyFormValues) => void | Promise<void>;
-};
-
-const colors = {
-  primary: "#1e3a8a",
-  primaryLight: "#2563eb",
-  text: "#0f172a",
-  muted: "#64748b",
-  danger: "#dc2626",
-  border: "#dce5e1",
+  onCreated?: (propertyId: string) => void;
 };
 
 const initialValues: AddPropertyFormValues = {
@@ -52,128 +53,93 @@ const initialValues: AddPropertyFormValues = {
   initialPayment: "",
   nextPaymentDate: "",
   imageUrl: "",
-  rucImageUrl: "",
+  identificationImageUrl: "",
+  identificationNumber: "",
 };
 
-export function AddPropertyModal({ open, onClose, onSave }: Readonly<AddPropertyModalProps>) {
-  const [values, setValues] = useState<AddPropertyFormValues>(initialValues);
-
-  const [errors, setErrors] = useState<AddPropertyFormErrors>({});
+export function AddPropertyModal({ open, onClose, onCreated }: Readonly<AddPropertyModalProps>) {
+  const [requestError, setRequestError] = useState("");
 
   const [isTotalPriceFocused, setIsTotalPriceFocused] = useState(false);
 
   const [isInitialPaymentFocused, setIsInitialPaymentFocused] = useState(false);
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { mutateAsync: createProperty, isPending: isCreatingProperty } = useCreateProperty();
 
-  const showTotalPriceSymbol = isTotalPriceFocused || values.totalPrice.trim() !== "";
+  const formik = useFormik<AddPropertyFormValues>({
+    initialValues,
+    validationSchema: addPropertySchema,
+    validateOnBlur: true,
+    validateOnChange: false,
 
-  const showInitialPaymentSymbol = isInitialPaymentFocused || values.initialPayment.trim() !== "";
+    onSubmit: async (values, helpers) => {
+      setRequestError("");
 
-  const updateField = <K extends keyof AddPropertyFormValues>(
-    field: K,
-    value: AddPropertyFormValues[K],
-  ): void => {
-    setValues((current) => ({
-      ...current,
-      [field]: value,
-    }));
+      try {
+        const response = await createProperty({
+          name: values.name.trim(),
 
-    setErrors((current) => ({
-      ...current,
-      [field]: undefined,
-    }));
-  };
+          projectName: values.projectName.trim(),
 
-  const resetForm = (): void => {
-    setValues(initialValues);
-    setErrors({});
-    setIsTotalPriceFocused(false);
-    setIsInitialPaymentFocused(false);
-  };
+          measure: values.measure.trim(),
+
+          location: values.location.trim(),
+
+          ownerName: values.ownerName.trim(),
+
+          totalPrice: Number(values.totalPrice),
+
+          initialPayment: Number(values.initialPayment || "0"),
+
+          nextPaymentDate: values.nextPaymentDate
+            ? dayjs(values.nextPaymentDate).startOf("day").toISOString()
+            : null,
+
+          imageUrl: values.imageUrl.trim() || null,
+
+          IdentificationNumber: values.identificationNumber.trim(),
+
+          IdentificationImageUrl: values.identificationImageUrl.trim() || null,
+        });
+
+        helpers.resetForm();
+
+        onCreated?.(response.id);
+
+        onClose();
+      } catch {
+        setRequestError("No se pudo registrar la propiedad.");
+      }
+    },
+  });
+
+  const showTotalPriceSymbol = isTotalPriceFocused || formik.values.totalPrice.trim() !== "";
+
+  const showInitialPaymentSymbol =
+    isInitialPaymentFocused || formik.values.initialPayment.trim() !== "";
 
   const handleClose = (): void => {
-    if (isSubmitting) {
+    if (isCreatingProperty) {
       return;
     }
 
-    resetForm();
+    formik.resetForm();
+
+    setRequestError("");
+
+    setIsTotalPriceFocused(false);
+
+    setIsInitialPaymentFocused(false);
+
     onClose();
   };
 
-  const validate = (): boolean => {
-    const nextErrors: AddPropertyFormErrors = {};
-
-    if (!values.name.trim()) {
-      nextErrors.name = "Ingresa el nombre de la propiedad";
+  const getFieldError = (field: keyof AddPropertyFormValues): string | undefined => {
+    if (!formik.touched[field]) {
+      return undefined;
     }
 
-    if (!values.projectName.trim()) {
-      nextErrors.projectName = "Ingresa el nombre del proyecto";
-    }
-
-    if (!values.measure.trim()) {
-      nextErrors.measure = "Ingresa la medida de la propiedad";
-    }
-
-    if (!values.location.trim()) {
-      nextErrors.location = "Ingresa la ubicación";
-    }
-
-    if (!values.ownerName.trim()) {
-      nextErrors.ownerName = "Ingresa el nombre del propietario";
-    }
-
-    const totalPrice = Number(values.totalPrice);
-
-    if (values.totalPrice.trim() === "" || !Number.isFinite(totalPrice) || totalPrice <= 0) {
-      nextErrors.totalPrice = "Ingresa un precio total mayor que cero";
-    }
-
-    const initialPayment = Number(values.initialPayment || "0");
-
-    if (!Number.isFinite(initialPayment) || initialPayment < 0) {
-      nextErrors.initialPayment = "Ingresa un abono inicial válido";
-    }
-
-    if (Number.isFinite(totalPrice) && initialPayment > totalPrice) {
-      nextErrors.initialPayment = "El abono inicial no puede ser mayor al precio total";
-    }
-
-    setErrors(nextErrors);
-
-    return Object.keys(nextErrors).length === 0;
-  };
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault();
-
-    if (!validate()) {
-      return;
-    }
-
-    const normalizedValues: AddPropertyFormValues = {
-      name: values.name.trim(),
-      projectName: values.projectName.trim(),
-      measure: values.measure.trim(),
-      location: values.location.trim(),
-      ownerName: values.ownerName.trim(),
-      totalPrice: values.totalPrice.trim(),
-      initialPayment: values.initialPayment.trim() || "0",
-      nextPaymentDate: values.nextPaymentDate,
-      imageUrl: values.imageUrl.trim(),
-      rucImageUrl: values.rucImageUrl.trim(),
-    };
-
-    try {
-      setIsSubmitting(true);
-
-      await onSave(normalizedValues);
-
-      resetForm();
-    } finally {
-      setIsSubmitting(false);
-    }
+    return formik.errors[field];
   };
 
   return (
@@ -184,10 +150,10 @@ export function AddPropertyModal({ open, onClose, onSave }: Readonly<AddProperty
       icon={<FaBuilding size={18} />}
       submitLabel="Guardar propiedad"
       submitIcon={<FaPlusCircle size={12} />}
-      maxWidth={680}
-      isSubmitting={isSubmitting}
+      maxWidth={880}
+      isSubmitting={isCreatingProperty}
       onClose={handleClose}
-      onSubmit={handleSubmit}
+      onSubmit={formik.handleSubmit}
     >
       <Box
         sx={{
@@ -196,13 +162,17 @@ export function AddPropertyModal({ open, onClose, onSave }: Readonly<AddProperty
           gap: 2.5,
         }}
       >
+        {requestError && <Alert severity="error">{requestError}</Alert>}
+
         <Box
           sx={{
             display: "grid",
+
             gridTemplateColumns: {
               xs: "1fr",
               sm: "1fr 1fr",
             },
+
             gap: 2,
           }}
         >
@@ -210,14 +180,13 @@ export function AddPropertyModal({ open, onClose, onSave }: Readonly<AddProperty
             <TextField
               id="property-name"
               name="name"
-              value={values.name}
-              onChange={(event) => {
-                updateField("name", event.target.value);
-              }}
+              value={formik.values.name}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
               placeholder="Ej. Lote A-12"
-              error={Boolean(errors.name)}
-              helperText={errors.name}
-              disabled={isSubmitting}
+              error={Boolean(getFieldError("name"))}
+              helperText={getFieldError("name")}
+              disabled={isCreatingProperty}
               fullWidth
               autoFocus
               sx={fieldStyles}
@@ -228,14 +197,13 @@ export function AddPropertyModal({ open, onClose, onSave }: Readonly<AddProperty
             <TextField
               id="property-project"
               name="projectName"
-              value={values.projectName}
-              onChange={(event) => {
-                updateField("projectName", event.target.value);
-              }}
+              value={formik.values.projectName}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
               placeholder="Ej. Residencial Las Colinas"
-              error={Boolean(errors.projectName)}
-              helperText={errors.projectName}
-              disabled={isSubmitting}
+              error={Boolean(getFieldError("projectName"))}
+              helperText={getFieldError("projectName")}
+              disabled={isCreatingProperty}
               fullWidth
               sx={fieldStyles}
             />
@@ -245,10 +213,12 @@ export function AddPropertyModal({ open, onClose, onSave }: Readonly<AddProperty
         <Box
           sx={{
             display: "grid",
+
             gridTemplateColumns: {
               xs: "1fr",
               sm: "1fr 1fr",
             },
+
             gap: 2,
           }}
         >
@@ -256,14 +226,13 @@ export function AddPropertyModal({ open, onClose, onSave }: Readonly<AddProperty
             <TextField
               id="property-measure"
               name="measure"
-              value={values.measure}
-              onChange={(event) => {
-                updateField("measure", event.target.value);
-              }}
+              value={formik.values.measure}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
               placeholder="Ej. 450 m²"
-              error={Boolean(errors.measure)}
-              helperText={errors.measure}
-              disabled={isSubmitting}
+              error={Boolean(getFieldError("measure"))}
+              helperText={getFieldError("measure")}
+              disabled={isCreatingProperty}
               fullWidth
               sx={fieldStyles}
             />
@@ -273,14 +242,13 @@ export function AddPropertyModal({ open, onClose, onSave }: Readonly<AddProperty
             <TextField
               id="property-location"
               name="location"
-              value={values.location}
-              onChange={(event) => {
-                updateField("location", event.target.value);
-              }}
+              value={formik.values.location}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
               placeholder="Ej. Las Colinas, Managua"
-              error={Boolean(errors.location)}
-              helperText={errors.location}
-              disabled={isSubmitting}
+              error={Boolean(getFieldError("location"))}
+              helperText={getFieldError("location")}
+              disabled={isCreatingProperty}
               fullWidth
               sx={fieldStyles}
             />
@@ -291,37 +259,71 @@ export function AddPropertyModal({ open, onClose, onSave }: Readonly<AddProperty
           <TextField
             id="property-owner-name"
             name="ownerName"
-            value={values.ownerName}
-            onChange={(event) => {
-              updateField("ownerName", event.target.value);
-            }}
+            value={formik.values.ownerName}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             placeholder="Ej. Valeria Gómez"
-            error={Boolean(errors.ownerName)}
-            helperText={errors.ownerName}
-            disabled={isSubmitting}
+            error={Boolean(getFieldError("ownerName"))}
+            helperText={getFieldError("ownerName")}
+            disabled={isCreatingProperty}
             fullWidth
             sx={fieldStyles}
-          />
-        </ModalField>
-
-        <ModalField label="Documento RUC" htmlFor="property-ruc-image">
-          <ImageUploadField
-            label="Foto del RUC"
-            value={values.rucImageUrl}
-            disabled={isSubmitting}
-            onChange={(imageUrl) => {
-              updateField("rucImageUrl", imageUrl);
-            }}
           />
         </ModalField>
 
         <Box
           sx={{
             display: "grid",
+
             gridTemplateColumns: {
               xs: "1fr",
               sm: "1fr 1fr",
             },
+
+            gap: 2,
+
+            alignItems: "start",
+          }}
+        >
+          <ModalField label="Número de identificación" htmlFor="property-identification-number">
+            <TextField
+              id="property-identification-number"
+              name="identificationNumber"
+              value={formik.values.identificationNumber}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              placeholder="Ej. 001-010190-0001A"
+              error={Boolean(getFieldError("identificationNumber"))}
+              helperText={getFieldError("identificationNumber")}
+              disabled={isCreatingProperty}
+              fullWidth
+              sx={fieldStyles}
+            />
+          </ModalField>
+
+          <ModalField label="Documento de identificación" htmlFor="property-identification-image">
+            <ImageUploadField
+              label="Foto del documento"
+              value={formik.values.identificationImageUrl}
+              disabled={isCreatingProperty}
+              onChange={(imageUrl) => {
+                void formik.setFieldValue("identificationImageUrl", imageUrl);
+
+                void formik.setFieldTouched("identificationImageUrl", true, false);
+              }}
+            />
+          </ModalField>
+        </Box>
+
+        <Box
+          sx={{
+            display: "grid",
+
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "1fr 1fr",
+            },
+
             gap: 2,
           }}
         >
@@ -330,26 +332,27 @@ export function AddPropertyModal({ open, onClose, onSave }: Readonly<AddProperty
               id="property-total-price"
               name="totalPrice"
               type="number"
-              value={values.totalPrice}
-              onChange={(event) => {
-                updateField("totalPrice", event.target.value);
-              }}
+              value={formik.values.totalPrice}
+              onChange={formik.handleChange}
               onFocus={() => {
                 setIsTotalPriceFocused(true);
               }}
-              onBlur={() => {
+              onBlur={(event) => {
                 setIsTotalPriceFocused(false);
+
+                formik.handleBlur(event);
               }}
               placeholder="0.00"
-              error={Boolean(errors.totalPrice)}
-              helperText={errors.totalPrice}
-              disabled={isSubmitting}
+              error={Boolean(getFieldError("totalPrice"))}
+              helperText={getFieldError("totalPrice")}
+              disabled={isCreatingProperty}
               fullWidth
               slotProps={{
                 htmlInput: {
                   min: 0,
                   step: "0.01",
                 },
+
                 input: {
                   startAdornment: showTotalPriceSymbol ? (
                     <InputAdornment position="start">$</InputAdornment>
@@ -365,26 +368,27 @@ export function AddPropertyModal({ open, onClose, onSave }: Readonly<AddProperty
               id="property-initial-payment"
               name="initialPayment"
               type="number"
-              value={values.initialPayment}
-              onChange={(event) => {
-                updateField("initialPayment", event.target.value);
-              }}
+              value={formik.values.initialPayment}
+              onChange={formik.handleChange}
               onFocus={() => {
                 setIsInitialPaymentFocused(true);
               }}
-              onBlur={() => {
+              onBlur={(event) => {
                 setIsInitialPaymentFocused(false);
+
+                formik.handleBlur(event);
               }}
               placeholder="0.00"
-              error={Boolean(errors.initialPayment)}
-              helperText={errors.initialPayment}
-              disabled={isSubmitting}
+              error={Boolean(getFieldError("initialPayment"))}
+              helperText={getFieldError("initialPayment")}
+              disabled={isCreatingProperty}
               fullWidth
               slotProps={{
                 htmlInput: {
                   min: 0,
                   step: "0.01",
                 },
+
                 input: {
                   startAdornment: showInitialPaymentSymbol ? (
                     <InputAdornment position="start">$</InputAdornment>
@@ -397,39 +401,57 @@ export function AddPropertyModal({ open, onClose, onSave }: Readonly<AddProperty
         </Box>
 
         <ModalField label="Próximo pago" htmlFor="property-next-payment-date">
-          <TextField
-            id="property-next-payment-date"
-            name="nextPaymentDate"
-            type="date"
-            value={values.nextPaymentDate}
-            onChange={(event) => {
-              updateField("nextPaymentDate", event.target.value);
-            }}
-            disabled={isSubmitting}
-            fullWidth
-            slotProps={{
-              inputLabel: {
-                shrink: true,
-              },
-            }}
-            sx={fieldStyles}
-          />
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              value={formik.values.nextPaymentDate ? dayjs(formik.values.nextPaymentDate) : null}
+              onChange={(date: Dayjs | null) => {
+                void formik.setFieldValue(
+                  "nextPaymentDate",
+
+                  date ? date.format("YYYY-MM-DD") : "",
+                );
+              }}
+              onClose={() => {
+                void formik.setFieldTouched("nextPaymentDate", true);
+              }}
+              disabled={isCreatingProperty}
+              format="DD/MM/YYYY"
+              slotProps={{
+                textField: {
+                  id: "property-next-payment-date",
+
+                  name: "nextPaymentDate",
+
+                  fullWidth: true,
+
+                  error: Boolean(getFieldError("nextPaymentDate")),
+
+                  helperText: getFieldError("nextPaymentDate"),
+
+                  sx: fieldStyles,
+                },
+              }}
+            />
+          </LocalizationProvider>
         </ModalField>
 
         <Box
           sx={{
             pt: 0.5,
-            borderTop: `1px solid ${colors.border}`,
+
+            borderTop: `1px solid ${colors.cardBorder}`,
           }}
         />
 
         <ModalField label="Imagen para la tarjeta" htmlFor="property-image">
           <ImageUploadField
             label="Imagen del terreno"
-            value={values.imageUrl}
-            disabled={isSubmitting}
+            value={formik.values.imageUrl}
+            disabled={isCreatingProperty}
             onChange={(imageUrl) => {
-              updateField("imageUrl", imageUrl);
+              void formik.setFieldValue("imageUrl", imageUrl);
+
+              void formik.setFieldTouched("imageUrl", true, false);
             }}
           />
         </ModalField>
@@ -441,15 +463,21 @@ export function AddPropertyModal({ open, onClose, onSave }: Readonly<AddProperty
 const fieldStyles: SxProps<Theme> = {
   "& .MuiOutlinedInput-root": {
     minHeight: 48,
+
     borderRadius: "9px",
+
     bgcolor: "#ffffff",
+
     color: colors.text,
+
     fontSize: 13,
+
     fontWeight: 650,
+
     transition: "all 0.18s ease",
 
     "& fieldset": {
-      borderColor: colors.border,
+      borderColor: colors.cardBorder,
     },
 
     "&:hover fieldset": {
@@ -458,11 +486,13 @@ const fieldStyles: SxProps<Theme> = {
 
     "&.Mui-focused": {
       bgcolor: "#ffffff",
+
       boxShadow: "0 0 0 3px rgba(37, 99, 235, 0.09)",
     },
 
     "&.Mui-focused fieldset": {
       borderColor: colors.primaryLight,
+
       borderWidth: "1px",
     },
 
@@ -484,7 +514,9 @@ const fieldStyles: SxProps<Theme> = {
 
     "&::placeholder": {
       color: "#94a3b8",
+
       WebkitTextFillColor: "#94a3b8",
+
       opacity: 1,
     },
 
@@ -503,10 +535,15 @@ const fieldStyles: SxProps<Theme> = {
 
   "& .MuiFormHelperText-root": {
     minHeight: 16,
+
     ml: 0,
+
     mt: 0.55,
+
     color: colors.danger,
+
     fontSize: 10.5,
+
     fontWeight: 650,
   },
 
@@ -516,11 +553,13 @@ const fieldStyles: SxProps<Theme> = {
 
   "& input[type='number']::-webkit-outer-spin-button": {
     WebkitAppearance: "none",
+
     margin: 0,
   },
 
   "& input[type='number']::-webkit-inner-spin-button": {
     WebkitAppearance: "none",
+
     margin: 0,
   },
 };

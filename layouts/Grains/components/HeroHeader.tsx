@@ -3,7 +3,7 @@
 import { FaLeaf } from "react-icons/fa";
 
 import { Box, Chip, Paper, Typography } from "@mui/material";
-import { grainsConfig } from "../GrainsWorkspace";
+import { grainsConfig } from "@/shared";
 
 export function HeroHeader() {
   return (

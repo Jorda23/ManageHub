@@ -13,6 +13,8 @@ import {
   Typography,
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
+import { colors } from "@/theme/sharedColors";
+import { formatCurrency } from "@/shared";
 
 export type SaleProduct = {
   id: string;
@@ -36,17 +38,6 @@ type RegisterSaleCardProps<TProduct extends SaleProduct> = {
   onQuantityChange: Dispatch<SetStateAction<string>>;
   onPaymentMethodChange: Dispatch<SetStateAction<string>>;
   onRegisterSale: () => void;
-};
-
-const colors = {
-  text: "#0f172a",
-  muted: "#64748b",
-  primary: "#92400e",
-  primaryLight: "#f59e0b",
-  primarySoft: "#ffedd5",
-  danger: "#dc2626",
-  dangerSoft: "#fee2e2",
-  cardBorder: "#dce5e1",
 };
 
 const inputSx: SxProps<Theme> = {
@@ -123,12 +114,6 @@ const selectSx: SxProps<Theme> = {
     py: 1.25,
   },
 };
-
-const formatCurrency = (value: number) =>
-  new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(value);
 
 export function RegisterSaleCard<TProduct extends SaleProduct>({
   products,

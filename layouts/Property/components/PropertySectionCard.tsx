@@ -2,8 +2,7 @@ import type { ReactNode } from "react";
 
 import { Card } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
-
-import { colors } from "../propertyWorkspaceData";
+import { colors } from "@/theme/sharedColors";
 
 type PropertySectionCardProps = {
   children: ReactNode;

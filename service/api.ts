@@ -25,7 +25,7 @@ import type {
   PropertyPayment,
   PropertyPaymentsFilters,
   DashboardResponse,
-} from "../types/api.types";
+} from "../shared/types/api.types";
 
 export const login = async (request: LoginRequest): Promise<LoginResponse> => {
   return apiClient.post<LoginResponse, LoginRequest>("/api/auth/login", request);

@@ -15,7 +15,7 @@ import type {
   PropertyPaymentsFilters,
   RegisterPropertyPaymentRequest,
   RegisterPropertyPaymentResponse,
-} from "@/types/api.types";
+} from "@/shared/types/api.types";
 
 const PROPERTIES_QUERY_KEY = ["properties"];
 

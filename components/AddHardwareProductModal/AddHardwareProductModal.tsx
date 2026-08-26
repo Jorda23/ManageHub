@@ -4,12 +4,10 @@ import { useState, type FormEvent } from "react";
 
 import {
   Box,
-  FormControl,
   FormControlLabel,
   InputAdornment,
   MenuItem,
   Radio,
-  RadioGroup,
   TextField,
   Typography,
 } from "@mui/material";
@@ -21,6 +19,7 @@ import { FaPlus, FaTools } from "react-icons/fa";
 import { FormModal } from "../FormModal";
 import { ModalField } from "../ModalField";
 import { ImageUploadField } from "../ImageUploadField/ImageUploadField";
+import { colors } from "@/theme/sharedColors";
 
 export type AddHardwareProductValues = {
   name: string;
@@ -39,16 +38,6 @@ type AddHardwareProductModalProps = {
   open: boolean;
   onClose: () => void;
   onSave: (values: AddHardwareProductValues) => void | Promise<void>;
-};
-
-const colors = {
-  primary: "#92400e",
-  primaryLight: "#f59e0b",
-  primarySoft: "#ffedd5",
-  text: "#0f172a",
-  muted: "#64748b",
-  danger: "#dc2626",
-  border: "#d7e0dc",
 };
 
 const initialValues: AddHardwareProductValues = {
@@ -410,70 +399,6 @@ export function AddHardwareProductModal({
             />
           </ModalField>
         </Box>
-
-        <FormControl
-          component="fieldset"
-          disabled={isSubmitting}
-          error={Boolean(errors.inventoryStatus)}
-        >
-          <Typography
-            component="legend"
-            sx={{
-              mb: 1,
-              color: errors.inventoryStatus ? colors.danger : colors.text,
-              fontSize: 10,
-              fontWeight: 950,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-            }}
-          >
-            Estado del inventario
-          </Typography>
-
-          <RadioGroup
-            row
-            name="inventoryStatus"
-            value={values.inventoryStatus}
-            onChange={(event) => {
-              updateField("inventoryStatus", event.target.value);
-            }}
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                sm: "1fr 1fr",
-              },
-              gap: 1.5,
-            }}
-          >
-            <StatusOption
-              value="Available"
-              label="En stock"
-              description="Producto disponible"
-              selected={values.inventoryStatus === "Available"}
-            />
-
-            <StatusOption
-              value="LowStock"
-              label="Stock bajo"
-              description="Requiere reposición"
-              selected={values.inventoryStatus === "LowStock"}
-            />
-          </RadioGroup>
-
-          {errors.inventoryStatus && (
-            <Typography
-              sx={{
-                mt: 0.75,
-                color: colors.danger,
-                fontSize: 10.5,
-                fontWeight: 650,
-              }}
-            >
-              {errors.inventoryStatus}
-            </Typography>
-          )}
-        </FormControl>
       </Box>
     </FormModal>
   );
@@ -490,7 +415,7 @@ const fieldStyles: SxProps<Theme> = {
     transition: "all 0.18s ease",
 
     "& fieldset": {
-      borderColor: colors.border,
+      borderColor: colors.cardBorder,
     },
 
     "&:hover fieldset": {
@@ -584,7 +509,7 @@ const menuPaperStyles: SxProps<Theme> = {
   borderRadius: "10px",
   bgcolor: "#ffffff",
 
-  border: `1px solid ${colors.border}`,
+  border: `1px solid ${colors.cardBorder}`,
 
   boxShadow: "0 14px 34px rgba(15, 23, 42, 0.16)",
 
@@ -671,7 +596,7 @@ function StatusOption({
 
         borderRadius: "9px",
 
-        border: `1px solid ${selected ? colors.primary : colors.border}`,
+        border: `1px solid ${selected ? colors.primary : colors.cardBorder}`,
 
         bgcolor: selected ? "#fff7ed" : "#ffffff",
 

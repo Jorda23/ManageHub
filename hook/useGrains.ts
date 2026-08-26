@@ -15,7 +15,7 @@ import type {
   GrainSalesFilters,
   RegisterGrainSaleRequest,
   RegisterGrainSaleResponse,
-} from "@/types/api.types";
+} from "@/shared/types/api.types";
 
 const GRAIN_PRODUCTS_QUERY_KEY = ["grain-products"];
 

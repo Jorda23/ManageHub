@@ -13,13 +13,9 @@ import {
   FaRulerCombined,
 } from "react-icons/fa";
 
-import {
-  colors,
-  formatCurrency,
-  getPendingAmount,
-  getStatusColors,
-  type PropertyItem,
-} from "@/layouts/Property/propertyWorkspaceData";
+import { getPendingAmount, getStatusColors, type PropertyItem } from "@/shared/data/property.data";
+import { colors } from "@/theme/sharedColors";
+import { formatCurrency } from "@/shared";
 
 type PropertyCardProps = {
   property: PropertyItem;

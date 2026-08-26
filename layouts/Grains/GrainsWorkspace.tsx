@@ -1,31 +1,18 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { FaBoxes, FaExclamationTriangle, FaFileInvoiceDollar, FaSeedling } from "react-icons/fa";
 import { Box } from "@mui/material";
 
-import {
-  useCreateGrainProduct,
-  useGrainProducts,
-  useGrainSales,
-  useRegisterGrainSale,
-} from "@/hook/useGrains";
-import { grainsColors } from "@/theme/sharedColors";
+import { useCreateGrainProduct, useGrainProducts, useRegisterGrainSale } from "@/hook/useGrains";
 
-import {
-  LoadingState,
-  MetricCard,
-  SectionCard,
-  RegisterSaleCard,
-  SalesHistoryTable,
-  AppShell,
-} from "@/components";
+import { LoadingState, SectionCard, RegisterSaleCard, AppShell } from "@/components";
 import { AddGrainModal, type AddGrainFormValues } from "@/components/AddGrainModal";
 import { GrainInventory, type GrainProduct } from "@/components/GrainInventory";
-import type { WorkspaceConfig } from "@/components/WorkspaceShared/workspaceTypes";
-import type { GrainSale as ApiGrainSale } from "@/types/api.types";
 
-import { HeroHeader } from "./components/HeroHeader";
+import { grainsConfig } from "@/shared/data/grains.data";
+import { paymentMethods } from "@/shared";
+import { colors } from "@/theme/sharedColors";
+import { GrainMetricsGrid, HeroHeader } from "./components";
 
 type GrainSale = {
   id: string;
@@ -39,72 +26,12 @@ type GrainSale = {
   date: string;
 };
 
-export const colors = grainsColors;
-
-export const grainsConfig: WorkspaceConfig = {
-  category: "grains",
-
-  badge: "Módulo de Ventas",
-
-  title: "Ventas de Granos Básicos",
-
-  subtitle: "Inventario independiente para granos, ventas por libra, saco, quintal o kilogramo.",
-
-  heroAccent: "#5ee3a7",
-
-  heroSecondary: "#f59e0b",
-
-  invoice: "#GRN-2026-082",
-
-  customer: "Alex Rivera",
-
-  customerEmail: "alex.rivera@assethub.com",
-
-  agent: "Jordan P.",
-
-  terminal: "Bodega Granos 01",
-
-  customerMode: "quick",
-
-  summaryLabel: "Comprobante de venta",
-
-  summaryTotal: "$58.32",
-
-  summaryNote:
-    "Módulo independiente para controlar inventario, ventas e historial de granos básicos.",
-
-  metrics: [],
-
-  products: [],
-
-  payments: [],
-
-  salesAnalysis: [],
-
-  workflowTitle: "Flujo granos básicos",
-
-  workflowItems: [],
-};
-
-const paymentMethods = ["Efectivo", "Tarjeta", "Transferencia"];
-
-const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat("es-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(value);
-};
-
 export function GrainsWorkspace() {
   const { data: grainProducts = [], isLoading: isLoadingProducts } = useGrainProducts();
-
-  const { data: apiSales = [], isLoading: isLoadingSales, isError: isSalesError } = useGrainSales();
 
   const { mutateAsync: createGrainProduct, isPending: isCreatingProduct } = useCreateGrainProduct();
 
   const { mutateAsync: registerGrainSale } = useRegisterGrainSale();
-
-  const isLoading = isLoadingProducts || isLoadingSales;
 
   const [selectedProductId, setSelectedProductId] = useState("");
 
@@ -147,32 +74,6 @@ export function GrainsWorkspace() {
     });
   }, [grainProducts]);
 
-  const sales = useMemo<GrainSale[]>(() => {
-    return apiSales.map((sale: ApiGrainSale) => ({
-      id: sale.id,
-
-      productId: sale.productId,
-
-      productName: sale.productName,
-
-      unit: sale.unit,
-
-      quantity: sale.quantity,
-
-      unitPrice: sale.unitPrice,
-
-      total: sale.total,
-
-      paymentMethod: sale.paymentMethod,
-
-      date: new Date(sale.createdAt).toLocaleString("es-NI", {
-        dateStyle: "short",
-
-        timeStyle: "short",
-      }),
-    }));
-  }, [apiSales]);
-
   const activeSelectedProductId = useMemo(() => {
     if (selectedProductId && products.some((product) => product.id === selectedProductId)) {
       return selectedProductId;
@@ -194,35 +95,6 @@ export function GrainsWorkspace() {
 
     return selectedProduct.price * numericQuantity;
   }, [selectedProduct, numericQuantity]);
-
-  const totalSold = useMemo(() => {
-    return sales.reduce((total, sale) => total + sale.total, 0);
-  }, [sales]);
-
-  const totalInventory = useMemo(() => {
-    return products.reduce((total, product) => total + product.stock, 0);
-  }, [products]);
-
-  const lowStockCount = useMemo(() => {
-    return products.filter((product) => product.stock <= product.minStock).length;
-  }, [products]);
-
-  const averageCheckoutTime = useMemo(() => {
-    if (apiSales.length < 2) {
-      return "Sin datos";
-    }
-
-    const sortedSaleTimes = apiSales
-      .map((sale) => new Date(sale.createdAt).getTime())
-      .sort((a, b) => a - b);
-
-    const intervals = sortedSaleTimes.slice(1).map((time, index) => time - sortedSaleTimes[index]);
-
-    const averageInterval =
-      intervals.reduce((total, interval) => total + interval, 0) / intervals.length;
-
-    return formatDuration(averageInterval);
-  }, [apiSales]);
 
   const handleRegisterSale = async (): Promise<void> => {
     setError("");
@@ -322,152 +194,94 @@ export function GrainsWorkspace() {
     console.log("Editar producto:", product);
   };
 
+  if (isLoadingProducts) {
+    return (
+      <AppShell active={grainsConfig.category}>
+        <LoadingState message="Cargando módulo de granos..." />
+      </AppShell>
+    );
+  }
+
   return (
     <AppShell active={grainsConfig.category}>
-      {isLoading ? (
-        <LoadingState message="Cargando módulo de granos..." />
-      ) : (
+      <Box
+        sx={{
+          width: "100%",
+          minHeight: "calc(100vh - 48px)",
+          px: {
+            xs: 2,
+            md: 4,
+          },
+          py: {
+            xs: 2.5,
+            md: 3,
+          },
+          bgcolor: colors.pageBg,
+          color: colors.text,
+        }}
+      >
         <Box
           sx={{
             width: "100%",
-            minHeight: "calc(100vh - 48px)",
-            px: {
-              xs: 2,
-              md: 4,
-            },
-            py: {
-              xs: 2.5,
-              md: 3,
-            },
-            bgcolor: colors.pageBg,
-            color: colors.text,
+            maxWidth: 1440,
+            mx: "auto",
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
           }}
         >
+          <HeroHeader />
+
+          <GrainMetricsGrid grainProducts={grainProducts} />
+
           <Box
             sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                lg: "minmax(0, 2fr) minmax(340px, 1fr)",
+              },
+              gap: {
+                xs: 2,
+                md: 2.5,
+              },
+              alignItems: "start",
               width: "100%",
-              maxWidth: 1440,
-              mx: "auto",
-              display: "flex",
-              flexDirection: "column",
-              gap: 3,
+              minWidth: 0,
             }}
           >
-            <HeroHeader />
-
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  sm: "repeat(2, minmax(0, 1fr))",
-                  lg: "repeat(3, minmax(0, 1fr))",
-                },
-                gap: 2.5,
+            <GrainInventory
+              products={products}
+              onAddProduct={() => {
+                setIsAddGrainOpen(true);
               }}
-            >
-              <MetricCard
-                icon={<FaFileInvoiceDollar />}
-                iconBg={colors.primarySoft}
-                iconColor={colors.primaryLight}
-                label="Ventas registradas"
-                value={sales.length.toString()}
-                detail={`Total: ${formatCurrency(totalSold)}`}
-              />
-
-              <MetricCard
-                icon={<FaBoxes />}
-                iconBg={colors.primarySoft}
-                iconColor={colors.primaryLight}
-                label="Productos en stock"
-                value={totalInventory.toString()}
-                detail={`${products.length} productos activos`}
-              />
-
-              <MetricCard
-                icon={<FaExclamationTriangle />}
-                iconBg={colors.orangeSoft}
-                iconColor={colors.orange}
-                label="Bajo inventario"
-                value={lowStockCount.toString()}
-                detail="Requieren revisión"
-              />
-            </Box>
-
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  lg: "minmax(0, 2fr) minmax(340px, 1fr)",
-                },
-                gap: {
-                  xs: 2,
-                  md: 2.5,
-                },
-                alignItems: "start",
-                width: "100%",
-                minWidth: 0,
-              }}
-            >
-              <GrainInventory
-                products={products}
-                onAddProduct={() => {
-                  setIsAddGrainOpen(true);
-                }}
-                onEditProduct={handleEditProduct}
-              />
-
-              <SectionCard
-                sx={{
-                  height: "100%",
-                }}
-              >
-                <RegisterSaleCard
-                  products={products}
-                  selectedProduct={selectedProduct}
-                  selectedProductId={activeSelectedProductId}
-                  quantity={quantity}
-                  numericQuantity={numericQuantity}
-                  paymentMethod={paymentMethod}
-                  paymentMethods={paymentMethods}
-                  saleTotal={saleTotal}
-                  error={error}
-                  onSelectedProductChange={setSelectedProductId}
-                  onQuantityChange={setQuantity}
-                  onPaymentMethodChange={setPaymentMethod}
-                  onRegisterSale={handleRegisterSale}
-                />
-              </SectionCard>
-            </Box>
-
-            <SalesHistoryTable
-              sales={sales}
-              totalSold={totalSold}
-              isLoading={isLoadingSales}
-              isError={isSalesError}
-              title="Historial de transacciones"
-              subtitle="Últimas ventas registradas en el módulo de granos"
-              productIcon={<FaSeedling size={13} />}
-              getRecordLabel={(sale) => `Venta #${sale.id.slice(-4).toUpperCase()}`}
-              getQuantityLabel={(sale) => `${sale.quantity} ${sale.unit}`}
-              getProductSecondaryText={() => "Producto vendido"}
-              colors={{
-                border: colors.cardBorder,
-                text: colors.text,
-                muted: colors.muted,
-                primary: colors.orange,
-                primarySoft: colors.orangeSoft,
-                tableHead: colors.tableHead,
-                rowHover: "#f0fdf4",
-                paymentBg: colors.primarySoft,
-                paymentText: colors.primary,
-                paymentBorder: "#bbf7d0",
-              }}
+              onEditProduct={handleEditProduct}
             />
+
+            <SectionCard
+              sx={{
+                height: "100%",
+              }}
+            >
+              <RegisterSaleCard
+                products={products}
+                selectedProduct={selectedProduct}
+                selectedProductId={activeSelectedProductId}
+                quantity={quantity}
+                numericQuantity={numericQuantity}
+                paymentMethod={paymentMethod}
+                paymentMethods={paymentMethods}
+                saleTotal={saleTotal}
+                error={error}
+                onSelectedProductChange={setSelectedProductId}
+                onQuantityChange={setQuantity}
+                onPaymentMethodChange={setPaymentMethod}
+                onRegisterSale={handleRegisterSale}
+              />
+            </SectionCard>
           </Box>
         </Box>
-      )}
+      </Box>
 
       <AddGrainModal
         open={isAddGrainOpen}
@@ -482,16 +296,4 @@ export function GrainsWorkspace() {
       />
     </AppShell>
   );
-}
-
-function formatDuration(milliseconds: number): string {
-  if (!Number.isFinite(milliseconds) || milliseconds <= 0) {
-    return "0m 00s";
-  }
-
-  const totalSeconds = Math.round(milliseconds / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-
-  return `${minutes}m ${String(seconds).padStart(2, "0")}s`;
 }

@@ -2,7 +2,7 @@
 
 import { type ReactNode } from "react";
 import { Box, Card, Typography } from "@mui/material";
-import { hardwareColors } from "@/theme/sharedColors";
+import { colors } from "@/theme/sharedColors";
 
 type MetricCardProps = {
   icon: ReactNode;
@@ -19,8 +19,8 @@ export function MetricCard({ icon, iconBg, iconColor, label, value, detail }: Me
       elevation={0}
       sx={{
         borderRadius: "16px",
-        border: `1px solid ${hardwareColors.cardBorder}`,
-        bgcolor: hardwareColors.cardBg,
+        border: `1px solid ${colors.cardBorder}`,
+        bgcolor: colors.cardBg,
         boxShadow: "0 8px 22px rgba(15, 23, 42, 0.05)",
       }}
     >
@@ -55,7 +55,7 @@ export function MetricCard({ icon, iconBg, iconColor, label, value, detail }: Me
           <Typography
             sx={{
               fontSize: 11,
-              color: hardwareColors.text,
+              color: colors.text,
               fontWeight: 950,
               textTransform: "uppercase",
               letterSpacing: "0.03em",
@@ -72,7 +72,7 @@ export function MetricCard({ icon, iconBg, iconColor, label, value, detail }: Me
               },
               fontWeight: 950,
               lineHeight: 1.1,
-              color: hardwareColors.text,
+              color: colors.text,
               overflowWrap: "anywhere",
             }}
           >
@@ -82,7 +82,7 @@ export function MetricCard({ icon, iconBg, iconColor, label, value, detail }: Me
           <Typography
             sx={{
               fontSize: 12,
-              color: hardwareColors.muted,
+              color: colors.muted,
             }}
           >
             {detail}

@@ -1,39 +1,30 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-
-import { FaBoxes, FaClipboardCheck, FaExclamationTriangle, FaWrench } from "react-icons/fa";
-
 import { Box } from "@mui/material";
 
 import {
   useCreateHardwareProduct,
   useHardwareProducts,
-  useHardwareSales,
   useRegisterHardwareSale,
 } from "@/hook/useHardware";
-
-import { hardwareColors } from "@/theme/sharedColors";
-
-import type { HardwareSale as ApiHardwareSale } from "@/types/api.types";
-import type { WorkspaceConfig } from "@/components/WorkspaceShared/workspaceTypes";
 
 import {
   AddHardwareProductModal,
   type AddHardwareProductValues,
 } from "@/components/AddHardwareProductModal";
 
-import { HardwareInventory, type HardwareProduct } from "@/components/HardwareInventory";
-
 import {
   LoadingState,
-  MetricCard,
   SectionCard,
   RegisterSaleCard,
-  SalesHistoryTable,
   AppShell,
+  HardwareInventory,
+  HardwareProduct,
 } from "@/components";
-import { HardwareWorkspaceHero } from "./components/HardwareWorkspaceHero";
+import { paymentMethods, hardwareConfig } from "@/shared";
+import { colors } from "@/theme/sharedColors";
+import { HardwareMetricsGrid, HardwareWorkspaceHero } from "./components";
 
 type HardwareSale = {
   id: string;
@@ -46,59 +37,6 @@ type HardwareSale = {
   date: string;
 };
 
-export const colors = hardwareColors;
-
-const hardwareConfig: WorkspaceConfig = {
-  category: "hardware",
-
-  badge: "Ferretería",
-
-  title: "Ventas de Ferretería",
-
-  subtitle: "Control de productos, cantidades, precios, inventario e historial de ventas.",
-
-  heroAccent: "#f59e0b",
-
-  heroSecondary: "#19d3d8",
-
-  invoice: "#FER-2026-014",
-
-  customer: "Carlos Mendoza",
-
-  customerEmail: "carlos.mendoza@assethub.com",
-
-  agent: "M. Torres",
-
-  terminal: "Caja Ferretería 01",
-
-  customerMode: "quick",
-
-  summaryLabel: "Ticket de venta",
-
-  summaryTotal: "$124.90",
-
-  summaryNote:
-    "Módulo para ventas rápidas de productos de ferretería, control de stock e historial.",
-
-  metrics: [],
-
-  products: [],
-
-  payments: [],
-
-  salesAnalysis: [],
-
-  workflowTitle: "Flujo ferretería",
-
-  workflowItems: [
-    "Seleccionar productos del inventario",
-    "Verificar cantidades y precios",
-    "Cobrar y generar recibo",
-  ],
-};
-
-const paymentMethods = ["Efectivo", "Tarjeta", "Crédito local", "Transferencia"];
-
 const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat("es-US", {
     style: "currency",
@@ -107,17 +45,7 @@ const formatCurrency = (value: number): string => {
 };
 
 export function HardwareWorkspace() {
-  const {
-    data: hardwareProducts = [],
-    isLoading: isLoadingProducts,
-    isError: isProductsError,
-  } = useHardwareProducts();
-
-  const {
-    data: apiSales = [],
-    isLoading: isLoadingSales,
-    isError: isSalesError,
-  } = useHardwareSales();
+  const { data: hardwareProducts = [], isLoading: isLoadingProducts } = useHardwareProducts();
 
   const { mutateAsync: createHardwareProduct, isPending: isCreatingProduct } =
     useCreateHardwareProduct();
@@ -166,29 +94,6 @@ export function HardwareWorkspace() {
     });
   }, [hardwareProducts]);
 
-  const sales = useMemo<HardwareSale[]>(() => {
-    return apiSales.map((sale: ApiHardwareSale) => ({
-      id: sale.id,
-
-      productId: sale.productId,
-
-      productName: sale.productName,
-
-      quantity: sale.quantity,
-
-      unitPrice: sale.unitPrice,
-
-      total: sale.total,
-
-      paymentMethod: sale.paymentMethod,
-
-      date: new Date(sale.createdAt).toLocaleString("es-NI", {
-        dateStyle: "short",
-        timeStyle: "short",
-      }),
-    }));
-  }, [apiSales]);
-
   useEffect(() => {
     if (products.length > 0 && !selectedProductId) {
       setSelectedProductId(products[0].id);
@@ -218,18 +123,6 @@ export function HardwareWorkspace() {
 
     return selectedProduct.price * numericQuantity;
   }, [numericQuantity, selectedProduct]);
-
-  const totalSold = useMemo(() => {
-    return sales.reduce((total, sale) => total + sale.total, 0);
-  }, [sales]);
-
-  const totalStock = useMemo(() => {
-    return products.reduce((total, product) => total + product.stock, 0);
-  }, [products]);
-
-  const lowStockCount = useMemo(() => {
-    return products.filter((product) => product.stock <= product.minStock).length;
-  }, [products]);
 
   const handleRegisterSale = async (): Promise<void> => {
     setError("");
@@ -331,159 +224,98 @@ export function HardwareWorkspace() {
     console.log("Editar producto de ferretería:", product);
   };
 
+  if (isLoadingProducts) {
+    return (
+      <AppShell active={hardwareConfig.category}>
+        <LoadingState message="Cargando módulo de Ferretería..." />
+      </AppShell>
+    );
+  }
+
   return (
     <AppShell active={hardwareConfig.category}>
-      {isLoadingProducts ? (
-        <LoadingState message="Cargando módulo de Ferretería..." />
-      ) : (
+      <Box
+        sx={{
+          width: "100%",
+          minHeight: "calc(100vh - 48px)",
+          px: {
+            xs: 2,
+            md: 4,
+          },
+          py: {
+            xs: 2.5,
+            md: 3,
+          },
+          bgcolor: colors.pageBg,
+          color: colors.text,
+        }}
+      >
         <Box
           sx={{
             width: "100%",
-            minHeight: "calc(100vh - 48px)",
-            px: {
-              xs: 2,
-              md: 4,
-            },
-            py: {
-              xs: 2.5,
-              md: 3,
-            },
-            bgcolor: colors.pageBg,
-            color: colors.text,
+            maxWidth: 1440,
+            mx: "auto",
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
           }}
         >
+          <HardwareWorkspaceHero
+            badge={hardwareConfig.badge}
+            title={hardwareConfig.title}
+            subtitle={hardwareConfig.subtitle}
+          />
+
+          <HardwareMetricsGrid hardwareProducts={hardwareProducts} />
+
           <Box
             sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                lg: "minmax(0, 2fr) minmax(340px, 1fr)",
+              },
+              gap: {
+                xs: 2,
+                md: 2.5,
+              },
+              alignItems: "start",
               width: "100%",
-              maxWidth: 1440,
-              mx: "auto",
-              display: "flex",
-              flexDirection: "column",
-              gap: 3,
+              minWidth: 0,
             }}
           >
-            <HardwareWorkspaceHero
-              badge={hardwareConfig.badge}
-              title={hardwareConfig.title}
-              subtitle={hardwareConfig.subtitle}
+            <HardwareInventory
+              products={products}
+              onAddProduct={() => {
+                setIsAddProductModalOpen(true);
+              }}
+              onEditProduct={handleEditProduct}
             />
 
-            <Box
+            <SectionCard
               sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  sm: "repeat(2, minmax(0, 1fr))",
-                  lg: "repeat(3, minmax(0, 1fr))",
-                },
-                gap: {
-                  xs: 1.5,
-                  md: 2,
-                },
+                height: "100%",
               }}
             >
-              <MetricCard
-                icon={<FaClipboardCheck />}
-                iconBg={colors.greenSoft}
-                iconColor={colors.green}
-                label="Ventas registradas"
-                value={sales.length.toString()}
-                detail={`Total: ${formatCurrency(totalSold)}`}
-              />
-
-              <MetricCard
-                icon={<FaBoxes />}
-                iconBg={colors.primarySoft}
-                iconColor={colors.primaryLight}
-                label="Productos en stock"
-                value={totalStock.toString()}
-                detail={`${products.length} productos activos`}
-              />
-
-              <MetricCard
-                icon={<FaExclamationTriangle />}
-                iconBg={colors.dangerSoft}
-                iconColor={colors.danger}
-                label="Bajo inventario"
-                value={lowStockCount.toString()}
-                detail="Requieren revisión"
-              />
-            </Box>
-
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  lg: "minmax(0, 2fr) minmax(340px, 1fr)",
-                },
-                gap: {
-                  xs: 2,
-                  md: 2.5,
-                },
-                alignItems: "start",
-                width: "100%",
-                minWidth: 0,
-              }}
-            >
-              <HardwareInventory
+              <RegisterSaleCard
                 products={products}
-                onAddProduct={() => {
-                  setIsAddProductModalOpen(true);
-                }}
-                onEditProduct={handleEditProduct}
+                selectedProduct={selectedProduct}
+                selectedProductId={selectedProductId}
+                quantity={quantity}
+                numericQuantity={numericQuantity}
+                paymentMethod={paymentMethod}
+                paymentMethods={paymentMethods}
+                saleTotal={saleTotal}
+                error={error}
+                onSelectedProductChange={setSelectedProductId}
+                onQuantityChange={setQuantity}
+                onPaymentMethodChange={setPaymentMethod}
+                onRegisterSale={handleRegisterSale}
               />
-
-              <SectionCard
-                sx={{
-                  height: "100%",
-                }}
-              >
-                <RegisterSaleCard
-                  products={products}
-                  selectedProduct={selectedProduct}
-                  selectedProductId={selectedProductId}
-                  quantity={quantity}
-                  numericQuantity={numericQuantity}
-                  paymentMethod={paymentMethod}
-                  paymentMethods={paymentMethods}
-                  saleTotal={saleTotal}
-                  error={error}
-                  onSelectedProductChange={setSelectedProductId}
-                  onQuantityChange={setQuantity}
-                  onPaymentMethodChange={setPaymentMethod}
-                  onRegisterSale={handleRegisterSale}
-                />
-              </SectionCard>
-            </Box>
-
-            <SalesHistoryTable
-              sales={sales}
-              totalSold={totalSold}
-              isLoading={isLoadingSales}
-              isError={isSalesError}
-              title="Historial de ventas"
-              subtitle="Productos vendidos, cantidades, precios y métodos de pago"
-              productIcon={<FaWrench size={13} />}
-              getRecordLabel={(sale) => `Venta #${sale.id.slice(-4).toUpperCase()}`}
-              getQuantityLabel={(sale) => `${sale.quantity}`}
-              getProductSecondaryText={() => "Producto de ferretería"}
-              colors={{
-                primary: colors.primary,
-                primarySoft: colors.primarySoft,
-                border: colors.cardBorder,
-                text: colors.text,
-                muted: colors.muted,
-                tableHead: colors.tableHead,
-                rowHover: "#fff7ed",
-                paymentBg: colors.greenSoft,
-                paymentText: colors.green,
-                paymentBorder: "#bbf7d0",
-              }}
-            />
+            </SectionCard>
           </Box>
         </Box>
-      )}
+      </Box>
 
       <AddHardwareProductModal
         open={isAddProductModalOpen}

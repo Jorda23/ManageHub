@@ -1,2 +1,2 @@
 export * from "./PropertyCard";
-export type { AccountStatus, PropertyItem } from "@/layouts/Property/propertyWorkspaceData";
+export type { AccountStatus, PropertyItem } from "@/shared/data/property.data";

@@ -2,11 +2,11 @@ import { Box, Divider } from "@mui/material";
 import { FaMapMarkedAlt } from "react-icons/fa";
 
 import { PropertyCard } from "@/components/PropertyCard";
+import { EmptyState } from "@/components/EmptyState";
 
-import { type PropertyItem } from "../propertyWorkspaceData";
+import { type PropertyItem } from "../../../shared/data/property.data";
 import { PropertySectionCard } from "./PropertySectionCard";
 import { PropertySectionHeader } from "./PropertySectionHeader";
-import { EmptyState } from "@/components/EmptyState";
 
 type PropertyTerrainsSectionProps = {
   properties: PropertyItem[];

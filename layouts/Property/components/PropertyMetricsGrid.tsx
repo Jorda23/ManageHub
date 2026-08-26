@@ -1,14 +1,69 @@
-import type { ReactNode } from "react";
+import { useMemo } from "react";
 
-import { Box, Card, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 
-import { colors, type PropertyMetric } from "../propertyWorkspaceData";
+import { FaClipboardCheck, FaFileContract, FaHome, FaMoneyBillWave } from "react-icons/fa";
+
+import { MetricCard, type PropertyItem } from "@/components";
+import { formatCurrency, getPendingAmount, type PropertyMetric } from "@/shared";
+import { colors } from "@/theme/sharedColors";
 
 type PropertyMetricsGridProps = {
-  metrics: PropertyMetric[];
+  properties: PropertyItem[];
 };
 
-export function PropertyMetricsGrid({ metrics }: PropertyMetricsGridProps) {
+export function PropertyMetricsGrid({ properties }: PropertyMetricsGridProps) {
+  const totalPortfolioValue = useMemo(() => {
+    return properties.reduce((total, property) => total + property.price, 0);
+  }, [properties]);
+
+  const totalPaid = useMemo(() => {
+    return properties.reduce((total, property) => total + property.paid, 0);
+  }, [properties]);
+
+  const totalPending = useMemo(() => {
+    return properties.reduce((total, property) => total + getPendingAmount(property), 0);
+  }, [properties]);
+
+  const paidAccounts = useMemo(() => {
+    return properties.filter((property) => property.status === "Pagado").length;
+  }, [properties]);
+
+  const metrics: PropertyMetric[] = [
+    {
+      icon: <FaHome />,
+      iconBg: colors.primarySoft,
+      iconColor: colors.primaryLight,
+      label: "Terrenos activos",
+      value: properties.length.toString(),
+      detail: "Captados por clientes",
+    },
+    {
+      icon: <FaMoneyBillWave />,
+      iconBg: colors.greenSoft,
+      iconColor: colors.green,
+      label: "Total abonado",
+      value: formatCurrency(totalPaid),
+      detail: "Pagos confirmados",
+    },
+    {
+      icon: <FaFileContract />,
+      iconBg: colors.orangeSoft,
+      iconColor: colors.orange,
+      label: "Saldo pendiente",
+      value: formatCurrency(totalPending),
+      detail: "Por cobrar",
+    },
+    {
+      icon: <FaClipboardCheck />,
+      iconBg: colors.purpleSoft,
+      iconColor: colors.purple,
+      label: "Cuentas pagadas",
+      value: `${paidAccounts}/${properties.length}`,
+      detail: formatCurrency(totalPortfolioValue),
+    },
+  ];
+
   return (
     <Box
       sx={{
@@ -28,94 +83,5 @@ export function PropertyMetricsGrid({ metrics }: PropertyMetricsGridProps) {
         <MetricCard key={metric.label} {...metric} />
       ))}
     </Box>
-  );
-}
-
-type MetricCardProps = {
-  icon: ReactNode;
-  iconBg: string;
-  iconColor: string;
-  label: string;
-  value: string;
-  detail: string;
-};
-
-function MetricCard({ icon, iconBg, iconColor, label, value, detail }: MetricCardProps) {
-  return (
-    <Card
-      elevation={0}
-      sx={{
-        borderRadius: "16px",
-        border: `1px solid ${colors.cardBorder}`,
-        bgcolor: colors.cardBg,
-        boxShadow: "0 8px 22px rgba(15, 23, 42, 0.05)",
-      }}
-    >
-      <Box
-        sx={{
-          p: {
-            xs: 1.8,
-            md: 2.25,
-          },
-          display: "flex",
-          gap: 2,
-          alignItems: "center",
-        }}
-      >
-        <Box
-          sx={{
-            width: 44,
-            height: 44,
-            borderRadius: "16px",
-            display: "grid",
-            placeItems: "center",
-            bgcolor: iconBg,
-            color: iconColor,
-            fontSize: 19,
-            flexShrink: 0,
-          }}
-        >
-          {icon}
-        </Box>
-
-        <Box sx={{ minWidth: 0 }}>
-          <Typography
-            sx={{
-              fontSize: 11,
-              color: colors.text,
-              fontWeight: 950,
-              textTransform: "uppercase",
-              letterSpacing: "0.03em",
-            }}
-          >
-            {label}
-          </Typography>
-
-          <Typography
-            sx={{
-              fontSize: {
-                xs: 20,
-                md: 22,
-              },
-              fontWeight: 950,
-              lineHeight: 1.1,
-              color: colors.text,
-              overflowWrap: "anywhere",
-            }}
-          >
-            {value}
-          </Typography>
-
-          <Typography
-            sx={{
-              fontSize: 12,
-              color: colors.muted,
-            }}
-          >
-            {detail}
-          </Typography>
-        </Box>
-      </Box>
-    </Card>
   );
 }

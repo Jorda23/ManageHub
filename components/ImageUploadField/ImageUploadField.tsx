@@ -5,6 +5,7 @@ import { ChangeEvent, DragEvent, KeyboardEvent, useId, useRef, useState } from "
 import { Box, Button, Typography } from "@mui/material";
 
 import { FaImage, FaTrashAlt, FaUpload } from "react-icons/fa";
+import { colors } from "@/theme/sharedColors";
 
 type ImageUploadFieldProps = {
   label?: string;
@@ -13,20 +14,6 @@ type ImageUploadFieldProps = {
   accept?: string;
   maxSizeMb?: number;
   onChange: (value: string) => void;
-};
-
-const colors = {
-  primary: "#1e3a8a",
-  primaryLight: "#2563eb",
-  primarySoft: "#eff6ff",
-
-  text: "#0f172a",
-  muted: "#64748b",
-
-  border: "#cbd5e1",
-  danger: "#dc2626",
-
-  background: "#f8fafc",
 };
 
 export function ImageUploadField({
@@ -151,9 +138,9 @@ export function ImageUploadField({
             borderRadius: "14px",
             overflow: "hidden",
 
-            border: `1px solid ${colors.border}`,
+            border: `1px solid ${colors.cardBorder}`,
 
-            bgcolor: colors.background,
+            bgcolor: colors.cardBg,
           }}
         >
           <Box

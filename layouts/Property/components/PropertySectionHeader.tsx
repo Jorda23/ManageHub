@@ -2,8 +2,7 @@ import type { ReactNode } from "react";
 
 import { Box, Button, Typography } from "@mui/material";
 import { FaPlusCircle } from "react-icons/fa";
-
-import { colors } from "../propertyWorkspaceData";
+import { colors } from "@/theme/sharedColors";
 
 type PropertySectionHeaderProps = {
   icon: ReactNode;

@@ -12,6 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import { FaTimes } from "react-icons/fa";
+import { colors } from "@/theme/sharedColors";
 
 type FormModalProps = {
   open: boolean;
@@ -26,15 +27,6 @@ type FormModalProps = {
   maxWidth?: number;
   onClose: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-};
-
-const colors = {
-  primary: "#064e3b",
-  primaryLight: "#0f766e",
-  primarySoft: "#dcfce7",
-  text: "#0f172a",
-  muted: "#64748b",
-  border: "#dce5e1",
 };
 
 export function FormModal({
@@ -91,7 +83,7 @@ export function FormModal({
             },
             overflow: "hidden",
             bgcolor: "#ffffff",
-            border: `1px solid ${colors.border}`,
+            border: `1px solid ${colors.cardBorder}`,
             boxShadow: "0 28px 80px rgba(15, 23, 42, 0.24)",
 
             display: "flex",
@@ -131,7 +123,7 @@ export function FormModal({
               sm: 2.75,
             },
             bgcolor: "#f8fbfa",
-            borderBottom: `1px solid ${colors.border}`,
+            borderBottom: `1px solid ${colors.cardBorder}`,
           }}
         >
           <Box
@@ -232,7 +224,7 @@ export function FormModal({
                 height: 34,
                 color: colors.muted,
                 bgcolor: "#ffffff",
-                border: `1px solid ${colors.border}`,
+                border: `1px solid ${colors.cardBorder}`,
                 flexShrink: 0,
 
                 "&:hover": {
@@ -279,7 +271,7 @@ export function FormModal({
 
             "&::-webkit-scrollbar-thumb": {
               bgcolor: "#b8c5c0",
-              borderRadius: 999,
+              cardBorderRadius: 999,
             },
 
             "&::-webkit-scrollbar-thumb:hover": {
@@ -303,7 +295,7 @@ export function FormModal({
             },
             gap: 1.25,
             bgcolor: "#f8fbfa",
-            borderTop: `1px solid ${colors.border}`,
+            borderTop: `1px solid ${colors.cardBorder}`,
 
             flexDirection: {
               xs: "column-reverse",

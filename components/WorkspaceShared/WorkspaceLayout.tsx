@@ -27,7 +27,7 @@ import {
   FaTruckLoading,
 } from "react-icons/fa";
 
-import { saleCategories, type SaleCategory } from "@/components/SaleWorkspace/saleWorkspaceData";
+import { saleCategories, type SaleCategory } from "@/shared/data/saleWorkspace.data";
 import type {
   IconType,
   WorkspaceAnalysisItem,

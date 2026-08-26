@@ -1,3 +1,5 @@
+import { formatCurrency } from "@/shared";
+
 type GeneratePaymentInvoiceParams = {
   invoiceWindow: Window;
   invoiceNumber: string;
@@ -11,13 +13,6 @@ type GeneratePaymentInvoiceParams = {
   previousPaid: number;
   paymentDate?: Date;
 };
-
-const formatCurrency = (value: number): string =>
-  new Intl.NumberFormat("es-NI", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-  }).format(value);
 
 const formatDate = (date: Date): string =>
   new Intl.DateTimeFormat("es-NI", {

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import { Box, Typography } from "@mui/material";
 import { FaBoxOpen } from "react-icons/fa";
-import { sharedColors } from "@/theme/sharedColors";
+import { colors } from "@/theme/sharedColors";
 
 type EmptyStateProps = {
   title: string;
@@ -50,8 +50,8 @@ export function EmptyState({
           },
           display: "grid",
           placeItems: "center",
-          bgcolor: sharedColors.cardBg,
-          color: sharedColors.muted,
+          bgcolor: colors.cardBg,
+          color: colors.muted,
         }}
       >
         {icon}
@@ -59,7 +59,7 @@ export function EmptyState({
 
       <Typography
         sx={{
-          color: sharedColors.text,
+          color: colors.text,
           fontSize: {
             xs: 13,
             sm: 14,
@@ -74,7 +74,7 @@ export function EmptyState({
         <Typography
           sx={{
             mt: 0.5,
-            color: sharedColors.muted,
+            color: colors.muted,
             fontSize: {
               xs: 10.5,
               sm: 12,

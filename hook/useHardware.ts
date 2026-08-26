@@ -15,7 +15,7 @@ import type {
   HardwareSalesFilters,
   RegisterHardwareSaleRequest,
   RegisterHardwareSaleResponse,
-} from "@/types/api.types";
+} from "@/shared/types/api.types";
 
 const HARDWARE_PRODUCTS_QUERY_KEY = ["hardware-products"];
 

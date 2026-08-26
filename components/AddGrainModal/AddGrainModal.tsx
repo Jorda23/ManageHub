@@ -11,6 +11,7 @@ import { FaPlus, FaSeedling } from "react-icons/fa";
 import { FormModal } from "../FormModal";
 import { ModalField } from "../ModalField";
 import { ImageUploadField } from "../ImageUploadField/ImageUploadField";
+import { colors } from "@/theme/sharedColors";
 
 export type AddGrainFormValues = {
   name: string;
@@ -28,16 +29,6 @@ type AddGrainModalProps = {
   open: boolean;
   onClose: () => void;
   onSave: (values: AddGrainFormValues) => void | Promise<void>;
-};
-
-const colors = {
-  primary: "#064e3b",
-  primaryLight: "#0f766e",
-  primarySoft: "#dcfce7",
-  text: "#0f172a",
-  muted: "#64748b",
-  danger: "#ef4444",
-  border: "#d7e0dc",
 };
 
 const initialValues: AddGrainFormValues = {
@@ -384,7 +375,7 @@ const fieldStyles: SxProps<Theme> = {
     transition: "all 0.18s ease",
 
     "& fieldset": {
-      borderColor: colors.border,
+      borderColor: colors.cardBorder,
     },
 
     "&:hover fieldset": {
@@ -480,7 +471,7 @@ const menuPaperStyles: SxProps<Theme> = {
   borderRadius: "10px",
   bgcolor: "#ffffff",
 
-  border: `1px solid ${colors.border}`,
+  border: `1px solid ${colors.cardBorder}`,
 
   boxShadow: "0 14px 34px rgba(15, 23, 42, 0.16)",
 
