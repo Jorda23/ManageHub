@@ -1,118 +1,51 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 
-import { useHardwareSales } from "@/hook/useHardware";
-import { useGrainSales } from "@/hook/useGrains";
-import { usePropertyPayments } from "@/hook/useProperties";
+import { useQuery } from "@tanstack/react-query";
 
-import {
-  mapGrainSaleToHistory,
-  mapHardwareSaleToHistory,
-  mapPropertyPaymentToHistory,
-} from "@/components/History/history.utils";
+import { getPaymentHistory } from "@/service/api";
 
-import type { HistoryFiltersValue, HistoryItem } from "@/components/History/history.types";
+import type { PaymentHistoryItem } from "@/shared/types/api.types";
 
-const DEFAULT_FILTERS: HistoryFiltersValue = {
-  search: "",
-  type: "all",
-  status: "all",
-  from: "",
-  to: "",
+const HISTORY_QUERY_KEY = ["payment-history"];
+
+const SEARCH_DEBOUNCE_MS = 400;
+
+type HistoryQueryFilters = {
+  type?: "hardware" | "grains" | "property" | "all";
+  search?: string;
+  from?: string;
+  to?: string;
 };
 
-export function useHistory(filters: HistoryFiltersValue = DEFAULT_FILTERS) {
-  const {
-    data: hardwareSales = [],
-    isLoading: isLoadingHardware,
-    isError: isHardwareError,
-  } = useHardwareSales();
+function useDebouncedValue<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
 
-  const {
-    data: grainSales = [],
-    isLoading: isLoadingGrains,
-    isError: isGrainsError,
-  } = useGrainSales();
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebounced(value);
+    }, delay);
 
-  const {
-    data: propertyPayments = [],
-    isLoading: isLoadingProperties,
-    isError: isPropertiesError,
-  } = usePropertyPayments();
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [value, delay]);
 
-  const data = useMemo<HistoryItem[]>(() => {
-    const hardwareItems =
-      filters.type === "all" || filters.type === "hardware"
-        ? hardwareSales.map(mapHardwareSaleToHistory)
-        : [];
+  return debounced;
+}
 
-    const grainItems =
-      filters.type === "all" || filters.type === "grains"
-        ? grainSales.map(mapGrainSaleToHistory)
-        : [];
+export function usePaymentHistory(filters?: HistoryQueryFilters) {
+  const debouncedSearch = useDebouncedValue(filters?.search ?? "", SEARCH_DEBOUNCE_MS);
 
-    const propertyItems =
-      filters.type === "all" || filters.type === "property"
-        ? propertyPayments.map(mapPropertyPaymentToHistory)
-        : [];
-
-    return [...hardwareItems, ...grainItems, ...propertyItems]
-      .filter((item) => filterBySearch(item, filters.search))
-      .filter((item) => filterByStatus(item, filters.status))
-      .filter((item) => filterByDateRange(item, filters.from, filters.to))
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [filters, hardwareSales, grainSales, propertyPayments]);
-
-  return {
-    data,
-
-    isLoading: isLoadingHardware || isLoadingGrains || isLoadingProperties,
-
-    isError: isHardwareError || isGrainsError || isPropertiesError,
+  const normalizedFilters: HistoryQueryFilters = {
+    ...filters,
+    search: debouncedSearch,
   };
-}
 
-function filterBySearch(item: HistoryItem, search: string) {
-  const normalizedSearch = search.trim().toLowerCase();
-
-  if (!normalizedSearch) {
-    return true;
-  }
-
-  return (
-    item.clientName.toLowerCase().includes(normalizedSearch) ||
-    item.description.toLowerCase().includes(normalizedSearch) ||
-    item.paymentMethod.toLowerCase().includes(normalizedSearch)
-  );
-}
-
-function filterByStatus(item: HistoryItem, status: HistoryFiltersValue["status"]) {
-  if (status === "all") {
-    return true;
-  }
-
-  return item.status === status;
-}
-
-function filterByDateRange(item: HistoryItem, from: string, to: string) {
-  const itemDate = new Date(item.createdAt);
-
-  if (from) {
-    const fromDate = new Date(`${from}T00:00:00`);
-
-    if (itemDate < fromDate) {
-      return false;
-    }
-  }
-
-  if (to) {
-    const toDate = new Date(`${to}T23:59:59.999`);
-
-    if (itemDate > toDate) {
-      return false;
-    }
-  }
-
-  return true;
+  return useQuery<PaymentHistoryItem[], Error>({
+    queryKey: [...HISTORY_QUERY_KEY, normalizedFilters],
+    queryFn: () => getPaymentHistory(normalizedFilters),
+    placeholderData: (previousData) => previousData,
+  });
 }

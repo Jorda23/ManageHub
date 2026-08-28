@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { Box } from "@mui/material";
 
-import { useHistory } from "@/hook/useHistory";
+import { usePaymentHistory } from "@/hook/useHistory";
 
 import { HistoryEmptyState, HistoryFilters, HistoryTable } from "./components";
 
@@ -13,7 +13,6 @@ import type { HistoryFiltersValue } from "./history.types";
 const INITIAL_FILTERS: HistoryFiltersValue = {
   search: "",
   type: "all",
-  status: "all",
   from: "",
   to: "",
 };
@@ -21,7 +20,7 @@ const INITIAL_FILTERS: HistoryFiltersValue = {
 export function History() {
   const [filters, setFilters] = useState<HistoryFiltersValue>(INITIAL_FILTERS);
 
-  const { data, isLoading, isError } = useHistory(filters);
+  const { data = [], isLoading, isError } = usePaymentHistory(filters);
 
   return (
     <Box

@@ -19,7 +19,7 @@ import dayjs, { type Dayjs } from "dayjs";
 
 import { colors } from "@/theme/sharedColors";
 
-import type { HistoryFiltersValue, HistoryOperationType } from "../history.types";
+import type { HistoryFiltersValue } from "../history.types";
 
 type HistoryFiltersProps = {
   value: HistoryFiltersValue;
@@ -101,8 +101,8 @@ export function HistoryFilters({ value, onChange }: Readonly<HistoryFiltersProps
           display: "grid",
           gridTemplateColumns: {
             xs: "1fr",
-            sm: "repeat(2, minmax(0, 1fr))",
-            lg: "2fr 1fr 1fr",
+            sm: "1fr 1fr",
+            lg: "2fr 1fr 1fr 1fr",
           },
           gap: 1.5,
           bgcolor: colors.cardBg,
@@ -136,9 +136,7 @@ export function HistoryFilters({ value, onChange }: Readonly<HistoryFiltersProps
           <Select
             size="small"
             value={value.type}
-            onChange={(event) =>
-              updateFilter("type", event.target.value as HistoryOperationType | "all")
-            }
+            onChange={(event) => updateFilter("type", event.target.value as HistoryFiltersValue["type"])}
             fullWidth
             sx={inputSx}
           >
@@ -146,21 +144,6 @@ export function HistoryFilters({ value, onChange }: Readonly<HistoryFiltersProps
             <MenuItem value="hardware">Ferretería</MenuItem>
             <MenuItem value="grains">Granos básicos</MenuItem>
             <MenuItem value="property">Terrenos</MenuItem>
-          </Select>
-        </FilterField>
-
-        <FilterField label="Estado">
-          <Select
-            size="small"
-            value={value.status}
-            onChange={(event) =>
-              updateFilter("status", event.target.value as HistoryFiltersValue["status"])
-            }
-            fullWidth
-            sx={inputSx}
-          >
-            <MenuItem value="all">Todos</MenuItem>
-            <MenuItem value="completed">Completado</MenuItem>
           </Select>
         </FilterField>
 

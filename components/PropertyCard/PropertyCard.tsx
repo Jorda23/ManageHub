@@ -1,12 +1,13 @@
 "use client";
 
-import type { KeyboardEvent, ReactNode } from "react";
+import { memo, type KeyboardEvent, type ReactNode } from "react";
 
-import { Box, Chip, LinearProgress, Paper, Typography } from "@mui/material";
+import { Box, Chip, IconButton, LinearProgress, Paper, Typography } from "@mui/material";
 import {
   FaBuilding,
   FaCalendarAlt,
   FaCheckCircle,
+  FaEdit,
   FaExclamationTriangle,
   FaHome,
   FaMapMarkedAlt,
@@ -20,11 +21,16 @@ import { formatCurrency } from "@/shared";
 type PropertyCardProps = {
   property: PropertyItem;
   onClick?: (property: PropertyItem) => void;
+  onEdit?: (property: PropertyItem) => void;
 };
 
 type StatusColors = ReturnType<typeof getStatusColors>;
 
-export function PropertyCard({ property, onClick }: PropertyCardProps) {
+export const PropertyCard = memo(function PropertyCard({
+  property,
+  onClick,
+  onEdit,
+}: PropertyCardProps) {
   const pendingAmount = getPendingAmount(property);
 
   const progress = property.price > 0 ? Math.min(100, (property.paid / property.price) * 100) : 0;
@@ -103,7 +109,7 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
           minWidth: 0,
         }}
       >
-        <PropertyCardHeader property={property} statusColors={statusColors} />
+        <PropertyCardHeader property={property} statusColors={statusColors} onEdit={onEdit} />
 
         <Box
           sx={{
@@ -151,7 +157,7 @@ export function PropertyCard({ property, onClick }: PropertyCardProps) {
       </Box>
     </Paper>
   );
-}
+});
 
 function PropertyImage({ property }: { property: PropertyItem }) {
   const hasImage = Boolean(property.imageUrl?.trim());
@@ -248,9 +254,11 @@ function PropertyImage({ property }: { property: PropertyItem }) {
 function PropertyCardHeader({
   property,
   statusColors,
+  onEdit,
 }: {
   property: PropertyItem;
   statusColors: StatusColors;
+  onEdit?: (property: PropertyItem) => void;
 }) {
   return (
     <Box
@@ -335,33 +343,67 @@ function PropertyCardHeader({
         </Typography>
       </Box>
 
-      <Chip
-        label={property.status}
-        size="small"
+      <Box
         sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 0.5,
           flexShrink: 0,
-          height: {
-            xs: 24,
-            sm: 24,
-            md: 26,
-          },
-          bgcolor: statusColors.bg,
-          color: statusColors.color,
-          border: `1px solid ${statusColors.border}`,
-          fontSize: {
-            xs: 10,
-            sm: 10,
-            md: 11,
-          },
-          fontWeight: 950,
-          "& .MuiChip-label": {
-            px: {
-              xs: 0.9,
-              sm: 1,
-            },
-          },
         }}
-      />
+      >
+        {onEdit && (
+          <IconButton
+            type="button"
+            size="small"
+            aria-label={`Editar ${property.name}`}
+            onClick={(event) => {
+              event.stopPropagation();
+              onEdit(property);
+            }}
+            sx={{
+              width: 26,
+              height: 26,
+              bgcolor: colors.tableHead,
+              border: `1px solid ${colors.cardBorder}`,
+              color: colors.muted,
+              "&:hover": {
+                bgcolor: colors.primarySoft,
+                color: colors.primary,
+              },
+            }}
+          >
+            <FaEdit size={11} />
+          </IconButton>
+        )}
+
+        <Chip
+          label={property.status}
+          size="small"
+          sx={{
+            flexShrink: 0,
+            height: {
+              xs: 24,
+              sm: 24,
+              md: 26,
+            },
+            bgcolor: statusColors.bg,
+            color: statusColors.color,
+            border: `1px solid ${statusColors.border}`,
+            fontSize: {
+              xs: 10,
+              sm: 10,
+              md: 11,
+            },
+            fontWeight: 950,
+            "& .MuiChip-label": {
+              px: {
+                xs: 0.9,
+                sm: 1,
+              },
+            },
+          }}
+        />
+      </Box>
     </Box>
   );
 }

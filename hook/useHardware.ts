@@ -5,6 +5,7 @@ import {
   getHardwareProducts,
   getHardwareSales,
   registerHardwareSale,
+  updateHardwareProduct,
 } from "@/service/api";
 
 import type {
@@ -15,6 +16,8 @@ import type {
   HardwareSalesFilters,
   RegisterHardwareSaleRequest,
   RegisterHardwareSaleResponse,
+  UpdateHardwareProductRequest,
+  UpdateHardwareProductResponse,
 } from "@/shared/types/api.types";
 
 const HARDWARE_PRODUCTS_QUERY_KEY = ["hardware-products"];
@@ -40,6 +43,19 @@ export const useCreateHardwareProduct = () => {
 
   return useMutation<CreateHardwareProductResponse, Error, CreateHardwareProductRequest>({
     mutationFn: createHardwareProduct,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: HARDWARE_PRODUCTS_QUERY_KEY,
+      });
+    },
+  });
+};
+
+export const useUpdateHardwareProduct = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<UpdateHardwareProductResponse, Error, { id: string; request: UpdateHardwareProductRequest }>({
+    mutationFn: ({ id, request }) => updateHardwareProduct(id, request),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: HARDWARE_PRODUCTS_QUERY_KEY,

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useCallback,
   useMemo,
   useState,
 } from "react";
@@ -10,6 +11,7 @@ import { Box } from "@mui/material";
 import {
   useCreateHardwareProduct,
   useHardwareProducts,
+  useUpdateHardwareProduct,
 } from "@/hook/useHardware";
 
 import {
@@ -20,7 +22,11 @@ import {
   HardwareInventoryItem,
   AddHardwareProductValues,
   AddHardwareProductForm,
+  EditHardwareProductForm,
+  EditHardwareProductValues,
 } from "@/components";
+
+import type { HardwareProduct } from "@/shared/types/api.types";
 
 import {
   hardwareConfig,
@@ -48,6 +54,16 @@ export function HardwareWorkspace() {
     mutateAsync: createHardwareProduct,
     isPending: isCreatingProduct,
   } = useCreateHardwareProduct();
+
+  const {
+    mutateAsync: updateHardwareProduct,
+    isPending: isUpdatingProduct,
+  } = useUpdateHardwareProduct();
+
+  const [
+    editingProduct,
+    setEditingProduct,
+  ] = useState<HardwareProduct | null>(null);
 
   const [
     activeTab,
@@ -95,56 +111,100 @@ export function HardwareWorkspace() {
       );
     }, [hardwareProducts]);
 
-  const handleAddProduct = async (
-    formValues: AddHardwareProductValues,
-  ): Promise<void> => {
-    try {
-      await createHardwareProduct({
-        name:
-          formValues.name.trim(),
+  const handleAddProduct = useCallback(
+    async (
+      formValues: AddHardwareProductValues,
+    ): Promise<void> => {
+      try {
+        await createHardwareProduct({
+          name:
+            formValues.name.trim(),
 
-        detail:
-          formValues.detail.trim(),
+          detail:
+            formValues.detail.trim(),
 
-        category:
-          formValues.category.trim(),
+          category:
+            formValues.category.trim(),
 
-        initialStock: Number(
-          formValues.initialStock,
-        ),
+          initialStock: Number(
+            formValues.initialStock,
+          ),
 
-        minimumStock: Number(
-          formValues.minimumStock,
-        ),
+          minimumStock: Number(
+            formValues.minimumStock,
+          ),
 
-        unitPrice: Number(
-          formValues.unitPrice,
-        ),
+          unitPrice: Number(
+            formValues.unitPrice,
+          ),
 
-        inventoryStatus:
-          formValues.inventoryStatus,
+          inventoryStatus:
+            formValues.inventoryStatus,
 
-        imageUrl:
-          formValues.imageUrl.trim() ||
-          null,
-      });
+          imageUrl:
+            formValues.imageUrl.trim() ||
+            null,
+        });
 
-      setActiveTab("inventory");
-    } catch {
-      throw new Error(
-        "No se pudo crear el producto.",
-      );
-    }
-  };
+        setActiveTab("inventory");
+      } catch {
+        throw new Error(
+          "No se pudo crear el producto.",
+        );
+      }
+    },
+    [createHardwareProduct],
+  );
 
-  const handleEditProduct = (
-    product: HardwareInventoryItem,
-  ): void => {
-    console.log(
-      "Editar producto de ferretería:",
-      product,
-    );
-  };
+  const handleEditProduct = useCallback(
+    (
+      product: HardwareInventoryItem,
+    ): void => {
+      const rawProduct =
+        hardwareProducts.find(
+          (item) => item.id === product.id,
+        ) ?? null;
+
+      setEditingProduct(rawProduct);
+    },
+    [hardwareProducts],
+  );
+
+  const handleUpdateProduct = useCallback(
+    async (
+      id: string,
+      values: EditHardwareProductValues,
+    ): Promise<void> => {
+      try {
+        await updateHardwareProduct({
+          id,
+          request: {
+            name: values.name.trim(),
+            detail: values.detail.trim(),
+            category: values.category.trim(),
+            minimumStock: Number(
+              values.minimumStock,
+            ),
+            unitPrice: Number(
+              values.unitPrice,
+            ),
+            inventoryStatus:
+              values.inventoryStatus,
+            imageUrl:
+              values.imageUrl.trim() ||
+              null,
+          },
+        });
+
+        setEditingProduct(null);
+      } catch {
+        throw new Error(
+          "No se pudo actualizar el producto.",
+        );
+      }
+    },
+    [updateHardwareProduct],
+  );
 
   if (isLoadingProducts) {
     return (
@@ -271,6 +331,16 @@ export function HardwareWorkspace() {
               }
             />
           )}
+
+          <EditHardwareProductForm
+            open={Boolean(editingProduct)}
+            product={editingProduct}
+            isSubmitting={isUpdatingProduct}
+            onClose={() => {
+              setEditingProduct(null);
+            }}
+            onSave={handleUpdateProduct}
+          />
         </Box>
       </Box>
   );

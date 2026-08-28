@@ -19,4 +19,7 @@ export * from "./WorkspaceShared";
 export * from "./AddPropertyForm";
 export * from "./AddGrainForm";
 export * from "./AddHardwareProductForm";
+export * from "./EditPropertyForm";
+export * from "./EditGrainProductForm";
+export * from "./EditHardwareProductForm";
 export * from "./WorkspaceTabs";

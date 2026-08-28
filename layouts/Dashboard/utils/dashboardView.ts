@@ -18,6 +18,15 @@ import type {
 import { colors } from "@/theme/sharedColors";
 import { formatCurrency } from "@/shared";
 
+const cashFlowDayFormatter = new Intl.DateTimeFormat("es-NI", {
+  weekday: "short",
+});
+
+const activityTimeFormatter = new Intl.DateTimeFormat("es-NI", {
+  hour: "numeric",
+  minute: "2-digit",
+});
+
 export function buildDashboardView(data?: DashboardResponse): DashboardView {
   return {
     metrics: buildMetrics(data?.summary),
@@ -66,9 +75,10 @@ function buildMetrics(summary?: DashboardSummary): MetricCard[] {
 
 function buildCashFlowView(items: DashboardCashFlowDay[]): CashFlowViewItem[] {
   const maxTotal = Math.max(...items.map((item) => item.total), 0);
+  const todayIso = new Date().toISOString().slice(0, 10);
 
   return items.map((item) => {
-    const isToday = isTodayIsoDate(item.date);
+    const isToday = item.date.slice(0, 10) === todayIso;
 
     return {
       day: formatCashFlowDayLabel(item.date, isToday),
@@ -124,20 +134,11 @@ function formatCashFlowDayLabel(date: string, isToday: boolean) {
     return "Hoy";
   }
 
-  return new Intl.DateTimeFormat("es-NI", {
-    weekday: "short",
-  }).format(new Date(date));
+  return cashFlowDayFormatter.format(new Date(date));
 }
 
 function formatActivityTime(date: string) {
-  return new Intl.DateTimeFormat("es-NI", {
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date(date));
-}
-
-function isTodayIsoDate(date: string) {
-  return new Date(date).toISOString().slice(0, 10) === new Date().toISOString().slice(0, 10);
+  return activityTimeFormatter.format(new Date(date));
 }
 
 function scaleBarValue(value: number, maxTotal: number) {

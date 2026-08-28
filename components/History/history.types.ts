@@ -1,21 +1,10 @@
-export type HistoryOperationType = "hardware" | "grains" | "property";
-
-export type HistoryOperationStatus = "completed";
+export type HistoryOperationType = "Hardware" | "Grains" | "Property";
 
 export type HistoryItem = {
-  id: string;
-  sourceId: string;
-
   type: HistoryOperationType;
-  status: HistoryOperationStatus;
-
-  clientName: string;
-  description: string;
-
-  quantity?: number;
-  unit?: string;
-  unitPrice?: number;
-
+  id: string;
+  name: string;
+  detail: string | null;
   amount: number;
   paymentMethod: string;
   createdAt: string;
@@ -23,8 +12,7 @@ export type HistoryItem = {
 
 export type HistoryFiltersValue = {
   search: string;
-  type: HistoryOperationType | "all";
-  status: HistoryOperationStatus | "all";
+  type: "hardware" | "grains" | "property" | "all";
   from: string;
   to: string;
 };

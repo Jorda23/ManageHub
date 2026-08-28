@@ -1,5 +1,7 @@
 "use client";
 
+import { memo } from "react";
+
 import { Box, Paper, Typography } from "@mui/material";
 
 import type { GrainProductCardProps } from "../grainInventory.types";
@@ -11,7 +13,10 @@ import { ProductImage } from "./ProductImage";
 import { ProductInfo } from "./ProductInfo";
 import { StockProgress } from "./StockProgress";
 
-export function GrainProductCard({ product, onEdit }: Readonly<GrainProductCardProps>) {
+export const GrainProductCard = memo(function GrainProductCard({
+  product,
+  onEdit,
+}: Readonly<GrainProductCardProps>) {
   const stockPercent =
     product.initialStock > 0
       ? Math.min(100, (product.stock / product.initialStock) * 100)
@@ -135,4 +140,5 @@ export function GrainProductCard({ product, onEdit }: Readonly<GrainProductCardP
       </Box>
     </Paper>
   );
-}
+});
+

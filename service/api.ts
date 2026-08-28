@@ -5,6 +5,8 @@ import type {
   LoginResponse,
   CreateHardwareProductRequest,
   CreateHardwareProductResponse,
+  UpdateHardwareProductRequest,
+  UpdateHardwareProductResponse,
   HardwareProduct,
   RegisterHardwareSaleRequest,
   RegisterHardwareSaleResponse,
@@ -12,6 +14,8 @@ import type {
   HardwareSalesFilters,
   CreateGrainProductRequest,
   CreateGrainProductResponse,
+  UpdateGrainProductRequest,
+  UpdateGrainProductResponse,
   GrainProduct,
   RegisterGrainSaleRequest,
   RegisterGrainSaleResponse,
@@ -19,11 +23,15 @@ import type {
   GrainSalesFilters,
   CreatePropertyRequest,
   CreatePropertyResponse,
+  UpdatePropertyRequest,
+  UpdatePropertyResponse,
   Property,
   RegisterPropertyPaymentRequest,
   RegisterPropertyPaymentResponse,
   PropertyPayment,
   PropertyPaymentsFilters,
+  PaymentHistoryItem,
+  PaymentHistoryFilters,
   DashboardResponse,
 } from "../shared/types/api.types";
 
@@ -40,6 +48,16 @@ export const createHardwareProduct = async (
 ): Promise<CreateHardwareProductResponse> => {
   return apiClient.post<CreateHardwareProductResponse, CreateHardwareProductRequest>(
     "/api/hardware/products",
+    request,
+  );
+};
+
+export const updateHardwareProduct = async (
+  id: string,
+  request: UpdateHardwareProductRequest,
+): Promise<UpdateHardwareProductResponse> => {
+  return apiClient.put<UpdateHardwareProductResponse, UpdateHardwareProductRequest>(
+    `/api/hardware/products/${id}`,
     request,
   );
 };
@@ -72,6 +90,16 @@ export const createGrainProduct = async (
   );
 };
 
+export const updateGrainProduct = async (
+  id: string,
+  request: UpdateGrainProductRequest,
+): Promise<UpdateGrainProductResponse> => {
+  return apiClient.put<UpdateGrainProductResponse, UpdateGrainProductRequest>(
+    `/api/grains/products/${id}`,
+    request,
+  );
+};
+
 export const registerGrainSale = async (
   request: RegisterGrainSaleRequest,
 ): Promise<RegisterGrainSaleResponse> => {
@@ -97,6 +125,16 @@ export const createProperty = async (
   return apiClient.post<CreatePropertyResponse, CreatePropertyRequest>("/api/properties", request);
 };
 
+export const updateProperty = async (
+  id: string,
+  request: UpdatePropertyRequest,
+): Promise<UpdatePropertyResponse> => {
+  return apiClient.put<UpdatePropertyResponse, UpdatePropertyRequest>(
+    `/api/properties/${id}`,
+    request,
+  );
+};
+
 export const registerPropertyPayment = async (
   request: RegisterPropertyPaymentRequest,
 ): Promise<RegisterPropertyPaymentResponse> => {
@@ -110,6 +148,14 @@ export const getPropertyPayments = async (
   filters?: PropertyPaymentsFilters,
 ): Promise<PropertyPayment[]> => {
   return apiClient.get<PropertyPayment[]>("/api/properties/payments", {
+    params: filters,
+  });
+};
+
+export const getPaymentHistory = async (
+  filters?: PaymentHistoryFilters,
+): Promise<PaymentHistoryItem[]> => {
+  return apiClient.get<PaymentHistoryItem[]>("/api/history/payments", {
     params: filters,
   });
 };

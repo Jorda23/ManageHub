@@ -1,5 +1,7 @@
 "use client";
 
+import { memo } from "react";
+
 import { Box, Paper, Typography } from "@mui/material";
 
 import type { HardwareProductCardProps } from "../hardwareInventory.types";
@@ -11,7 +13,10 @@ import { ProductInfo } from "./ProductInfo";
 import { StockProgress } from "./StockProgress";
 import { formatCurrency } from "@/shared";
 
-export function HardwareProductCard({ product, onEdit }: Readonly<HardwareProductCardProps>) {
+export const HardwareProductCard = memo(function HardwareProductCard({
+  product,
+  onEdit,
+}: Readonly<HardwareProductCardProps>) {
   const isLowStock = product.status === "lowStock" || product.stock <= product.minStock;
 
   const stockPercent =
@@ -150,4 +155,5 @@ export function HardwareProductCard({ product, onEdit }: Readonly<HardwareProduc
       </Box>
     </Paper>
   );
-}
+});
+

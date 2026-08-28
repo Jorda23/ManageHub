@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Box,
   Chip,
   Paper,
   Table,
@@ -22,23 +21,23 @@ type HistoryTableProps = {
 };
 
 const TYPE_LABELS = {
-  hardware: "Ferretería",
-  grains: "Granos",
-  property: "Terreno",
+  Hardware: "Ferretería",
+  Grains: "Granos",
+  Property: "Terreno",
 } as const;
 
 const TYPE_STYLES = {
-  hardware: {
+  Hardware: {
     bgcolor: colors.primarySoft,
     color: colors.primary,
     borderColor: colors.primaryBorder,
   },
-  grains: {
+  Grains: {
     bgcolor: palette.amber[50],
     color: palette.amber[800],
     borderColor: palette.amber[500],
   },
-  property: {
+  Property: {
     bgcolor: colors.greenSoft,
     color: colors.green,
     borderColor: colors.greenBorder,
@@ -93,9 +92,9 @@ export function HistoryTable({ items }: Readonly<HistoryTableProps>) {
 
             <HeaderCell width="12%">Tipo</HeaderCell>
 
-            <HeaderCell width="25%">Descripción</HeaderCell>
+            <HeaderCell width="26%">Descripción</HeaderCell>
 
-            <HeaderCell width="18%">Cliente / propietario</HeaderCell>
+            <HeaderCell width="17%">Detalle</HeaderCell>
 
             <HeaderCell width="16%">Método de pago</HeaderCell>
 
@@ -165,47 +164,28 @@ export function HistoryTable({ items }: Readonly<HistoryTableProps>) {
                 </TableCell>
 
                 <TableCell>
-                  <Box sx={{ minWidth: 0 }}>
-                    <Typography
-                      sx={{
-                        color: colors.text,
-                        fontSize: 13,
-                        fontWeight: 800,
-                        lineHeight: 1.3,
-                      }}
-                    >
-                      {item.description}
-                    </Typography>
-
-                    {item.quantity !== undefined ? (
-                      <Typography
-                        sx={{
-                          mt: 0.3,
-                          color: colors.muted,
-                          fontSize: 11,
-                          fontWeight: 500,
-                        }}
-                      >
-                        {item.quantity}
-                        {item.unit ? ` ${item.unit}` : " unidades"}
-
-                        {item.unitPrice !== undefined
-                          ? ` · ${formatCurrency(item.unitPrice)} c/u`
-                          : ""}
-                      </Typography>
-                    ) : null}
-                  </Box>
+                  <Typography
+                    sx={{
+                      color: colors.text,
+                      fontSize: 13,
+                      fontWeight: 800,
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {item.name}
+                  </Typography>
                 </TableCell>
 
                 <TableCell>
                   <Typography
                     sx={{
-                      color: colors.text,
-                      fontSize: 12.5,
+                      color: colors.muted,
+                      fontSize: 12,
                       fontWeight: 600,
+                      lineHeight: 1.3,
                     }}
                   >
-                    {item.clientName}
+                    {item.detail || "—"}
                   </Typography>
                 </TableCell>
 
@@ -272,20 +252,24 @@ function HeaderCell({ children, width, align = "left" }: Readonly<HeaderCellProp
   );
 }
 
+const currencyFormatter = new Intl.NumberFormat("es-NI", {
+  style: "currency",
+  currency: "NIO",
+  minimumFractionDigits: 2,
+});
+
+const dateFormatter = new Intl.DateTimeFormat("es-NI", {
+  year: "numeric",
+  month: "short",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
 function formatCurrency(value: number) {
-  return new Intl.NumberFormat("es-NI", {
-    style: "currency",
-    currency: "NIO",
-    minimumFractionDigits: 2,
-  }).format(value);
+  return currencyFormatter.format(value);
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("es-NI", {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
+  return dateFormatter.format(new Date(value));
 }

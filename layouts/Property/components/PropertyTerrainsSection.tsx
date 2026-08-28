@@ -11,6 +11,7 @@ import { PropertySectionHeader } from "./PropertySectionHeader";
 type PropertyTerrainsSectionProps = {
   properties: PropertyItem[];
   onAddProperty: () => void;
+  onEditProperty?: (property: PropertyItem) => void;
 };
 
 const scrollAreaSx = {
@@ -54,6 +55,7 @@ const scrollAreaSx = {
 export function PropertyTerrainsSection({
   properties,
   onAddProperty,
+  onEditProperty,
 }: PropertyTerrainsSectionProps) {
   return (
     <PropertySectionCard>
@@ -99,7 +101,11 @@ export function PropertyTerrainsSection({
               }}
             >
               {properties.map((property) => (
-                <PropertyCard key={property.id} property={property} />
+                <PropertyCard
+                  key={property.id}
+                  property={property}
+                  onEdit={onEditProperty}
+                />
               ))}
             </Box>
           </Box>

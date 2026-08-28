@@ -26,6 +26,22 @@ export type CreateHardwareProductResponse = {
   name: string;
 };
 
+export type UpdateHardwareProductRequest = {
+  name: string;
+  detail: string;
+  category: string;
+  minimumStock: number;
+  unitPrice: number;
+  inventoryStatus: string;
+  imageUrl?: string | null;
+};
+
+export type UpdateHardwareProductResponse = {
+  id: string;
+  code: string;
+  name: string;
+};
+
 export type HardwareProduct = {
   id: string;
   code: string;
@@ -87,6 +103,21 @@ export type CreateGrainProductRequest = {
 };
 
 export type CreateGrainProductResponse = {
+  id: string;
+  code: string;
+  name: string;
+};
+
+export type UpdateGrainProductRequest = {
+  name: string;
+  unit: string;
+  location: string;
+  minimumStock: number;
+  unitPrice: number;
+  imageUrl?: string | null;
+};
+
+export type UpdateGrainProductResponse = {
   id: string;
   code: string;
   name: string;
@@ -159,6 +190,24 @@ export type CreatePropertyRequest = {
 };
 
 export type CreatePropertyResponse = {
+  id: string;
+  code: string;
+  name: string;
+};
+
+export type UpdatePropertyRequest = {
+  name: string;
+  projectName: string;
+  measure: string;
+  location: string;
+  ownerName: string;
+  identificationNumber: string;
+  nextPaymentDate?: string | null;
+  imageUrl?: string | null;
+  identificationImageUrl?: string | null;
+};
+
+export type UpdatePropertyResponse = {
   id: string;
   code: string;
   name: string;
@@ -259,4 +308,24 @@ export type DashboardResponse = {
   recentActivity: DashboardRecentActivity[];
   cashFlow7Days: DashboardCashFlowDay[];
   alerts: DashboardAlert[];
+};
+
+export type PaymentHistoryType = "Hardware" | "Grains" | "Property";
+
+export type PaymentHistoryItem = {
+  type: PaymentHistoryType;
+  id: string;
+  name: string;
+  detail: string | null;
+  amount: number;
+  paymentMethod: string;
+  createdAt: string;
+};
+
+export type PaymentHistoryFilters = {
+  type?: "hardware" | "grains" | "property" | "all";
+  search?: string;
+  from?: string;
+  to?: string;
+  paymentMethod?: string;
 };

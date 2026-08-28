@@ -79,9 +79,6 @@ export const AppShell = ({ children, active }: AppShellProps) => {
       <Drawer
         open={isMobileMenuOpen}
         onClose={closeMobileMenu}
-        ModalProps={{
-          keepMounted: true,
-        }}
         slotProps={{
           backdrop: {
             sx: {

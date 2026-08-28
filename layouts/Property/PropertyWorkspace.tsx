@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { Box } from "@mui/material";
 
@@ -11,9 +11,16 @@ import {
   PropertyTerrainsSection,
 } from "./components";
 
-import { useProperties } from "@/hook/useProperties";
+import { useProperties, useUpdateProperty } from "@/hook/useProperties";
 
-import { AppShell, LoadingState, type PropertyItem } from "@/components";
+import {
+  LoadingState,
+  type PropertyItem,
+  EditPropertyForm,
+  EditPropertyValues,
+} from "@/components";
+
+import type { Property } from "@/shared/types/api.types";
 
 import { propertyConfig } from "@/shared";
 import { colors } from "@/theme/sharedColors";
@@ -25,9 +32,11 @@ export type PropertyWorkspaceTab = "properties" | "create";
 export function PropertyWorkspace() {
   const { data: apiProperties = [], isLoading: isLoadingProperties } = useProperties();
 
+  const { mutateAsync: updateProperty, isPending: isUpdatingProperty } = useUpdateProperty();
+
   const [activeTab, setActiveTab] = useState<PropertyWorkspaceTab>("properties");
 
-  const [selectedPropertyId, setSelectedPropertyId] = useState("");
+  const [editingProperty, setEditingProperty] = useState<Property | null>(null);
 
   const properties = useMemo<PropertyItem[]>(() => {
     return apiProperties.map((property) => {
@@ -58,21 +67,40 @@ export function PropertyWorkspace() {
     });
   }, [apiProperties]);
 
-  useEffect(() => {
-    if (properties.length > 0 && !selectedPropertyId) {
-      setSelectedPropertyId(properties[0].id);
-    }
-  }, [properties, selectedPropertyId]);
+  const handleEditProperty = useCallback(
+    (property: PropertyItem): void => {
+      const rawProperty = apiProperties.find((item) => item.id === property.id) ?? null;
 
-  useEffect(() => {
-    if (
-      selectedPropertyId &&
-      properties.length > 0 &&
-      !properties.some((property) => property.id === selectedPropertyId)
-    ) {
-      setSelectedPropertyId(properties[0].id);
-    }
-  }, [properties, selectedPropertyId]);
+      setEditingProperty(rawProperty);
+    },
+    [apiProperties],
+  );
+
+  const handleUpdateProperty = useCallback(
+    async (id: string, values: EditPropertyValues): Promise<void> => {
+      try {
+        await updateProperty({
+          id,
+          request: {
+            name: values.name.trim(),
+            projectName: values.projectName.trim(),
+            measure: values.measure.trim(),
+            location: values.location.trim(),
+            ownerName: values.ownerName.trim(),
+            identificationNumber: values.identificationNumber.trim(),
+            nextPaymentDate: values.nextPaymentDate || null,
+            imageUrl: values.imageUrl?.trim() || null,
+            identificationImageUrl: values.identificationImageUrl?.trim() || null,
+          },
+        });
+
+        setEditingProperty(null);
+      } catch {
+        throw new Error("No se pudo actualizar el terreno.");
+      }
+    },
+    [updateProperty],
+  );
 
   if (isLoadingProperties) {
     return <LoadingState message="Cargando módulo de propiedades..." />;
@@ -132,6 +160,7 @@ export function PropertyWorkspace() {
               >
                 <PropertyTerrainsSection
                   properties={properties}
+                  onEditProperty={handleEditProperty}
                   onAddProperty={() => {
                     setActiveTab("create");
                   }}
@@ -145,12 +174,21 @@ export function PropertyWorkspace() {
               onCancel={() => {
                 setActiveTab("properties");
               }}
-              onCreated={(propertyId) => {
-                setSelectedPropertyId(propertyId);
+              onCreated={() => {
                 setActiveTab("properties");
               }}
             />
           )}
+
+          <EditPropertyForm
+            open={Boolean(editingProperty)}
+            property={editingProperty}
+            isSubmitting={isUpdatingProperty}
+            onClose={() => {
+              setEditingProperty(null);
+            }}
+            onSave={handleUpdateProperty}
+          />
         </Box>
       </Box>
   );

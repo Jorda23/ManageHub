@@ -1,4 +1,4 @@
-import { WorkspaceConfig } from "@/components";
+import type { WorkspaceConfig } from "@/components/WorkspaceShared/workspaceTypes";
 
 export type WorkspaceHeaderConfig = Pick<
   WorkspaceConfig,

@@ -5,6 +5,7 @@ import {
   getGrainProducts,
   getGrainSales,
   registerGrainSale,
+  updateGrainProduct,
 } from "@/service/api";
 
 import type {
@@ -15,6 +16,8 @@ import type {
   GrainSalesFilters,
   RegisterGrainSaleRequest,
   RegisterGrainSaleResponse,
+  UpdateGrainProductRequest,
+  UpdateGrainProductResponse,
 } from "@/shared/types/api.types";
 
 const GRAIN_PRODUCTS_QUERY_KEY = ["grain-products"];
@@ -40,6 +43,19 @@ export const useCreateGrainProduct = () => {
 
   return useMutation<CreateGrainProductResponse, Error, CreateGrainProductRequest>({
     mutationFn: createGrainProduct,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: GRAIN_PRODUCTS_QUERY_KEY,
+      });
+    },
+  });
+};
+
+export const useUpdateGrainProduct = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<UpdateGrainProductResponse, Error, { id: string; request: UpdateGrainProductRequest }>({
+    mutationFn: ({ id, request }) => updateGrainProduct(id, request),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: GRAIN_PRODUCTS_QUERY_KEY,

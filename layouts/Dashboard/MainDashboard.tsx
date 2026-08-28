@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+
 import { Box } from "@mui/material";
 
 import { useDashboard } from "@/hook/useDashboard";
@@ -21,7 +23,7 @@ import {
 
 export default function MainDashboard() {
   const { data, isLoading, isError } = useDashboard();
-  const dashboardView = buildDashboardView(data);
+  const dashboardView = useMemo(() => buildDashboardView(data), [data]);
 
   if (isLoading) {
     return (

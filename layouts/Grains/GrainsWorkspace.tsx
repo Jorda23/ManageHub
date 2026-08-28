@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { Box } from "@mui/material";
 
-import { useCreateGrainProduct, useGrainProducts } from "@/hook/useGrains";
+import { useCreateGrainProduct, useGrainProducts, useUpdateGrainProduct } from "@/hook/useGrains";
 
 import {
   LoadingState,
@@ -12,11 +12,14 @@ import {
   RegisterGrainSaleForm,
   AddGrainForm,
   AddGrainFormValues,
+  EditGrainProductForm,
+  EditGrainProductValues,
 } from "@/components";
+
+import type { GrainProduct } from "@/shared/types/api.types";
 
 import { GrainInventory, type GrainInventoryItem } from "@/components/GrainInventory";
 
-import { grainsConfig } from "@/shared/data/grains.data";
 import { colors } from "@/theme/sharedColors";
 
 import { GrainMetricsGrid, GrainsTabs, HeroHeader } from "./components";
@@ -28,7 +31,11 @@ export function GrainsWorkspace() {
 
   const { mutateAsync: createGrainProduct, isPending: isCreatingProduct } = useCreateGrainProduct();
 
+  const { mutateAsync: updateGrainProduct, isPending: isUpdatingProduct } = useUpdateGrainProduct();
+
   const [activeTab, setActiveTab] = useState<GrainsWorkspaceTab>("inventory");
+
+  const [editingProduct, setEditingProduct] = useState<GrainProduct | null>(null);
 
   const products = useMemo<GrainInventoryItem[]>(() => {
     return grainProducts.map((product) => {
@@ -52,27 +59,58 @@ export function GrainsWorkspace() {
     });
   }, [grainProducts]);
 
-  const handleCreateGrain = async (values: AddGrainFormValues): Promise<void> => {
-    try {
-      await createGrainProduct({
-        name: values.name.trim(),
-        unit: values.unit.trim(),
-        location: values.location.trim(),
-        initialStock: Number(values.initialStock),
-        minimumStock: Number(values.minimumStock),
-        unitPrice: Number(values.unitPrice),
-        imageUrl: values.imageUrl.trim() || null,
-      });
+  const handleCreateGrain = useCallback(
+    async (values: AddGrainFormValues): Promise<void> => {
+      try {
+        await createGrainProduct({
+          name: values.name.trim(),
+          unit: values.unit.trim(),
+          location: values.location.trim(),
+          initialStock: Number(values.initialStock),
+          minimumStock: Number(values.minimumStock),
+          unitPrice: Number(values.unitPrice),
+          imageUrl: values.imageUrl.trim() || null,
+        });
 
-      setActiveTab("inventory");
-    } catch {
-      throw new Error("No se pudo crear el producto.");
-    }
-  };
+        setActiveTab("inventory");
+      } catch {
+        throw new Error("No se pudo crear el producto.");
+      }
+    },
+    [createGrainProduct],
+  );
 
-  const handleEditProduct = (product: GrainInventoryItem): void => {
-    console.log("Editar producto:", product);
-  };
+  const handleEditProduct = useCallback(
+    (product: GrainInventoryItem): void => {
+      const rawProduct = grainProducts.find((item) => item.id === product.id) ?? null;
+
+      setEditingProduct(rawProduct);
+    },
+    [grainProducts],
+  );
+
+  const handleUpdateProduct = useCallback(
+    async (id: string, values: EditGrainProductValues): Promise<void> => {
+      try {
+        await updateGrainProduct({
+          id,
+          request: {
+            name: values.name.trim(),
+            unit: values.unit.trim(),
+            location: values.location.trim(),
+            minimumStock: Number(values.minimumStock),
+            unitPrice: Number(values.unitPrice),
+            imageUrl: values.imageUrl.trim() || null,
+          },
+        });
+
+        setEditingProduct(null);
+      } catch {
+        throw new Error("No se pudo actualizar el producto.");
+      }
+    },
+    [updateGrainProduct],
+  );
 
   if (isLoadingProducts) {
     return <LoadingState message="Cargando módulo de granos..." />;
@@ -155,6 +193,16 @@ export function GrainsWorkspace() {
               onSave={handleCreateGrain}
             />
           )}
+
+          <EditGrainProductForm
+            open={Boolean(editingProduct)}
+            product={editingProduct}
+            isSubmitting={isUpdatingProduct}
+            onClose={() => {
+              setEditingProduct(null);
+            }}
+            onSave={handleUpdateProduct}
+          />
         </Box>
       </Box>
   );
