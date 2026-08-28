@@ -1,6 +1,6 @@
 export type HardwareStatus = "inStock" | "lowStock";
 
-export type HardwareProduct = {
+export type HardwareInventoryItem = {
   id: string;
   name: string;
   detail: string;
@@ -16,25 +16,25 @@ export type HardwareProduct = {
 };
 
 export type HardwareInventoryProps = {
-  products: HardwareProduct[];
+  products: HardwareInventoryItem[];
   onAddProduct: () => void;
-  onEditProduct?: (product: HardwareProduct) => void;
+  onEditProduct?: (product: HardwareInventoryItem) => void;
 };
 
 export type HardwareProductCardProps = {
-  product: HardwareProduct;
-  onEdit?: (product: HardwareProduct) => void;
+  product: HardwareInventoryItem;
+  onEdit?: (product: HardwareInventoryItem) => void;
 };
 
 export type HardwareProductImageProps = {
-  product: HardwareProduct;
+  product: HardwareInventoryItem;
   isLowStock: boolean;
 };
 
 export type HardwareProductHeaderProps = {
-  product: HardwareProduct;
+  product: HardwareInventoryItem;
   isLowStock: boolean;
-  onEdit?: (product: HardwareProduct) => void;
+  onEdit?: (product: HardwareInventoryItem) => void;
 };
 
 export type HardwareStockProgressProps = {

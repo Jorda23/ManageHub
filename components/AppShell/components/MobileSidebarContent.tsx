@@ -2,7 +2,7 @@
 
 import { Box, IconButton, Typography } from "@mui/material";
 import { FaTimes } from "react-icons/fa";
-import { AppShellProps, navItems } from "@/shared";
+import { AppShellProps, sidebarSections } from "@/shared";
 import { colors } from "@/theme/sharedColors";
 
 import { SidebarLink } from "./SidebarLink";
@@ -84,11 +84,35 @@ export function MobileSidebarContent({ active, onClose }: Readonly<MobileSidebar
           py: 2,
           display: "flex",
           flexDirection: "column",
-          gap: 0.75,
+          gap: 1.5,
         }}
       >
-        {navItems.map((item) => (
-          <SidebarLink key={item.key} item={item} active={active} onClick={onClose} />
+        {sidebarSections.map((section) => (
+          <Box
+            key={section.id}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 0.6,
+            }}
+          >
+            <Typography
+              sx={{
+                px: 1,
+                color: colors.softMuted,
+                fontSize: 9.5,
+                fontWeight: 900,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+              }}
+            >
+              {section.title}
+            </Typography>
+
+            {section.items.map((item) => (
+              <SidebarLink key={item.key} item={item} active={active} onClick={onClose} />
+            ))}
+          </Box>
         ))}
       </Box>
 

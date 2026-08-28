@@ -1,9 +1,9 @@
 "use client";
 
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 
 import { colors } from "@/theme/sharedColors";
-import { AppShellProps, navItems } from "@/shared";
+import { AppShellProps, sidebarSections } from "@/shared";
 
 import { SidebarHeader } from "./SidebarHeader";
 import { SidebarLink } from "./SidebarLink";
@@ -37,13 +37,39 @@ export function DesktopSidebar({ active }: Readonly<DesktopSidebarProps>) {
       <Box
         sx={{
           px: 2,
+          py: 1.5,
           display: "flex",
           flexDirection: "column",
-          gap: 0.75,
+          gap: 1.5,
+          overflowY: "auto",
         }}
       >
-        {navItems.map((item) => (
-          <SidebarLink key={item.key} item={item} active={active} />
+        {sidebarSections.map((section) => (
+          <Box
+            key={section.id}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 0.6,
+            }}
+          >
+            <Typography
+              sx={{
+                px: 1,
+                color: colors.softMuted,
+                fontSize: 9.5,
+                fontWeight: 900,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+              }}
+            >
+              {section.title}
+            </Typography>
+
+            {section.items.map((item) => (
+              <SidebarLink key={item.key} item={item} active={active} />
+            ))}
+          </Box>
         ))}
       </Box>
 

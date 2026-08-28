@@ -4,6 +4,8 @@ import { Avatar, Box, Typography } from "@mui/material";
 
 import { colors } from "@/theme/sharedColors";
 
+import { LogoutButton } from "./LogoutButton";
+
 export function UserCard() {
   return (
     <Box
@@ -53,6 +55,10 @@ export function UserCard() {
             Global Manager
           </Typography>
         </Box>
+      </Box>
+
+      <Box sx={{ mt: 1.5 }}>
+        <LogoutButton />
       </Box>
     </Box>
   );

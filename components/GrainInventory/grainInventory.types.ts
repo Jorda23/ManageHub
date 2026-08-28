@@ -1,6 +1,6 @@
 export type GrainStatus = "inStock" | "lowStock";
 
-export type GrainProduct = {
+export type GrainInventoryItem = {
   id: string;
   name: string;
   unit: string;
@@ -16,25 +16,25 @@ export type GrainProduct = {
 };
 
 export type GrainInventoryProps = {
-  products: GrainProduct[];
+  products: GrainInventoryItem[];
   onAddProduct: () => void;
-  onEditProduct?: (product: GrainProduct) => void;
+  onEditProduct?: (product: GrainInventoryItem) => void;
 };
 
 export type GrainProductCardProps = {
-  product: GrainProduct;
-  onEdit?: (product: GrainProduct) => void;
+  product: GrainInventoryItem;
+  onEdit?: (product: GrainInventoryItem) => void;
 };
 
 export type ProductImageProps = {
-  product: GrainProduct;
+  product: GrainInventoryItem;
   isLowStock: boolean;
 };
 
 export type ProductCardHeaderProps = {
-  product: GrainProduct;
+  product: GrainInventoryItem;
   isLowStock: boolean;
-  onEdit?: (product: GrainProduct) => void;
+  onEdit?: (product: GrainInventoryItem) => void;
 };
 
 export type StockProgressProps = {

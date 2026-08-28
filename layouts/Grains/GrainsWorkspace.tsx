@@ -10,12 +10,11 @@ import {
   LoadingState,
   SectionCard,
   RegisterGrainSaleForm,
-  AppShell,
   AddGrainForm,
   AddGrainFormValues,
 } from "@/components";
 
-import { GrainInventory, type GrainProduct } from "@/components/GrainInventory";
+import { GrainInventory, type GrainInventoryItem } from "@/components/GrainInventory";
 
 import { grainsConfig } from "@/shared/data/grains.data";
 import { colors } from "@/theme/sharedColors";
@@ -31,7 +30,7 @@ export function GrainsWorkspace() {
 
   const [activeTab, setActiveTab] = useState<GrainsWorkspaceTab>("inventory");
 
-  const products = useMemo<GrainProduct[]>(() => {
+  const products = useMemo<GrainInventoryItem[]>(() => {
     return grainProducts.map((product) => {
       const isLowStock =
         product.inventoryStatus === "LowStock" || product.stock <= product.minimumStock;
@@ -71,46 +70,38 @@ export function GrainsWorkspace() {
     }
   };
 
-  const handleEditProduct = (product: GrainProduct): void => {
+  const handleEditProduct = (product: GrainInventoryItem): void => {
     console.log("Editar producto:", product);
   };
 
   if (isLoadingProducts) {
-    return (
-      <AppShell active={grainsConfig.category}>
-        <LoadingState message="Cargando módulo de granos..." />
-      </AppShell>
-    );
+    return <LoadingState message="Cargando módulo de granos..." />;
   }
 
   return (
-    <AppShell active={grainsConfig.category}>
+    <Box
+      sx={{
+        width: "100%",
+        px: {
+          xs: 2,
+          md: 4,
+        },
+        py: {
+          xs: 2.5,
+          md: 3,
+        },
+      }}
+    >
       <Box
         sx={{
           width: "100%",
-          minHeight: "calc(100vh - 48px)",
-          px: {
-            xs: 2,
-            md: 4,
-          },
-          py: {
-            xs: 2.5,
-            md: 3,
-          },
-          bgcolor: colors.pageBg,
-          color: colors.text,
+          maxWidth: 1440,
+          mx: "auto",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2.5,
         }}
       >
-        <Box
-          sx={{
-            width: "100%",
-            maxWidth: 1440,
-            mx: "auto",
-            display: "flex",
-            flexDirection: "column",
-            gap: 2.5,
-          }}
-        >
           <HeroHeader />
 
           <GrainsTabs value={activeTab} onChange={setActiveTab} />
@@ -166,6 +157,5 @@ export function GrainsWorkspace() {
           )}
         </Box>
       </Box>
-    </AppShell>
   );
 }

@@ -75,41 +75,33 @@ export function PropertyWorkspace() {
   }, [properties, selectedPropertyId]);
 
   if (isLoadingProperties) {
-    return (
-      <AppShell active={propertyConfig.category}>
-        <LoadingState message="Cargando módulo de propiedades..." />
-      </AppShell>
-    );
+    return <LoadingState message="Cargando módulo de propiedades..." />;
   }
 
   return (
-    <AppShell active={propertyConfig.category}>
+    <Box
+      sx={{
+        width: "100%",
+        px: {
+          xs: 2,
+          md: 4,
+        },
+        py: {
+          xs: 2.5,
+          md: 3,
+        },
+      }}
+    >
       <Box
         sx={{
           width: "100%",
-          minHeight: "calc(100vh - 48px)",
-          px: {
-            xs: 2,
-            md: 4,
-          },
-          py: {
-            xs: 2.5,
-            md: 3,
-          },
-          bgcolor: colors.pageBg,
-          color: colors.text,
+          maxWidth: 1440,
+          mx: "auto",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2.5,
         }}
       >
-        <Box
-          sx={{
-            width: "100%",
-            maxWidth: 1440,
-            mx: "auto",
-            display: "flex",
-            flexDirection: "column",
-            gap: 2.5,
-          }}
-        >
           <PropertyHeroHeader
             badge={propertyConfig.badge}
             title={propertyConfig.title}
@@ -161,6 +153,5 @@ export function PropertyWorkspace() {
           )}
         </Box>
       </Box>
-    </AppShell>
   );
 }

@@ -20,25 +20,11 @@ import { useCreateProperty } from "@/hook/useProperties";
 
 import { colors } from "@/theme/sharedColors";
 
-import { addPropertySchema } from "@/validations";
+import { addPropertySchema, type AddPropertyFormValues } from "@/validations";
 
 import { ImageUploadField } from "@/components/ImageUploadField/ImageUploadField";
 import { ModalField } from "@/components/ModalField";
 import { FormSection } from "../FormSection";
-
-export type AddPropertyFormValues = {
-  name: string;
-  projectName: string;
-  measure: string;
-  location: string;
-  ownerName: string;
-  totalPrice: string;
-  initialPayment: string;
-  nextPaymentDate: string;
-  imageUrl: string;
-  identificationImageUrl: string;
-  identificationNumber: string;
-};
 
 type AddPropertyFormProps = {
   onCancel: () => void;

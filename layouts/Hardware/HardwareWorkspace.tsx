@@ -16,9 +16,8 @@ import {
   LoadingState,
   SectionCard,
   RegisterHardwareSaleForm,
-  AppShell,
   HardwareInventory,
-  HardwareProduct,
+  HardwareInventoryItem,
   AddHardwareProductValues,
   AddHardwareProductForm,
 } from "@/components";
@@ -59,7 +58,7 @@ export function HardwareWorkspace() {
     );
 
   const products =
-    useMemo<HardwareProduct[]>(() => {
+    useMemo<HardwareInventoryItem[]>(() => {
       return hardwareProducts.map(
         (product) => {
           const isLowStock =
@@ -139,7 +138,7 @@ export function HardwareWorkspace() {
   };
 
   const handleEditProduct = (
-    product: HardwareProduct,
+    product: HardwareInventoryItem,
   ): void => {
     console.log(
       "Editar producto de ferretería:",
@@ -149,44 +148,28 @@ export function HardwareWorkspace() {
 
   if (isLoadingProducts) {
     return (
-      <AppShell
-        active={
-          hardwareConfig.category
-        }
-      >
-        <LoadingState message="Cargando módulo de Ferretería..." />
-      </AppShell>
+      <LoadingState message="Cargando módulo de Ferretería..." />
     );
   }
 
   return (
-    <AppShell
-      active={hardwareConfig.category}
+    <Box
+      sx={{
+        width: "100%",
+
+        px: {
+          xs: 2,
+          md: 4,
+        },
+
+        py: {
+          xs: 2.5,
+          md: 3,
+        },
+      }}
     >
       <Box
         sx={{
-          width: "100%",
-
-          minHeight:
-            "calc(100vh - 48px)",
-
-          px: {
-            xs: 2,
-            md: 4,
-          },
-
-          py: {
-            xs: 2.5,
-            md: 3,
-          },
-
-          bgcolor: colors.pageBg,
-
-          color: colors.text,
-        }}
-      >
-        <Box
-          sx={{
             width: "100%",
 
             maxWidth: 1440,
@@ -290,6 +273,5 @@ export function HardwareWorkspace() {
           )}
         </Box>
       </Box>
-    </AppShell>
   );
 }

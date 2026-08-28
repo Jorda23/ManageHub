@@ -79,6 +79,7 @@ export type PanelHeaderProps = {
   title: string;
   subtitle: string;
   action?: string;
+  href?: string;
 };
 
 export type IconBadgeProps = {

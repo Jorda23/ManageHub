@@ -1,7 +1,8 @@
 import type { ComponentType, ReactNode } from "react";
 
-export type AppShellSection =
-  "dashboard" | "hardware" | "grains" | "property" | "history" | "activity";
+import type { SidebarItemKey } from "../data/appShell.data";
+
+export type AppShellSection = SidebarItemKey | "activity";
 
 export type AppShellProps = {
   children: ReactNode;
@@ -13,5 +14,11 @@ export type NavItem = {
   mobileLabel: string;
   href: string;
   icon: ComponentType<{ size?: number }>;
-  key: Exclude<AppShellSection, "activity">;
+  key: SidebarItemKey;
+};
+
+export type SidebarSection = {
+  id: string;
+  title: string;
+  items: NavItem[];
 };

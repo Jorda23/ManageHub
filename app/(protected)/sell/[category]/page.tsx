@@ -1,4 +1,5 @@
 import { saleCategories, isSaleCategory, SaleWorkspace } from "@/components/SaleWorkspace";
+import { AppShell } from "@/components";
 import { notFound } from "next/navigation";
 
 type SellPageProps = {
@@ -18,5 +19,9 @@ export default async function SellCategoryPage({ params }: SellPageProps) {
     notFound();
   }
 
-  return <SaleWorkspace category={category} />;
+  return (
+    <AppShell active={category}>
+      <SaleWorkspace category={category} />
+    </AppShell>
+  );
 }
