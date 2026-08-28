@@ -13,8 +13,8 @@ import { StockProgress } from "./StockProgress";
 
 export function GrainProductCard({ product, onEdit }: Readonly<GrainProductCardProps>) {
   const stockPercent =
-    product.minStock > 0
-      ? Math.min(100, (product.stock / Math.max(product.minStock * 4, product.stock)) * 100)
+    product.initialStock > 0
+      ? Math.min(100, (product.stock / product.initialStock) * 100)
       : 100;
 
   const isLowStock = product.status === "lowStock" || product.stock <= product.minStock;
@@ -127,7 +127,6 @@ export function GrainProductCard({ product, onEdit }: Readonly<GrainProductCardP
 
           <StockProgress
             stock={product.stock}
-            minStock={product.minStock}
             stockPercent={stockPercent}
             progressColor={progressColor}
             isLowStock={isLowStock}

@@ -5,6 +5,7 @@ export type GrainProduct = {
   name: string;
   unit: string;
   stock: number;
+  initialStock: number;
   minStock: number;
   price: number;
   code: string;
@@ -38,7 +39,6 @@ export type ProductCardHeaderProps = {
 
 export type StockProgressProps = {
   stock: number;
-  minStock: number;
   stockPercent: number;
   progressColor: string;
   isLowStock: boolean;

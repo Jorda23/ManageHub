@@ -4,8 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Box } from "@mui/material";
 
-import { AddPropertyModal } from "@/components/AddPropertyModal";
-
 import {
   PropertyHeroHeader,
   PropertyMetricsGrid,
@@ -18,14 +16,18 @@ import { useProperties } from "@/hook/useProperties";
 import { AppShell, LoadingState, type PropertyItem } from "@/components";
 
 import { propertyConfig } from "@/shared";
-
 import { colors } from "@/theme/sharedColors";
+import { AddPropertyForm } from "../../components/AddPropertyForm/AddPropertyForm";
+import { PropertyTabs } from "./components/PropertyTabs";
+
+export type PropertyWorkspaceTab = "properties" | "create";
 
 export function PropertyWorkspace() {
   const { data: apiProperties = [], isLoading: isLoadingProperties } = useProperties();
 
+  const [activeTab, setActiveTab] = useState<PropertyWorkspaceTab>("properties");
+
   const [selectedPropertyId, setSelectedPropertyId] = useState("");
-  const [isPropertyDialogOpen, setIsPropertyDialogOpen] = useState(false);
 
   const properties = useMemo<PropertyItem[]>(() => {
     return apiProperties.map((property) => {
@@ -105,7 +107,7 @@ export function PropertyWorkspace() {
             mx: "auto",
             display: "flex",
             flexDirection: "column",
-            gap: 3,
+            gap: 2.5,
           }}
         >
           <PropertyHeroHeader
@@ -114,43 +116,49 @@ export function PropertyWorkspace() {
             subtitle={propertyConfig.subtitle}
           />
 
-          <PropertyMetricsGrid properties={properties} />
+          <PropertyTabs value={activeTab} onChange={setActiveTab} />
 
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                lg: "minmax(0, 2fr) minmax(340px, 1fr)",
-              },
-              gap: {
-                xs: 2,
-                md: 2.5,
-              },
-              alignItems: "start",
-              width: "100%",
-              minWidth: 0,
-            }}
-          >
-            <PropertyTerrainsSection
-              properties={properties}
-              onAddProperty={() => {
-                setIsPropertyDialogOpen(true);
+          {activeTab === "properties" ? (
+            <>
+              <PropertyMetricsGrid properties={properties} />
+
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "1fr",
+                    lg: "minmax(0, 2fr) minmax(340px, 1fr)",
+                  },
+                  gap: {
+                    xs: 2,
+                    md: 2.5,
+                  },
+                  alignItems: "start",
+                  width: "100%",
+                  minWidth: 0,
+                }}
+              >
+                <PropertyTerrainsSection
+                  properties={properties}
+                  onAddProperty={() => {
+                    setActiveTab("create");
+                  }}
+                />
+
+                <PropertyPaymentSection properties={properties} />
+              </Box>
+            </>
+          ) : (
+            <AddPropertyForm
+              onCancel={() => {
+                setActiveTab("properties");
+              }}
+              onCreated={(propertyId) => {
+                setSelectedPropertyId(propertyId);
+                setActiveTab("properties");
               }}
             />
-
-            <PropertyPaymentSection properties={properties} />
-          </Box>
-
-          <AddPropertyModal
-            open={isPropertyDialogOpen}
-            onClose={() => {
-              setIsPropertyDialogOpen(false);
-            }}
-            onCreated={(propertyId) => {
-              setSelectedPropertyId(propertyId);
-            }}
-          />
+          )}
         </Box>
       </Box>
     </AppShell>

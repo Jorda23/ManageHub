@@ -33,6 +33,7 @@ export type HardwareProduct = {
   detail: string;
   category: string;
   stock: number;
+  initialStock: number;
   minimumStock: number;
   unitPrice: number;
   inventoryStatus: string;
@@ -98,6 +99,7 @@ export type GrainProduct = {
   unit: string;
   location: string;
   stock: number;
+  initialStock: number;
   minimumStock: number;
   unitPrice: number;
   inventoryStatus: string;

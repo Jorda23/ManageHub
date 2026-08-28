@@ -5,6 +5,7 @@ export type HardwareProduct = {
   name: string;
   detail: string;
   stock: number;
+  initialStock: number;
   minStock: number;
   price: number;
   code: string;
@@ -38,7 +39,6 @@ export type HardwareProductHeaderProps = {
 
 export type HardwareStockProgressProps = {
   stock: number;
-  minStock: number;
   stockPercent: number;
   progressColor: string;
   isLowStock: boolean;

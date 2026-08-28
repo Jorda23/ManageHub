@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 
-import { Alert, Box, InputAdornment, TextField } from "@mui/material";
+import { Alert, Box, Button, InputAdornment, TextField, Typography } from "@mui/material";
+
 import type { SxProps, Theme } from "@mui/material/styles";
 
 import dayjs, { type Dayjs } from "dayjs";
@@ -13,15 +14,17 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
-import { FaBuilding, FaPlusCircle } from "react-icons/fa";
+import { FaBuilding, FaDollarSign, FaIdCard, FaPlusCircle, FaTimes } from "react-icons/fa";
 
 import { useCreateProperty } from "@/hook/useProperties";
+
 import { colors } from "@/theme/sharedColors";
+
 import { addPropertySchema } from "@/validations";
 
-import { FormModal } from "../FormModal";
-import { ImageUploadField } from "../ImageUploadField/ImageUploadField";
-import { ModalField } from "../ModalField";
+import { ImageUploadField } from "@/components/ImageUploadField/ImageUploadField";
+import { ModalField } from "@/components/ModalField";
+import { FormSection } from "../FormSection";
 
 export type AddPropertyFormValues = {
   name: string;
@@ -37,9 +40,8 @@ export type AddPropertyFormValues = {
   identificationNumber: string;
 };
 
-type AddPropertyModalProps = {
-  open: boolean;
-  onClose: () => void;
+type AddPropertyFormProps = {
+  onCancel: () => void;
   onCreated?: (propertyId: string) => void;
 };
 
@@ -57,7 +59,7 @@ const initialValues: AddPropertyFormValues = {
   identificationNumber: "",
 };
 
-export function AddPropertyModal({ open, onClose, onCreated }: Readonly<AddPropertyModalProps>) {
+export function AddPropertyForm({ onCancel, onCreated }: Readonly<AddPropertyFormProps>) {
   const [requestError, setRequestError] = useState("");
 
   const [isTotalPriceFocused, setIsTotalPriceFocused] = useState(false);
@@ -105,20 +107,27 @@ export function AddPropertyModal({ open, onClose, onCreated }: Readonly<AddPrope
         helpers.resetForm();
 
         onCreated?.(response.id);
-
-        onClose();
       } catch {
         setRequestError("No se pudo registrar la propiedad.");
       }
     },
   });
 
-  const showTotalPriceSymbol = isTotalPriceFocused || formik.values.totalPrice.trim() !== "";
+  const showTotalPriceSymbol =
+    isTotalPriceFocused || String(formik.values.totalPrice ?? "").trim() !== "";
 
   const showInitialPaymentSymbol =
-    isInitialPaymentFocused || formik.values.initialPayment.trim() !== "";
+    isInitialPaymentFocused || String(formik.values.initialPayment ?? "").trim() !== "";
 
-  const handleClose = (): void => {
+  const getFieldError = (field: keyof AddPropertyFormValues): string | undefined => {
+    if (!formik.touched[field]) {
+      return undefined;
+    }
+
+    return formik.errors[field];
+  };
+
+  const handleCancel = (): void => {
     if (isCreatingProperty) {
       return;
     }
@@ -131,51 +140,97 @@ export function AddPropertyModal({ open, onClose, onCreated }: Readonly<AddPrope
 
     setIsInitialPaymentFocused(false);
 
-    onClose();
-  };
-
-  const getFieldError = (field: keyof AddPropertyFormValues): string | undefined => {
-    if (!formik.touched[field]) {
-      return undefined;
-    }
-
-    return formik.errors[field];
+    onCancel();
   };
 
   return (
-    <FormModal
-      open={open}
-      title="Agregar propiedad"
-      description="Registra el terreno o propiedad, los datos del propietario y su información de pago."
-      icon={<FaBuilding size={18} />}
-      submitLabel="Guardar propiedad"
-      submitIcon={<FaPlusCircle size={12} />}
-      maxWidth={880}
-      isSubmitting={isCreatingProperty}
-      onClose={handleClose}
+    <Box
+      component="form"
       onSubmit={formik.handleSubmit}
+      sx={{
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+      }}
     >
       <Box
         sx={{
           display: "flex",
-          flexDirection: "column",
-          gap: 2.5,
+          alignItems: {
+            xs: "flex-start",
+            sm: "center",
+          },
+          justifyContent: "space-between",
+          flexDirection: {
+            xs: "column",
+            sm: "row",
+          },
+          gap: 1.5,
         }}
       >
-        {requestError && <Alert severity="error">{requestError}</Alert>}
+        <Box>
+          <Typography
+            component="h2"
+            sx={{
+              color: colors.text,
+              fontSize: {
+                xs: 18,
+                md: 20,
+              },
+              lineHeight: 1.2,
+              fontWeight: 850,
+            }}
+          >
+            Registrar nuevo terreno
+          </Typography>
 
-        <Box
+          <Typography
+            sx={{
+              mt: 0.5,
+              color: colors.muted,
+              fontSize: 12,
+              fontWeight: 500,
+            }}
+          >
+            Registra la información del terreno, propietario y condiciones de pago.
+          </Typography>
+        </Box>
+
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<FaTimes size={11} />}
+          disabled={isCreatingProperty}
+          onClick={handleCancel}
           sx={{
-            display: "grid",
+            minHeight: 38,
+            borderRadius: "8px",
+            px: 2,
+            borderColor: colors.cardBorder,
+            color: colors.muted,
+            textTransform: "none",
+            fontSize: 11,
+            fontWeight: 800,
 
-            gridTemplateColumns: {
-              xs: "1fr",
-              sm: "1fr 1fr",
+            "&:hover": {
+              borderColor: colors.primaryLight,
+              bgcolor: colors.primarySoft,
             },
-
-            gap: 2,
           }}
         >
+          Cancelar
+        </Button>
+      </Box>
+
+      {requestError && <Alert severity="error">{requestError}</Alert>}
+
+      <FormSection
+        icon={<FaBuilding size={14} />}
+        title="Información del terreno"
+        description="Datos generales y ubicación de la propiedad."
+      >
+        <Box sx={twoColumnsStyles}>
           <ModalField label="Nombre de la propiedad" htmlFor="property-name">
             <TextField
               id="property-name"
@@ -210,18 +265,7 @@ export function AddPropertyModal({ open, onClose, onCreated }: Readonly<AddPrope
           </ModalField>
         </Box>
 
-        <Box
-          sx={{
-            display: "grid",
-
-            gridTemplateColumns: {
-              xs: "1fr",
-              sm: "1fr 1fr",
-            },
-
-            gap: 2,
-          }}
-        >
+        <Box sx={twoColumnsStyles}>
           <ModalField label="Medida" htmlFor="property-measure">
             <TextField
               id="property-measure"
@@ -255,6 +299,25 @@ export function AddPropertyModal({ open, onClose, onCreated }: Readonly<AddPrope
           </ModalField>
         </Box>
 
+        <ModalField label="Imagen del terreno" htmlFor="property-image">
+          <ImageUploadField
+            label="Imagen del terreno"
+            value={formik.values.imageUrl}
+            disabled={isCreatingProperty}
+            onChange={(imageUrl) => {
+              void formik.setFieldValue("imageUrl", imageUrl);
+
+              void formik.setFieldTouched("imageUrl", true, false);
+            }}
+          />
+        </ModalField>
+      </FormSection>
+
+      <FormSection
+        icon={<FaIdCard size={14} />}
+        title="Datos del propietario"
+        description="Información de la persona asociada al terreno."
+      >
         <ModalField label="Propietario" htmlFor="property-owner-name">
           <TextField
             id="property-owner-name"
@@ -271,20 +334,7 @@ export function AddPropertyModal({ open, onClose, onCreated }: Readonly<AddPrope
           />
         </ModalField>
 
-        <Box
-          sx={{
-            display: "grid",
-
-            gridTemplateColumns: {
-              xs: "1fr",
-              sm: "1fr 1fr",
-            },
-
-            gap: 2,
-
-            alignItems: "start",
-          }}
-        >
+        <Box sx={twoColumnsStyles}>
           <ModalField label="Número de identificación" htmlFor="property-identification-number">
             <TextField
               id="property-identification-number"
@@ -314,19 +364,14 @@ export function AddPropertyModal({ open, onClose, onCreated }: Readonly<AddPrope
             />
           </ModalField>
         </Box>
+      </FormSection>
 
-        <Box
-          sx={{
-            display: "grid",
-
-            gridTemplateColumns: {
-              xs: "1fr",
-              sm: "1fr 1fr",
-            },
-
-            gap: 2,
-          }}
-        >
+      <FormSection
+        icon={<FaDollarSign size={14} />}
+        title="Información de pago"
+        description="Precio, abono inicial y programación del siguiente pago."
+      >
+        <Box sx={twoColumnsStyles}>
           <ModalField label="Precio total" htmlFor="property-total-price">
             <TextField
               id="property-total-price"
@@ -352,7 +397,6 @@ export function AddPropertyModal({ open, onClose, onCreated }: Readonly<AddPrope
                   min: 0,
                   step: "0.01",
                 },
-
                 input: {
                   startAdornment: showTotalPriceSymbol ? (
                     <InputAdornment position="start">$</InputAdornment>
@@ -388,7 +432,6 @@ export function AddPropertyModal({ open, onClose, onCreated }: Readonly<AddPrope
                   min: 0,
                   step: "0.01",
                 },
-
                 input: {
                   startAdornment: showInitialPaymentSymbol ? (
                     <InputAdornment position="start">$</InputAdornment>
@@ -400,65 +443,115 @@ export function AddPropertyModal({ open, onClose, onCreated }: Readonly<AddPrope
           </ModalField>
         </Box>
 
-        <ModalField label="Próximo pago" htmlFor="property-next-payment-date">
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              value={formik.values.nextPaymentDate ? dayjs(formik.values.nextPaymentDate) : null}
-              onChange={(date: Dayjs | null) => {
-                void formik.setFieldValue(
-                  "nextPaymentDate",
-
-                  date ? date.format("YYYY-MM-DD") : "",
-                );
-              }}
-              onClose={() => {
-                void formik.setFieldTouched("nextPaymentDate", true);
-              }}
-              disabled={isCreatingProperty}
-              format="DD/MM/YYYY"
-              slotProps={{
-                textField: {
-                  id: "property-next-payment-date",
-
-                  name: "nextPaymentDate",
-
-                  fullWidth: true,
-
-                  error: Boolean(getFieldError("nextPaymentDate")),
-
-                  helperText: getFieldError("nextPaymentDate"),
-
-                  sx: fieldStyles,
-                },
-              }}
-            />
-          </LocalizationProvider>
-        </ModalField>
-
         <Box
           sx={{
-            pt: 0.5,
-
-            borderTop: `1px solid ${colors.cardBorder}`,
+            width: {
+              xs: "100%",
+              sm: "calc(50% - 8px)",
+            },
           }}
-        />
+        >
+          <ModalField label="Próximo pago" htmlFor="property-next-payment-date">
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                value={formik.values.nextPaymentDate ? dayjs(formik.values.nextPaymentDate) : null}
+                onChange={(date: Dayjs | null) => {
+                  void formik.setFieldValue(
+                    "nextPaymentDate",
+                    date ? date.format("YYYY-MM-DD") : "",
+                  );
+                }}
+                onClose={() => {
+                  void formik.setFieldTouched("nextPaymentDate", true);
+                }}
+                disabled={isCreatingProperty}
+                format="DD/MM/YYYY"
+                slotProps={{
+                  textField: {
+                    id: "property-next-payment-date",
+                    name: "nextPaymentDate",
+                    fullWidth: true,
+                    error: Boolean(getFieldError("nextPaymentDate")),
+                    helperText: getFieldError("nextPaymentDate"),
+                    sx: fieldStyles,
+                  },
+                }}
+              />
+            </LocalizationProvider>
+          </ModalField>
+        </Box>
+      </FormSection>
 
-        <ModalField label="Imagen para la tarjeta" htmlFor="property-image">
-          <ImageUploadField
-            label="Imagen del terreno"
-            value={formik.values.imageUrl}
-            disabled={isCreatingProperty}
-            onChange={(imageUrl) => {
-              void formik.setFieldValue("imageUrl", imageUrl);
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          gap: 1,
+          pt: 0.5,
+        }}
+      >
+        <Button
+          type="button"
+          variant="outlined"
+          disabled={isCreatingProperty}
+          onClick={handleCancel}
+          sx={{
+            minHeight: 42,
+            px: 2.5,
+            borderRadius: "9px",
+            borderColor: colors.cardBorder,
+            color: colors.muted,
+            textTransform: "none",
+            fontSize: 12,
+            fontWeight: 800,
 
-              void formik.setFieldTouched("imageUrl", true, false);
-            }}
-          />
-        </ModalField>
+            "&:hover": {
+              borderColor: colors.primaryLight,
+              bgcolor: colors.primarySoft,
+            },
+          }}
+        >
+          Cancelar
+        </Button>
+
+        <Button
+          type="submit"
+          variant="contained"
+          disableElevation
+          disabled={isCreatingProperty}
+          startIcon={<FaPlusCircle size={12} />}
+          sx={{
+            minHeight: 42,
+            px: 2.75,
+            borderRadius: "9px",
+            bgcolor: colors.primary,
+            textTransform: "none",
+            fontSize: 12,
+            fontWeight: 850,
+
+            "&:hover": {
+              bgcolor: colors.primary,
+              filter: "brightness(0.94)",
+            },
+          }}
+        >
+          {isCreatingProperty ? "Registrando..." : "Registrar terreno"}
+        </Button>
       </Box>
-    </FormModal>
+    </Box>
   );
 }
+
+const twoColumnsStyles: SxProps<Theme> = {
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "1fr",
+    sm: "1fr 1fr",
+  },
+  gap: 2,
+  alignItems: "start",
+};
 
 const fieldStyles: SxProps<Theme> = {
   "& .MuiOutlinedInput-root": {
@@ -486,13 +579,11 @@ const fieldStyles: SxProps<Theme> = {
 
     "&.Mui-focused": {
       bgcolor: "#ffffff",
-
       boxShadow: "0 0 0 3px rgba(37, 99, 235, 0.09)",
     },
 
     "&.Mui-focused fieldset": {
       borderColor: colors.primaryLight,
-
       borderWidth: "1px",
     },
 
@@ -514,17 +605,13 @@ const fieldStyles: SxProps<Theme> = {
 
     "&::placeholder": {
       color: "#94a3b8",
-
       WebkitTextFillColor: "#94a3b8",
-
       opacity: 1,
     },
 
     "&:-webkit-autofill": {
       WebkitBoxShadow: "0 0 0 1000px #ffffff inset",
-
       WebkitTextFillColor: `${colors.text} !important`,
-
       caretColor: colors.text,
     },
   },
@@ -535,15 +622,10 @@ const fieldStyles: SxProps<Theme> = {
 
   "& .MuiFormHelperText-root": {
     minHeight: 16,
-
     ml: 0,
-
     mt: 0.55,
-
     color: colors.danger,
-
     fontSize: 10.5,
-
     fontWeight: 650,
   },
 
@@ -553,13 +635,11 @@ const fieldStyles: SxProps<Theme> = {
 
   "& input[type='number']::-webkit-outer-spin-button": {
     WebkitAppearance: "none",
-
     margin: 0,
   },
 
   "& input[type='number']::-webkit-inner-spin-button": {
     WebkitAppearance: "none",
-
     margin: 0,
   },
 };

@@ -1,6 +1,15 @@
 "use client";
 
-import { Box, FormControl, MenuItem, Select, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  FormControl,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+  type SxProps,
+  type Theme,
+} from "@mui/material";
 
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -17,36 +26,54 @@ type HistoryFiltersProps = {
   onChange: (value: HistoryFiltersValue) => void;
 };
 
-const inputSx = {
+const inputSx: SxProps<Theme> = {
+  minWidth: 0,
+
   "& .MuiOutlinedInput-root": {
-    minHeight: 40,
-    borderRadius: 2,
-    bgcolor: colors.cardBg,
-    fontSize: 12.5,
+    minHeight: {
+      xs: 42,
+      sm: 44,
+    },
+    borderRadius: {
+      xs: "12px",
+      sm: "14px",
+    },
+    bgcolor: "#fbfdfc",
+    fontSize: 14,
+    fontWeight: 600,
+    color: colors.text,
 
     "& fieldset": {
       borderColor: colors.cardBorder,
     },
 
     "&:hover fieldset": {
-      borderColor: colors.softMuted,
+      borderColor: "#94a3b8",
     },
 
     "&.Mui-focused fieldset": {
       borderColor: colors.primaryLight,
       borderWidth: 1.5,
     },
+
+    "&.Mui-error fieldset": {
+      borderColor: colors.danger,
+    },
   },
 
   "& .MuiInputBase-input": {
-    color: colors.text,
+    minWidth: 0,
+    px: {
+      xs: 1.5,
+      sm: 1.75,
+    },
   },
 
   "& .MuiInputBase-input::placeholder": {
     color: colors.softMuted,
     opacity: 1,
   },
-} as const;
+};
 
 export function HistoryFilters({ value, onChange }: Readonly<HistoryFiltersProps>) {
   const updateFilter = <K extends keyof HistoryFiltersValue>(

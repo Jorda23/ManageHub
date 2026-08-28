@@ -7,7 +7,6 @@ import { colors } from "@/theme/sharedColors";
 
 export function StockProgress({
   stock,
-  minStock,
   stockPercent,
   progressColor,
   isLowStock,
@@ -27,8 +26,12 @@ export function StockProgress({
           noWrap
           sx={{
             color: colors.softMuted,
-            fontSize: { xs: 10, sm: 10, md: 11 },
             fontWeight: 950,
+            fontSize: {
+              xs: 10,
+              sm: 10,
+              md: 11,
+            },
             textTransform: "uppercase",
           }}
         >
@@ -36,44 +39,40 @@ export function StockProgress({
         </Typography>
 
         <Typography
+          noWrap
           sx={{
-            color: isLowStock ? colors.danger : colors.text,
-            fontSize: { xs: 12, sm: 12, md: 13 },
-            fontWeight: 950,
-            fontVariantNumeric: "tabular-nums",
             flexShrink: 0,
+            color: isLowStock ? colors.danger : progressColor,
+            fontWeight: 950,
+            fontSize: {
+              xs: 11,
+              sm: 11,
+              md: 12,
+            },
           }}
         >
-          {stock}
+          {stock} · {Math.round(stockPercent)}%
         </Typography>
       </Box>
 
       <LinearProgress
         variant="determinate"
         value={stockPercent}
+        aria-label={`Stock actual ${Math.round(stockPercent)}%`}
         sx={{
-          height: { xs: 5, sm: 5, md: 6 },
+          height: {
+            xs: 6,
+            sm: 6,
+            md: 7,
+          },
           borderRadius: 999,
-          bgcolor: colors.tableHead,
+          bgcolor: "#e5e7eb",
           "& .MuiLinearProgress-bar": {
             bgcolor: progressColor,
             borderRadius: 999,
           },
         }}
       />
-
-      <Typography
-        noWrap
-        sx={{
-          mt: 0.45,
-          color: colors.softMuted,
-          fontSize: { xs: 10, sm: 10, md: 11 },
-          fontWeight: 700,
-          textAlign: "right",
-        }}
-      >
-        Mínimo: {minStock}
-      </Typography>
     </Box>
   );
 }

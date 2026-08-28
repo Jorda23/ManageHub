@@ -351,7 +351,7 @@ function AlertsCard({ alerts }: { alerts: AlertItem[] }) {
   );
 }
 
-function SectorModuleCard({ eyebrow, title, description, image, href, stats }: ModuleCard) {
+function SectorModuleCard({ eyebrow, title, description, image, href }: ModuleCard) {
   return (
     <Card elevation={0} sx={{ ...cardStyles, overflow: "hidden", p: 0 }}>
       <Box
@@ -409,29 +409,6 @@ function SectorModuleCard({ eyebrow, title, description, image, href, stats }: M
             </IconBadge>
           </Link>
         </Box>
-
-        <Divider sx={{ my: 1.7, borderColor: colors.cardBorder }} />
-
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1 }}>
-          {stats.map((stat) => (
-            <Box key={stat.label} sx={{ minWidth: 0 }}>
-              <Typography sx={{ color: colors.text, fontSize: 13, fontWeight: 950 }}>
-                {stat.value}
-              </Typography>
-              <Typography
-                sx={{
-                  mt: 0.25,
-                  color: colors.muted,
-                  fontSize: 8.5,
-                  fontWeight: 850,
-                  lineHeight: 1.25,
-                }}
-              >
-                {stat.label}
-              </Typography>
-            </Box>
-          ))}
-        </Box>
       </Box>
     </Card>
   );
@@ -446,6 +423,7 @@ function ActivityCard({ activities }: { activities: ActivityItem[] }) {
         title="Actividad reciente"
         subtitle="Ultimos movimientos realizados en todos los modulos"
         action="Ver historial"
+        href="/history"
       />
 
       <Box sx={{ display: "flex", flexDirection: "column" }}>
@@ -518,12 +496,14 @@ function PanelHeader({
   title,
   subtitle,
   action,
+  href,
 }: {
   icon: ComponentType<{ size?: number }>;
   accent: string;
   title: string;
   subtitle: string;
   action?: string;
+  href?: string;
 }) {
   return (
     <Box
@@ -552,6 +532,7 @@ function PanelHeader({
 
       {action && (
         <Button
+          href={href ?? ""}
           size="small"
           endIcon={<FaArrowRight size={10} />}
           sx={{
