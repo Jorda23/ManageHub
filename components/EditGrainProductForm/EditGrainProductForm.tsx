@@ -16,7 +16,7 @@ import { addGrainSchema } from "@/validations";
 
 import { FormModal } from "../FormModal";
 import { FormSection } from "../FormSection";
-import { ImageUploadField } from "../ImageUploadField";
+import { ImageUrlField } from "../ImageUrlField";
 import { ModalField } from "../ModalField";
 
 import type { GrainProduct } from "@/shared/types/api.types";
@@ -202,7 +202,7 @@ export function EditGrainProductForm({
           </Box>
 
           <ModalField label="Imagen del producto" htmlFor="edit-grain-image">
-            <ImageUploadField
+            <ImageUrlField
               label="Imagen del grano"
               value={formik.values.imageUrl}
               disabled={disabled}

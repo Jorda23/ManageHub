@@ -4,6 +4,8 @@ import { useCallback, useMemo, useState } from "react";
 
 import { Box } from "@mui/material";
 
+import dayjs from "dayjs";
+
 import {
   PropertyHeroHeader,
   PropertyMetricsGrid,
@@ -18,6 +20,7 @@ import {
   type PropertyItem,
   EditPropertyForm,
   EditPropertyValues,
+  useToast,
 } from "@/components";
 
 import type { Property } from "@/shared/types/api.types";
@@ -33,6 +36,8 @@ export function PropertyWorkspace() {
   const { data: apiProperties = [], isLoading: isLoadingProperties } = useProperties();
 
   const { mutateAsync: updateProperty, isPending: isUpdatingProperty } = useUpdateProperty();
+
+  const { showSuccess, showError } = useToast();
 
   const [activeTab, setActiveTab] = useState<PropertyWorkspaceTab>("properties");
 
@@ -88,18 +93,24 @@ export function PropertyWorkspace() {
             location: values.location.trim(),
             ownerName: values.ownerName.trim(),
             identificationNumber: values.identificationNumber.trim(),
-            nextPaymentDate: values.nextPaymentDate || null,
+            nextPaymentDate: values.nextPaymentDate
+              ? dayjs(values.nextPaymentDate).startOf("day").toISOString()
+              : null,
             imageUrl: values.imageUrl?.trim() || null,
             identificationImageUrl: values.identificationImageUrl?.trim() || null,
           },
         });
 
+        showSuccess("Terreno actualizado correctamente.");
+
         setEditingProperty(null);
       } catch {
+        showError("No se pudo actualizar el terreno.");
+
         throw new Error("No se pudo actualizar el terreno.");
       }
     },
-    [updateProperty],
+    [updateProperty, showSuccess, showError],
   );
 
   if (isLoadingProperties) {

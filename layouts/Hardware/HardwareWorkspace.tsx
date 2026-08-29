@@ -24,6 +24,7 @@ import {
   AddHardwareProductForm,
   EditHardwareProductForm,
   EditHardwareProductValues,
+  useToast,
 } from "@/components";
 
 import type { HardwareProduct } from "@/shared/types/api.types";
@@ -59,6 +60,8 @@ export function HardwareWorkspace() {
     mutateAsync: updateHardwareProduct,
     isPending: isUpdatingProduct,
   } = useUpdateHardwareProduct();
+
+  const { showSuccess, showError } = useToast();
 
   const [
     editingProduct,
@@ -146,14 +149,22 @@ export function HardwareWorkspace() {
             null,
         });
 
+        showSuccess(
+          "Producto de ferretería creado correctamente.",
+        );
+
         setActiveTab("inventory");
       } catch {
+        showError(
+          "No se pudo crear el producto.",
+        );
+
         throw new Error(
           "No se pudo crear el producto.",
         );
       }
     },
-    [createHardwareProduct],
+    [createHardwareProduct, showSuccess, showError],
   );
 
   const handleEditProduct = useCallback(
@@ -196,14 +207,22 @@ export function HardwareWorkspace() {
           },
         });
 
+        showSuccess(
+          "Producto de ferretería actualizado correctamente.",
+        );
+
         setEditingProduct(null);
       } catch {
+        showError(
+          "No se pudo actualizar el producto.",
+        );
+
         throw new Error(
           "No se pudo actualizar el producto.",
         );
       }
     },
-    [updateHardwareProduct],
+    [updateHardwareProduct, showSuccess, showError],
   );
 
   if (isLoadingProducts) {

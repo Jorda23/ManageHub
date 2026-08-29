@@ -31,7 +31,7 @@ import { colors } from "@/theme/sharedColors";
 
 import { addHardwareProductSchema } from "@/validations";
 
-import { ImageUploadField } from "../ImageUploadField";
+import { ImageUrlField } from "../ImageUrlField";
 
 import { ModalField } from "../ModalField";
 import { FaBoxesStacked } from "react-icons/fa6";
@@ -397,7 +397,7 @@ export function AddHardwareProductForm({
           label="Imagen del producto"
           htmlFor="hardware-product-image"
         >
-          <ImageUploadField
+          <ImageUrlField
             label="Imagen del producto"
             value={
               formik.values.imageUrl
@@ -573,76 +573,7 @@ export function AddHardwareProductForm({
           </ModalField>
         </Box>
       </FormSection>
-
-      <FormSection
-        icon={
-          <FaInfoCircle size={14} />
-        }
-        title="Estado"
-        description="Selecciona el estado inicial del inventario."
-      >
-        <RadioGroup
-          name="inventoryStatus"
-          value={
-            formik.values
-              .inventoryStatus
-          }
-          onChange={
-            formik.handleChange
-          }
-          onBlur={formik.handleBlur}
-          sx={{
-            display: "grid",
-
-            gridTemplateColumns: {
-              xs: "1fr",
-              sm: "1fr 1fr",
-            },
-
-            gap: 1,
-          }}
-        >
-          <StatusOption
-            value="Available"
-            label="Disponible"
-            description="Producto disponible para venta."
-            selected={
-              formik.values
-                .inventoryStatus ===
-              "Available"
-            }
-          />
-
-          <StatusOption
-            value="Unavailable"
-            label="No disponible"
-            description="Producto temporalmente no disponible."
-            selected={
-              formik.values
-                .inventoryStatus ===
-              "Unavailable"
-            }
-          />
-        </RadioGroup>
-
-        {getFieldError(
-          "inventoryStatus",
-        ) && (
-          <Typography
-            sx={{
-              mt: 0.5,
-              color: colors.danger,
-              fontSize: 10.5,
-              fontWeight: 650,
-            }}
-          >
-            {getFieldError(
-              "inventoryStatus",
-            )}
-          </Typography>
-        )}
-      </FormSection>
-
+      
       <Box
         sx={{
           display: "flex",

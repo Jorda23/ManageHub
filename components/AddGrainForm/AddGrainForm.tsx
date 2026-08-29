@@ -16,7 +16,7 @@ import { colors } from "@/theme/sharedColors";
 
 import { addGrainSchema } from "@/validations";
 
-import { ImageUploadField } from "../ImageUploadField";
+import { ImageUrlField } from "../ImageUrlField";
 
 import { ModalField } from "../ModalField";
 import { FormSection } from "../FormSection";
@@ -293,7 +293,7 @@ export function AddGrainForm({
         </Box>
 
         <ModalField label="Imagen del producto" htmlFor="grain-image">
-          <ImageUploadField
+          <ImageUrlField
             label="Imagen del grano"
             value={formik.values.imageUrl}
             disabled={isSubmitting}

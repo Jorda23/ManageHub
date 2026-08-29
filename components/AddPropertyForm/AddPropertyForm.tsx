@@ -22,7 +22,9 @@ import { colors } from "@/theme/sharedColors";
 
 import { addPropertySchema, type AddPropertyFormValues } from "@/validations";
 
-import { ImageUploadField } from "@/components/ImageUploadField/ImageUploadField";
+import { useToast } from "@/components/Toast";
+
+import { ImageUrlField } from "@/components/ImageUrlField";
 import { ModalField } from "@/components/ModalField";
 import { FormSection } from "../FormSection";
 
@@ -53,6 +55,8 @@ export function AddPropertyForm({ onCancel, onCreated }: Readonly<AddPropertyFor
   const [isInitialPaymentFocused, setIsInitialPaymentFocused] = useState(false);
 
   const { mutateAsync: createProperty, isPending: isCreatingProperty } = useCreateProperty();
+
+  const { showSuccess, showError } = useToast();
 
   const formik = useFormik<AddPropertyFormValues>({
     initialValues,
@@ -92,9 +96,13 @@ export function AddPropertyForm({ onCancel, onCreated }: Readonly<AddPropertyFor
 
         helpers.resetForm();
 
+        showSuccess("Terreno registrado correctamente.");
+
         onCreated?.(response.id);
       } catch {
         setRequestError("No se pudo registrar la propiedad.");
+
+        showError("No se pudo registrar la propiedad.");
       }
     },
   });
@@ -286,7 +294,7 @@ export function AddPropertyForm({ onCancel, onCreated }: Readonly<AddPropertyFor
         </Box>
 
         <ModalField label="Imagen del terreno" htmlFor="property-image">
-          <ImageUploadField
+          <ImageUrlField
             label="Imagen del terreno"
             value={formik.values.imageUrl}
             disabled={isCreatingProperty}
@@ -338,7 +346,7 @@ export function AddPropertyForm({ onCancel, onCreated }: Readonly<AddPropertyFor
           </ModalField>
 
           <ModalField label="Documento de identificación" htmlFor="property-identification-image">
-            <ImageUploadField
+            <ImageUrlField
               label="Foto del documento"
               value={formik.values.identificationImageUrl}
               disabled={isCreatingProperty}

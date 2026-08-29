@@ -17,7 +17,7 @@ import { addHardwareProductSchema } from "@/validations";
 
 import { FormModal } from "../FormModal";
 import { FormSection } from "../FormSection";
-import { ImageUploadField } from "../ImageUploadField";
+import { ImageUrlField } from "../ImageUrlField";
 import { ModalField } from "../ModalField";
 
 import type { HardwareProduct } from "@/shared/types/api.types";
@@ -216,7 +216,7 @@ export function EditHardwareProductForm({
           </Box>
 
           <ModalField label="Imagen del producto" htmlFor="edit-hardware-product-image">
-            <ImageUploadField
+            <ImageUrlField
               label="Imagen del producto"
               value={formik.values.imageUrl}
               disabled={disabled}
@@ -312,40 +312,6 @@ export function EditHardwareProductForm({
               />
             </ModalField>
           </Box>
-        </FormSection>
-
-        <FormSection
-          icon={<FaInfoCircle size={14} />}
-          title="Estado"
-          description="Selecciona el estado del inventario."
-        >
-          <RadioGroup
-            name="inventoryStatus"
-            value={formik.values.inventoryStatus}
-            onChange={formik.handleChange}
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                sm: "1fr 1fr",
-              },
-              gap: 1,
-            }}
-          >
-            <StatusOption
-              value="Available"
-              label="Disponible"
-              description="Producto disponible para venta."
-              selected={formik.values.inventoryStatus === "Available"}
-            />
-
-            <StatusOption
-              value="Unavailable"
-              label="No disponible"
-              description="Producto temporalmente no disponible."
-              selected={formik.values.inventoryStatus === "Unavailable"}
-            />
-          </RadioGroup>
         </FormSection>
       </Box>
     </FormModal>

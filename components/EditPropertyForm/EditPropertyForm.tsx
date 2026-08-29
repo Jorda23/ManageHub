@@ -20,7 +20,7 @@ import { colors } from "@/theme/sharedColors";
 
 import { FormModal } from "../FormModal";
 import { FormSection } from "../FormSection";
-import { ImageUploadField } from "../ImageUploadField";
+import { ImageUrlField } from "../ImageUrlField";
 import { ModalField } from "../ModalField";
 
 import type { Property } from "@/shared/types/api.types";
@@ -212,7 +212,7 @@ export function EditPropertyForm({
           </Box>
 
           <ModalField label="Imagen del terreno" htmlFor="edit-property-image">
-            <ImageUploadField
+            <ImageUrlField
               label="Imagen del terreno"
               value={formik.values.imageUrl ?? ""}
               disabled={disabled}
@@ -261,7 +261,7 @@ export function EditPropertyForm({
             </ModalField>
 
             <ModalField label="Documento de identificación" htmlFor="edit-property-identification-image">
-              <ImageUploadField
+              <ImageUrlField
                 label="Foto del documento"
                 value={formik.values.identificationImageUrl ?? ""}
                 disabled={disabled}

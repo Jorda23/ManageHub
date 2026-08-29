@@ -6,6 +6,8 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/query/queryClient";
 import { Inter } from "next/font/google";
 
+import { ToastProvider } from "@/components/Toast";
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
@@ -18,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <QueryClientProvider client={queryClient}>
           <ThemeProvider theme={theme}>
             <CssBaseline />
-            {children}
+            <ToastProvider>{children}</ToastProvider>
           </ThemeProvider>
         </QueryClientProvider>
       </body>

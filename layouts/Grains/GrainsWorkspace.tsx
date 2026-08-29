@@ -14,6 +14,7 @@ import {
   AddGrainFormValues,
   EditGrainProductForm,
   EditGrainProductValues,
+  useToast,
 } from "@/components";
 
 import type { GrainProduct } from "@/shared/types/api.types";
@@ -32,6 +33,8 @@ export function GrainsWorkspace() {
   const { mutateAsync: createGrainProduct, isPending: isCreatingProduct } = useCreateGrainProduct();
 
   const { mutateAsync: updateGrainProduct, isPending: isUpdatingProduct } = useUpdateGrainProduct();
+
+  const { showSuccess, showError } = useToast();
 
   const [activeTab, setActiveTab] = useState<GrainsWorkspaceTab>("inventory");
 
@@ -72,12 +75,16 @@ export function GrainsWorkspace() {
           imageUrl: values.imageUrl.trim() || null,
         });
 
+        showSuccess("Producto de granos creado correctamente.");
+
         setActiveTab("inventory");
       } catch {
+        showError("No se pudo crear el producto.");
+
         throw new Error("No se pudo crear el producto.");
       }
     },
-    [createGrainProduct],
+    [createGrainProduct, showSuccess, showError],
   );
 
   const handleEditProduct = useCallback(
@@ -104,12 +111,16 @@ export function GrainsWorkspace() {
           },
         });
 
+        showSuccess("Producto de granos actualizado correctamente.");
+
         setEditingProduct(null);
       } catch {
+        showError("No se pudo actualizar el producto.");
+
         throw new Error("No se pudo actualizar el producto.");
       }
     },
-    [updateGrainProduct],
+    [updateGrainProduct, showSuccess, showError],
   );
 
   if (isLoadingProducts) {
