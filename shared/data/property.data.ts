@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import type { WorkspaceConfig } from "@/components/WorkspaceShared/workspaceTypes";
+import type { WorkspaceHeaderConfig } from "@/components/WorkspaceShared/workspaceTypes";
 import { colors } from "@/theme/sharedColors";
 
 export type AccountStatus = "Al día" | "Pendiente" | "Atrasado" | "Pagado";
@@ -43,8 +43,6 @@ export type PropertyMetric = {
   value: string;
   detail: string;
 };
-
-type WorkspaceHeaderConfig = Pick<WorkspaceConfig, "category" | "badge" | "title" | "subtitle">;
 
 export const propertyConfig: WorkspaceHeaderConfig = {
   category: "property",

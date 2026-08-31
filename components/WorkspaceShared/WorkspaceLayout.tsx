@@ -28,8 +28,9 @@ import {
 } from "react-icons/fa";
 
 import { saleCategories, type SaleCategory } from "@/shared/data/saleWorkspace.data";
+import type { DashboardIcon } from "@/shared";
+import { formatCurrency } from "@/shared";
 import type {
-  IconType,
   WorkspaceAnalysisItem,
   WorkspaceConfig,
   WorkspaceProduct,
@@ -718,7 +719,7 @@ function MetricCard({
   label: string;
   value: string;
   detail: string;
-  icon: IconType;
+  icon: DashboardIcon;
   accent: string;
 }) {
   return (
@@ -799,7 +800,7 @@ function CategoryTile({
   accent,
 }: {
   href: string;
-  icon: IconType;
+  icon: DashboardIcon;
   label: string;
   hint: string;
   active?: boolean;
@@ -1250,15 +1251,6 @@ function parseCurrency(value?: string) {
   const numeric = Number(value.replace(/[^0-9.-]/g, ""));
 
   return Number.isFinite(numeric) ? numeric : null;
-}
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
 }
 
 const tableHeaderSx = {

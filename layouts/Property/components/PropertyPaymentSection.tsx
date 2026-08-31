@@ -31,7 +31,7 @@ import {
 
 import { useRegisterPropertyPayment } from "@/hook/useProperties";
 
-import { generatePaymentInvoice } from "@/utils/generatePaymentInvoice";
+import { downloadPaymentInvoicePdf } from "@/utils/generatePaymentInvoice";
 
 import {
   registerPropertyPaymentSchema,
@@ -94,18 +94,6 @@ export function PropertyPaymentSection({ properties }: Readonly<PropertyPaymentS
 
       helpers.setStatus(undefined);
 
-      const invoiceWindow = window.open("", "_blank", "width=900,height=900");
-
-      if (!invoiceWindow) {
-        helpers.setStatus(
-          "El navegador bloqueó la ventana del recibo. Habilita las ventanas emergentes.",
-        );
-
-        return;
-      }
-
-      renderProcessingInvoice(invoiceWindow);
-
       try {
         const payment = await registerPropertyPayment({
           propertyId: selectedProperty.id,
@@ -118,10 +106,12 @@ export function PropertyPaymentSection({ properties }: Readonly<PropertyPaymentS
         });
 
         try {
-          generatePaymentInvoice({
-            invoiceWindow,
+          const invoiceNumber = payment?.id ? `REC-${payment.id}` : `REC-${Date.now()}`;
 
-            invoiceNumber: payment?.id ? `REC-${payment.id}` : `REC-${Date.now()}`,
+          await downloadPaymentInvoicePdf({
+            fileName: `${invoiceNumber}.pdf`,
+
+            invoiceNumber,
 
             propertyName: selectedProperty.name,
 
@@ -144,8 +134,6 @@ export function PropertyPaymentSection({ properties }: Readonly<PropertyPaymentS
         } catch (error) {
           console.error("Error generando recibo:", error);
 
-          renderInvoiceError(invoiceWindow);
-
           helpers.setStatus("El pago fue registrado, pero no se pudo generar el recibo.");
 
           return;
@@ -159,8 +147,6 @@ export function PropertyPaymentSection({ properties }: Readonly<PropertyPaymentS
         });
       } catch (error) {
         console.error("Error registrando abono:", error);
-
-        invoiceWindow.close();
 
         helpers.setStatus("No se pudo registrar el abono.");
       }
@@ -519,67 +505,6 @@ export function PropertyPaymentSection({ properties }: Readonly<PropertyPaymentS
       </Box>
     </PropertySectionCard>
   );
-}
-
-function renderProcessingInvoice(invoiceWindow: Window): void {
-  invoiceWindow.document.open();
-
-  invoiceWindow.document.write(`
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <title>Procesando pago...</title>
-      </head>
-
-      <body
-        style="
-          font-family: Arial, sans-serif;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          min-height: 100vh;
-          margin: 0;
-        "
-      >
-        <div>
-          <h2>Registrando pago...</h2>
-        </div>
-      </body>
-    </html>
-  `);
-
-  invoiceWindow.document.close();
-}
-
-function renderInvoiceError(invoiceWindow: Window): void {
-  invoiceWindow.document.open();
-
-  invoiceWindow.document.write(`
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <title>Error generando recibo</title>
-      </head>
-
-      <body
-        style="
-          font-family: Arial, sans-serif;
-          padding: 40px;
-        "
-      >
-        <h2>
-          Pago registrado correctamente
-        </h2>
-
-        <p>
-          El pago fue guardado, pero ocurrió
-          un error generando el recibo.
-        </p>
-      </body>
-    </html>
-  `);
-
-  invoiceWindow.document.close();
 }
 
 function FieldLabel({ children }: { children: ReactNode }) {

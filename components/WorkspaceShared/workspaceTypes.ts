@@ -1,6 +1,4 @@
-import type React from "react";
-
-export type IconType = React.ComponentType<{ size?: number }>;
+import type { DashboardIcon } from "@/shared/types/dashboard.types";
 
 export type WorkspaceProduct = {
   name: string;
@@ -10,11 +8,11 @@ export type WorkspaceProduct = {
   unit: string;
   total: string;
   accent: string;
-  icon: IconType;
+  icon: DashboardIcon;
 };
 
 export type WorkspacePayment = {
-  icon: IconType;
+  icon: DashboardIcon;
   title: string;
   subtitle: string;
   active?: boolean;
@@ -31,7 +29,7 @@ export type WorkspaceMetric = {
   label: string;
   value: string;
   detail: string;
-  icon: IconType;
+  icon: DashboardIcon;
 };
 
 export type WorkspaceAnalysisItem = {

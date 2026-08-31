@@ -1,6 +1,7 @@
-import type { ComponentType, ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import type { SidebarItemKey } from "../data/appShell.data";
+import type { DashboardIcon } from "./dashboard.types";
 
 export type AppShellSection = SidebarItemKey | "activity";
 
@@ -13,7 +14,7 @@ export type NavItem = {
   label: string;
   mobileLabel: string;
   href: string;
-  icon: ComponentType<{ size?: number }>;
+  icon: DashboardIcon;
   key: SidebarItemKey;
 };
 

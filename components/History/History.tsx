@@ -8,9 +8,9 @@ import { usePaymentHistory } from "@/hook/useHistory";
 
 import { HistoryEmptyState, HistoryFilters, HistoryTable } from "./components";
 
-import type { HistoryFiltersValue } from "./history.types";
+import type { PaymentHistoryFilters } from "@/shared";
 
-const INITIAL_FILTERS: HistoryFiltersValue = {
+const INITIAL_FILTERS: PaymentHistoryFilters = {
   search: "",
   type: "all",
   from: "",
@@ -18,7 +18,7 @@ const INITIAL_FILTERS: HistoryFiltersValue = {
 };
 
 export function History() {
-  const [filters, setFilters] = useState<HistoryFiltersValue>(INITIAL_FILTERS);
+  const [filters, setFilters] = useState<PaymentHistoryFilters>(INITIAL_FILTERS);
 
   const { data = [], isLoading, isError } = usePaymentHistory(filters);
 

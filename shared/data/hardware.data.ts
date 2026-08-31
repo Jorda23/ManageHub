@@ -1,6 +1,4 @@
-import type { WorkspaceConfig } from "@/components/WorkspaceShared/workspaceTypes";
-
-type WorkspaceHeaderConfig = Pick<WorkspaceConfig, "category" | "badge" | "title" | "subtitle">;
+import type { WorkspaceHeaderConfig } from "@/components/WorkspaceShared/workspaceTypes";
 
 export const hardwareConfig: WorkspaceHeaderConfig = {
   category: "hardware",

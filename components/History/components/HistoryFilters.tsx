@@ -19,11 +19,11 @@ import dayjs, { type Dayjs } from "dayjs";
 
 import { colors } from "@/theme/sharedColors";
 
-import type { HistoryFiltersValue } from "../history.types";
+import type { PaymentHistoryFilters } from "@/shared";
 
 type HistoryFiltersProps = {
-  value: HistoryFiltersValue;
-  onChange: (value: HistoryFiltersValue) => void;
+  value: PaymentHistoryFilters;
+  onChange: (value: PaymentHistoryFilters) => void;
 };
 
 const inputSx: SxProps<Theme> = {
@@ -76,9 +76,9 @@ const inputSx: SxProps<Theme> = {
 };
 
 export function HistoryFilters({ value, onChange }: Readonly<HistoryFiltersProps>) {
-  const updateFilter = <K extends keyof HistoryFiltersValue>(
+  const updateFilter = <K extends keyof PaymentHistoryFilters>(
     field: K,
-    fieldValue: HistoryFiltersValue[K],
+    fieldValue: PaymentHistoryFilters[K],
   ) => {
     onChange({
       ...value,
@@ -136,7 +136,7 @@ export function HistoryFilters({ value, onChange }: Readonly<HistoryFiltersProps
           <Select
             size="small"
             value={value.type}
-            onChange={(event) => updateFilter("type", event.target.value as HistoryFiltersValue["type"])}
+            onChange={(event) => updateFilter("type", event.target.value as PaymentHistoryFilters["type"])}
             fullWidth
             sx={inputSx}
           >

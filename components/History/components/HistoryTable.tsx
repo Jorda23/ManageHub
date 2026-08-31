@@ -14,10 +14,12 @@ import {
 
 import { colors, palette } from "@/theme/sharedColors";
 
-import type { HistoryItem } from "../history.types";
+import { formatPrice } from "@/shared";
+
+import type { PaymentHistoryItem } from "@/shared/types/api.types";
 
 type HistoryTableProps = {
-  items: HistoryItem[];
+  items: PaymentHistoryItem[];
 };
 
 const TYPE_LABELS = {
@@ -211,7 +213,7 @@ export function HistoryTable({ items }: Readonly<HistoryTableProps>) {
                       letterSpacing: "-0.01em",
                     }}
                   >
-                    {formatCurrency(item.amount)}
+                    {formatPrice(item.amount, { locale: "es-NI", currency: "NIO" })}
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -252,12 +254,6 @@ function HeaderCell({ children, width, align = "left" }: Readonly<HeaderCellProp
   );
 }
 
-const currencyFormatter = new Intl.NumberFormat("es-NI", {
-  style: "currency",
-  currency: "NIO",
-  minimumFractionDigits: 2,
-});
-
 const dateFormatter = new Intl.DateTimeFormat("es-NI", {
   year: "numeric",
   month: "short",
@@ -265,10 +261,6 @@ const dateFormatter = new Intl.DateTimeFormat("es-NI", {
   hour: "2-digit",
   minute: "2-digit",
 });
-
-function formatCurrency(value: number) {
-  return currencyFormatter.format(value);
-}
 
 function formatDate(value: string) {
   return dateFormatter.format(new Date(value));

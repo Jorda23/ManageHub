@@ -6,18 +6,11 @@ import { useQuery } from "@tanstack/react-query";
 
 import { getPaymentHistory } from "@/service/api";
 
-import type { PaymentHistoryItem } from "@/shared/types/api.types";
+import type { PaymentHistoryFilters, PaymentHistoryItem } from "@/shared/types/api.types";
 
 const HISTORY_QUERY_KEY = ["payment-history"];
 
 const SEARCH_DEBOUNCE_MS = 400;
-
-type HistoryQueryFilters = {
-  type?: "hardware" | "grains" | "property" | "all";
-  search?: string;
-  from?: string;
-  to?: string;
-};
 
 function useDebouncedValue<T>(value: T, delay: number): T {
   const [debounced, setDebounced] = useState(value);
@@ -35,10 +28,10 @@ function useDebouncedValue<T>(value: T, delay: number): T {
   return debounced;
 }
 
-export function usePaymentHistory(filters?: HistoryQueryFilters) {
+export function usePaymentHistory(filters?: PaymentHistoryFilters) {
   const debouncedSearch = useDebouncedValue(filters?.search ?? "", SEARCH_DEBOUNCE_MS);
 
-  const normalizedFilters: HistoryQueryFilters = {
+  const normalizedFilters: PaymentHistoryFilters = {
     ...filters,
     search: debouncedSearch,
   };
