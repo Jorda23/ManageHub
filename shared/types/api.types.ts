@@ -355,4 +355,5 @@ export type PaymentHistoryFilters = {
   from?: string;
   to?: string;
   paymentMethod?: string;
+  currency?: Currency;
 };

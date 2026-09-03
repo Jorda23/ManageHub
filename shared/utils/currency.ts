@@ -60,14 +60,3 @@ export const currencySymbols: Record<Currency, string> = {
 export function getCurrencySymbol(currency: unknown): string {
   return currencySymbols[normalizeCurrency(currency)] ?? "C$";
 }
-
-export function formatCurrency(value: number, currency: unknown = "NIO"): string {
-  const normalizedCurrency = normalizeCurrency(currency);
-
-  return new Intl.NumberFormat(normalizedCurrency === "NIO" ? "es-NI" : "en-US", {
-    style: "currency",
-    currency: normalizedCurrency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
-}
