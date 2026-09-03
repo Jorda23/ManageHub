@@ -20,6 +20,7 @@ import dayjs, { type Dayjs } from "dayjs";
 import { colors } from "@/theme/sharedColors";
 
 import type { PaymentHistoryFilters } from "@/shared";
+import { currencies, currencyLabels } from "@/shared/utils/currency";
 
 type HistoryFiltersProps = {
   value: PaymentHistoryFilters;
@@ -144,6 +145,29 @@ export function HistoryFilters({ value, onChange }: Readonly<HistoryFiltersProps
             <MenuItem value="hardware">Ferretería</MenuItem>
             <MenuItem value="grains">Granos básicos</MenuItem>
             <MenuItem value="property">Terrenos</MenuItem>
+          </Select>
+        </FilterField>
+
+        <FilterField label="Moneda">
+          <Select
+            size="small"
+            value={value.currency ?? ""}
+            displayEmpty
+            onChange={(event) =>
+              updateFilter(
+                "currency",
+                (event.target.value || undefined) as PaymentHistoryFilters["currency"],
+              )
+            }
+            fullWidth
+            sx={inputSx}
+          >
+            <MenuItem value="">Todas</MenuItem>
+            {currencies.map((currency) => (
+              <MenuItem key={currency} value={currency}>
+                {currencyLabels[currency]}
+              </MenuItem>
+            ))}
           </Select>
         </FilterField>
 

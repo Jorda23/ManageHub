@@ -31,6 +31,8 @@ export function HardwareWorkspaceHero({
           md: 3,
         },
         borderRadius: "16px",
+        border: "1px solid rgba(255, 237, 213, 0.34)",
+        boxShadow: "0 14px 32px rgba(120, 53, 15, 0.16)",
         color: "#ffffff",
         background: "linear-gradient(135deg, #78350f 0%, #f59e0b 55%, #0891b2 100%)",
         minHeight: {

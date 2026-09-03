@@ -19,10 +19,11 @@ export const HardwareProductCard = memo(function HardwareProductCard({
 }: Readonly<HardwareProductCardProps>) {
   const isLowStock = product.status === "lowStock" || product.stock <= product.minStock;
 
+  const stockReference = product.initialStock > 0 ? product.initialStock : product.stock;
   const stockPercent =
-    product.initialStock > 0
-      ? Math.min(100, (product.stock / product.initialStock) * 100)
-      : 100;
+    stockReference > 0
+      ? Math.max(0, Math.min(100, (product.stock / stockReference) * 100))
+      : 0;
 
   const progressColor = isLowStock ? colors.danger : product.accent;
 
@@ -111,7 +112,7 @@ export const HardwareProductCard = memo(function HardwareProductCard({
 
             <ProductInfo
               label="Precio"
-              value={formatCurrency(product.price)}
+              value={formatCurrency(product.price, product.currency)}
               valueColor={colors.primary}
               align="right"
             />
@@ -156,4 +157,3 @@ export const HardwareProductCard = memo(function HardwareProductCard({
     </Paper>
   );
 });
-

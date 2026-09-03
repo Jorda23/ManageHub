@@ -2,13 +2,12 @@
 
 import { useCallback, useMemo, useState } from "react";
 
-import { Box } from "@mui/material";
+import { Box, Dialog } from "@mui/material";
 
 import { useCreateGrainProduct, useGrainProducts, useUpdateGrainProduct } from "@/hook/useGrains";
 
 import {
   LoadingState,
-  SectionCard,
   RegisterGrainSaleForm,
   AddGrainForm,
   AddGrainFormValues,
@@ -24,6 +23,7 @@ import { GrainInventory, type GrainInventoryItem } from "@/components/GrainInven
 import { colors } from "@/theme/sharedColors";
 
 import { GrainMetricsGrid, GrainsTabs, HeroHeader } from "./components";
+import { normalizeCurrency } from "@/shared/utils/currency";
 
 export type GrainsWorkspaceTab = "inventory" | "create";
 
@@ -37,23 +37,25 @@ export function GrainsWorkspace() {
   const { showSuccess, showError } = useToast();
 
   const [activeTab, setActiveTab] = useState<GrainsWorkspaceTab>("inventory");
+  const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
 
   const [editingProduct, setEditingProduct] = useState<GrainProduct | null>(null);
 
   const products = useMemo<GrainInventoryItem[]>(() => {
     return grainProducts.map((product) => {
       const isLowStock =
-        product.inventoryStatus === "LowStock" || product.stock <= product.minimumStock;
+        product.inventoryStatus === "LowStock" || product.currentStock <= product.minimumStock;
 
       return {
         id: product.id,
         code: product.code,
         name: product.name,
         unit: product.unit,
-        stock: product.stock,
+        stock: product.currentStock,
         initialStock: product.initialStock,
         minStock: product.minimumStock,
         price: product.unitPrice,
+        currency: product.currency,
         silo: product.location,
         imageUrl: product.imageUrl ?? "",
         status: isLowStock ? "lowStock" : "inStock",
@@ -65,6 +67,8 @@ export function GrainsWorkspace() {
   const handleCreateGrain = useCallback(
     async (values: AddGrainFormValues): Promise<void> => {
       try {
+        const safeCurrency = normalizeCurrency(values.currency);
+
         await createGrainProduct({
           name: values.name.trim(),
           unit: values.unit.trim(),
@@ -72,6 +76,7 @@ export function GrainsWorkspace() {
           initialStock: Number(values.initialStock),
           minimumStock: Number(values.minimumStock),
           unitPrice: Number(values.unitPrice),
+          currency: safeCurrency,
           imageUrl: values.imageUrl.trim() || null,
         });
 
@@ -99,6 +104,8 @@ export function GrainsWorkspace() {
   const handleUpdateProduct = useCallback(
     async (id: string, values: EditGrainProductValues): Promise<void> => {
       try {
+        const safeCurrency = normalizeCurrency(values.currency);
+
         await updateGrainProduct({
           id,
           request: {
@@ -107,6 +114,7 @@ export function GrainsWorkspace() {
             location: values.location.trim(),
             minimumStock: Number(values.minimumStock),
             unitPrice: Number(values.unitPrice),
+            currency: safeCurrency,
             imageUrl: values.imageUrl.trim() || null,
           },
         });
@@ -164,7 +172,7 @@ export function GrainsWorkspace() {
                   display: "grid",
                   gridTemplateColumns: {
                     xs: "1fr",
-                    lg: "minmax(0, 2fr) minmax(340px, 1fr)",
+                    lg: "minmax(0, 1fr)",
                   },
                   gap: {
                     xs: 2,
@@ -178,21 +186,12 @@ export function GrainsWorkspace() {
                 <GrainInventory
                   products={products}
                   onEditProduct={handleEditProduct}
+                  onRegisterSale={() => setIsSaleModalOpen(true)}
                   onAddProduct={() => {
                     setActiveTab("create");
                   }}
                 />
 
-                <SectionCard
-                  sx={{
-                    height: "100%",
-                  }}
-                >
-                  <RegisterGrainSaleForm
-                    products={products}
-                    productOptionLabel={({ name, unit }) => `${name} · ${unit}`}
-                  />
-                </SectionCard>
               </Box>
             </>
           ) : (
@@ -214,6 +213,41 @@ export function GrainsWorkspace() {
             }}
             onSave={handleUpdateProduct}
           />
+
+          <Dialog
+            open={isSaleModalOpen}
+            onClose={() => setIsSaleModalOpen(false)}
+            fullWidth
+            maxWidth={false}
+            scroll="paper"
+            slotProps={{
+              paper: {
+                elevation: 0,
+                sx: {
+                  width: { xs: "calc(100% - 24px)", sm: "calc(100% - 64px)" },
+                  maxWidth: 620,
+                  maxHeight: { xs: "calc(100dvh - 24px)", sm: "calc(100dvh - 64px)" },
+                  m: { xs: 1.5, sm: 4 },
+                  borderRadius: "16px",
+                  overflow: "hidden",
+                  border: "1px solid rgba(148, 163, 184, 0.28)",
+                  boxShadow: "0 28px 80px rgba(15, 23, 42, 0.24)",
+                },
+              },
+              backdrop: {
+                sx: {
+                  bgcolor: "rgba(15, 23, 42, 0.56)",
+                  backdropFilter: "blur(5px)",
+                },
+              },
+            }}
+          >
+            <RegisterGrainSaleForm
+              products={products}
+              productOptionLabel={({ name, unit }) => `${name} · ${unit}`}
+              onRegistered={() => setIsSaleModalOpen(false)}
+            />
+          </Dialog>
         </Box>
       </Box>
   );

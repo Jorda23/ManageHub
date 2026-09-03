@@ -8,6 +8,7 @@ export type HardwareInventoryItem = {
   initialStock: number;
   minStock: number;
   price: number;
+  currency: "USD" | "NIO";
   code: string;
   accent: string;
   imageUrl: string;
@@ -18,6 +19,7 @@ export type HardwareInventoryItem = {
 export type HardwareInventoryProps = {
   products: HardwareInventoryItem[];
   onAddProduct: () => void;
+  onRegisterSale?: () => void;
   onEditProduct?: (product: HardwareInventoryItem) => void;
 };
 

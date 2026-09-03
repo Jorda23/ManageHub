@@ -20,6 +20,7 @@ import { ImageUrlField } from "../ImageUrlField";
 import { ModalField } from "../ModalField";
 
 import type { GrainProduct } from "@/shared/types/api.types";
+import { currencies, currencyLabels, normalizeCurrency, getCurrencySymbol } from "@/shared/utils/currency";
 
 export type EditGrainProductValues = {
   name: string;
@@ -27,6 +28,7 @@ export type EditGrainProductValues = {
   location: string;
   minimumStock: string;
   unitPrice: string;
+  currency: "USD" | "NIO";
   imageUrl: string;
 };
 
@@ -56,6 +58,7 @@ export function EditGrainProductForm({
       location: "",
       minimumStock: "",
       unitPrice: "",
+      currency: "NIO",
       imageUrl: "",
     },
     validationSchema: addGrainSchema.pick(["name", "unit", "location"]),
@@ -66,12 +69,15 @@ export function EditGrainProductForm({
         return;
       }
 
+      const normalizedCurrency = normalizeCurrency(values.currency);
+
       await onSave(product.id, {
         name: values.name.trim(),
         unit: values.unit.trim(),
         location: values.location.trim(),
         minimumStock: String(values.minimumStock ?? "").trim(),
         unitPrice: String(values.unitPrice ?? "").trim(),
+        currency: normalizedCurrency,
         imageUrl: values.imageUrl.trim(),
       });
 
@@ -88,6 +94,7 @@ export function EditGrainProductForm({
         location: product.location,
         minimumStock: String(product.minimumStock ?? ""),
         unitPrice: String(product.unitPrice ?? ""),
+        currency: product.currency,
         imageUrl: product.imageUrl ?? "",
       });
       formik.setTouched({});
@@ -132,6 +139,22 @@ export function EditGrainProductForm({
           title="Información del producto"
           description="Datos generales del grano y su ubicación."
         >
+          <ModalField label="Moneda" htmlFor="edit-grain-currency">
+            <TextField
+              id="edit-grain-currency"
+              name="currency"
+              select
+              value={formik.values.currency}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              disabled={disabled}
+              fullWidth
+            >
+              {currencies.map((currency) => (
+                <MenuItem key={currency} value={currency}>{currencyLabels[currency]}</MenuItem>
+              ))}
+            </TextField>
+          </ModalField>
           <ModalField label="Nombre del producto" htmlFor="edit-grain-name">
             <TextField
               id="edit-grain-name"
@@ -290,7 +313,7 @@ export function EditGrainProductForm({
                   },
                   input: {
                     startAdornment: showPriceSymbol ? (
-                      <InputAdornment position="start">$</InputAdornment>
+                      <InputAdornment position="start">{getCurrencySymbol(formik.values.currency)}</InputAdornment>
                     ) : undefined,
                   },
                 }}

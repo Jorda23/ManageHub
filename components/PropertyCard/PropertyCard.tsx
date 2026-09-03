@@ -62,7 +62,10 @@ export const PropertyCard = memo(function PropertyCard({
       onKeyDown={handleKeyDown}
       sx={{
         width: "100%",
+        height: "100%",
         minWidth: 0,
+        display: "flex",
+        flexDirection: "column",
         overflow: "hidden",
         borderRadius: {
           xs: "12px",
@@ -107,6 +110,7 @@ export const PropertyCard = memo(function PropertyCard({
             md: 1.4,
           },
           minWidth: 0,
+          flex: 1,
         }}
       >
         <PropertyCardHeader property={property} statusColors={statusColors} onEdit={onEdit} />
@@ -148,9 +152,9 @@ export const PropertyCard = memo(function PropertyCard({
             },
           }}
         >
-          <AmountBox label="Precio" value={formatCurrency(property.price)} />
-          <AmountBox label="Abonado" value={formatCurrency(property.paid)} />
-          <AmountBox label="Pendiente" value={formatCurrency(pendingAmount)} />
+          <AmountBox label="Precio" value={formatCurrency(property.price, property.currency ?? "NIO")} />
+          <AmountBox label="Abonado" value={formatCurrency(property.paid, property.currency ?? "NIO")} />
+          <AmountBox label="Pendiente" value={formatCurrency(pendingAmount, property.currency ?? "NIO")} />
         </Box>
 
         <PaymentProgress progress={progress} accent={property.accent} />
@@ -172,7 +176,8 @@ function PropertyImage({ property }: { property: PropertyItem }) {
         height: {
           xs: 150,
           sm: 170,
-          md: 180,
+          md: 190,
+          lg: 200,
         },
         bgcolor: colors.primarySoft,
         backgroundImage: hasImage

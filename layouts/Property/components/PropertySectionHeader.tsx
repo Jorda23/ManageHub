@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Box, Button, Typography } from "@mui/material";
 import { FaPlusCircle } from "react-icons/fa";
 import { colors } from "@/theme/sharedColors";
+import { sellButtonBaseSx } from "@/theme/sellButtonStyles";
 
 type PropertySectionHeaderProps = {
   icon: ReactNode;
@@ -80,15 +81,11 @@ export function PropertySectionHeader({
           startIcon={onAction ? <FaPlusCircle size={13} /> : undefined}
           onClick={onAction}
           sx={{
-            borderRadius: 2.25,
+            ...sellButtonBaseSx,
+            minWidth: onAction ? 136 : "auto",
             px: onAction ? 1.6 : 1,
-            fontSize: 11,
-            fontWeight: 950,
             color: onAction ? "#ffffff" : colors.primary,
             bgcolor: onAction ? colors.primary : "transparent",
-            textTransform: "uppercase",
-            letterSpacing: "0.04em",
-            whiteSpace: "nowrap",
             boxShadow: onAction ? "0 8px 18px rgba(37, 99, 235, 0.2)" : "none",
             "&:hover": {
               bgcolor: onAction ? "#172554" : colors.primarySoft,

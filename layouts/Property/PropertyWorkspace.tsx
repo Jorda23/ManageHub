@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 
-import { Box } from "@mui/material";
+import { Box, Dialog } from "@mui/material";
 
 import dayjs from "dayjs";
 
@@ -26,6 +26,7 @@ import {
 import type { Property } from "@/shared/types/api.types";
 
 import { propertyConfig } from "@/shared";
+import { normalizeCurrency } from "@/shared/utils/currency";
 import { colors } from "@/theme/sharedColors";
 import { AddPropertyForm } from "../../components/AddPropertyForm/AddPropertyForm";
 import { PropertyTabs } from "./components/PropertyTabs";
@@ -40,6 +41,7 @@ export function PropertyWorkspace() {
   const { showSuccess, showError } = useToast();
 
   const [activeTab, setActiveTab] = useState<PropertyWorkspaceTab>("properties");
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
 
@@ -54,6 +56,7 @@ export function PropertyWorkspace() {
         location: property.location,
         size: property.measure,
         price: property.totalPrice,
+        currency: normalizeCurrency(property.currency ?? "NIO"),
         paid: property.amountPaid,
         ownerName: property.ownerName,
         ownerPhone: "",
@@ -141,66 +144,82 @@ export function PropertyWorkspace() {
           gap: 2.5,
         }}
       >
-          <PropertyHeroHeader
-            badge={propertyConfig.badge}
-            title={propertyConfig.title}
-            subtitle={propertyConfig.subtitle}
-          />
+        <PropertyHeroHeader
+          badge={propertyConfig.badge}
+          title={propertyConfig.title}
+          subtitle={propertyConfig.subtitle}
+        />
 
-          <PropertyTabs value={activeTab} onChange={setActiveTab} />
+        <PropertyTabs value={activeTab} onChange={setActiveTab} />
 
-          {activeTab === "properties" ? (
-            <>
-              <PropertyMetricsGrid properties={properties} />
+        {activeTab === "properties" ? (
+          <>
+            <PropertyMetricsGrid properties={properties} />
 
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: {
-                    xs: "1fr",
-                    lg: "minmax(0, 2fr) minmax(340px, 1fr)",
-                  },
-                  gap: {
-                    xs: 2,
-                    md: 2.5,
-                  },
-                  alignItems: "start",
-                  width: "100%",
-                  minWidth: 0,
-                }}
-              >
-                <PropertyTerrainsSection
-                  properties={properties}
-                  onEditProperty={handleEditProperty}
-                  onAddProperty={() => {
-                    setActiveTab("create");
-                  }}
-                />
-
-                <PropertyPaymentSection properties={properties} />
-              </Box>
-            </>
-          ) : (
-            <AddPropertyForm
-              onCancel={() => {
-                setActiveTab("properties");
-              }}
-              onCreated={() => {
-                setActiveTab("properties");
+            <PropertyTerrainsSection
+              properties={properties}
+              onEditProperty={handleEditProperty}
+              onRegisterPayment={() => setIsPaymentModalOpen(true)}
+              onAddProperty={() => {
+                setActiveTab("create");
               }}
             />
-          )}
-
-          <EditPropertyForm
-            open={Boolean(editingProperty)}
-            property={editingProperty}
-            isSubmitting={isUpdatingProperty}
-            onClose={() => {
-              setEditingProperty(null);
+          </>
+        ) : (
+          <AddPropertyForm
+            onCancel={() => {
+              setActiveTab("properties");
             }}
-            onSave={handleUpdateProperty}
+            onCreated={() => {
+              setActiveTab("properties");
+            }}
           />
-        </Box>
+        )}
+
+        <EditPropertyForm
+          open={Boolean(editingProperty)}
+          property={editingProperty}
+          isSubmitting={isUpdatingProperty}
+          onClose={() => {
+            setEditingProperty(null);
+          }}
+          onSave={handleUpdateProperty}
+        />
+
+        <Dialog
+          open={isPaymentModalOpen}
+          onClose={() => setIsPaymentModalOpen(false)}
+          fullWidth
+          maxWidth={false}
+          scroll="paper"
+          slotProps={{
+            paper: {
+              elevation: 0,
+              sx: {
+                width: { xs: "calc(100% - 24px)", sm: "calc(100% - 64px)" },
+                maxWidth: 620,
+                maxHeight: { xs: "calc(100dvh - 24px)", sm: "calc(100dvh - 64px)" },
+                m: { xs: 1.5, sm: 4 },
+                borderRadius: "16px",
+                overflow: "hidden",
+                border: "1px solid rgba(148, 163, 184, 0.28)",
+                boxShadow: "0 28px 80px rgba(15, 23, 42, 0.24)",
+              },
+            },
+            backdrop: {
+              sx: {
+                bgcolor: "rgba(15, 23, 42, 0.56)",
+                backdropFilter: "blur(5px)",
+              },
+            },
+          }}
+        >
+          <PropertyPaymentSection
+            properties={properties}
+            onRegistered={() => setIsPaymentModalOpen(false)}
+          />
+        </Dialog>
+      </Box>
       </Box>
   );
 }

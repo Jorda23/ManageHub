@@ -12,6 +12,7 @@ export function HardwareInventory({
   products,
   onAddProduct,
   onEditProduct,
+  onRegisterSale,
 }: Readonly<HardwareInventoryProps>) {
   return (
     <Paper
@@ -30,7 +31,7 @@ export function HardwareInventory({
         boxShadow: "0 10px 28px rgba(15, 23, 42, 0.06)",
       }}
     >
-      <InventoryHeader onAddProduct={onAddProduct} />
+      <InventoryHeader onAddProduct={onAddProduct} onRegisterSale={onRegisterSale} />
 
       <Box
         sx={{

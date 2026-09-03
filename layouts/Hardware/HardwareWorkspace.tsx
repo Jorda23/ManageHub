@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 
-import { Box } from "@mui/material";
+import { Box, Dialog } from "@mui/material";
 
 import {
   useCreateHardwareProduct,
@@ -16,7 +16,6 @@ import {
 
 import {
   LoadingState,
-  SectionCard,
   RegisterHardwareSaleForm,
   HardwareInventory,
   HardwareInventoryItem,
@@ -40,6 +39,7 @@ import {
   HardwareTabs,
   HardwareWorkspaceHero,
 } from "./components";
+import { normalizeCurrency } from "@/shared/utils/currency";
 
 export type HardwareWorkspaceTab =
   | "inventory"
@@ -75,6 +75,7 @@ export function HardwareWorkspace() {
     useState<HardwareWorkspaceTab>(
       "inventory",
     );
+  const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
 
   const products =
     useMemo<HardwareInventoryItem[]>(() => {
@@ -83,7 +84,7 @@ export function HardwareWorkspace() {
           const isLowStock =
             product.inventoryStatus ===
               "LowStock" ||
-            product.stock <=
+            product.currentStock <=
               product.minimumStock;
 
           return {
@@ -92,12 +93,13 @@ export function HardwareWorkspace() {
             detail: product.detail,
             category: product.category,
             code: product.code,
-            stock: product.stock,
+            stock: product.currentStock,
             initialStock:
               product.initialStock,
             minStock:
               product.minimumStock,
             price: product.unitPrice,
+            currency: product.currency,
 
             status: isLowStock
               ? "lowStock"
@@ -119,6 +121,8 @@ export function HardwareWorkspace() {
       formValues: AddHardwareProductValues,
     ): Promise<void> => {
       try {
+        const safeCurrency = normalizeCurrency(formValues.currency);
+
         await createHardwareProduct({
           name:
             formValues.name.trim(),
@@ -140,6 +144,7 @@ export function HardwareWorkspace() {
           unitPrice: Number(
             formValues.unitPrice,
           ),
+          currency: safeCurrency,
 
           inventoryStatus:
             formValues.inventoryStatus,
@@ -187,6 +192,8 @@ export function HardwareWorkspace() {
       values: EditHardwareProductValues,
     ): Promise<void> => {
       try {
+        const safeCurrency = normalizeCurrency(values.currency);
+
         await updateHardwareProduct({
           id,
           request: {
@@ -199,6 +206,7 @@ export function HardwareWorkspace() {
             unitPrice: Number(
               values.unitPrice,
             ),
+            currency: safeCurrency,
             inventoryStatus:
               values.inventoryStatus,
             imageUrl:
@@ -296,8 +304,7 @@ export function HardwareWorkspace() {
                   gridTemplateColumns:
                     {
                       xs: "1fr",
-
-                      lg: "minmax(0, 2fr) minmax(340px, 1fr)",
+                      lg: "minmax(0, 1fr)",
                     },
 
                   gap: {
@@ -318,21 +325,12 @@ export function HardwareWorkspace() {
                   onEditProduct={
                     handleEditProduct
                   }
+                   onRegisterSale={() => setIsSaleModalOpen(true)}
                    onAddProduct={() => {
                     setActiveTab("create");
                   }}
                 />
 
-                <SectionCard
-                  sx={{
-                    height: "100%",
-                  }}
-                >
-                  <RegisterHardwareSaleForm
-                    products={products}
-                    productOptionLabel={({ name, code }) => `${code} · ${name}`}
-                  />
-                </SectionCard>
               </Box>
             </>
           ) : (
@@ -360,6 +358,41 @@ export function HardwareWorkspace() {
             }}
             onSave={handleUpdateProduct}
           />
+
+          <Dialog
+            open={isSaleModalOpen}
+            onClose={() => setIsSaleModalOpen(false)}
+            fullWidth
+            maxWidth={false}
+            scroll="paper"
+            slotProps={{
+              paper: {
+                elevation: 0,
+                sx: {
+                  width: { xs: "calc(100% - 24px)", sm: "calc(100% - 64px)" },
+                  maxWidth: 620,
+                  maxHeight: { xs: "calc(100dvh - 24px)", sm: "calc(100dvh - 64px)" },
+                  m: { xs: 1.5, sm: 4 },
+                  borderRadius: "16px",
+                  overflow: "hidden",
+                  border: "1px solid rgba(148, 163, 184, 0.28)",
+                  boxShadow: "0 28px 80px rgba(15, 23, 42, 0.24)",
+                },
+              },
+              backdrop: {
+                sx: {
+                  bgcolor: "rgba(15, 23, 42, 0.56)",
+                  backdropFilter: "blur(5px)",
+                },
+              },
+            }}
+          >
+            <RegisterHardwareSaleForm
+              products={products}
+              productOptionLabel={({ name, code }) => `${code} · ${name}`}
+              onRegistered={() => setIsSaleModalOpen(false)}
+            />
+          </Dialog>
         </Box>
       </Box>
   );

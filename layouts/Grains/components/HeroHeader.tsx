@@ -17,6 +17,8 @@ export function HeroHeader() {
           md: 3,
         },
         borderRadius: "16px",
+        border: "1px solid rgba(187, 247, 208, 0.28)",
+        boxShadow: "0 14px 32px rgba(6, 78, 59, 0.16)",
         color: "#ffffff",
         background: "linear-gradient(135deg, #064e3b 0%, #14532d 58%, #1f6f4a 100%)",
         minHeight: 116,

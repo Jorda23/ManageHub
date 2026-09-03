@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import type { WorkspaceHeaderConfig } from "@/components/WorkspaceShared/workspaceTypes";
 import { colors } from "@/theme/sharedColors";
+import type { Currency } from "@/shared/types/api.types";
 
 export type AccountStatus = "Al día" | "Pendiente" | "Atrasado" | "Pagado";
 
@@ -12,6 +13,7 @@ export type PropertyItem = {
   location: string;
   size: string;
   price: number;
+  currency?: Currency;
   paid: number;
   buyerName: string;
   buyerEmail: string;

@@ -4,19 +4,21 @@ import { Box, Button, Typography } from "@mui/material";
 import { FaBoxOpen, FaPlus } from "react-icons/fa";
 
 import { colors } from "@/theme/sharedColors";
+import { sellButtonBaseSx, sellSecondaryButtonSx } from "@/theme/sellButtonStyles";
 
 type InventoryHeaderProps = {
   onAddProduct: () => void;
+  onRegisterSale?: () => void;
 };
 
-export function InventoryHeader({ onAddProduct }: Readonly<InventoryHeaderProps>) {
+export function InventoryHeader({ onAddProduct, onRegisterSale }: Readonly<InventoryHeaderProps>) {
   return (
     <Box
       sx={{
         position: "relative",
         zIndex: 2,
-        px: { xs: 1.25, sm: 2, md: 2.5 },
-        py: { xs: 1.25, sm: 1.75, md: 2 },
+        px: { xs: 1.25, sm: 2, md: 3 },
+        py: { xs: 1.25, sm: 1.75, md: 2.5 },
         display: "flex",
         flexDirection: { xs: "column", sm: "row" },
         justifyContent: "space-between",
@@ -80,36 +82,44 @@ export function InventoryHeader({ onAddProduct }: Readonly<InventoryHeaderProps>
         </Box>
       </Box>
 
-      <Button
-        type="button"
-        variant="contained"
-        size="small"
-        startIcon={<FaPlus size={11} />}
-        onClick={onAddProduct}
+      <Box
         sx={{
-          minHeight: { xs: 32, sm: 34 },
+          display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
+          gap: 1,
           width: { xs: "100%", sm: "auto" },
-          px: { xs: 1.2, sm: 1.75 },
-          borderRadius: "8px",
-          bgcolor: colors.green,
-          color: colors.cardBg,
-          fontSize: { xs: 9, sm: 10 },
-          fontWeight: 900,
-          letterSpacing: "0.03em",
-          textTransform: "uppercase",
-          whiteSpace: "nowrap",
-          boxShadow: "none",
-          "@media (min-width: 400px)": {
-            width: "auto",
-          },
-          "&:hover": {
-            bgcolor: colors.green,
-            boxShadow: "none",
-          },
         }}
       >
-        Nuevo ingreso
-      </Button>
+        {onRegisterSale && (
+          <Button
+            type="button"
+            variant="outlined"
+            size="small"
+            onClick={onRegisterSale}
+            sx={sellSecondaryButtonSx}
+          >
+            Nueva venta
+          </Button>
+        )}
+        <Button
+          type="button"
+          variant="contained"
+          size="small"
+          startIcon={<FaPlus size={11} />}
+          onClick={onAddProduct}
+          sx={{
+            ...sellButtonBaseSx,
+            bgcolor: colors.green,
+            color: colors.cardBg,
+            "&:hover": {
+              bgcolor: colors.green,
+              boxShadow: "none",
+            },
+          }}
+        >
+          Nuevo ingreso
+        </Button>
+      </Box>
     </Box>
   );
 }

@@ -28,6 +28,11 @@ export const addPropertySchema = yup.object({
       return Number.isFinite(amount) && amount > 0;
     }),
 
+  currency: yup
+    .string()
+    .oneOf(["USD", "NIO"], "Seleccione una moneda valida: USD o NIO")
+    .required("Seleccione una moneda valida: USD o NIO"),
+
   initialPayment: yup
     .string()
     .default("")

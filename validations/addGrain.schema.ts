@@ -44,5 +44,9 @@ export const addGrainSchema = Yup.object({
     .moreThan(0, "Ingresa un precio mayor que cero")
     .required("Ingresa un precio mayor que cero"),
 
+  currency: Yup.string()
+    .oneOf(["USD", "NIO"], "Seleccione una moneda válida: USD o NIO")
+    .required("Seleccione una moneda válida: USD o NIO"),
+
   imageUrl: Yup.string().trim(),
 });

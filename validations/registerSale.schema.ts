@@ -4,6 +4,7 @@ export type RegisterSaleFormValues = {
   productId: string;
   quantity: string;
   paymentMethod: string;
+  currency: "USD" | "NIO";
 };
 
 const createRegisterSaleSchema = (maxStock: number) =>
@@ -34,6 +35,10 @@ const createRegisterSaleSchema = (maxStock: number) =>
     paymentMethod: Yup.string().required(
       "Selecciona un método de pago.",
     ),
+
+    currency: Yup.string()
+      .oneOf(["USD", "NIO"], "Seleccione una moneda válida: USD o NIO")
+      .required("Seleccione una moneda válida: USD o NIO"),
   });
 
 export const registerHardwareSaleSchema = (maxStock: number) =>

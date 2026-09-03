@@ -1,4 +1,5 @@
 import { formatCurrency } from "@/shared";
+import type { Currency } from "@/shared/types/api.types";
 
 import { downloadHtmlAsPdf } from "./downloadPdf";
 
@@ -9,6 +10,7 @@ type PaymentInvoiceData = {
   buyerName: string;
   amount: number;
   paymentMethod: string;
+  currency: Currency;
   note?: string | null;
   totalPrice: number;
   previousPaid: number;
@@ -36,6 +38,7 @@ const buildPaymentInvoiceHtml = ({
   buyerName,
   amount,
   paymentMethod,
+  currency,
   note,
   totalPrice,
   previousPaid,
@@ -140,7 +143,7 @@ const buildPaymentInvoiceHtml = ({
           </div>
 
           <div class="payment-amount">
-            ${formatCurrency(amount)}
+            ${formatCurrency(amount, currency)}
           </div>
         </div>
 
@@ -162,7 +165,7 @@ const buildPaymentInvoiceHtml = ({
                 <td>Valor total</td>
 
                 <td>
-                  ${formatCurrency(totalPrice)}
+                  ${formatCurrency(totalPrice, currency)}
                 </td>
               </tr>
 
@@ -170,7 +173,7 @@ const buildPaymentInvoiceHtml = ({
                 <td>Abonado anteriormente</td>
 
                 <td>
-                  ${formatCurrency(previousPaid)}
+                  ${formatCurrency(previousPaid, currency)}
                 </td>
               </tr>
 
@@ -178,7 +181,7 @@ const buildPaymentInvoiceHtml = ({
                 <td>Abono actual</td>
 
                 <td>
-                  ${formatCurrency(amount)}
+                  ${formatCurrency(amount, currency)}
                 </td>
               </tr>
 
@@ -186,7 +189,7 @@ const buildPaymentInvoiceHtml = ({
                 <td>Total abonado</td>
 
                 <td class="paid">
-                  ${formatCurrency(totalPaid)}
+                  ${formatCurrency(totalPaid, currency)}
                 </td>
               </tr>
 
@@ -194,7 +197,7 @@ const buildPaymentInvoiceHtml = ({
                 <td>Saldo pendiente</td>
 
                 <td class="pending">
-                  ${formatCurrency(pendingAmount)}
+                  ${formatCurrency(pendingAmount, currency)}
                 </td>
               </tr>
             </tbody>

@@ -1,3 +1,5 @@
+import { normalizeCurrency } from "./currency";
+
 export type FormatPriceOptions = {
   locale?: string;
   currency?: string;
@@ -7,10 +9,11 @@ export type FormatPriceOptions = {
 
 export function formatPrice(value: number, options: FormatPriceOptions = {}): string {
   const { locale = "es-US", currency = "USD" } = options;
+  const safeCurrency = normalizeCurrency(currency);
 
   return new Intl.NumberFormat(locale, {
     style: "currency",
-    currency,
+    currency: safeCurrency,
     ...(options.minimumFractionDigits !== undefined && {
       minimumFractionDigits: options.minimumFractionDigits,
     }),

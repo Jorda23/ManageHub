@@ -14,6 +14,11 @@ export const registerPropertyPaymentSchema = yup.object({
 
   paymentMethod: yup.string().required("Selecciona un método de pago"),
 
+  currency: yup
+    .mixed<"USD" | "NIO">()
+    .oneOf(["USD", "NIO"], "Seleccione una moneda válida: USD o NIO")
+    .required("Seleccione una moneda válida: USD o NIO"),
+
   note: yup.string().default(""),
 });
 

@@ -213,7 +213,10 @@ export function HistoryTable({ items }: Readonly<HistoryTableProps>) {
                       letterSpacing: "-0.01em",
                     }}
                   >
-                    {formatPrice(item.amount, { locale: "es-NI", currency: "NIO" })}
+                    {formatPrice(item.amount, {
+                      locale: item.currency === "USD" ? "en-US" : "es-NI",
+                      currency: item.currency,
+                    })}
                   </Typography>
                 </TableCell>
               </TableRow>

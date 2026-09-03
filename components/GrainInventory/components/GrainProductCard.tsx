@@ -17,10 +17,11 @@ export const GrainProductCard = memo(function GrainProductCard({
   product,
   onEdit,
 }: Readonly<GrainProductCardProps>) {
+  const stockReference = product.initialStock > 0 ? product.initialStock : product.stock;
   const stockPercent =
-    product.initialStock > 0
-      ? Math.min(100, (product.stock / product.initialStock) * 100)
-      : 100;
+    stockReference > 0
+      ? Math.max(0, Math.min(100, (product.stock / stockReference) * 100))
+      : 0;
 
   const isLowStock = product.status === "lowStock" || product.stock <= product.minStock;
 
@@ -100,7 +101,7 @@ export const GrainProductCard = memo(function GrainProductCard({
 
             <ProductInfo
               label="Precio"
-              value={formatCurrency(product.price)}
+              value={formatCurrency(product.price, product.currency)}
               valueColor={colors.orange}
               align="right"
             />
@@ -141,4 +142,3 @@ export const GrainProductCard = memo(function GrainProductCard({
     </Paper>
   );
 });
-

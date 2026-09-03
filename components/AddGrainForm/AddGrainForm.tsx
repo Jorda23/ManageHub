@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 
 import { Box, Button, InputAdornment, MenuItem, TextField, Typography } from "@mui/material";
 
@@ -15,11 +15,13 @@ import { FaPlusCircle, FaTimes } from "react-icons/fa";
 import { colors } from "@/theme/sharedColors";
 
 import { addGrainSchema } from "@/validations";
+import { useToast } from "@/components/Toast";
 
 import { ImageUrlField } from "../ImageUrlField";
 
 import { ModalField } from "../ModalField";
 import { FormSection } from "../FormSection";
+import { currencies, currencyLabels, normalizeCurrency, getCurrencySymbol } from "@/shared/utils/currency";
 
 export type AddGrainFormValues = {
   name: string;
@@ -28,6 +30,7 @@ export type AddGrainFormValues = {
   initialStock: string;
   minimumStock: string;
   unitPrice: string;
+  currency: "USD" | "NIO";
   imageUrl: string;
 };
 
@@ -46,6 +49,7 @@ const initialValues: AddGrainFormValues = {
   initialStock: "",
   minimumStock: "",
   unitPrice: "",
+  currency: "NIO",
   imageUrl: "",
 };
 
@@ -57,6 +61,7 @@ export function AddGrainForm({
   isSubmitting = false,
 }: Readonly<AddGrainFormProps>) {
   const [isPriceFocused, setIsPriceFocused] = useState(false);
+  const { showError } = useToast();
 
   const formik = useFormik<AddGrainFormValues>({
     initialValues,
@@ -68,6 +73,8 @@ export function AddGrainForm({
     validateOnChange: false,
 
     onSubmit: async (values, helpers) => {
+      const normalizedCurrency = normalizeCurrency(values.currency);
+
       const normalizedValues: AddGrainFormValues = {
         name: values.name.trim(),
 
@@ -80,6 +87,7 @@ export function AddGrainForm({
         minimumStock: String(values.minimumStock ?? "").trim(),
 
         unitPrice: String(values.unitPrice ?? "").trim(),
+        currency: normalizedCurrency,
 
         imageUrl: values.imageUrl.trim(),
       };
@@ -102,6 +110,29 @@ export function AddGrainForm({
     return formik.errors[field];
   };
 
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault();
+
+    const errors = await formik.validateForm();
+
+    if (Object.keys(errors).length > 0) {
+      await formik.setTouched({
+        name: true,
+        unit: true,
+        location: true,
+        initialStock: true,
+        minimumStock: true,
+        unitPrice: true,
+        currency: true,
+        imageUrl: true,
+      });
+      showError("Revisa los campos marcados antes de continuar.");
+      return;
+    }
+
+    await formik.submitForm();
+  };
+
   const handleCancel = (): void => {
     if (isSubmitting) {
       return;
@@ -117,7 +148,7 @@ export function AddGrainForm({
   return (
     <Box
       component="form"
-      onSubmit={formik.handleSubmit}
+      onSubmit={handleSubmit}
       sx={{
         width: "100%",
 
@@ -223,6 +254,26 @@ export function AddGrainForm({
         title="Información del producto"
         description="Datos generales del grano y su ubicación."
       >
+        <ModalField label="Moneda" htmlFor="grain-currency">
+          <TextField
+            id="grain-currency"
+            name="currency"
+            select
+            value={formik.values.currency}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={Boolean(getFieldError("currency"))}
+            helperText={getFieldError("currency")}
+            disabled={isSubmitting}
+            fullWidth
+          >
+            {currencies.map((currency) => (
+              <MenuItem key={currency} value={currency}>
+                {currencyLabels[currency]}
+              </MenuItem>
+            ))}
+          </TextField>
+        </ModalField>
         <ModalField label="Nombre del producto" htmlFor="grain-name">
           <TextField
             id="grain-name"
@@ -405,7 +456,7 @@ export function AddGrainForm({
 
                 input: {
                   startAdornment: showPriceSymbol ? (
-                    <InputAdornment position="start">$</InputAdornment>
+                    <InputAdornment position="start">{getCurrencySymbol(formik.values.currency)}</InputAdornment>
                   ) : undefined,
                 },
               }}

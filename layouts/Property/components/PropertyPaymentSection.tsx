@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { FormEvent, ReactNode } from "react";
 
 import {
   Alert,
@@ -39,24 +39,32 @@ import {
 } from "@/validations/registerPropertyPayment.schema";
 
 import { colors } from "@/theme/sharedColors";
+import { useToast } from "@/components/Toast";
+import { currencies, currencyLabels, normalizeCurrency } from "@/shared/utils/currency";
 
 import { PropertySectionCard } from "./PropertySectionCard";
 import { PropertySectionHeader } from "./PropertySectionHeader";
 
 type PropertyPaymentSectionProps = {
   properties: PropertyItem[];
+  onRegistered?: () => void;
 };
 
 const initialValues: RegisterPropertyPaymentFormValues = {
   propertyId: "",
   amount: "500",
   paymentMethod: paymentMethods[0] ?? "",
+  currency: "NIO",
   note: "Abono de cuota",
 };
 
-export function PropertyPaymentSection({ properties }: Readonly<PropertyPaymentSectionProps>) {
+export function PropertyPaymentSection({
+  properties,
+  onRegistered,
+}: Readonly<PropertyPaymentSectionProps>) {
   const { mutateAsync: registerPropertyPayment, isPending: isRegisteringPayment } =
     useRegisterPropertyPayment();
+  const { showSuccess, showError } = useToast();
 
   const formik = useFormik<RegisterPropertyPaymentFormValues>({
     initialValues,
@@ -72,6 +80,7 @@ export function PropertyPaymentSection({ properties }: Readonly<PropertyPaymentS
 
       if (!selectedProperty) {
         helpers.setFieldError("propertyId", "Selecciona una propiedad válida");
+        showError("Selecciona una propiedad válida.");
 
         return;
       }
@@ -82,12 +91,14 @@ export function PropertyPaymentSection({ properties }: Readonly<PropertyPaymentS
 
       if (pendingAmount <= 0) {
         helpers.setStatus("Esta cuenta ya está pagada en su totalidad.");
+        showError("Esta cuenta ya está pagada en su totalidad.");
 
         return;
       }
 
       if (amount > pendingAmount) {
         helpers.setFieldError("amount", "El abono no puede ser mayor al saldo pendiente");
+        showError("El abono no puede ser mayor al saldo pendiente.");
 
         return;
       }
@@ -95,15 +106,21 @@ export function PropertyPaymentSection({ properties }: Readonly<PropertyPaymentS
       helpers.setStatus(undefined);
 
       try {
+        const safeCurrency = normalizeCurrency(values.currency);
+        await formik.setFieldValue("currency", safeCurrency, false);
+
         const payment = await registerPropertyPayment({
           propertyId: selectedProperty.id,
 
           amount,
 
           paymentMethod: values.paymentMethod,
+          currency: safeCurrency,
 
           note: values.note.trim() || null,
         });
+
+        showSuccess("Abono registrado correctamente.");
 
         try {
           const invoiceNumber = payment?.id ? `REC-${payment.id}` : `REC-${Date.now()}`;
@@ -122,6 +139,7 @@ export function PropertyPaymentSection({ properties }: Readonly<PropertyPaymentS
             amount: payment?.amount ?? amount,
 
             paymentMethod: payment?.paymentMethod ?? values.paymentMethod,
+            currency: payment?.currency ?? values.currency,
 
             note: payment?.note ?? (values.note.trim() || null),
 
@@ -135,6 +153,7 @@ export function PropertyPaymentSection({ properties }: Readonly<PropertyPaymentS
           console.error("Error generando recibo:", error);
 
           helpers.setStatus("El pago fue registrado, pero no se pudo generar el recibo.");
+          showError("El pago fue registrado, pero no se pudo generar el recibo.");
 
           return;
         }
@@ -145,13 +164,35 @@ export function PropertyPaymentSection({ properties }: Readonly<PropertyPaymentS
             propertyId: selectedProperty.id,
           },
         });
+        onRegistered?.();
       } catch (error) {
         console.error("Error registrando abono:", error);
 
         helpers.setStatus("No se pudo registrar el abono.");
+        showError("No se pudo registrar el abono.");
       }
     },
   });
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault();
+
+    const errors = await formik.validateForm();
+
+    if (Object.keys(errors).length > 0) {
+      await formik.setTouched({
+        propertyId: true,
+        amount: true,
+        paymentMethod: true,
+        currency: true,
+        note: true,
+      });
+      showError("Revisa los campos marcados antes de continuar.");
+      return;
+    }
+
+    await formik.submitForm();
+  };
 
   const selectedProperty = properties.find((property) => property.id === formik.values.propertyId);
 
@@ -173,6 +214,9 @@ export function PropertyPaymentSection({ properties }: Readonly<PropertyPaymentS
         },
 
         overflow: "hidden",
+        border: "0",
+        borderRadius: 0,
+        boxShadow: "none",
       }}
     >
       <PropertySectionHeader icon={<FaReceipt />} title="Registrar abono" />
@@ -181,7 +225,7 @@ export function PropertyPaymentSection({ properties }: Readonly<PropertyPaymentS
 
       <Box
         component="form"
-        onSubmit={formik.handleSubmit}
+        onSubmit={handleSubmit}
         sx={{
           width: "100%",
           minWidth: 0,
@@ -372,6 +416,24 @@ export function PropertyPaymentSection({ properties }: Readonly<PropertyPaymentS
             {paymentMethodError && <FormHelperText>{paymentMethodError}</FormHelperText>}
           </FormControl>
         </Box>
+        <Box sx={{ minWidth: 0 }}>
+          <FieldLabel>Moneda</FieldLabel>
+          <FormControl fullWidth size="small">
+            <Select
+              id="currency"
+              name="currency"
+              value={formik.values.currency}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={Boolean(formik.touched.currency && formik.errors.currency)}
+              sx={selectSx}
+            >
+              {currencies.map((currency) => (
+                <MenuItem key={currency} value={currency}>{currencyLabels[currency]}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
 
         <Box
           sx={{
@@ -404,7 +466,7 @@ export function PropertyPaymentSection({ properties }: Readonly<PropertyPaymentS
             minWidth: 0,
           }}
         >
-          <AccountSummary property={selectedProperty} />
+          <AccountSummary property={selectedProperty} currency={formik.values.currency} />
         </Box>
 
         <Button
@@ -531,7 +593,13 @@ function FieldLabel({ children }: { children: ReactNode }) {
   );
 }
 
-function AccountSummary({ property }: { property?: PropertyItem }) {
+function AccountSummary({
+  property,
+  currency,
+}: {
+  property?: PropertyItem;
+  currency: "USD" | "NIO";
+}) {
   if (!property) {
     return null;
   }
@@ -574,11 +642,11 @@ function AccountSummary({ property }: { property?: PropertyItem }) {
 
         <SummaryRow label="Cliente propietario" value={property.ownerName} />
 
-        <SummaryRow label="Valor total" value={formatCurrency(property.price)} />
+        <SummaryRow label="Valor total" value={formatCurrency(property.price, currency)} />
 
-        <SummaryRow label="Abonado" value={formatCurrency(property.paid)} />
+        <SummaryRow label="Abonado" value={formatCurrency(property.paid, currency)} />
 
-        <SummaryRow label="Saldo pendiente" value={formatCurrency(pendingAmount)} highlighted />
+        <SummaryRow label="Saldo pendiente" value={formatCurrency(pendingAmount, currency)} highlighted />
 
         <Divider sx={{ my: 0.5 }} />
 

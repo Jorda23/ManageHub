@@ -1,4 +1,5 @@
 import { formatCurrency } from "@/shared";
+import type { Currency } from "@/shared/types/api.types";
 
 import { downloadHtmlAsPdf } from "./downloadPdf";
 
@@ -12,6 +13,7 @@ type SaleInvoiceData = {
   unitPrice: number;
   total: number;
   paymentMethod: string;
+  currency: Currency;
   saleDate?: Date;
 };
 
@@ -44,6 +46,7 @@ const buildSaleInvoiceHtml = ({
   unitPrice,
   total,
   paymentMethod,
+  currency,
   saleDate = new Date(),
 }: SaleInvoiceData): string => `
   <div class="invoice">
@@ -130,7 +133,7 @@ const buildSaleInvoiceHtml = ({
         </div>
 
         <div class="payment-amount">
-          ${formatCurrency(total)}
+          ${formatCurrency(total, currency)}
         </div>
       </div>
 
@@ -152,7 +155,7 @@ const buildSaleInvoiceHtml = ({
               <td>Precio unitario</td>
 
               <td>
-                ${formatCurrency(unitPrice)}
+                ${formatCurrency(unitPrice, currency)}
               </td>
             </tr>
 
@@ -170,7 +173,7 @@ const buildSaleInvoiceHtml = ({
               <td>Total</td>
 
               <td>
-                ${formatCurrency(total)}
+                ${formatCurrency(total, currency)}
               </td>
             </tr>
           </tbody>

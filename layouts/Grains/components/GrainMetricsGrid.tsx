@@ -14,12 +14,13 @@ type GrainMetricsGridProps = {
 
 export function GrainMetricsGrid({ grainProducts }: GrainMetricsGridProps) {
   const totalInventory = useMemo(() => {
-    return grainProducts.reduce((total, product) => total + product.stock, 0);
+    return grainProducts.reduce((total, product) => total + product.currentStock, 0);
   }, [grainProducts]);
 
   const lowStockCount = useMemo(() => {
     return grainProducts.filter(
-      (product) => product.inventoryStatus === "LowStock" || product.stock <= product.minimumStock,
+      (product) =>
+        product.inventoryStatus === "LowStock" || product.currentStock <= product.minimumStock,
     ).length;
   }, [grainProducts]);
 

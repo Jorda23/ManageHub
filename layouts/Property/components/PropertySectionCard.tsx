@@ -14,6 +14,7 @@ export function PropertySectionCard({ children, sx }: PropertySectionCardProps) 
     <Card
       elevation={0}
       sx={{
+        width: "100%",
         borderRadius: "16px",
         border: `1px solid ${colors.cardBorder}`,
         bgcolor: colors.cardBg,

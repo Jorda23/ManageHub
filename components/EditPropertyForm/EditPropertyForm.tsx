@@ -95,12 +95,13 @@ export function EditPropertyForm({
         measure: property.measure,
         location: property.location,
         ownerName: property.ownerName,
-        identificationNumber: "",
+        identificationNumber: property.IdentificationNumber ?? property.identificationNumber ?? "",
         nextPaymentDate: property.nextPaymentDate
           ? dayjs(property.nextPaymentDate).format("YYYY-MM-DD")
           : "",
         imageUrl: property.imageUrl ?? "",
-        identificationImageUrl: "",
+        identificationImageUrl:
+          property.IdentificationImageUrl ?? property.identificationImageUrl ?? "",
       });
       formik.setTouched({});
     }

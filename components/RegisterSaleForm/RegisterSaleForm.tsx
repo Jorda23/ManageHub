@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, type FormEvent } from "react";
 
 import {
   Box,
@@ -26,14 +26,17 @@ import { colors } from "@/theme/sharedColors";
 import { formatCurrency } from "@/shared";
 
 import { paymentMethods } from "@/shared/data/grains.data";
+import { useToast } from "../Toast";
 
 import type { RegisterSaleFormValues } from "@/validations";
+import { currencies, currencyLabels, normalizeCurrency } from "@/shared/utils/currency";
 
 export type SaleFormProduct = {
   id: string;
   name: string;
   price: number;
   stock: number;
+  currency: "USD" | "NIO";
 };
 
 type RegisterSaleFormProps<TProduct extends SaleFormProduct> = {
@@ -45,6 +48,7 @@ type RegisterSaleFormProps<TProduct extends SaleFormProduct> = {
   ) => Promise<void>;
   productOptionLabel?: (product: TProduct) => string;
   productSummaryLabel?: (product: TProduct) => string;
+  onRegistered?: () => void;
 };
 
 const inputSx: SxProps<Theme> = {
@@ -141,12 +145,16 @@ export function RegisterSaleForm<TProduct extends SaleFormProduct>({
   onRegister,
   productOptionLabel = (product) => product.name,
   productSummaryLabel = (product) => product.name,
+  onRegistered,
 }: RegisterSaleFormProps<TProduct>) {
+  const { showSuccess, showError } = useToast();
+
   const formik = useFormik<RegisterSaleFormValues>({
     initialValues: {
       productId: products[0]?.id ?? "",
       quantity: "1",
       paymentMethod: paymentMethods[0],
+      currency: products[0]?.currency ?? "NIO",
     },
     validateOnBlur: true,
     validateOnChange: false,
@@ -192,11 +200,15 @@ export function RegisterSaleForm<TProduct extends SaleFormProduct>({
       }
 
       try {
+        const safeCurrency = normalizeCurrency(values.currency);
+        await formik.setFieldValue("currency", safeCurrency, false);
+
         await onRegister(
           {
             productId: product.id,
             quantity: values.quantity,
             paymentMethod: values.paymentMethod,
+            currency: safeCurrency,
           },
           product,
         );
@@ -205,8 +217,13 @@ export function RegisterSaleForm<TProduct extends SaleFormProduct>({
         helpers.setFieldTouched("quantity", false);
         helpers.setErrors({});
         helpers.setStatus(undefined);
+        showSuccess("Venta registrada correctamente.");
+        onRegistered?.();
       } catch (err) {
-        helpers.setStatus(err instanceof Error ? err.message : "No se pudo registrar la venta.");
+        const message = err instanceof Error ? err.message : "No se pudo registrar la venta.";
+
+        helpers.setStatus(message);
+        showError(message);
       }
     },
   });
@@ -229,10 +246,29 @@ export function RegisterSaleForm<TProduct extends SaleFormProduct>({
     return formik.errors[field];
   };
 
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault();
+
+    const errors = await formik.validateForm();
+
+    if (Object.keys(errors).length > 0) {
+      await formik.setTouched({
+        productId: true,
+        quantity: true,
+        paymentMethod: true,
+        currency: true,
+      });
+      showError("Revisa los campos marcados antes de continuar.");
+      return;
+    }
+
+    await formik.submitForm();
+  };
+
   return (
     <Box
       component="form"
-      onSubmit={formik.handleSubmit}
+      onSubmit={handleSubmit}
       sx={{
         width: "100%",
         minWidth: 0,
@@ -278,6 +314,25 @@ export function RegisterSaleForm<TProduct extends SaleFormProduct>({
           }}
         >
           <FaCashRegister />
+        </Box>
+        <Box sx={{ minWidth: 0 }}>
+          <FieldLabel>Moneda</FieldLabel>
+          <FormControl fullWidth size="small">
+            <Select
+              name="currency"
+              value={formik.values.currency}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={Boolean(getFieldError("currency"))}
+              sx={selectSx}
+            >
+              {currencies.map((currency) => (
+                <MenuItem key={currency} value={currency}>
+                  {currencyLabels[currency]}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Box>
 
         <Typography
@@ -359,7 +414,16 @@ export function RegisterSaleForm<TProduct extends SaleFormProduct>({
             name="productId"
             value={formik.values.productId}
             displayEmpty
-            onChange={formik.handleChange}
+            onChange={(event) => {
+              const productId = String(event.target.value);
+              const product = products.find((item) => item.id === productId);
+
+              void formik.setValues((currentValues) => ({
+                ...currentValues,
+                productId,
+                currency: product?.currency ?? currentValues.currency,
+              }));
+            }}
             onBlur={formik.handleBlur}
             error={Boolean(getFieldError("productId"))}
             sx={selectSx}
@@ -435,6 +499,7 @@ export function RegisterSaleForm<TProduct extends SaleFormProduct>({
           unitPrice={selectedProduct?.price ?? 0}
           quantity={numericQuantity}
           total={saleTotal}
+          currency={formik.values.currency}
         />
       </Box>
 
@@ -535,11 +600,13 @@ function SaleSummary({
   unitPrice,
   quantity,
   total,
+  currency,
 }: {
   productName: string;
   unitPrice: number;
   quantity: number;
   total: number;
+  currency: "USD" | "NIO";
 }) {
   return (
     <Box
@@ -567,7 +634,7 @@ function SaleSummary({
       >
         <SummaryRow label="Producto" value={productName} />
 
-        <SummaryRow label="Precio unitario" value={formatCurrency(unitPrice)} />
+        <SummaryRow label="Precio unitario" value={formatCurrency(unitPrice, currency)} />
 
         <SummaryRow label="Cantidad" value={`${quantity || 0}`} />
 
@@ -621,7 +688,7 @@ function SaleSummary({
               overflowWrap: "anywhere",
             }}
           >
-            {formatCurrency(total)}
+            {formatCurrency(total, currency)}
           </Typography>
         </Box>
       </Box>

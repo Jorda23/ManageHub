@@ -9,6 +9,8 @@ export type LoginResponse = {
   token: string;
 };
 
+export type Currency = "USD" | "NIO";
+
 export type CreateHardwareProductRequest = {
   name: string;
   detail: string;
@@ -16,6 +18,7 @@ export type CreateHardwareProductRequest = {
   initialStock: number;
   minimumStock: number;
   unitPrice: number;
+  currency: Currency;
   inventoryStatus: string;
   imageUrl?: string | null;
 };
@@ -32,6 +35,7 @@ export type UpdateHardwareProductRequest = {
   category: string;
   minimumStock: number;
   unitPrice: number;
+  currency: Currency;
   inventoryStatus: string;
   imageUrl?: string | null;
 };
@@ -48,10 +52,11 @@ export type HardwareProduct = {
   name: string;
   detail: string;
   category: string;
-  stock: number;
+  currentStock: number;
   initialStock: number;
   minimumStock: number;
   unitPrice: number;
+  currency: Currency;
   inventoryStatus: string;
   imageUrl?: string | null;
 };
@@ -60,6 +65,7 @@ export type RegisterHardwareSaleRequest = {
   productId: string;
   quantity: number;
   paymentMethod: string;
+  currency: Currency;
 };
 
 export type RegisterHardwareSaleResponse = {
@@ -71,6 +77,7 @@ export type RegisterHardwareSaleResponse = {
   total: number;
   remainingStock: number;
   paymentMethod: string;
+  currency: Currency;
   createdAt: string;
 };
 
@@ -82,6 +89,7 @@ export type HardwareSale = {
   unitPrice: number;
   total: number;
   paymentMethod: string;
+  currency: Currency;
   createdAt: string;
 };
 
@@ -90,6 +98,7 @@ export type HardwareSalesFilters = {
   from?: string;
   to?: string;
   paymentMethod?: string;
+  currency?: Currency;
 };
 
 export type CreateGrainProductRequest = {
@@ -99,6 +108,7 @@ export type CreateGrainProductRequest = {
   initialStock: number;
   minimumStock: number;
   unitPrice: number;
+  currency: Currency;
   imageUrl?: string | null;
 };
 
@@ -114,6 +124,7 @@ export type UpdateGrainProductRequest = {
   location: string;
   minimumStock: number;
   unitPrice: number;
+  currency: Currency;
   imageUrl?: string | null;
 };
 
@@ -129,10 +140,11 @@ export type GrainProduct = {
   name: string;
   unit: string;
   location: string;
-  stock: number;
+  currentStock: number;
   initialStock: number;
   minimumStock: number;
   unitPrice: number;
+  currency: Currency;
   inventoryStatus: string;
   imageUrl?: string | null;
 };
@@ -141,6 +153,7 @@ export type RegisterGrainSaleRequest = {
   productId: string;
   quantity: number;
   paymentMethod: string;
+  currency: Currency;
 };
 
 export type RegisterGrainSaleResponse = {
@@ -153,6 +166,7 @@ export type RegisterGrainSaleResponse = {
   total: number;
   remainingStock: number;
   paymentMethod: string;
+  currency: Currency;
   createdAt: string;
 };
 
@@ -165,6 +179,7 @@ export type GrainSale = {
   unitPrice: number;
   total: number;
   paymentMethod: string;
+  currency: Currency;
   createdAt: string;
 };
 
@@ -173,6 +188,7 @@ export type GrainSalesFilters = {
   from?: string;
   to?: string;
   paymentMethod?: string;
+  currency?: Currency;
 };
 
 export type CreatePropertyRequest = {
@@ -183,6 +199,7 @@ export type CreatePropertyRequest = {
   ownerName: string;
   totalPrice: number;
   initialPayment: number;
+  currency: Currency;
   nextPaymentDate?: string | null;
   imageUrl?: string | null;
   IdentificationImageUrl?: string | null;
@@ -222,17 +239,23 @@ export type Property = {
   location: string;
   ownerName: string;
   totalPrice: number;
+  currency?: Currency;
   amountPaid: number;
   pendingBalance: number;
   nextPaymentDate?: string | null;
   status: string;
   imageUrl?: string | null;
+  IdentificationImageUrl?: string | null;
+  IdentificationNumber?: string;
+  identificationImageUrl?: string | null;
+  identificationNumber?: string;
 };
 
 export type RegisterPropertyPaymentRequest = {
   propertyId: string;
   amount: number;
   paymentMethod: string;
+  currency: Currency;
   note?: string | null;
 };
 
@@ -246,6 +269,7 @@ export type RegisterPropertyPaymentResponse = {
   pendingBalance: number;
   status: string;
   paymentMethod: string;
+  currency: Currency;
   note?: string | null;
   createdAt: string;
 };
@@ -257,6 +281,7 @@ export type PropertyPayment = {
   ownerName: string;
   amount: number;
   paymentMethod: string;
+  currency: Currency;
   note?: string | null;
   createdAt: string;
 };
@@ -266,6 +291,7 @@ export type PropertyPaymentsFilters = {
   from?: string;
   to?: string;
   paymentMethod?: string;
+  currency?: Currency;
 };
 
 export type DashboardSummary = {
@@ -319,6 +345,7 @@ export type PaymentHistoryItem = {
   detail: string | null;
   amount: number;
   paymentMethod: string;
+  currency: Currency;
   createdAt: string;
 };
 

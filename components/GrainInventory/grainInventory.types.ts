@@ -8,6 +8,7 @@ export type GrainInventoryItem = {
   initialStock: number;
   minStock: number;
   price: number;
+  currency: "USD" | "NIO";
   code: string;
   accent: string;
   imageUrl: string;
@@ -18,6 +19,7 @@ export type GrainInventoryItem = {
 export type GrainInventoryProps = {
   products: GrainInventoryItem[];
   onAddProduct: () => void;
+  onRegisterSale?: () => void;
   onEditProduct?: (product: GrainInventoryItem) => void;
 };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 
 import {
   Box,
@@ -30,12 +30,14 @@ import {
 import { colors } from "@/theme/sharedColors";
 
 import { addHardwareProductSchema } from "@/validations";
+import { useToast } from "../Toast";
 
 import { ImageUrlField } from "../ImageUrlField";
 
 import { ModalField } from "../ModalField";
 import { FaBoxesStacked } from "react-icons/fa6";
 import { FormSection } from "../FormSection";
+import { currencies, currencyLabels, normalizeCurrency, getCurrencySymbol } from "@/shared/utils/currency";
 
 export type AddHardwareProductValues = {
   name: string;
@@ -44,6 +46,7 @@ export type AddHardwareProductValues = {
   initialStock: string;
   minimumStock: string;
   unitPrice: string;
+  currency: "USD" | "NIO";
   inventoryStatus: string;
   imageUrl: string;
 };
@@ -65,6 +68,7 @@ const initialValues: AddHardwareProductValues = {
   initialStock: "",
   minimumStock: "",
   unitPrice: "",
+  currency: "NIO",
   inventoryStatus: "Available",
   imageUrl: "",
 };
@@ -89,6 +93,7 @@ export function AddHardwareProductForm({
     isPriceFocused,
     setIsPriceFocused,
   ] = useState(false);
+  const { showError } = useToast();
 
   const formik =
     useFormik<AddHardwareProductValues>({
@@ -105,6 +110,8 @@ export function AddHardwareProductForm({
         values,
         helpers,
       ) => {
+        const normalizedCurrency = normalizeCurrency(values.currency);
+
         const normalizedValues: AddHardwareProductValues =
           {
             name: values.name.trim(),
@@ -126,6 +133,7 @@ export function AddHardwareProductForm({
             unitPrice: String(
               values.unitPrice ?? "",
             ).trim(),
+            currency: normalizedCurrency,
 
             inventoryStatus:
               values.inventoryStatus,
@@ -158,6 +166,30 @@ export function AddHardwareProductForm({
     return formik.errors[field];
   };
 
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault();
+
+    const errors = await formik.validateForm();
+
+    if (Object.keys(errors).length > 0) {
+      await formik.setTouched({
+        name: true,
+        detail: true,
+        category: true,
+        initialStock: true,
+        minimumStock: true,
+        unitPrice: true,
+        currency: true,
+        inventoryStatus: true,
+        imageUrl: true,
+      });
+      showError("Revisa los campos marcados antes de continuar.");
+      return;
+    }
+
+    await formik.submitForm();
+  };
+
   const handleCancel = (): void => {
     if (
       isSubmitting ||
@@ -180,7 +212,7 @@ export function AddHardwareProductForm({
   return (
     <Box
       component="form"
-      onSubmit={formik.handleSubmit}
+      onSubmit={handleSubmit}
       sx={{
         width: "100%",
         display: "flex",
@@ -288,6 +320,26 @@ export function AddHardwareProductForm({
         title="Información del producto"
         description="Datos generales y clasificación del producto."
       >
+        <ModalField label="Moneda" htmlFor="hardware-currency">
+          <TextField
+            id="hardware-currency"
+            name="currency"
+            select
+            value={formik.values.currency}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={Boolean(getFieldError("currency"))}
+            helperText={getFieldError("currency")}
+            disabled={disabled}
+            fullWidth
+          >
+            {currencies.map((currency) => (
+              <MenuItem key={currency} value={currency}>
+                {currencyLabels[currency]}
+              </MenuItem>
+            ))}
+          </TextField>
+        </ModalField>
         <ModalField
           label="Nombre del producto"
           htmlFor="hardware-product-name"
@@ -563,7 +615,7 @@ export function AddHardwareProductForm({
                   startAdornment:
                     showPriceSymbol ? (
                       <InputAdornment position="start">
-                        $
+                        {getCurrencySymbol(formik.values.currency)}
                       </InputAdornment>
                     ) : undefined,
                 },

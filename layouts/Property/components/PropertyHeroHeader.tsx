@@ -20,6 +20,8 @@ export function PropertyHeroHeader({ badge, title, subtitle }: PropertyHeroHeade
           md: 3,
         },
         borderRadius: "16px",
+        border: "1px solid rgba(191, 219, 254, 0.45)",
+        boxShadow: "0 14px 32px rgba(30, 58, 138, 0.16)",
         color: "white",
         background: "linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #0f766e 100%)",
         minHeight: {

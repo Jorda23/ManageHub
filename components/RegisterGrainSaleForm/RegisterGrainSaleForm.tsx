@@ -7,6 +7,7 @@ import { useRegisterGrainSale } from "@/hook/useGrains";
 import { registerGrainSaleSchema } from "@/validations";
 
 import { downloadSaleInvoicePdf } from "@/utils";
+import { normalizeCurrency } from "@/shared/utils/currency";
 
 import { RegisterSaleForm, type SaleFormProduct } from "../RegisterSaleForm";
 
@@ -14,12 +15,14 @@ type RegisterGrainSaleFormProps<TProduct extends SaleFormProduct> = {
   products: TProduct[];
   productOptionLabel?: (product: TProduct) => string;
   productSummaryLabel?: (product: TProduct) => string;
+  onRegistered?: () => void;
 };
 
 export function RegisterGrainSaleForm<TProduct extends SaleFormProduct>({
   products,
   productOptionLabel,
   productSummaryLabel,
+  onRegistered,
 }: Readonly<RegisterGrainSaleFormProps<TProduct>>) {
   const { mutateAsync: registerGrainSale } = useRegisterGrainSale();
 
@@ -30,13 +33,17 @@ export function RegisterGrainSaleForm<TProduct extends SaleFormProduct>({
       productId: string;
       quantity: string;
       paymentMethod: string;
+      currency: "USD" | "NIO";
     },
     product: TProduct,
   ): Promise<void> => {
+    const safeCurrency = normalizeCurrency(formValues.currency);
+
     const sale = await registerGrainSale({
       productId: product.id,
       quantity: Number(formValues.quantity),
       paymentMethod: formValues.paymentMethod,
+      currency: safeCurrency,
     });
 
     try {
@@ -62,6 +69,7 @@ export function RegisterGrainSaleForm<TProduct extends SaleFormProduct>({
         total: sale?.total ?? product.price * Number(formValues.quantity),
 
         paymentMethod: sale?.paymentMethod ?? formValues.paymentMethod,
+        currency: sale?.currency ?? formValues.currency,
 
         saleDate: sale?.createdAt ? new Date(sale.createdAt) : new Date(),
       });
@@ -79,6 +87,7 @@ export function RegisterGrainSaleForm<TProduct extends SaleFormProduct>({
       onRegister={handleRegister}
       productOptionLabel={productOptionLabel}
       productSummaryLabel={productSummaryLabel}
+      onRegistered={onRegistered}
     />
   );
 }

@@ -21,6 +21,7 @@ import { ImageUrlField } from "../ImageUrlField";
 import { ModalField } from "../ModalField";
 
 import type { HardwareProduct } from "@/shared/types/api.types";
+import { currencies, currencyLabels, normalizeCurrency, getCurrencySymbol } from "@/shared/utils/currency";
 
 export type EditHardwareProductValues = {
   name: string;
@@ -28,6 +29,7 @@ export type EditHardwareProductValues = {
   category: string;
   minimumStock: string;
   unitPrice: string;
+  currency: "USD" | "NIO";
   inventoryStatus: string;
   imageUrl: string;
 };
@@ -67,6 +69,7 @@ export function EditHardwareProductForm({
       category: "",
       minimumStock: "",
       unitPrice: "",
+      currency: "NIO",
       inventoryStatus: "Available",
       imageUrl: "",
     },
@@ -78,12 +81,15 @@ export function EditHardwareProductForm({
         return;
       }
 
+      const normalizedCurrency = normalizeCurrency(values.currency);
+
       await onSave(product.id, {
         name: values.name.trim(),
         detail: values.detail.trim(),
         category: values.category.trim(),
         minimumStock: String(values.minimumStock ?? "").trim(),
         unitPrice: String(values.unitPrice ?? "").trim(),
+        currency: normalizedCurrency,
         inventoryStatus: values.inventoryStatus,
         imageUrl: values.imageUrl.trim(),
       });
@@ -101,6 +107,7 @@ export function EditHardwareProductForm({
         category: product.category,
         minimumStock: String(product.minimumStock ?? ""),
         unitPrice: String(product.unitPrice ?? ""),
+        currency: product.currency,
         inventoryStatus: product.inventoryStatus || "Available",
         imageUrl: product.imageUrl ?? "",
       });
@@ -146,6 +153,22 @@ export function EditHardwareProductForm({
           title="Información del producto"
           description="Datos generales y clasificación del producto."
         >
+          <ModalField label="Moneda" htmlFor="edit-hardware-currency">
+            <TextField
+              id="edit-hardware-currency"
+              name="currency"
+              select
+              value={formik.values.currency}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              disabled={disabled}
+              fullWidth
+            >
+              {currencies.map((currency) => (
+                <MenuItem key={currency} value={currency}>{currencyLabels[currency]}</MenuItem>
+              ))}
+            </TextField>
+          </ModalField>
           <ModalField label="Nombre del producto" htmlFor="edit-hardware-product-name">
             <TextField
               id="edit-hardware-product-name"
@@ -304,7 +327,7 @@ export function EditHardwareProductForm({
                   },
                   input: {
                     startAdornment: showPriceSymbol ? (
-                      <InputAdornment position="start">$</InputAdornment>
+                      <InputAdornment position="start">{getCurrencySymbol(formik.values.currency)}</InputAdornment>
                     ) : undefined,
                   },
                 }}

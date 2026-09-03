@@ -68,7 +68,8 @@ export function StockProgress({
           height: {
             xs: 6,
             sm: 6,
-            md: 7,
+            md: 10,
+            lg: 11,
           },
           borderRadius: 999,
           bgcolor: "#e5e7eb",

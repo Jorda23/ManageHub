@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 
-import { Alert, Box, Button, InputAdornment, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, InputAdornment, MenuItem, TextField, Typography } from "@mui/material";
 
 import type { SxProps, Theme } from "@mui/material/styles";
 
@@ -24,6 +24,8 @@ import { addPropertySchema, type AddPropertyFormValues } from "@/validations";
 
 import { useToast } from "@/components/Toast";
 
+import { currencies, currencyLabels, normalizeCurrency, getCurrencySymbol } from "@/shared/utils/currency";
+
 import { ImageUrlField } from "@/components/ImageUrlField";
 import { ModalField } from "@/components/ModalField";
 import { FormSection } from "../FormSection";
@@ -40,6 +42,7 @@ const initialValues: AddPropertyFormValues = {
   location: "",
   ownerName: "",
   totalPrice: "",
+  currency: "NIO",
   initialPayment: "",
   nextPaymentDate: "",
   imageUrl: "",
@@ -83,6 +86,8 @@ export function AddPropertyForm({ onCancel, onCreated }: Readonly<AddPropertyFor
 
           initialPayment: Number(values.initialPayment || "0"),
 
+          currency: normalizeCurrency(values.currency),
+
           nextPaymentDate: values.nextPaymentDate
             ? dayjs(values.nextPaymentDate).startOf("day").toISOString()
             : null,
@@ -121,6 +126,33 @@ export function AddPropertyForm({ onCancel, onCreated }: Readonly<AddPropertyFor
     return formik.errors[field];
   };
 
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault();
+
+    const errors = await formik.validateForm();
+
+    if (Object.keys(errors).length > 0) {
+      await formik.setTouched({
+        name: true,
+        projectName: true,
+        measure: true,
+        location: true,
+        ownerName: true,
+        totalPrice: true,
+        currency: true,
+        initialPayment: true,
+        nextPaymentDate: true,
+        imageUrl: true,
+        identificationImageUrl: true,
+        identificationNumber: true,
+      });
+      showError("Revisa los campos marcados antes de continuar.");
+      return;
+    }
+
+    await formik.submitForm();
+  };
+
   const handleCancel = (): void => {
     if (isCreatingProperty) {
       return;
@@ -140,7 +172,7 @@ export function AddPropertyForm({ onCancel, onCreated }: Readonly<AddPropertyFor
   return (
     <Box
       component="form"
-      onSubmit={formik.handleSubmit}
+      onSubmit={handleSubmit}
       sx={{
         width: "100%",
         display: "flex",
@@ -365,6 +397,28 @@ export function AddPropertyForm({ onCancel, onCreated }: Readonly<AddPropertyFor
         title="Información de pago"
         description="Precio, abono inicial y programación del siguiente pago."
       >
+        <ModalField label="Moneda" htmlFor="property-currency">
+          <TextField
+            id="property-currency"
+            name="currency"
+            select
+            value={formik.values.currency}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={Boolean(getFieldError("currency"))}
+            helperText={getFieldError("currency")}
+            disabled={isCreatingProperty}
+            fullWidth
+            sx={fieldStyles}
+          >
+            {currencies.map((currency) => (
+              <MenuItem key={currency} value={currency}>
+                {currencyLabels[currency]}
+              </MenuItem>
+            ))}
+          </TextField>
+        </ModalField>
+
         <Box sx={twoColumnsStyles}>
           <ModalField label="Precio total" htmlFor="property-total-price">
             <TextField
@@ -393,7 +447,7 @@ export function AddPropertyForm({ onCancel, onCreated }: Readonly<AddPropertyFor
                 },
                 input: {
                   startAdornment: showTotalPriceSymbol ? (
-                    <InputAdornment position="start">$</InputAdornment>
+                    <InputAdornment position="start">{getCurrencySymbol(formik.values.currency)}</InputAdornment>
                   ) : undefined,
                 },
               }}
@@ -428,7 +482,7 @@ export function AddPropertyForm({ onCancel, onCreated }: Readonly<AddPropertyFor
                 },
                 input: {
                   startAdornment: showInitialPaymentSymbol ? (
-                    <InputAdornment position="start">$</InputAdornment>
+                    <InputAdornment position="start">{getCurrencySymbol(formik.values.currency)}</InputAdornment>
                   ) : undefined,
                 },
               }}
