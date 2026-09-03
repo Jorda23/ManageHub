@@ -157,6 +157,7 @@ export function RegisterSaleCard<TProduct extends SaleProduct>({
             sm: 2,
           },
           display: "flex",
+          flexWrap: "wrap",
           alignItems: "center",
           gap: 1.25,
         }}

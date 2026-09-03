@@ -288,6 +288,7 @@ export function RegisterSaleForm<TProduct extends SaleFormProduct>({
             sm: 2,
           },
           display: "flex",
+          flexWrap: "wrap",
           alignItems: "center",
           gap: 1.25,
         }}
@@ -315,25 +316,6 @@ export function RegisterSaleForm<TProduct extends SaleFormProduct>({
         >
           <FaCashRegister />
         </Box>
-        <Box sx={{ minWidth: 0 }}>
-          <FieldLabel>Moneda</FieldLabel>
-          <FormControl fullWidth size="small">
-            <Select
-              name="currency"
-              value={formik.values.currency}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={Boolean(getFieldError("currency"))}
-              sx={selectSx}
-            >
-              {currencies.map((currency) => (
-                <MenuItem key={currency} value={currency}>
-                  {currencyLabels[currency]}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Box>
 
         <Typography
           component="h2"
@@ -352,6 +334,26 @@ export function RegisterSaleForm<TProduct extends SaleFormProduct>({
         >
           Registrar venta
         </Typography>
+
+        <Box sx={{ minWidth: 0, ml: "auto" }}>
+          <FieldLabel>Moneda</FieldLabel>
+          <FormControl fullWidth size="small">
+            <Select
+              name="currency"
+              value={formik.values.currency}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={Boolean(getFieldError("currency"))}
+              sx={selectSx}
+            >
+              {currencies.map((currency) => (
+                <MenuItem key={currency} value={currency}>
+                  {currencyLabels[currency]}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
       </Box>
 
       <Divider />
