@@ -4,6 +4,7 @@ import { Box, Chip } from "@mui/material";
 
 import type { ProductImageProps } from "../grainInventory.types";
 import { colors } from "@/theme/sharedColors";
+import { getImageKitUrl } from "@/utils/imagekit";
 
 export function ProductImage({ product, isLowStock }: Readonly<ProductImageProps>) {
   return (
@@ -29,7 +30,7 @@ export function ProductImage({ product, isLowStock }: Readonly<ProductImageProps
                 rgba(6, 78, 59, 0.02),
                 rgba(6, 78, 59, 0.16)
               ),
-              url("${product.imageUrl}")
+              url("${getImageKitUrl(product.imageUrl, { width: 600, quality: 80, format: "auto" })}")
             `
           : `linear-gradient(135deg, ${colors.greenSoft}, ${colors.greenBorder})`,
         backgroundSize: "cover",

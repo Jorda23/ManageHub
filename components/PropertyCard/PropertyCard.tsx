@@ -17,6 +17,7 @@ import {
 import { getPendingAmount, getStatusColors, type PropertyItem } from "@/shared/data/property.data";
 import { colors } from "@/theme/sharedColors";
 import { formatCurrency } from "@/shared";
+import { getImageKitUrl } from "@/utils/imagekit";
 
 type PropertyCardProps = {
   property: PropertyItem;
@@ -196,7 +197,7 @@ function PropertyImage({ property }: { property: PropertyItem }) {
                 rgba(15, 23, 42, 0.03),
                 rgba(15, 23, 42, 0.38)
               ),
-              url("${property.imageUrl}")
+              url("${getImageKitUrl(property.imageUrl, { width: 800, quality: 80, format: "auto" })}")
             `
           : "linear-gradient(135deg, #dbeafe, #bfdbfe)",
         backgroundSize: "cover",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Box, Dialog } from "@mui/material";
 
@@ -22,19 +22,59 @@ import {
   useToast,
 } from "@/components";
 
-import type { HardwareProduct } from "@/shared/types/api.types";
+import type { HardwareProduct, HardwareProductFilters } from "@/shared/types/api.types";
 
 import { hardwareConfig } from "@/shared";
 
 import { colors } from "@/theme/sharedColors";
 
-import { HardwareMetricsGrid, HardwareTabs, HardwareWorkspaceHero } from "./components";
+import { HardwareTabs, HardwareWorkspaceHero } from "./components";
 import { normalizeCurrency } from "@/shared/utils/currency";
+import { INFINITE_SCROLL_PAGE_SIZE, useInfiniteList } from "@/hook/useInfiniteList";
+import { getHardwareProducts } from "@/service/api";
 
 export type HardwareWorkspaceTab = "inventory" | "create";
 
 export function HardwareWorkspace() {
   const { data: hardwareProducts = [], isLoading: isLoadingProducts } = useHardwareProducts();
+
+  const [search, setSearch] = useState("");
+
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const searchFilters = useMemo<HardwareProductFilters | undefined>(
+    () => (debouncedSearch ? { search: debouncedSearch } : undefined),
+    [debouncedSearch],
+  );
+
+  const {
+    data: infiniteProducts,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isSearchLoading,
+  } = useInfiniteList<HardwareProduct>({
+    queryKey: ["hardware-products", "inventory", searchFilters],
+    queryFn: (page) =>
+      getHardwareProducts({
+        ...searchFilters,
+        page,
+        limit: INFINITE_SCROLL_PAGE_SIZE,
+      }),
+  });
+
+  const visibleProducts = useMemo(
+    () => infiniteProducts?.pages.flatMap((page) => page) ?? [],
+    [infiniteProducts],
+  );
 
   const { mutateAsync: createHardwareProduct, isPending: isCreatingProduct } =
     useCreateHardwareProduct();
@@ -49,8 +89,8 @@ export function HardwareWorkspace() {
   const [activeTab, setActiveTab] = useState<HardwareWorkspaceTab>("inventory");
   const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
 
-  const products = useMemo<HardwareInventoryItem[]>(() => {
-    return hardwareProducts.map((product) => {
+  const toItems = useCallback((list: HardwareProduct[]): HardwareInventoryItem[] => {
+    return list.map((product) => {
       const isLowStock =
         product.inventoryStatus === "LowStock" || product.currentStock <= product.minimumStock;
 
@@ -73,7 +113,11 @@ export function HardwareWorkspace() {
         imageUrl: product.imageUrl ?? "",
       };
     });
-  }, [hardwareProducts]);
+  }, []);
+
+  const products = useMemo(() => toItems(hardwareProducts), [hardwareProducts, toItems]);
+
+  const filteredProducts = useMemo(() => toItems(visibleProducts), [visibleProducts, toItems]);
 
   const handleAddProduct = useCallback(
     async (formValues: AddHardwareProductValues): Promise<void> => {
@@ -195,40 +239,44 @@ export function HardwareWorkspace() {
         <HardwareTabs value={activeTab} onChange={setActiveTab} />
 
         {activeTab === "inventory" ? (
-          <>
-            <HardwareMetricsGrid hardwareProducts={hardwareProducts} />
+          <Box
+            sx={{
+              display: "grid",
 
-            <Box
-              sx={{
-                display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                lg: "minmax(0, 1fr)",
+              },
 
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  lg: "minmax(0, 1fr)",
-                },
+              gap: {
+                xs: 2,
+                md: 2.5,
+              },
 
-                gap: {
-                  xs: 2,
-                  md: 2.5,
-                },
+              alignItems: "start",
 
-                alignItems: "start",
+              width: "100%",
 
-                width: "100%",
-
-                minWidth: 0,
+              minWidth: 0,
+            }}
+          >
+            <HardwareInventory
+              products={filteredProducts}
+              search={search}
+              onSearchChange={setSearch}
+              isInitialLoading={isSearchLoading}
+              hasMore={hasNextPage ?? false}
+              isLoadingMore={isFetchingNextPage}
+              onLoadMore={() => {
+                void fetchNextPage();
               }}
-            >
-              <HardwareInventory
-                products={products}
-                onEditProduct={handleEditProduct}
-                onRegisterSale={() => setIsSaleModalOpen(true)}
-                onAddProduct={() => {
-                  setActiveTab("create");
-                }}
-              />
-            </Box>
-          </>
+              onEditProduct={handleEditProduct}
+              onRegisterSale={() => setIsSaleModalOpen(true)}
+              onAddProduct={() => {
+                setActiveTab("create");
+              }}
+            />
+          </Box>
         ) : (
           <AddHardwareProductForm
             isSubmitting={isCreatingProduct}

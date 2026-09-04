@@ -20,7 +20,8 @@ const INITIAL_FILTERS: PaymentHistoryFilters = {
 export function History() {
   const [filters, setFilters] = useState<PaymentHistoryFilters>(INITIAL_FILTERS);
 
-  const { data = [], isLoading, isError } = usePaymentHistory(filters);
+  const { items, isLoading, isError, hasMore, isLoadingMore, loadMore } =
+    usePaymentHistory(filters);
 
   return (
     <Box
@@ -36,10 +37,15 @@ export function History() {
         <HistoryLoadingState />
       ) : isError ? (
         <HistoryErrorState />
-      ) : data.length === 0 ? (
+      ) : items.length === 0 ? (
         <HistoryEmptyState />
       ) : (
-        <HistoryTable items={data} />
+        <HistoryTable
+          items={items}
+          hasMore={hasMore}
+          isLoadingMore={isLoadingMore}
+          onLoadMore={loadMore}
+        />
       )}
     </Box>
   );

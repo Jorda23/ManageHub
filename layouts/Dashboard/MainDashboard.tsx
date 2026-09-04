@@ -5,7 +5,6 @@ import { useMemo } from "react";
 import { Box } from "@mui/material";
 
 import { useDashboard } from "@/hook/useDashboard";
-import { modules } from "@/shared/data/dashboard.data";
 import { colors } from "@/theme/sharedColors";
 
 import { AppShell } from "@/components/AppShell";
@@ -14,8 +13,6 @@ import {
   StatusScreen,
   DashboardHero,
   DashboardMetricCard,
-  SectionHeading,
-  SectorModuleCard,
   CashFlowCard,
   AlertsCard,
   ActivityCard,

@@ -1,33 +1,99 @@
 "use client";
 
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, TextField, type SxProps, type Theme } from "@mui/material";
 
-import { FaBoxOpen, FaCashRegister, FaPlus } from "react-icons/fa";
+import { FaCashRegister, FaPlus, FaSearch } from "react-icons/fa";
 
 import { colors } from "@/theme/sharedColors";
 
 import { sellButtonBaseSx } from "@/theme/sellButtonStyles";
 
 type InventoryHeaderProps = {
+  search?: string;
+
+  onSearchChange?: (value: string) => void;
+
   onAddProduct: () => void;
+
   onRegisterSale?: () => void;
 };
 
-export function InventoryHeader({ onAddProduct, onRegisterSale }: Readonly<InventoryHeaderProps>) {
+const searchInputSx: SxProps<Theme> = {
+  "& .MuiOutlinedInput-root": {
+    minHeight: {
+      xs: 36,
+      sm: 40,
+    },
+
+    borderRadius: {
+      xs: "8px",
+      sm: "10px",
+    },
+
+    bgcolor: "#fbfdfc",
+
+    fontSize: {
+      xs: 12,
+      sm: 13,
+    },
+
+    fontWeight: 600,
+
+    color: colors.text,
+
+    "& fieldset": {
+      borderColor: colors.cardBorder,
+    },
+
+    "&:hover fieldset": {
+      borderColor: "#94a3b8",
+    },
+
+    "&.Mui-focused fieldset": {
+      borderColor: colors.green,
+      borderWidth: 1.5,
+    },
+  },
+
+  "& .MuiInputBase-input": {
+    px: {
+      xs: 0.75,
+      sm: 1.25,
+    },
+
+    py: {
+      xs: 0.75,
+      sm: 1,
+    },
+  },
+
+  "& .MuiInputBase-input::placeholder": {
+    color: colors.softMuted,
+    opacity: 1,
+  },
+};
+
+export function InventoryHeader({
+  search = "",
+  onSearchChange,
+  onAddProduct,
+  onRegisterSale,
+}: Readonly<InventoryHeaderProps>) {
   return (
     <Box
       sx={{
         position: "relative",
+
         zIndex: 2,
 
         px: {
-          xs: 1.25,
+          xs: 1,
           sm: 2,
           md: 3,
         },
 
         py: {
-          xs: 1.25,
+          xs: 1,
           sm: 1.75,
           md: 2.5,
         },
@@ -47,120 +113,88 @@ export function InventoryHeader({ onAddProduct, onRegisterSale }: Readonly<Inven
         },
 
         gap: {
-          xs: 1.5,
+          xs: 1,
           sm: 2,
         },
 
         bgcolor: colors.cardBg,
 
         borderBottom: `1px solid ${colors.cardBorder}`,
-
-        "@media (min-width: 400px)": {
-          flexDirection: "row",
-          alignItems: "center",
-        },
       }}
     >
       <Box
         sx={{
-          display: "flex",
-          alignItems: "center",
-
-          gap: {
-            xs: 0.8,
-            sm: 1.2,
-          },
+          flex: 1,
 
           minWidth: 0,
+
+          width: {
+            xs: "100%",
+            sm: "auto",
+          },
+
+          maxWidth: {
+            sm: 420,
+          },
         }}
       >
-        <Box
-          sx={{
-            width: {
-              xs: 27,
-              sm: 30,
+        <TextField
+          size="small"
+          placeholder="Buscar producto por nombre..."
+          value={search}
+          onChange={(event) => onSearchChange?.(event.target.value)}
+          fullWidth
+          slotProps={{
+            input: {
+              startAdornment: (
+                <Box
+                  component="span"
+                  sx={{
+                    mr: {
+                      xs: 0.75,
+                      sm: 1,
+                    },
+
+                    display: "grid",
+
+                    placeItems: "center",
+
+                    color: colors.softMuted,
+
+                    fontSize: {
+                      xs: 12,
+                      sm: 13,
+                    },
+                  }}
+                >
+                  <FaSearch size={12} />
+                </Box>
+              ),
             },
-
-            height: {
-              xs: 27,
-              sm: 30,
-            },
-
-            borderRadius: {
-              xs: "8px",
-              sm: "10px",
-            },
-
-            display: "grid",
-            placeItems: "center",
-
-            color: colors.green,
-            bgcolor: colors.greenSoft,
-
-            flexShrink: 0,
           }}
-        >
-          <FaBoxOpen size={13} />
-        </Box>
-
-        <Box sx={{ minWidth: 0 }}>
-          <Typography
-            noWrap
-            sx={{
-              color: colors.text,
-
-              fontSize: {
-                xs: 13,
-                sm: 16,
-              },
-
-              fontWeight: 950,
-              lineHeight: 1.2,
-            }}
-          >
-            Inventario de granos
-          </Typography>
-
-          <Typography
-            noWrap
-            sx={{
-              mt: 0.2,
-
-              color: colors.muted,
-
-              fontSize: {
-                xs: 9.5,
-                sm: 11,
-              },
-
-              lineHeight: 1.3,
-            }}
-          >
-            Productos, existencias y niveles mínimos
-          </Typography>
-        </Box>
+          sx={searchInputSx}
+        />
       </Box>
 
       <Box
         sx={{
           display: "flex",
 
-          flexDirection: {
-            xs: "column",
-            sm: "row",
-          },
+          flexDirection: "row",
 
-          alignItems: {
-            xs: "stretch",
-            sm: "center",
-          },
+          alignItems: "center",
 
-          gap: 1,
+          gap: {
+            xs: 0.75,
+            sm: 1,
+          },
 
           width: {
             xs: "100%",
             sm: "auto",
           },
+
+          flexShrink: 0,
         }}
       >
         {onRegisterSale && (
@@ -168,37 +202,67 @@ export function InventoryHeader({ onAddProduct, onRegisterSale }: Readonly<Inven
             type="button"
             variant="outlined"
             size="small"
-            startIcon={<FaCashRegister size={12} />}
+            startIcon={<FaCashRegister size={11} />}
             onClick={onRegisterSale}
             sx={{
-              minHeight: 36,
+              flex: {
+                xs: 1,
+                sm: "initial",
+              },
+
+              minWidth: 0,
+
+              minHeight: {
+                xs: 34,
+                sm: 36,
+              },
 
               width: {
-                xs: "100%",
+                xs: 0,
                 sm: "auto",
               },
 
-              px: 1.5,
+              px: {
+                xs: 0.75,
+                sm: 1.5,
+              },
 
-              borderRadius: "9px",
+              borderRadius: {
+                xs: "8px",
+                sm: "9px",
+              },
 
               color: "#b45309",
+
               bgcolor: "#fffbeb",
+
               border: "1px solid #fde68a",
 
               textTransform: "none",
-              fontSize: 12,
+
+              fontSize: {
+                xs: 11,
+                sm: 12,
+              },
+
               fontWeight: 800,
+
+              whiteSpace: "nowrap",
 
               boxShadow: "none",
 
               "& .MuiButton-startIcon": {
-                mr: 0.75,
+                mr: {
+                  xs: 0.5,
+                  sm: 0.75,
+                },
+
                 color: "#d97706",
               },
 
               "&:hover": {
                 bgcolor: "#fef3c7",
+
                 color: "#92400e",
 
                 borderColor: "#fcd34d",
@@ -212,6 +276,7 @@ export function InventoryHeader({ onAddProduct, onRegisterSale }: Readonly<Inven
 
               "&:focus-visible": {
                 outline: "2px solid #f59e0b",
+
                 outlineOffset: 2,
               },
             }}
@@ -224,33 +289,60 @@ export function InventoryHeader({ onAddProduct, onRegisterSale }: Readonly<Inven
           type="button"
           variant="contained"
           size="small"
-          startIcon={<FaPlus size={11} />}
+          startIcon={<FaPlus size={10} />}
           onClick={onAddProduct}
           sx={{
             ...sellButtonBaseSx,
 
-            minHeight: 36,
+            flex: {
+              xs: 1,
+              sm: "initial",
+            },
+
+            minWidth: 0,
+
+            minHeight: {
+              xs: 34,
+              sm: 36,
+            },
 
             width: {
-              xs: "100%",
+              xs: 0,
               sm: "auto",
             },
 
-            px: 1.6,
+            px: {
+              xs: 0.75,
+              sm: 1.6,
+            },
 
-            borderRadius: "9px",
+            borderRadius: {
+              xs: "8px",
+              sm: "9px",
+            },
 
             bgcolor: colors.green,
+
             color: colors.cardBg,
 
             textTransform: "none",
-            fontSize: 12,
+
+            fontSize: {
+              xs: 11,
+              sm: 12,
+            },
+
             fontWeight: 800,
+
+            whiteSpace: "nowrap",
 
             boxShadow: "0 3px 8px rgba(22, 163, 74, 0.18)",
 
             "& .MuiButton-startIcon": {
-              mr: 0.75,
+              mr: {
+                xs: 0.5,
+                sm: 0.75,
+              },
             },
 
             "&:hover": {
@@ -265,6 +357,7 @@ export function InventoryHeader({ onAddProduct, onRegisterSale }: Readonly<Inven
 
             "&:focus-visible": {
               outline: `2px solid ${colors.green}`,
+
               outlineOffset: 2,
             },
           }}

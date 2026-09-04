@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   createHardwareProduct,
@@ -12,6 +12,7 @@ import type {
   CreateHardwareProductRequest,
   CreateHardwareProductResponse,
   HardwareProduct,
+  HardwareProductFilters,
   HardwareSale,
   HardwareSalesFilters,
   RegisterHardwareSaleRequest,
@@ -24,10 +25,11 @@ const HARDWARE_PRODUCTS_QUERY_KEY = ["hardware-products"];
 
 const HARDWARE_SALES_QUERY_KEY = ["hardware-sales"];
 
-export const useHardwareProducts = () => {
+export const useHardwareProducts = (filters?: HardwareProductFilters) => {
   return useQuery<HardwareProduct[], Error>({
-    queryKey: HARDWARE_PRODUCTS_QUERY_KEY,
-    queryFn: getHardwareProducts,
+    queryKey: filters ? [...HARDWARE_PRODUCTS_QUERY_KEY, filters] : HARDWARE_PRODUCTS_QUERY_KEY,
+    queryFn: () => getHardwareProducts(filters),
+    placeholderData: keepPreviousData,
   });
 };
 

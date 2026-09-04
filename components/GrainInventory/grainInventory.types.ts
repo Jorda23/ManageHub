@@ -18,6 +18,12 @@ export type GrainInventoryItem = {
 
 export type GrainInventoryProps = {
   products: GrainInventoryItem[];
+  search?: string;
+  onSearchChange?: (value: string) => void;
+  isInitialLoading?: boolean;
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
+  onLoadMore?: () => void;
   onAddProduct: () => void;
   onRegisterSale?: () => void;
   onEditProduct?: (product: GrainInventoryItem) => void;

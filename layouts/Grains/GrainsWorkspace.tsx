@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Box, Dialog } from "@mui/material";
 
@@ -16,19 +16,59 @@ import {
   useToast,
 } from "@/components";
 
-import type { GrainProduct } from "@/shared/types/api.types";
+import type { GrainProduct, GrainProductFilters } from "@/shared/types/api.types";
 
 import { GrainInventory, type GrainInventoryItem } from "@/components/GrainInventory";
 
 import { colors } from "@/theme/sharedColors";
 
-import { GrainMetricsGrid, GrainsTabs, HeroHeader } from "./components";
+import { GrainsTabs, HeroHeader } from "./components";
 import { normalizeCurrency } from "@/shared/utils/currency";
+import { INFINITE_SCROLL_PAGE_SIZE, useInfiniteList } from "@/hook/useInfiniteList";
+import { getGrainProducts } from "@/service/api";
 
 export type GrainsWorkspaceTab = "inventory" | "create";
 
 export function GrainsWorkspace() {
   const { data: grainProducts = [], isLoading: isLoadingProducts } = useGrainProducts();
+
+  const [search, setSearch] = useState("");
+
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const searchFilters = useMemo<GrainProductFilters | undefined>(
+    () => (debouncedSearch ? { search: debouncedSearch } : undefined),
+    [debouncedSearch],
+  );
+
+  const {
+    data: infiniteProducts,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isSearchLoading,
+  } = useInfiniteList<GrainProduct>({
+    queryKey: ["grain-products", "inventory", searchFilters],
+    queryFn: (page) =>
+      getGrainProducts({
+        ...searchFilters,
+        page,
+        limit: INFINITE_SCROLL_PAGE_SIZE,
+      }),
+  });
+
+  const visibleProducts = useMemo(
+    () => infiniteProducts?.pages.flatMap((page) => page) ?? [],
+    [infiniteProducts],
+  );
 
   const { mutateAsync: createGrainProduct, isPending: isCreatingProduct } = useCreateGrainProduct();
 
@@ -41,8 +81,8 @@ export function GrainsWorkspace() {
 
   const [editingProduct, setEditingProduct] = useState<GrainProduct | null>(null);
 
-  const products = useMemo<GrainInventoryItem[]>(() => {
-    return grainProducts.map((product) => {
+  const toItems = useCallback((list: GrainProduct[]): GrainInventoryItem[] => {
+    return list.map((product) => {
       const isLowStock =
         product.inventoryStatus === "LowStock" || product.currentStock <= product.minimumStock;
 
@@ -62,7 +102,11 @@ export function GrainsWorkspace() {
         accent: isLowStock ? colors.danger : colors.primaryLight,
       };
     });
-  }, [grainProducts]);
+  }, []);
+
+  const products = useMemo(() => toItems(grainProducts), [grainProducts, toItems]);
+
+  const filteredProducts = useMemo(() => toItems(visibleProducts), [visibleProducts, toItems]);
 
   const handleCreateGrain = useCallback(
     async (values: AddGrainFormValues): Promise<void> => {
@@ -164,35 +208,39 @@ export function GrainsWorkspace() {
         <GrainsTabs value={activeTab} onChange={setActiveTab} />
 
         {activeTab === "inventory" ? (
-          <>
-            <GrainMetricsGrid grainProducts={grainProducts} />
-
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  lg: "minmax(0, 1fr)",
-                },
-                gap: {
-                  xs: 2,
-                  md: 2.5,
-                },
-                alignItems: "start",
-                width: "100%",
-                minWidth: 0,
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                lg: "minmax(0, 1fr)",
+              },
+              gap: {
+                xs: 2,
+                md: 2.5,
+              },
+              alignItems: "start",
+              width: "100%",
+              minWidth: 0,
+            }}
+          >
+            <GrainInventory
+              products={filteredProducts}
+              search={search}
+              onSearchChange={setSearch}
+              isInitialLoading={isSearchLoading}
+              hasMore={hasNextPage ?? false}
+              isLoadingMore={isFetchingNextPage}
+              onLoadMore={() => {
+                void fetchNextPage();
               }}
-            >
-              <GrainInventory
-                products={products}
-                onEditProduct={handleEditProduct}
-                onRegisterSale={() => setIsSaleModalOpen(true)}
-                onAddProduct={() => {
-                  setActiveTab("create");
-                }}
-              />
-            </Box>
-          </>
+              onEditProduct={handleEditProduct}
+              onRegisterSale={() => setIsSaleModalOpen(true)}
+              onAddProduct={() => {
+                setActiveTab("create");
+              }}
+            />
+          </Box>
         ) : (
           <AddGrainForm
             isSubmitting={isCreatingProduct}

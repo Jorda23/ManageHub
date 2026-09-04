@@ -11,6 +11,7 @@ import { FaCloudUploadAlt, FaTrashAlt } from "react-icons/fa";
 import { colors } from "@/theme/sharedColors";
 
 import { useUploadBase64Image } from "@/hook";
+import { getImageKitUrl } from "@/utils/imagekit";
 
 type ImageUrlFieldProps = {
   label?: string;
@@ -98,7 +99,7 @@ export function ImageUrlField({
         >
           <Box
             component="img"
-            src={value.trim()}
+            src={getImageKitUrl(value.trim(), { width: 600, quality: 80, format: "auto" })}
             alt={label}
             sx={{
               display: "block",

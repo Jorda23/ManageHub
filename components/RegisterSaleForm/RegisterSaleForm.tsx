@@ -29,11 +29,7 @@ import { paymentMethods } from "@/shared/data/grains.data";
 import { useToast } from "../Toast";
 
 import type { RegisterSaleFormValues } from "@/validations";
-import {
-  convertCurrency,
-  normalizeCurrency,
-  roundCurrency,
-} from "@/shared/utils/currency";
+import { convertCurrency, normalizeCurrency, roundCurrency } from "@/shared/utils/currency";
 
 export type SaleFormProduct = {
   id: string;

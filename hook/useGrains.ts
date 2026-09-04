@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   createGrainProduct,
@@ -12,6 +12,7 @@ import type {
   CreateGrainProductRequest,
   CreateGrainProductResponse,
   GrainProduct,
+  GrainProductFilters,
   GrainSale,
   GrainSalesFilters,
   RegisterGrainSaleRequest,
@@ -24,10 +25,11 @@ const GRAIN_PRODUCTS_QUERY_KEY = ["grain-products"];
 
 const GRAIN_SALES_QUERY_KEY = ["grain-sales"];
 
-export const useGrainProducts = () => {
+export const useGrainProducts = (filters?: GrainProductFilters) => {
   return useQuery<GrainProduct[], Error>({
-    queryKey: GRAIN_PRODUCTS_QUERY_KEY,
-    queryFn: getGrainProducts,
+    queryKey: filters ? [...GRAIN_PRODUCTS_QUERY_KEY, filters] : GRAIN_PRODUCTS_QUERY_KEY,
+    queryFn: () => getGrainProducts(filters),
+    placeholderData: keepPreviousData,
   });
 };
 

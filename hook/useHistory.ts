@@ -1,14 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
 
 import { getPaymentHistory } from "@/service/api";
 
-import type { PaymentHistoryFilters, PaymentHistoryItem } from "@/shared/types/api.types";
+import { INFINITE_SCROLL_PAGE_SIZE, useInfiniteList } from "@/hook/useInfiniteList";
 
-const HISTORY_QUERY_KEY = ["payment-history"];
+import type { PaymentHistoryFilters, PaymentHistoryItem } from "@/shared/types/api.types";
 
 const SEARCH_DEBOUNCE_MS = 400;
 
@@ -36,9 +34,26 @@ export function usePaymentHistory(filters?: PaymentHistoryFilters) {
     search: debouncedSearch,
   };
 
-  return useQuery<PaymentHistoryItem[], Error>({
-    queryKey: [...HISTORY_QUERY_KEY, normalizedFilters],
-    queryFn: () => getPaymentHistory(normalizedFilters),
-    placeholderData: (previousData) => previousData,
+  const query = useInfiniteList<PaymentHistoryItem>({
+    queryKey: ["payment-history", normalizedFilters],
+    queryFn: (page) =>
+      getPaymentHistory({
+        ...normalizedFilters,
+        page,
+        limit: INFINITE_SCROLL_PAGE_SIZE,
+      }),
   });
+
+  const items = useMemo(() => query.data?.pages.flatMap((page) => page) ?? [], [query.data]);
+
+  return {
+    items,
+    isLoading: query.isLoading,
+    isError: query.isError,
+    hasMore: query.hasNextPage ?? false,
+    isLoadingMore: query.isFetchingNextPage,
+    loadMore: () => {
+      void query.fetchNextPage();
+    },
+  };
 }

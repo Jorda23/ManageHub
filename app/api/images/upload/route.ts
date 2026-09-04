@@ -1,14 +1,17 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { randomUUID } from "node:crypto";
 
 import { NextResponse } from "next/server";
+import ImageKit from "@imagekit/nodejs";
+
+const imagekit = new ImageKit({
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY!,
+});
 
 type UploadImageRequest = {
   base64Image: string;
 };
 
-const IMAGE_TYPES: Record<string, string> = {
+const IMAGE_MIME_MAP: Record<string, string> = {
   "image/png": "png",
   "image/jpeg": "jpg",
   "image/jpg": "jpg",
@@ -31,7 +34,7 @@ export async function POST(request: Request) {
 
     const [, mimeType, base64Data] = match;
 
-    const extension = IMAGE_TYPES[mimeType];
+    const extension = IMAGE_MIME_MAP[mimeType];
 
     if (!extension) {
       return NextResponse.json({ message: `Unsupported image type: ${mimeType}` }, { status: 400 });
@@ -39,18 +42,15 @@ export async function POST(request: Request) {
 
     const fileName = `${randomUUID()}.${extension}`;
 
-    const uploadDirectory = path.join(process.cwd(), "public", "uploads");
-
-    await mkdir(uploadDirectory, {
-      recursive: true,
+    const result = await imagekit.files.upload({
+      file: `data:${mimeType};base64,${base64Data}`,
+      fileName,
+      folder: "/uploads",
+      useUniqueFileName: false,
     });
 
-    await writeFile(path.join(uploadDirectory, fileName), Buffer.from(base64Data, "base64"));
-
-    const url = new URL(`/uploads/${fileName}`, request.url).toString();
-
     return NextResponse.json({
-      url,
+      url: result.url,
     });
   } catch (error) {
     console.error("Image upload error:", error);

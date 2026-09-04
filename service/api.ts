@@ -33,14 +33,21 @@ import type {
   PaymentHistoryItem,
   PaymentHistoryFilters,
   DashboardResponse,
+  HardwareProductFilters,
+  GrainProductFilters,
+  PropertyFilters,
 } from "../shared/types/api.types";
 
 export const login = async (request: LoginRequest): Promise<LoginResponse> => {
   return apiClient.post<LoginResponse, LoginRequest>("/api/auth/login", request);
 };
 
-export const getHardwareProducts = async (): Promise<HardwareProduct[]> => {
-  return apiClient.get<HardwareProduct[]>("/api/hardware/products");
+export const getHardwareProducts = async (
+  filters?: HardwareProductFilters,
+): Promise<HardwareProduct[]> => {
+  return apiClient.get<HardwareProduct[]>("/api/hardware/products", {
+    params: filters,
+  });
 };
 
 export const createHardwareProduct = async (
@@ -77,8 +84,10 @@ export const getHardwareSales = async (filters?: HardwareSalesFilters): Promise<
   });
 };
 
-export const getGrainProducts = async (): Promise<GrainProduct[]> => {
-  return apiClient.get<GrainProduct[]>("/api/grains/products");
+export const getGrainProducts = async (filters?: GrainProductFilters): Promise<GrainProduct[]> => {
+  return apiClient.get<GrainProduct[]>("/api/grains/products", {
+    params: filters,
+  });
 };
 
 export const createGrainProduct = async (
@@ -115,8 +124,10 @@ export const getGrainSales = async (filters?: GrainSalesFilters): Promise<GrainS
   });
 };
 
-export const getProperties = async (): Promise<Property[]> => {
-  return apiClient.get<Property[]>("/api/properties");
+export const getProperties = async (filters?: PropertyFilters): Promise<Property[]> => {
+  return apiClient.get<Property[]>("/api/properties", {
+    params: filters,
+  });
 };
 
 export const createProperty = async (

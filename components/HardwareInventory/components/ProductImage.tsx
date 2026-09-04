@@ -5,6 +5,7 @@ import { FaTools } from "react-icons/fa";
 
 import type { HardwareProductImageProps } from "../hardwareInventory.types";
 import { colors } from "@/theme/sharedColors";
+import { getImageKitUrl } from "@/utils/imagekit";
 
 export function ProductImage({ product, isLowStock }: Readonly<HardwareProductImageProps>) {
   return (
@@ -32,7 +33,7 @@ export function ProductImage({ product, isLowStock }: Readonly<HardwareProductIm
                 rgba(120, 53, 15, 0.01),
                 rgba(120, 53, 15, 0.18)
               ),
-              url("${product.imageUrl}")
+              url("${getImageKitUrl(product.imageUrl, { width: 600, quality: 80, format: "auto" })}")
             `
           : `linear-gradient(135deg, ${colors.orangeSoft}, ${colors.orangeBorder})`,
         backgroundSize: "cover",

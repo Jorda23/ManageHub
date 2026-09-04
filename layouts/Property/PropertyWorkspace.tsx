@@ -1,17 +1,12 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Box, Dialog } from "@mui/material";
 
 import dayjs from "dayjs";
 
-import {
-  PropertyHeroHeader,
-  PropertyMetricsGrid,
-  PropertyPaymentSection,
-  PropertyTerrainsSection,
-} from "./components";
+import { PropertyHeroHeader, PropertyPaymentSection, PropertyTerrainsSection } from "./components";
 
 import { useProperties, useUpdateProperty } from "@/hook/useProperties";
 
@@ -23,18 +18,58 @@ import {
   useToast,
 } from "@/components";
 
-import type { Property } from "@/shared/types/api.types";
+import type { Property, PropertyFilters } from "@/shared/types/api.types";
 
 import { propertyConfig } from "@/shared";
 import { normalizeCurrency } from "@/shared/utils/currency";
 import { colors } from "@/theme/sharedColors";
 import { AddPropertyForm } from "../../components/AddPropertyForm/AddPropertyForm";
 import { PropertyTabs } from "./components/PropertyTabs";
+import { INFINITE_SCROLL_PAGE_SIZE, useInfiniteList } from "@/hook/useInfiniteList";
+import { getProperties } from "@/service/api";
 
 export type PropertyWorkspaceTab = "properties" | "create";
 
 export function PropertyWorkspace() {
   const { data: apiProperties = [], isLoading: isLoadingProperties } = useProperties();
+
+  const [search, setSearch] = useState("");
+
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const searchFilters = useMemo<PropertyFilters | undefined>(
+    () => (debouncedSearch ? { search: debouncedSearch } : undefined),
+    [debouncedSearch],
+  );
+
+  const {
+    data: infiniteProperties,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isSearchLoading,
+  } = useInfiniteList<Property>({
+    queryKey: ["properties", "inventory", searchFilters],
+    queryFn: (page) =>
+      getProperties({
+        ...searchFilters,
+        page,
+        limit: INFINITE_SCROLL_PAGE_SIZE,
+      }),
+  });
+
+  const visibleProperties = useMemo(
+    () => infiniteProperties?.pages.flatMap((page) => page) ?? [],
+    [infiniteProperties],
+  );
 
   const { mutateAsync: updateProperty, isPending: isUpdatingProperty } = useUpdateProperty();
 
@@ -45,8 +80,8 @@ export function PropertyWorkspace() {
 
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
 
-  const properties = useMemo<PropertyItem[]>(() => {
-    return apiProperties.map((property) => {
+  const toItems = useCallback((list: Property[]): PropertyItem[] => {
+    return list.map((property) => {
       const isPaid = property.status === "Paid";
 
       return {
@@ -73,7 +108,14 @@ export function PropertyWorkspace() {
         imageUrl: property.imageUrl ?? "",
       };
     });
-  }, [apiProperties]);
+  }, []);
+
+  const properties = useMemo(() => toItems(apiProperties), [apiProperties, toItems]);
+
+  const filteredProperties = useMemo(
+    () => toItems(visibleProperties),
+    [visibleProperties, toItems],
+  );
 
   const handleEditProperty = useCallback(
     (property: PropertyItem): void => {
@@ -153,18 +195,22 @@ export function PropertyWorkspace() {
         <PropertyTabs value={activeTab} onChange={setActiveTab} />
 
         {activeTab === "properties" ? (
-          <>
-            <PropertyMetricsGrid properties={properties} />
-
-            <PropertyTerrainsSection
-              properties={properties}
-              onEditProperty={handleEditProperty}
-              onRegisterPayment={() => setIsPaymentModalOpen(true)}
-              onAddProperty={() => {
-                setActiveTab("create");
-              }}
-            />
-          </>
+          <PropertyTerrainsSection
+            properties={filteredProperties}
+            search={search}
+            onSearchChange={setSearch}
+            isInitialLoading={isSearchLoading}
+            hasMore={hasNextPage ?? false}
+            isLoadingMore={isFetchingNextPage}
+            onLoadMore={() => {
+              void fetchNextPage();
+            }}
+            onEditProperty={handleEditProperty}
+            onRegisterPayment={() => setIsPaymentModalOpen(true)}
+            onAddProperty={() => {
+              setActiveTab("create");
+            }}
+          />
         ) : (
           <AddPropertyForm
             onCancel={() => {

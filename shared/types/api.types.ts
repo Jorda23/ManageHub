@@ -92,6 +92,12 @@ export type HardwareSale = {
   createdAt: string;
 };
 
+export type HardwareProductFilters = {
+  search?: string;
+  limit?: number;
+  page?: number;
+};
+
 export type HardwareSalesFilters = {
   search?: string;
   from?: string;
@@ -179,6 +185,12 @@ export type GrainSale = {
   paymentMethod: string;
   currency: Currency;
   createdAt: string;
+};
+
+export type GrainProductFilters = {
+  search?: string;
+  limit?: number;
+  page?: number;
 };
 
 export type GrainSalesFilters = {
@@ -292,6 +304,12 @@ export type PropertyPaymentsFilters = {
   currency?: Currency;
 };
 
+export type PropertyFilters = {
+  search?: string;
+  limit?: number;
+  page?: number;
+};
+
 export type DashboardSummary = {
   salesToday: number;
   monthlyIncome: number;
@@ -354,4 +372,6 @@ export type PaymentHistoryFilters = {
   to?: string;
   paymentMethod?: string;
   currency?: Currency;
+  page?: number;
+  limit?: number;
 };

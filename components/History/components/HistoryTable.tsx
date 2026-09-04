@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  Box,
   Chip,
+  CircularProgress,
   Paper,
   Table,
   TableBody,
@@ -16,10 +18,15 @@ import { colors, palette } from "@/theme/sharedColors";
 
 import { formatPrice } from "@/shared";
 
+import { useInfiniteScroll } from "@/hook/useInfiniteScroll";
+
 import type { PaymentHistoryItem } from "@/shared/types/api.types";
 
 type HistoryTableProps = {
   items: PaymentHistoryItem[];
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
+  onLoadMore?: () => void;
 };
 
 const TYPE_LABELS = {
@@ -46,9 +53,23 @@ const TYPE_STYLES = {
   },
 } as const;
 
-export function HistoryTable({ items }: Readonly<HistoryTableProps>) {
+export function HistoryTable({
+  items,
+  hasMore = false,
+  isLoadingMore = false,
+  onLoadMore,
+}: Readonly<HistoryTableProps>) {
+  const { rootRef, sentinelRef } = useInfiniteScroll<HTMLDivElement>({
+    hasMore,
+    isLoadingMore,
+    onLoadMore: () => {
+      onLoadMore?.();
+    },
+  });
+
   return (
     <TableContainer
+      ref={rootRef}
       component={Paper}
       elevation={0}
       sx={{
@@ -222,6 +243,47 @@ export function HistoryTable({ items }: Readonly<HistoryTableProps>) {
               </TableRow>
             );
           })}
+
+          {isLoadingMore ? (
+            <TableRow>
+              <TableCell
+                colSpan={6}
+                sx={{
+                  border: 0,
+                  py: 1.75,
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "grid",
+                    placeItems: "center",
+                    color: colors.softMuted,
+                  }}
+                >
+                  <CircularProgress size={22} thickness={5} />
+                </Box>
+              </TableCell>
+            </TableRow>
+          ) : null}
+
+          {hasMore ? (
+            <TableRow aria-hidden="true">
+              <TableCell
+                colSpan={6}
+                sx={{
+                  border: 0,
+                  p: 0,
+                }}
+              >
+                <Box
+                  ref={sentinelRef}
+                  sx={{
+                    height: 1,
+                  }}
+                />
+              </TableCell>
+            </TableRow>
+          ) : null}
         </TableBody>
       </Table>
     </TableContainer>

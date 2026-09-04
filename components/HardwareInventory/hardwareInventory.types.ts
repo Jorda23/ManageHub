@@ -18,6 +18,12 @@ export type HardwareInventoryItem = {
 
 export type HardwareInventoryProps = {
   products: HardwareInventoryItem[];
+  search?: string;
+  onSearchChange?: (value: string) => void;
+  isInitialLoading?: boolean;
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
+  onLoadMore?: () => void;
   onAddProduct: () => void;
   onRegisterSale?: () => void;
   onEditProduct?: (product: HardwareInventoryItem) => void;

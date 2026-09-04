@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   createProperty,
@@ -12,6 +12,7 @@ import type {
   CreatePropertyRequest,
   CreatePropertyResponse,
   Property,
+  PropertyFilters,
   PropertyPayment,
   PropertyPaymentsFilters,
   RegisterPropertyPaymentRequest,
@@ -24,10 +25,11 @@ const PROPERTIES_QUERY_KEY = ["properties"];
 
 const PROPERTY_PAYMENTS_QUERY_KEY = ["property-payments"];
 
-export const useProperties = () => {
+export const useProperties = (filters?: PropertyFilters) => {
   return useQuery<Property[], Error>({
-    queryKey: PROPERTIES_QUERY_KEY,
-    queryFn: getProperties,
+    queryKey: filters ? [...PROPERTIES_QUERY_KEY, filters] : PROPERTIES_QUERY_KEY,
+    queryFn: () => getProperties(filters),
+    placeholderData: keepPreviousData,
   });
 };
 
