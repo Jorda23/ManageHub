@@ -159,96 +159,95 @@ export function GrainsWorkspace() {
           gap: 2.5,
         }}
       >
-          <HeroHeader />
+        <HeroHeader />
 
-          <GrainsTabs value={activeTab} onChange={setActiveTab} />
+        <GrainsTabs value={activeTab} onChange={setActiveTab} />
 
-          {activeTab === "inventory" ? (
-            <>
-              <GrainMetricsGrid grainProducts={grainProducts} />
+        {activeTab === "inventory" ? (
+          <>
+            <GrainMetricsGrid grainProducts={grainProducts} />
 
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: {
-                    xs: "1fr",
-                    lg: "minmax(0, 1fr)",
-                  },
-                  gap: {
-                    xs: 2,
-                    md: 2.5,
-                  },
-                  alignItems: "start",
-                  width: "100%",
-                  minWidth: 0,
-                }}
-              >
-                <GrainInventory
-                  products={products}
-                  onEditProduct={handleEditProduct}
-                  onRegisterSale={() => setIsSaleModalOpen(true)}
-                  onAddProduct={() => {
-                    setActiveTab("create");
-                  }}
-                />
-
-              </Box>
-            </>
-          ) : (
-            <AddGrainForm
-              isSubmitting={isCreatingProduct}
-              onCancel={() => {
-                setActiveTab("inventory");
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  lg: "minmax(0, 1fr)",
+                },
+                gap: {
+                  xs: 2,
+                  md: 2.5,
+                },
+                alignItems: "start",
+                width: "100%",
+                minWidth: 0,
               }}
-              onSave={handleCreateGrain}
-            />
-          )}
-
-          <EditGrainProductForm
-            open={Boolean(editingProduct)}
-            product={editingProduct}
-            isSubmitting={isUpdatingProduct}
-            onClose={() => {
-              setEditingProduct(null);
+            >
+              <GrainInventory
+                products={products}
+                onEditProduct={handleEditProduct}
+                onRegisterSale={() => setIsSaleModalOpen(true)}
+                onAddProduct={() => {
+                  setActiveTab("create");
+                }}
+              />
+            </Box>
+          </>
+        ) : (
+          <AddGrainForm
+            isSubmitting={isCreatingProduct}
+            onCancel={() => {
+              setActiveTab("inventory");
             }}
-            onSave={handleUpdateProduct}
+            onSave={handleCreateGrain}
           />
+        )}
 
-          <Dialog
-            open={isSaleModalOpen}
-            onClose={() => setIsSaleModalOpen(false)}
-            fullWidth
-            maxWidth={false}
-            scroll="paper"
-            slotProps={{
-              paper: {
-                elevation: 0,
-                sx: {
-                  width: { xs: "calc(100% - 24px)", sm: "calc(100% - 64px)" },
-                  maxWidth: 620,
-                  maxHeight: { xs: "calc(100dvh - 24px)", sm: "calc(100dvh - 64px)" },
-                  m: { xs: 1.5, sm: 4 },
-                  borderRadius: "16px",
-                  overflow: "hidden",
-                  border: "1px solid rgba(148, 163, 184, 0.28)",
-                  boxShadow: "0 28px 80px rgba(15, 23, 42, 0.24)",
-                },
+        <EditGrainProductForm
+          open={Boolean(editingProduct)}
+          product={editingProduct}
+          isSubmitting={isUpdatingProduct}
+          onClose={() => {
+            setEditingProduct(null);
+          }}
+          onSave={handleUpdateProduct}
+        />
+
+        <Dialog
+          open={isSaleModalOpen}
+          onClose={() => setIsSaleModalOpen(false)}
+          fullWidth
+          maxWidth={false}
+          scroll="paper"
+          slotProps={{
+            paper: {
+              elevation: 0,
+              sx: {
+                width: { xs: "calc(100% - 24px)", sm: "calc(100% - 64px)" },
+                maxWidth: 620,
+                maxHeight: { xs: "calc(100dvh - 24px)", sm: "calc(100dvh - 64px)" },
+                m: { xs: 1.5, sm: 4 },
+                borderRadius: "16px",
+                overflow: "hidden",
+                border: "1px solid rgba(148, 163, 184, 0.28)",
+                boxShadow: "0 28px 80px rgba(15, 23, 42, 0.24)",
               },
-              backdrop: {
-                sx: {
-                  bgcolor: "rgba(15, 23, 42, 0.56)",
-                  backdropFilter: "blur(5px)",
-                },
+            },
+            backdrop: {
+              sx: {
+                bgcolor: "rgba(15, 23, 42, 0.56)",
+                backdropFilter: "blur(5px)",
               },
-            }}
-          >
-            <RegisterGrainSaleForm
-              products={products}
-              productOptionLabel={({ name, unit }) => `${name} · ${unit}`}
-              onRegistered={() => setIsSaleModalOpen(false)}
-            />
-          </Dialog>
-        </Box>
+            },
+          }}
+        >
+          <RegisterGrainSaleForm
+            products={products}
+            productOptionLabel={({ name, unit }) => `${name} · ${unit}`}
+            onRegistered={() => setIsSaleModalOpen(false)}
+          />
+        </Dialog>
       </Box>
+    </Box>
   );
 }

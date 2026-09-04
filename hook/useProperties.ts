@@ -54,14 +54,16 @@ export const useCreateProperty = () => {
 export const useUpdateProperty = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<UpdatePropertyResponse, Error, { id: string; request: UpdatePropertyRequest }>({
-    mutationFn: ({ id, request }) => updateProperty(id, request),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: PROPERTIES_QUERY_KEY,
-      });
+  return useMutation<UpdatePropertyResponse, Error, { id: string; request: UpdatePropertyRequest }>(
+    {
+      mutationFn: ({ id, request }) => updateProperty(id, request),
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: PROPERTIES_QUERY_KEY,
+        });
+      },
     },
-  });
+  );
 };
 
 export const useRegisterPropertyPayment = () => {

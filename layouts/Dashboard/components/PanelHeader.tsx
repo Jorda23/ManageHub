@@ -7,7 +7,14 @@ import type { PanelHeaderProps } from "@/shared/types/dashboard.types";
 import { colors } from "@/theme/sharedColors";
 import { IconBadge } from "./IconBadge";
 
-export function PanelHeader({ icon: Icon, accent, title, subtitle, action, href }: PanelHeaderProps) {
+export function PanelHeader({
+  icon: Icon,
+  accent,
+  title,
+  subtitle,
+  action,
+  href,
+}: PanelHeaderProps) {
   return (
     <Box
       sx={{

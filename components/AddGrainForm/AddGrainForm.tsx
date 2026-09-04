@@ -21,7 +21,12 @@ import { ImageUrlField } from "../ImageUrlField";
 
 import { ModalField } from "../ModalField";
 import { FormSection } from "../FormSection";
-import { currencies, currencyLabels, normalizeCurrency, getCurrencySymbol } from "@/shared/utils/currency";
+import {
+  currencies,
+  currencyLabels,
+  normalizeCurrency,
+  getCurrencySymbol,
+} from "@/shared/utils/currency";
 
 export type AddGrainFormValues = {
   name: string;
@@ -456,7 +461,9 @@ export function AddGrainForm({
 
                 input: {
                   startAdornment: showPriceSymbol ? (
-                    <InputAdornment position="start">{getCurrencySymbol(formik.values.currency)}</InputAdornment>
+                    <InputAdornment position="start">
+                      {getCurrencySymbol(formik.values.currency)}
+                    </InputAdornment>
                   ) : undefined,
                 },
               }}

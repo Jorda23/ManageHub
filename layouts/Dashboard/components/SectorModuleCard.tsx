@@ -9,9 +9,19 @@ import { colors } from "@/theme/sharedColors";
 import { cardStyles } from "./dashboard.styles";
 import { IconBadge } from "./IconBadge";
 
-export function SectorModuleCard({ eyebrow, title, description, image, href, stats }: ModuleCardData) {
+export function SectorModuleCard({
+  eyebrow,
+  title,
+  description,
+  image,
+  href,
+  stats,
+}: ModuleCardData) {
   return (
-    <Card elevation={0} sx={{ ...cardStyles, display: "flex", flexDirection: "column", overflow: "hidden", p: 0 }}>
+    <Card
+      elevation={0}
+      sx={{ ...cardStyles, display: "flex", flexDirection: "column", overflow: "hidden", p: 0 }}
+    >
       <Box
         sx={{
           height: { xs: 150, sm: 168 },
@@ -89,7 +99,12 @@ export function SectorModuleCard({ eyebrow, title, description, image, href, sta
                 }}
               >
                 <Typography
-                  sx={{ color: colors.muted, fontSize: 8.5, fontWeight: 800, textTransform: "uppercase" }}
+                  sx={{
+                    color: colors.muted,
+                    fontSize: 8.5,
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                  }}
                 >
                   {stat.label}
                 </Typography>

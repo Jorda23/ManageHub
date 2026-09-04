@@ -20,7 +20,12 @@ import { ImageUrlField } from "../ImageUrlField";
 import { ModalField } from "../ModalField";
 
 import type { GrainProduct } from "@/shared/types/api.types";
-import { currencies, currencyLabels, normalizeCurrency, getCurrencySymbol } from "@/shared/utils/currency";
+import {
+  currencies,
+  currencyLabels,
+  normalizeCurrency,
+  getCurrencySymbol,
+} from "@/shared/utils/currency";
 
 export type EditGrainProductValues = {
   name: string;
@@ -102,8 +107,7 @@ export function EditGrainProductForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, product]);
 
-  const showPriceSymbol =
-    isPriceFocused || String(formik.values.unitPrice ?? "").trim() !== "";
+  const showPriceSymbol = isPriceFocused || String(formik.values.unitPrice ?? "").trim() !== "";
 
   const getFieldError = (field: keyof EditGrainProductValues): string | undefined => {
     if (!formik.touched[field]) {
@@ -151,7 +155,9 @@ export function EditGrainProductForm({
               fullWidth
             >
               {currencies.map((currency) => (
-                <MenuItem key={currency} value={currency}>{currencyLabels[currency]}</MenuItem>
+                <MenuItem key={currency} value={currency}>
+                  {currencyLabels[currency]}
+                </MenuItem>
               ))}
             </TextField>
           </ModalField>
@@ -313,7 +319,9 @@ export function EditGrainProductForm({
                   },
                   input: {
                     startAdornment: showPriceSymbol ? (
-                      <InputAdornment position="start">{getCurrencySymbol(formik.values.currency)}</InputAdornment>
+                      <InputAdornment position="start">
+                        {getCurrencySymbol(formik.values.currency)}
+                      </InputAdornment>
                     ) : undefined,
                   },
                 }}

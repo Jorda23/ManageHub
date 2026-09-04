@@ -8,9 +8,7 @@ type UploadBase64ImageParams = {
   base64Image: string;
 };
 
-async function uploadBase64Image(
-  base64Image: string,
-): Promise<string> {
+async function uploadBase64Image(base64Image: string): Promise<string> {
   const response = await fetch("/api/images/upload", {
     method: "POST",
     headers: {
@@ -25,19 +23,13 @@ async function uploadBase64Image(
     throw new Error("Unable to upload image");
   }
 
-  const data =
-    (await response.json()) as UploadImageResponse;
+  const data = (await response.json()) as UploadImageResponse;
 
   return data.url;
 }
 
 export function useUploadBase64Image() {
-  return useMutation<
-    string,
-    Error,
-    UploadBase64ImageParams
-  >({
-    mutationFn: ({ base64Image }) =>
-      uploadBase64Image(base64Image),
+  return useMutation<string, Error, UploadBase64ImageParams>({
+    mutationFn: ({ base64Image }) => uploadBase64Image(base64Image),
   });
 }

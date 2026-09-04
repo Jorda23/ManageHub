@@ -29,7 +29,13 @@ import { paymentMethods } from "@/shared/data/grains.data";
 import { useToast } from "../Toast";
 
 import type { RegisterSaleFormValues } from "@/validations";
-import { currencies, currencyLabels, normalizeCurrency } from "@/shared/utils/currency";
+import {
+  convertCurrency,
+  currencies,
+  currencyLabels,
+  normalizeCurrency,
+  roundCurrency,
+} from "@/shared/utils/currency";
 
 export type SaleFormProduct = {
   id: string;
@@ -42,10 +48,7 @@ export type SaleFormProduct = {
 type RegisterSaleFormProps<TProduct extends SaleFormProduct> = {
   products: TProduct[];
   schemaFactory: (maxStock: number) => unknown;
-  onRegister: (
-    values: RegisterSaleFormValues,
-    product: TProduct,
-  ) => Promise<void>;
+  onRegister: (values: RegisterSaleFormValues, product: TProduct) => Promise<void>;
   productOptionLabel?: (product: TProduct) => string;
   productSummaryLabel?: (product: TProduct) => string;
   onRegistered?: () => void;
@@ -201,6 +204,7 @@ export function RegisterSaleForm<TProduct extends SaleFormProduct>({
 
       try {
         const safeCurrency = normalizeCurrency(values.currency);
+
         await formik.setFieldValue("currency", safeCurrency, false);
 
         await onRegister(
@@ -234,9 +238,22 @@ export function RegisterSaleForm<TProduct extends SaleFormProduct>({
 
   const numericQuantity = Number(formik.values.quantity);
 
-  const saleTotal = selectedProduct && !Number.isNaN(numericQuantity)
-    ? selectedProduct.price * numericQuantity
+  const paymentCurrency = normalizeCurrency(formik.values.currency);
+
+  const productCurrency = selectedProduct
+    ? normalizeCurrency(selectedProduct.currency)
+    : paymentCurrency;
+
+  const saleTotal =
+    selectedProduct && !Number.isNaN(numericQuantity) ? selectedProduct.price * numericQuantity : 0;
+
+  const convertedUnitPrice = selectedProduct
+    ? roundCurrency(convertCurrency(selectedProduct.price, productCurrency, paymentCurrency))
     : 0;
+
+  const convertedTotal = roundCurrency(
+    convertCurrency(saleTotal, productCurrency, paymentCurrency),
+  );
 
   const getFieldError = (field: keyof RegisterSaleFormValues): string | undefined => {
     if (!formik.touched[field]) {
@@ -334,26 +351,6 @@ export function RegisterSaleForm<TProduct extends SaleFormProduct>({
         >
           Registrar venta
         </Typography>
-
-        <Box sx={{ minWidth: 0, ml: "auto" }}>
-          <FieldLabel>Moneda</FieldLabel>
-          <FormControl fullWidth size="small">
-            <Select
-              name="currency"
-              value={formik.values.currency}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={Boolean(getFieldError("currency"))}
-              sx={selectSx}
-            >
-              {currencies.map((currency) => (
-                <MenuItem key={currency} value={currency}>
-                  {currencyLabels[currency]}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Box>
       </Box>
 
       <Divider />
@@ -377,221 +374,242 @@ export function RegisterSaleForm<TProduct extends SaleFormProduct>({
           alignItems: "start",
         }}
       >
-      {formik.status && (
+        {formik.status && (
+          <Box
+            role="alert"
+            sx={{
+              gridColumn: "1 / -1",
+              px: 1.5,
+              py: 1.15,
+              borderRadius: {
+                xs: "12px",
+                sm: "16px",
+              },
+              bgcolor: colors.dangerSoft,
+              border: "1px solid #fecaca",
+              color: colors.danger,
+              fontSize: 12,
+              fontWeight: 800,
+              overflowWrap: "anywhere",
+            }}
+          >
+            {formik.status}
+          </Box>
+        )}
+
         <Box
-          role="alert"
           sx={{
-            gridColumn: "1 / -1",
-            px: 1.5,
-            py: 1.15,
-            borderRadius: {
-              xs: "12px",
-              sm: "16px",
+            minWidth: 0,
+            gridColumn: {
+              xs: "auto",
+              md: "1 / -1",
             },
-            bgcolor: colors.dangerSoft,
-            border: "1px solid #fecaca",
-            color: colors.danger,
-            fontSize: 12,
-            fontWeight: 800,
-            overflowWrap: "anywhere",
           }}
         >
-          {formik.status}
+          <FieldLabel>Producto</FieldLabel>
+
+          <FormControl fullWidth size="small">
+            <Select
+              name="productId"
+              value={formik.values.productId}
+              displayEmpty
+              onChange={(event) => {
+                const productId = String(event.target.value);
+                const product = products.find((item) => item.id === productId);
+
+                void formik.setValues((currentValues) => ({
+                  ...currentValues,
+                  productId,
+                  currency: product?.currency ?? currentValues.currency,
+                }));
+              }}
+              onBlur={formik.handleBlur}
+              error={Boolean(getFieldError("productId"))}
+              sx={selectSx}
+            >
+              {!products.length && (
+                <MenuItem value="" disabled>
+                  No hay productos disponibles
+                </MenuItem>
+              )}
+
+              {products.map((product) => (
+                <MenuItem key={product.id} value={product.id}>
+                  {productOptionLabel(product)}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Box>
-      )}
 
-      <Box
-        sx={{
-          minWidth: 0,
-          gridColumn: {
-            xs: "auto",
-            md: "1 / -1",
-          },
-        }}
-      >
-        <FieldLabel>Producto</FieldLabel>
+        <Box sx={{ minWidth: 0 }}>
+          <FieldLabel>Cantidad</FieldLabel>
 
-        <FormControl fullWidth size="small">
-          <Select
-            name="productId"
-            value={formik.values.productId}
-            displayEmpty
-            onChange={(event) => {
-              const productId = String(event.target.value);
-              const product = products.find((item) => item.id === productId);
-
-              void formik.setValues((currentValues) => ({
-                ...currentValues,
-                productId,
-                currency: product?.currency ?? currentValues.currency,
-              }));
-            }}
-            onBlur={formik.handleBlur}
-            error={Boolean(getFieldError("productId"))}
-            sx={selectSx}
-          >
-            {!products.length && (
-              <MenuItem value="" disabled>
-                No hay productos disponibles
-              </MenuItem>
-            )}
-
-            {products.map((product) => (
-              <MenuItem key={product.id} value={product.id}>
-                {productOptionLabel(product)}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Box>
-
-      <Box sx={{ minWidth: 0 }}>
-        <FieldLabel>Cantidad</FieldLabel>
-
-        <TextField
-          name="quantity"
-          type="number"
-          size="small"
-          value={formik.values.quantity}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          error={Boolean(getFieldError("quantity"))}
-          helperText={getFieldError("quantity")}
-          slotProps={{
-            htmlInput: {
-              min: 1,
-              step: 1,
-              inputMode: "numeric",
-            },
-          }}
-          fullWidth
-          sx={inputSx}
-        />
-      </Box>
-
-      <Box sx={{ minWidth: 0 }}>
-        <FieldLabel>Método de pago</FieldLabel>
-
-        <FormControl fullWidth size="small">
-          <Select
-            name="paymentMethod"
-            value={formik.values.paymentMethod}
+          <TextField
+            name="quantity"
+            type="number"
+            size="small"
+            value={formik.values.quantity}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            error={Boolean(getFieldError("paymentMethod"))}
-            sx={selectSx}
-          >
-            {paymentMethods.map((method) => (
-              <MenuItem key={method} value={method}>
-                {method}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Box>
+            error={Boolean(getFieldError("quantity"))}
+            helperText={getFieldError("quantity")}
+            slotProps={{
+              htmlInput: {
+                min: 1,
+                step: 1,
+                inputMode: "numeric",
+              },
+            }}
+            fullWidth
+            sx={inputSx}
+          />
+        </Box>
 
-      <Box
-        sx={{
-          gridColumn: "1 / -1",
-          minWidth: 0,
-        }}
-      >
-        <SaleSummary
-          productName={selectedProduct ? productSummaryLabel(selectedProduct) : "-"}
-          unitPrice={selectedProduct?.price ?? 0}
-          quantity={numericQuantity}
-          total={saleTotal}
-          currency={formik.values.currency}
-        />
-      </Box>
+        <Box sx={{ minWidth: 0 }}>
+          <FieldLabel>Método de pago</FieldLabel>
 
-      <Button
-        type="submit"
-        fullWidth
-        variant="contained"
-        startIcon={<FaPlusCircle />}
-        disabled={!formik.values.productId}
-        sx={{
-          gridColumn: "1 / -1",
-          width: "100%",
-          minHeight: {
-            xs: 52,
-            sm: 48,
-          },
-          px: {
-            xs: 2,
-            sm: 3,
-          },
-          py: {
-            xs: 1.4,
-            sm: 1.2,
-          },
-          borderRadius: {
-            xs: "14px",
-            sm: "12px",
-          },
+          <FormControl fullWidth size="small">
+            <Select
+              name="paymentMethod"
+              value={formik.values.paymentMethod}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={Boolean(getFieldError("paymentMethod"))}
+              sx={selectSx}
+            >
+              {paymentMethods.map((method) => (
+                <MenuItem key={method} value={method}>
+                  {method}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
 
-          bgcolor: colors.primary,
-          color: "#ffffff",
-          fontSize: {
-            xs: 15,
-            sm: 14,
-            md: 15,
-          },
-          lineHeight: 1.2,
-          fontWeight: 900,
-          textTransform: "none",
-          whiteSpace: "nowrap",
+        <Box sx={{ minWidth: 0 }}>
+          <FieldLabel>Moneda</FieldLabel>
 
-          boxShadow: {
-            xs: "0 8px 18px rgba(146, 64, 14, 0.2)",
-            sm: "0 10px 22px rgba(146, 64, 14, 0.22)",
-          },
+          <FormControl fullWidth size="small">
+            <Select
+              name="currency"
+              value={formik.values.currency}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={Boolean(getFieldError("currency"))}
+              sx={selectSx}
+            >
+              {currencies.map((currency) => (
+                <MenuItem key={currency} value={currency}>
+                  {currencyLabels[currency]}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
 
-          transition: "background-color 160ms ease, box-shadow 160ms ease, transform 120ms ease",
+        <Box
+          sx={{
+            gridColumn: "1 / -1",
+            minWidth: 0,
+          }}
+        >
+          <SaleSummary
+            productName={selectedProduct ? productSummaryLabel(selectedProduct) : "-"}
+            unitPrice={convertedUnitPrice}
+            quantity={numericQuantity}
+            total={convertedTotal}
+            currency={paymentCurrency}
+          />
+        </Box>
 
-          "& .MuiButton-startIcon": {
-            mr: {
-              xs: 1,
-              sm: 0.8,
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          startIcon={<FaPlusCircle />}
+          disabled={!formik.values.productId}
+          sx={{
+            gridColumn: "1 / -1",
+            width: "100%",
+            minHeight: {
+              xs: 52,
+              sm: 48,
+            },
+            px: {
+              xs: 2,
+              sm: 3,
+            },
+            py: {
+              xs: 1.4,
+              sm: 1.2,
+            },
+            borderRadius: {
+              xs: "14px",
+              sm: "12px",
             },
 
-            "& svg": {
-              width: {
-                xs: 19,
-                sm: 17,
+            bgcolor: colors.primary,
+            color: "#ffffff",
+            fontSize: {
+              xs: 15,
+              sm: 14,
+              md: 15,
+            },
+            lineHeight: 1.2,
+            fontWeight: 900,
+            textTransform: "none",
+            whiteSpace: "nowrap",
+
+            boxShadow: {
+              xs: "0 8px 18px rgba(146, 64, 14, 0.2)",
+              sm: "0 10px 22px rgba(146, 64, 14, 0.22)",
+            },
+
+            transition: "background-color 160ms ease, box-shadow 160ms ease, transform 120ms ease",
+
+            "& .MuiButton-startIcon": {
+              mr: {
+                xs: 1,
+                sm: 0.8,
               },
-              height: {
-                xs: 19,
-                sm: 17,
+
+              "& svg": {
+                width: {
+                  xs: 19,
+                  sm: 17,
+                },
+                height: {
+                  xs: 19,
+                  sm: 17,
+                },
               },
             },
-          },
 
-          "&:hover": {
-            bgcolor: "#78350f",
-            boxShadow: "0 12px 24px rgba(146, 64, 14, 0.26)",
-          },
+            "&:hover": {
+              bgcolor: "#78350f",
+              boxShadow: "0 12px 24px rgba(146, 64, 14, 0.26)",
+            },
 
-          "&:active": {
-            transform: "scale(0.985)",
-            boxShadow: "0 5px 12px rgba(146, 64, 14, 0.2)",
-          },
+            "&:active": {
+              transform: "scale(0.985)",
+              boxShadow: "0 5px 12px rgba(146, 64, 14, 0.2)",
+            },
 
-          "&:focus-visible": {
-            outline: "3px solid rgba(245, 158, 11, 0.35)",
-            outlineOffset: 2,
-          },
+            "&:focus-visible": {
+              outline: "3px solid rgba(245, 158, 11, 0.35)",
+              outlineOffset: 2,
+            },
 
-          "&.Mui-disabled": {
-            bgcolor: "#e2e8f0",
-            color: "#94a3b8",
-            boxShadow: "none",
-          },
-        }}
-      >
-        Registrar venta
-      </Button>
+            "&.Mui-disabled": {
+              bgcolor: "#e2e8f0",
+              color: "#94a3b8",
+              boxShadow: "none",
+            },
+          }}
+        >
+          Registrar venta
+        </Button>
       </Box>
     </Box>
   );

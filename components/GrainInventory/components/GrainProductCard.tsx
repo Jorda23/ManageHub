@@ -19,9 +19,7 @@ export const GrainProductCard = memo(function GrainProductCard({
 }: Readonly<GrainProductCardProps>) {
   const stockReference = product.initialStock > 0 ? product.initialStock : product.stock;
   const stockPercent =
-    stockReference > 0
-      ? Math.max(0, Math.min(100, (product.stock / stockReference) * 100))
-      : 0;
+    stockReference > 0 ? Math.max(0, Math.min(100, (product.stock / stockReference) * 100)) : 0;
 
   const isLowStock = product.status === "lowStock" || product.stock <= product.minStock;
 

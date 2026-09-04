@@ -54,7 +54,11 @@ export const useCreateGrainProduct = () => {
 export const useUpdateGrainProduct = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<UpdateGrainProductResponse, Error, { id: string; request: UpdateGrainProductRequest }>({
+  return useMutation<
+    UpdateGrainProductResponse,
+    Error,
+    { id: string; request: UpdateGrainProductRequest }
+  >({
     mutationFn: ({ id, request }) => updateGrainProduct(id, request),
     onSuccess: async () => {
       await queryClient.invalidateQueries({

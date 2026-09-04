@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  FaBuilding,
-  FaPlusCircle,
-} from "react-icons/fa";
+import { FaBuilding, FaPlusCircle } from "react-icons/fa";
 
 import type { PropertyWorkspaceTab } from "../PropertyWorkspace";
 import { WorkspaceTabItem, WorkspaceTabs } from "@/components";
@@ -26,15 +23,6 @@ const tabs: WorkspaceTabItem<PropertyWorkspaceTab>[] = [
   },
 ];
 
-export function PropertyTabs({
-  value,
-  onChange,
-}: Readonly<PropertyTabsProps>) {
-  return (
-    <WorkspaceTabs
-      value={value}
-      onChange={onChange}
-      tabs={tabs}
-    />
-  );
+export function PropertyTabs({ value, onChange }: Readonly<PropertyTabsProps>) {
+  return <WorkspaceTabs value={value} onChange={onChange} tabs={tabs} />;
 }

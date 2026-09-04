@@ -152,9 +152,18 @@ export const PropertyCard = memo(function PropertyCard({
             },
           }}
         >
-          <AmountBox label="Precio" value={formatCurrency(property.price, property.currency ?? "NIO")} />
-          <AmountBox label="Abonado" value={formatCurrency(property.paid, property.currency ?? "NIO")} />
-          <AmountBox label="Pendiente" value={formatCurrency(pendingAmount, property.currency ?? "NIO")} />
+          <AmountBox
+            label="Precio"
+            value={formatCurrency(property.price, property.currency ?? "NIO")}
+          />
+          <AmountBox
+            label="Abonado"
+            value={formatCurrency(property.paid, property.currency ?? "NIO")}
+          />
+          <AmountBox
+            label="Pendiente"
+            value={formatCurrency(pendingAmount, property.currency ?? "NIO")}
+          />
         </Box>
 
         <PaymentProgress progress={progress} accent={property.accent} />

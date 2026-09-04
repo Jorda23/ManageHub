@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  FaPlusCircle,
-  FaSeedling,
-} from "react-icons/fa";
+import { FaPlusCircle, FaSeedling } from "react-icons/fa";
 
 import type { GrainsWorkspaceTab } from "../GrainsWorkspace";
 import { WorkspaceTabItem, WorkspaceTabs } from "@/components";
@@ -26,15 +23,6 @@ const tabs: WorkspaceTabItem<GrainsWorkspaceTab>[] = [
   },
 ];
 
-export function GrainsTabs({
-  value,
-  onChange,
-}: Readonly<GrainsTabsProps>) {
-  return (
-    <WorkspaceTabs
-      value={value}
-      onChange={onChange}
-      tabs={tabs}
-    />
-  );
+export function GrainsTabs({ value, onChange }: Readonly<GrainsTabsProps>) {
+  return <WorkspaceTabs value={value} onChange={onChange} tabs={tabs} />;
 }

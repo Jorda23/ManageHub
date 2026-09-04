@@ -60,3 +60,25 @@ export const currencySymbols: Record<Currency, string> = {
 export function getCurrencySymbol(currency: unknown): string {
   return currencySymbols[normalizeCurrency(currency)] ?? "C$";
 }
+
+export const EXCHANGE_RATE_NIO_PER_USD = 36.5;
+
+export function convertCurrency(
+  amount: number,
+  from: Currency,
+  to: Currency,
+  rate: number = EXCHANGE_RATE_NIO_PER_USD,
+): number {
+  const safeFrom = normalizeCurrency(from);
+  const safeTo = normalizeCurrency(to);
+
+  if (safeFrom === safeTo) {
+    return amount;
+  }
+
+  return safeFrom === "USD" ? amount * rate : amount / rate;
+}
+
+export function roundCurrency(value: number): number {
+  return Number.isFinite(value) ? Math.round(value * 100) / 100 : 0;
+}

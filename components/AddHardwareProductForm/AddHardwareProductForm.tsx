@@ -16,16 +16,9 @@ import type { SxProps, Theme } from "@mui/material/styles";
 
 import { useFormik } from "formik";
 
-import {
-  FaDollarSign,
-  FaInfoCircle,
-  FaTools,
-} from "react-icons/fa";
+import { FaDollarSign, FaInfoCircle, FaTools } from "react-icons/fa";
 
-import {
-  FaPlusCircle,
-  FaTimes,
-} from "react-icons/fa";
+import { FaPlusCircle, FaTimes } from "react-icons/fa";
 
 import { colors } from "@/theme/sharedColors";
 
@@ -37,7 +30,12 @@ import { ImageUrlField } from "../ImageUrlField";
 import { ModalField } from "../ModalField";
 import { FaBoxesStacked } from "react-icons/fa6";
 import { FormSection } from "../FormSection";
-import { currencies, currencyLabels, normalizeCurrency, getCurrencySymbol } from "@/shared/utils/currency";
+import {
+  currencies,
+  currencyLabels,
+  normalizeCurrency,
+  getCurrencySymbol,
+} from "@/shared/utils/currency";
 
 export type AddHardwareProductValues = {
   name: string;
@@ -54,9 +52,7 @@ export type AddHardwareProductValues = {
 type AddHardwareProductFormProps = {
   onCancel: () => void;
 
-  onSave: (
-    values: AddHardwareProductValues,
-  ) => void | Promise<void>;
+  onSave: (values: AddHardwareProductValues) => void | Promise<void>;
 
   isSubmitting?: boolean;
 };
@@ -89,76 +85,51 @@ export function AddHardwareProductForm({
   onSave,
   isSubmitting = false,
 }: Readonly<AddHardwareProductFormProps>) {
-  const [
-    isPriceFocused,
-    setIsPriceFocused,
-  ] = useState(false);
+  const [isPriceFocused, setIsPriceFocused] = useState(false);
   const { showError } = useToast();
 
-  const formik =
-    useFormik<AddHardwareProductValues>({
-      initialValues,
+  const formik = useFormik<AddHardwareProductValues>({
+    initialValues,
 
-      validationSchema:
-        addHardwareProductSchema,
+    validationSchema: addHardwareProductSchema,
 
-      validateOnBlur: true,
+    validateOnBlur: true,
 
-      validateOnChange: false,
+    validateOnChange: false,
 
-      onSubmit: async (
-        values,
-        helpers,
-      ) => {
-        const normalizedCurrency = normalizeCurrency(values.currency);
+    onSubmit: async (values, helpers) => {
+      const normalizedCurrency = normalizeCurrency(values.currency);
 
-        const normalizedValues: AddHardwareProductValues =
-          {
-            name: values.name.trim(),
+      const normalizedValues: AddHardwareProductValues = {
+        name: values.name.trim(),
 
-            detail:
-              values.detail.trim(),
+        detail: values.detail.trim(),
 
-            category:
-              values.category.trim(),
+        category: values.category.trim(),
 
-            initialStock: String(
-              values.initialStock ?? "",
-            ).trim(),
+        initialStock: String(values.initialStock ?? "").trim(),
 
-            minimumStock: String(
-              values.minimumStock ?? "",
-            ).trim(),
+        minimumStock: String(values.minimumStock ?? "").trim(),
 
-            unitPrice: String(
-              values.unitPrice ?? "",
-            ).trim(),
-            currency: normalizedCurrency,
+        unitPrice: String(values.unitPrice ?? "").trim(),
+        currency: normalizedCurrency,
 
-            inventoryStatus:
-              values.inventoryStatus,
+        inventoryStatus: values.inventoryStatus,
 
-            imageUrl:
-              values.imageUrl.trim(),
-          };
+        imageUrl: values.imageUrl.trim(),
+      };
 
-        await onSave(normalizedValues);
+      await onSave(normalizedValues);
 
-        helpers.resetForm();
+      helpers.resetForm();
 
-        setIsPriceFocused(false);
-      },
-    });
+      setIsPriceFocused(false);
+    },
+  });
 
-  const showPriceSymbol =
-    isPriceFocused ||
-    String(
-      formik.values.unitPrice ?? "",
-    ).trim() !== "";
+  const showPriceSymbol = isPriceFocused || String(formik.values.unitPrice ?? "").trim() !== "";
 
-  const getFieldError = (
-    field: keyof AddHardwareProductValues,
-  ): string | undefined => {
+  const getFieldError = (field: keyof AddHardwareProductValues): string | undefined => {
     if (!formik.touched[field]) {
       return undefined;
     }
@@ -191,10 +162,7 @@ export function AddHardwareProductForm({
   };
 
   const handleCancel = (): void => {
-    if (
-      isSubmitting ||
-      formik.isSubmitting
-    ) {
+    if (isSubmitting || formik.isSubmitting) {
       return;
     }
 
@@ -205,9 +173,7 @@ export function AddHardwareProductForm({
     onCancel();
   };
 
-  const disabled =
-    isSubmitting ||
-    formik.isSubmitting;
+  const disabled = isSubmitting || formik.isSubmitting;
 
   return (
     <Box
@@ -229,8 +195,7 @@ export function AddHardwareProductForm({
             sm: "center",
           },
 
-          justifyContent:
-            "space-between",
+          justifyContent: "space-between",
 
           flexDirection: {
             xs: "column",
@@ -270,18 +235,14 @@ export function AddHardwareProductForm({
               fontWeight: 500,
             }}
           >
-            Registra el producto, su
-            inventario inicial y precio
-            de venta.
+            Registra el producto, su inventario inicial y precio de venta.
           </Typography>
         </Box>
 
         <Button
           type="button"
           variant="outlined"
-          startIcon={
-            <FaTimes size={11} />
-          }
+          startIcon={<FaTimes size={11} />}
           disabled={disabled}
           onClick={handleCancel}
           sx={{
@@ -291,8 +252,7 @@ export function AddHardwareProductForm({
 
             px: 2,
 
-            borderColor:
-              colors.cardBorder,
+            borderColor: colors.cardBorder,
 
             color: colors.muted,
 
@@ -303,11 +263,9 @@ export function AddHardwareProductForm({
             fontWeight: 800,
 
             "&:hover": {
-              borderColor:
-                colors.primary,
+              borderColor: colors.primary,
 
-              bgcolor:
-                colors.primarySoft,
+              bgcolor: colors.primarySoft,
             },
           }}
         >
@@ -340,10 +298,7 @@ export function AddHardwareProductForm({
             ))}
           </TextField>
         </ModalField>
-        <ModalField
-          label="Nombre del producto"
-          htmlFor="hardware-product-name"
-        >
+        <ModalField label="Nombre del producto" htmlFor="hardware-product-name">
           <TextField
             id="hardware-product-name"
             name="name"
@@ -351,12 +306,8 @@ export function AddHardwareProductForm({
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             placeholder="Ej. Taladro inalámbrico"
-            error={Boolean(
-              getFieldError("name"),
-            )}
-            helperText={getFieldError(
-              "name",
-            )}
+            error={Boolean(getFieldError("name"))}
+            helperText={getFieldError("name")}
             disabled={disabled}
             fullWidth
             autoFocus
@@ -366,58 +317,34 @@ export function AddHardwareProductForm({
         </ModalField>
 
         <Box sx={twoColumnsStyles}>
-          <ModalField
-            label="Detalle o presentación"
-            htmlFor="hardware-product-detail"
-          >
+          <ModalField label="Detalle o presentación" htmlFor="hardware-product-detail">
             <TextField
               id="hardware-product-detail"
               name="detail"
-              value={
-                formik.values.detail
-              }
-              onChange={
-                formik.handleChange
-              }
+              value={formik.values.detail}
+              onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               placeholder="Ej. 18V Kit"
-              error={Boolean(
-                getFieldError("detail"),
-              )}
-              helperText={getFieldError(
-                "detail",
-              )}
+              error={Boolean(getFieldError("detail"))}
+              helperText={getFieldError("detail")}
               disabled={disabled}
               fullWidth
               sx={fieldStyles}
             />
           </ModalField>
 
-          <ModalField
-            label="Categoría"
-            htmlFor="hardware-product-category"
-          >
+          <ModalField label="Categoría" htmlFor="hardware-product-category">
             <TextField
               id="hardware-product-category"
               name="category"
-              value={
-                formik.values.category
-              }
-              onChange={
-                formik.handleChange
-              }
+              value={formik.values.category}
+              onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               select
               fullWidth
               disabled={disabled}
-              error={Boolean(
-                getFieldError(
-                  "category",
-                ),
-              )}
-              helperText={getFieldError(
-                "category",
-              )}
+              error={Boolean(getFieldError("category"))}
+              helperText={getFieldError("category")}
               slotProps={{
                 select: {
                   MenuProps: {
@@ -431,79 +358,46 @@ export function AddHardwareProductForm({
               }}
               sx={fieldStyles}
             >
-              {categoryOptions.map(
-                (category) => (
-                  <MenuItem
-                    key={category}
-                    value={category}
-                  >
-                    {category}
-                  </MenuItem>
-                ),
-              )}
+              {categoryOptions.map((category) => (
+                <MenuItem key={category} value={category}>
+                  {category}
+                </MenuItem>
+              ))}
             </TextField>
           </ModalField>
         </Box>
 
-        <ModalField
-          label="Imagen del producto"
-          htmlFor="hardware-product-image"
-        >
+        <ModalField label="Imagen del producto" htmlFor="hardware-product-image">
           <ImageUrlField
             label="Imagen del producto"
-            value={
-              formik.values.imageUrl
-            }
+            value={formik.values.imageUrl}
             disabled={disabled}
             onChange={(imageUrl) => {
-              void formik.setFieldValue(
-                "imageUrl",
-                imageUrl,
-              );
+              void formik.setFieldValue("imageUrl", imageUrl);
 
-              void formik.setFieldTouched(
-                "imageUrl",
-                true,
-                false,
-              );
+              void formik.setFieldTouched("imageUrl", true, false);
             }}
           />
         </ModalField>
       </FormSection>
 
       <FormSection
-        icon={
-          <FaBoxesStacked size={14} />
-        }
+        icon={<FaBoxesStacked size={14} />}
         title="Inventario"
         description="Configura las existencias y el nivel mínimo."
       >
         <Box sx={twoColumnsStyles}>
-          <ModalField
-            label="Stock inicial"
-            htmlFor="hardware-product-initial-stock"
-          >
+          <ModalField label="Stock inicial" htmlFor="hardware-product-initial-stock">
             <TextField
               id="hardware-product-initial-stock"
               name="initialStock"
               type="number"
-              value={
-                formik.values
-                  .initialStock
-              }
-              onChange={
-                formik.handleChange
-              }
+              value={formik.values.initialStock}
+              onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               placeholder="0"
-              error={Boolean(
-                getFieldError(
-                  "initialStock",
-                ),
-              )}
-              helperText={getFieldError(
-                "initialStock",
-              )}
+              error={Boolean(getFieldError("initialStock"))}
+              helperText={getFieldError("initialStock")}
               disabled={disabled}
               fullWidth
               slotProps={{
@@ -516,31 +410,17 @@ export function AddHardwareProductForm({
             />
           </ModalField>
 
-          <ModalField
-            label="Stock mínimo"
-            htmlFor="hardware-product-minimum-stock"
-          >
+          <ModalField label="Stock mínimo" htmlFor="hardware-product-minimum-stock">
             <TextField
               id="hardware-product-minimum-stock"
               name="minimumStock"
               type="number"
-              value={
-                formik.values
-                  .minimumStock
-              }
-              onChange={
-                formik.handleChange
-              }
+              value={formik.values.minimumStock}
+              onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               placeholder="0"
-              error={Boolean(
-                getFieldError(
-                  "minimumStock",
-                ),
-              )}
-              helperText={getFieldError(
-                "minimumStock",
-              )}
+              error={Boolean(getFieldError("minimumStock"))}
+              helperText={getFieldError("minimumStock")}
               disabled={disabled}
               fullWidth
               slotProps={{
@@ -556,9 +436,7 @@ export function AddHardwareProductForm({
       </FormSection>
 
       <FormSection
-        icon={
-          <FaDollarSign size={14} />
-        }
+        icon={<FaDollarSign size={14} />}
         title="Precio"
         description="Define el precio unitario de venta."
       >
@@ -570,39 +448,24 @@ export function AddHardwareProductForm({
             },
           }}
         >
-          <ModalField
-            label="Precio unitario"
-            htmlFor="hardware-product-unit-price"
-          >
+          <ModalField label="Precio unitario" htmlFor="hardware-product-unit-price">
             <TextField
               id="hardware-product-unit-price"
               name="unitPrice"
               type="number"
-              value={
-                formik.values.unitPrice
-              }
-              onChange={
-                formik.handleChange
-              }
+              value={formik.values.unitPrice}
+              onChange={formik.handleChange}
               onFocus={() => {
                 setIsPriceFocused(true);
               }}
               onBlur={(event) => {
                 setIsPriceFocused(false);
 
-                formik.handleBlur(
-                  event,
-                );
+                formik.handleBlur(event);
               }}
               placeholder="0.00"
-              error={Boolean(
-                getFieldError(
-                  "unitPrice",
-                ),
-              )}
-              helperText={getFieldError(
-                "unitPrice",
-              )}
+              error={Boolean(getFieldError("unitPrice"))}
+              helperText={getFieldError("unitPrice")}
               disabled={disabled}
               fullWidth
               slotProps={{
@@ -612,12 +475,11 @@ export function AddHardwareProductForm({
                 },
 
                 input: {
-                  startAdornment:
-                    showPriceSymbol ? (
-                      <InputAdornment position="start">
-                        {getCurrencySymbol(formik.values.currency)}
-                      </InputAdornment>
-                    ) : undefined,
+                  startAdornment: showPriceSymbol ? (
+                    <InputAdornment position="start">
+                      {getCurrencySymbol(formik.values.currency)}
+                    </InputAdornment>
+                  ) : undefined,
                 },
               }}
               sx={fieldStyles}
@@ -625,7 +487,7 @@ export function AddHardwareProductForm({
           </ModalField>
         </Box>
       </FormSection>
-      
+
       <Box
         sx={{
           display: "flex",
@@ -651,8 +513,7 @@ export function AddHardwareProductForm({
 
             borderRadius: "9px",
 
-            borderColor:
-              colors.cardBorder,
+            borderColor: colors.cardBorder,
 
             color: colors.muted,
 
@@ -671,9 +532,7 @@ export function AddHardwareProductForm({
           variant="contained"
           disableElevation
           disabled={disabled}
-          startIcon={
-            <FaPlusCircle size={12} />
-          }
+          startIcon={<FaPlusCircle size={12} />}
           sx={{
             minHeight: 42,
 
@@ -690,17 +549,13 @@ export function AddHardwareProductForm({
             fontWeight: 850,
 
             "&:hover": {
-              bgcolor:
-                colors.primary,
+              bgcolor: colors.primary,
 
-              filter:
-                "brightness(0.94)",
+              filter: "brightness(0.94)",
             },
           }}
         >
-          {disabled
-            ? "Registrando..."
-            : "Registrar producto"}
+          {disabled ? "Registrando..." : "Registrar producto"}
         </Button>
       </Box>
     </Box>
@@ -714,12 +569,7 @@ type StatusOptionProps = {
   selected: boolean;
 };
 
-function StatusOption({
-  value,
-  label,
-  description,
-  selected,
-}: Readonly<StatusOptionProps>) {
+function StatusOption({ value, label, description, selected }: Readonly<StatusOptionProps>) {
   return (
     <Box
       component="label"
@@ -735,35 +585,22 @@ function StatusOption({
 
         borderRadius: "9px",
 
-        border: `1px solid ${
-          selected
-            ? colors.primary
-            : colors.cardBorder
-        }`,
+        border: `1px solid ${selected ? colors.primary : colors.cardBorder}`,
 
-        bgcolor: selected
-          ? "#fff7ed"
-          : "#ffffff",
+        bgcolor: selected ? "#fff7ed" : "#ffffff",
 
         cursor: "pointer",
 
         transition: "all 0.18s ease",
 
         "&:hover": {
-          borderColor:
-            colors.primary,
+          borderColor: colors.primary,
 
           bgcolor: "#fff7ed",
         },
       }}
     >
-      <input
-        type="radio"
-        value={value}
-        name="inventoryStatus"
-        checked={selected}
-        readOnly
-      />
+      <input type="radio" value={value} name="inventoryStatus" checked={selected} readOnly />
 
       <Box>
         <Typography
@@ -820,8 +657,7 @@ const fieldStyles: SxProps<Theme> = {
     transition: "all 0.18s ease",
 
     "& fieldset": {
-      borderColor:
-        colors.cardBorder,
+      borderColor: colors.cardBorder,
     },
 
     "&:hover fieldset": {
@@ -831,20 +667,17 @@ const fieldStyles: SxProps<Theme> = {
     "&.Mui-focused": {
       bgcolor: "#ffffff",
 
-      boxShadow:
-        "0 0 0 3px rgba(146, 64, 14, 0.09)",
+      boxShadow: "0 0 0 3px rgba(146, 64, 14, 0.09)",
     },
 
     "&.Mui-focused fieldset": {
-      borderColor:
-        colors.primary,
+      borderColor: colors.primary,
 
       borderWidth: "1px",
     },
 
     "&.Mui-error fieldset": {
-      borderColor:
-        colors.danger,
+      borderColor: colors.danger,
     },
 
     "&.Mui-disabled": {
@@ -853,30 +686,25 @@ const fieldStyles: SxProps<Theme> = {
   },
 
   "& .MuiInputBase-input": {
-    color:
-      `${colors.text} !important`,
+    color: `${colors.text} !important`,
 
-    WebkitTextFillColor:
-      `${colors.text} !important`,
+    WebkitTextFillColor: `${colors.text} !important`,
 
     py: 1.35,
 
     "&::placeholder": {
       color: "#94a3b8",
 
-      WebkitTextFillColor:
-        "#94a3b8",
+      WebkitTextFillColor: "#94a3b8",
 
       opacity: 1,
     },
   },
 
   "& .MuiSelect-select": {
-    color:
-      `${colors.text} !important`,
+    color: `${colors.text} !important`,
 
-    WebkitTextFillColor:
-      `${colors.text} !important`,
+    WebkitTextFillColor: `${colors.text} !important`,
 
     py: 1.35,
   },
@@ -907,17 +735,15 @@ const fieldStyles: SxProps<Theme> = {
     MozAppearance: "textfield",
   },
 
-  "& input[type='number']::-webkit-outer-spin-button":
-    {
-      WebkitAppearance: "none",
-      margin: 0,
-    },
+  "& input[type='number']::-webkit-outer-spin-button": {
+    WebkitAppearance: "none",
+    margin: 0,
+  },
 
-  "& input[type='number']::-webkit-inner-spin-button":
-    {
-      WebkitAppearance: "none",
-      margin: 0,
-    },
+  "& input[type='number']::-webkit-inner-spin-button": {
+    WebkitAppearance: "none",
+    margin: 0,
+  },
 };
 
 const menuPaperStyles: SxProps<Theme> = {
@@ -931,8 +757,7 @@ const menuPaperStyles: SxProps<Theme> = {
 
   border: `1px solid ${colors.cardBorder}`,
 
-  boxShadow:
-    "0 14px 34px rgba(15, 23, 42, 0.16)",
+  boxShadow: "0 14px 34px rgba(15, 23, 42, 0.16)",
 
   "& .MuiMenuItem-root": {
     minHeight: 42,
@@ -948,8 +773,7 @@ const menuPaperStyles: SxProps<Theme> = {
     },
 
     "&.Mui-selected": {
-      bgcolor:
-        colors.primarySoft,
+      bgcolor: colors.primarySoft,
 
       color: colors.primary,
 

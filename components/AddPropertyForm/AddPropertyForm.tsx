@@ -24,7 +24,12 @@ import { addPropertySchema, type AddPropertyFormValues } from "@/validations";
 
 import { useToast } from "@/components/Toast";
 
-import { currencies, currencyLabels, normalizeCurrency, getCurrencySymbol } from "@/shared/utils/currency";
+import {
+  currencies,
+  currencyLabels,
+  normalizeCurrency,
+  getCurrencySymbol,
+} from "@/shared/utils/currency";
 
 import { ImageUrlField } from "@/components/ImageUrlField";
 import { ModalField } from "@/components/ModalField";
@@ -447,7 +452,9 @@ export function AddPropertyForm({ onCancel, onCreated }: Readonly<AddPropertyFor
                 },
                 input: {
                   startAdornment: showTotalPriceSymbol ? (
-                    <InputAdornment position="start">{getCurrencySymbol(formik.values.currency)}</InputAdornment>
+                    <InputAdornment position="start">
+                      {getCurrencySymbol(formik.values.currency)}
+                    </InputAdornment>
                   ) : undefined,
                 },
               }}
@@ -482,7 +489,9 @@ export function AddPropertyForm({ onCancel, onCreated }: Readonly<AddPropertyFor
                 },
                 input: {
                   startAdornment: showInitialPaymentSymbol ? (
-                    <InputAdornment position="start">{getCurrencySymbol(formik.values.currency)}</InputAdornment>
+                    <InputAdornment position="start">
+                      {getCurrencySymbol(formik.values.currency)}
+                    </InputAdornment>
                   ) : undefined,
                 },
               }}

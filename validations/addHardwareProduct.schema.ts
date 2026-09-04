@@ -1,17 +1,11 @@
 import * as Yup from "yup";
 
 export const addHardwareProductSchema = Yup.object({
-  name: Yup.string()
-    .trim()
-    .required("Ingresa el nombre del producto"),
+  name: Yup.string().trim().required("Ingresa el nombre del producto"),
 
-  detail: Yup.string()
-    .trim()
-    .required("Ingresa una descripción o presentación"),
+  detail: Yup.string().trim().required("Ingresa una descripción o presentación"),
 
-  category: Yup.string()
-    .trim()
-    .required("Selecciona una categoría"),
+  category: Yup.string().trim().required("Selecciona una categoría"),
 
   initialStock: Yup.number()
     .transform((value, originalValue) => {
@@ -34,10 +28,7 @@ export const addHardwareProductSchema = Yup.object({
       function validateMinimumStock(value) {
         const initialStock = Number(this.parent.initialStock);
 
-        if (
-          value === undefined ||
-          Number.isNaN(initialStock)
-        ) {
+        if (value === undefined || Number.isNaN(initialStock)) {
           return true;
         }
 
@@ -57,8 +48,7 @@ export const addHardwareProductSchema = Yup.object({
     .oneOf(["USD", "NIO"], "Seleccione una moneda válida: USD o NIO")
     .required("Seleccione una moneda válida: USD o NIO"),
 
-  inventoryStatus: Yup.string()
-    .required("Selecciona el estado del inventario"),
+  inventoryStatus: Yup.string().required("Selecciona el estado del inventario"),
 
   imageUrl: Yup.string().trim(),
 });

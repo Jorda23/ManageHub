@@ -1,1 +1,1 @@
-export * from "./WorkspaceTabs"
+export * from "./WorkspaceTabs";

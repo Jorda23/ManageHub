@@ -14,6 +14,10 @@ type PaymentInvoiceData = {
   note?: string | null;
   totalPrice: number;
   previousPaid: number;
+  propertyCurrency: Currency;
+  paymentAmountInPropertyCurrency: number;
+  paidAfterPayment: number;
+  pendingAfterPayment: number;
   paymentDate?: Date;
 };
 
@@ -42,11 +46,15 @@ const buildPaymentInvoiceHtml = ({
   note,
   totalPrice,
   previousPaid,
+  propertyCurrency,
+  paymentAmountInPropertyCurrency,
+  paidAfterPayment,
+  pendingAfterPayment,
   paymentDate = new Date(),
 }: PaymentInvoiceData): string => {
-  const totalPaid = previousPaid + amount;
+  const totalPaid = paidAfterPayment;
 
-  const pendingAmount = Math.max(totalPrice - totalPaid, 0);
+  const pendingAmount = Math.max(pendingAfterPayment, 0);
 
   return `
     <div class="invoice">
@@ -165,7 +173,7 @@ const buildPaymentInvoiceHtml = ({
                 <td>Valor total</td>
 
                 <td>
-                  ${formatCurrency(totalPrice, currency)}
+                  ${formatCurrency(totalPrice, propertyCurrency)}
                 </td>
               </tr>
 
@@ -173,7 +181,7 @@ const buildPaymentInvoiceHtml = ({
                 <td>Abonado anteriormente</td>
 
                 <td>
-                  ${formatCurrency(previousPaid, currency)}
+                  ${formatCurrency(previousPaid, propertyCurrency)}
                 </td>
               </tr>
 
@@ -181,7 +189,7 @@ const buildPaymentInvoiceHtml = ({
                 <td>Abono actual</td>
 
                 <td>
-                  ${formatCurrency(amount, currency)}
+                  ${formatCurrency(paymentAmountInPropertyCurrency, propertyCurrency)}
                 </td>
               </tr>
 
@@ -189,7 +197,7 @@ const buildPaymentInvoiceHtml = ({
                 <td>Total abonado</td>
 
                 <td class="paid">
-                  ${formatCurrency(totalPaid, currency)}
+                  ${formatCurrency(totalPaid, propertyCurrency)}
                 </td>
               </tr>
 
@@ -197,7 +205,7 @@ const buildPaymentInvoiceHtml = ({
                 <td>Saldo pendiente</td>
 
                 <td class="pending">
-                  ${formatCurrency(pendingAmount, currency)}
+                  ${formatCurrency(pendingAmount, propertyCurrency)}
                 </td>
               </tr>
             </tbody>

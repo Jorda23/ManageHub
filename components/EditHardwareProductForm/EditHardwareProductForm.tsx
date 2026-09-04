@@ -21,7 +21,12 @@ import { ImageUrlField } from "../ImageUrlField";
 import { ModalField } from "../ModalField";
 
 import type { HardwareProduct } from "@/shared/types/api.types";
-import { currencies, currencyLabels, normalizeCurrency, getCurrencySymbol } from "@/shared/utils/currency";
+import {
+  currencies,
+  currencyLabels,
+  normalizeCurrency,
+  getCurrencySymbol,
+} from "@/shared/utils/currency";
 
 export type EditHardwareProductValues = {
   name: string;
@@ -116,8 +121,7 @@ export function EditHardwareProductForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, product]);
 
-  const showPriceSymbol =
-    isPriceFocused || String(formik.values.unitPrice ?? "").trim() !== "";
+  const showPriceSymbol = isPriceFocused || String(formik.values.unitPrice ?? "").trim() !== "";
 
   const getFieldError = (field: keyof EditHardwareProductValues): string | undefined => {
     if (!formik.touched[field]) {
@@ -165,7 +169,9 @@ export function EditHardwareProductForm({
               fullWidth
             >
               {currencies.map((currency) => (
-                <MenuItem key={currency} value={currency}>{currencyLabels[currency]}</MenuItem>
+                <MenuItem key={currency} value={currency}>
+                  {currencyLabels[currency]}
+                </MenuItem>
               ))}
             </TextField>
           </ModalField>
@@ -327,7 +333,9 @@ export function EditHardwareProductForm({
                   },
                   input: {
                     startAdornment: showPriceSymbol ? (
-                      <InputAdornment position="start">{getCurrencySymbol(formik.values.currency)}</InputAdornment>
+                      <InputAdornment position="start">
+                        {getCurrencySymbol(formik.values.currency)}
+                      </InputAdornment>
                     ) : undefined,
                   },
                 }}
@@ -348,12 +356,7 @@ type StatusOptionProps = {
   selected: boolean;
 };
 
-function StatusOption({
-  value,
-  label,
-  description,
-  selected,
-}: Readonly<StatusOptionProps>) {
+function StatusOption({ value, label, description, selected }: Readonly<StatusOptionProps>) {
   return (
     <Box
       component="label"

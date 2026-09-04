@@ -104,29 +104,6 @@ export default function MainDashboard() {
           </Box>
 
           <Box>
-            <SectionHeading
-              title="Modulos del negocio"
-              subtitle="Accede directamente a ventas, inventarios y gestion de propiedades."
-            />
-
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  md: "repeat(2, minmax(0, 1fr))",
-                  xl: "repeat(3, minmax(0, 1fr))",
-                },
-                gap: 2,
-              }}
-            >
-              {modules.map((module) => (
-                <SectorModuleCard key={module.title} {...module} />
-              ))}
-            </Box>
-          </Box>
-
-          <Box>
             <ActivityCard activities={dashboardView.activities} />
           </Box>
         </Box>

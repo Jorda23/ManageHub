@@ -30,10 +30,7 @@ export function ImageUrlField({
 
   const hasImage = value.trim().length > 0;
 
-  const {
-    mutateAsync: uploadBase64Image,
-    isPending: isUploading,
-  } = useUploadBase64Image();
+  const { mutateAsync: uploadBase64Image, isPending: isUploading } = useUploadBase64Image();
 
   const readFileAsDataUrl = (file: File) => {
     if (!file.type.startsWith("image/")) {
@@ -172,9 +169,7 @@ export function ImageUrlField({
         component="button"
         type="button"
         disabled={disabled || isUploading}
-        aria-label={
-          hasImage ? "Reemplazar imagen" : "Subir imagen"
-        }
+        aria-label={hasImage ? "Reemplazar imagen" : "Subir imagen"}
         onClick={() => inputRef.current?.click()}
         onDragOver={(event: DragEvent<HTMLButtonElement>) => {
           event.preventDefault();
@@ -194,9 +189,7 @@ export function ImageUrlField({
           minHeight: 118,
           cursor: disabled || isUploading ? "not-allowed" : "pointer",
           borderRadius: "12px",
-          border: `2px dashed ${
-            isDragOver ? colors.primaryLight : "rgba(37, 99, 235, 0.35)"
-          }`,
+          border: `2px dashed ${isDragOver ? colors.primaryLight : "rgba(37, 99, 235, 0.35)"}`,
           bgcolor: isDragOver ? colors.primarySoft : "rgba(241, 245, 249, 0.6)",
           color: isDragOver ? colors.primaryLight : colors.muted,
           padding: "14px",
@@ -209,14 +202,8 @@ export function ImageUrlField({
           },
 
           "&:hover": {
-            bgcolor:
-              disabled || isUploading
-                ? "rgba(241, 245, 249, 0.6)"
-                : colors.primarySoft,
-            borderColor:
-              disabled || isUploading
-                ? "rgba(37, 99, 235, 0.35)"
-                : colors.primaryLight,
+            bgcolor: disabled || isUploading ? "rgba(241, 245, 249, 0.6)" : colors.primarySoft,
+            borderColor: disabled || isUploading ? "rgba(37, 99, 235, 0.35)" : colors.primaryLight,
           },
 
           "&.Mui-disabled": {
@@ -224,15 +211,8 @@ export function ImageUrlField({
           },
         }}
       >
-        <Box
-          component="span"
-          sx={{ display: "flex", fontSize: 26, lineHeight: 1 }}
-        >
-          {isUploading ? (
-            <CircularProgress size={26} thickness={4} />
-          ) : (
-            <FaCloudUploadAlt />
-          )}
+        <Box component="span" sx={{ display: "flex", fontSize: 26, lineHeight: 1 }}>
+          {isUploading ? <CircularProgress size={26} thickness={4} /> : <FaCloudUploadAlt />}
         </Box>
 
         <Typography

@@ -220,6 +220,6 @@ export function PropertyWorkspace() {
           />
         </Dialog>
       </Box>
-      </Box>
+    </Box>
   );
 }

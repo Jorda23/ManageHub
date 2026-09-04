@@ -137,7 +137,9 @@ export function HistoryFilters({ value, onChange }: Readonly<HistoryFiltersProps
           <Select
             size="small"
             value={value.type}
-            onChange={(event) => updateFilter("type", event.target.value as PaymentHistoryFilters["type"])}
+            onChange={(event) =>
+              updateFilter("type", event.target.value as PaymentHistoryFilters["type"])
+            }
             fullWidth
             sx={inputSx}
           >

@@ -27,17 +27,26 @@ export function WorkspaceTabs<T extends string>({
     <Box
       role="tablist"
       sx={{
-        display: "inline-flex",
+        display: "flex",
         alignItems: "center",
-        gap: 0.5,
-        p: 0.5,
-        maxWidth: "100%",
-        bgcolor: "#ffffff",
-        border: `1px solid ${colors.cardBorder}`,
-        borderRadius: "12px",
-        boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04)",
+
+        gap: {
+          xs: 0.75,
+          sm: 1,
+        },
+
+        width: "100%",
+
+        py: {
+          xs: 1,
+          sm: 1.5,
+        },
+
+        borderBottom: `1px solid ${colors.cardBorder}`,
+
         overflowX: "auto",
         scrollbarWidth: "none",
+
         "&::-webkit-scrollbar": {
           display: "none",
         },
@@ -56,46 +65,98 @@ export function WorkspaceTabs<T extends string>({
             disableElevation
             disableRipple
             sx={{
-              minHeight: 40,
-              minWidth: "auto",
-              px: {
-                xs: 1.5,
-                sm: 2,
+              flex: {
+                xs: "1 1 0",
+                sm: "0 0 auto",
               },
-              borderRadius: "9px",
-              whiteSpace: "nowrap",
+
+              minHeight: {
+                xs: 38,
+                sm: 42,
+              },
+
+              minWidth: {
+                xs: 0,
+                sm: "auto",
+              },
+
+              px: {
+                xs: 1,
+                sm: 1.75,
+              },
+
+              py: {
+                xs: 0.75,
+                sm: 1,
+              },
+
+              borderRadius: {
+                xs: "8px",
+                sm: "10px",
+              },
+
               textTransform: "none",
-              fontSize: 12.5,
-              fontWeight: isActive ? 800 : 700,
-              lineHeight: 1,
+
+              whiteSpace: "nowrap",
+
+              overflow: "hidden",
+
+              textOverflow: "ellipsis",
+
+              fontSize: {
+                xs: 11.5,
+                sm: 13,
+              },
+
+              fontWeight: 700,
+
+              lineHeight: 1.2,
+
               color: isActive ? "#ffffff" : colors.muted,
-              bgcolor: isActive ? colors.primary : "transparent",
+
+              bgcolor: isActive ? colors.primary : "#ffffff",
+
+              border: `1px solid ${isActive ? colors.primary : colors.cardBorder}`,
+
+              boxShadow: isActive
+                ? "0 4px 10px rgba(37, 99, 235, 0.18)"
+                : "0 1px 2px rgba(15, 23, 42, 0.04)",
+
               transition:
-                "background-color 160ms ease, color 160ms ease, box-shadow 160ms ease",
+                "background-color 150ms ease, color 150ms ease, border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease",
 
               "& .MuiButton-startIcon": {
-                mr: 0.8,
+                mr: {
+                  xs: 0.5,
+                  sm: 0.75,
+                },
+
                 color: "inherit",
+
+                "& > *": {
+                  fontSize: {
+                    xs: 12,
+                    sm: 14,
+                  },
+                },
               },
 
               "&:hover": {
-                bgcolor: isActive
-                  ? colors.primary
-                  : colors.primarySoft,
-                color: isActive
-                  ? "#ffffff"
-                  : colors.primary,
+                bgcolor: isActive ? colors.primary : colors.primarySoft,
+
+                color: isActive ? "#ffffff" : colors.primary,
+
+                borderColor: isActive ? colors.primary : "rgba(37, 99, 235, 0.28)",
+              },
+
+              "&:active": {
+                transform: "translateY(1px)",
               },
 
               "&:focus-visible": {
                 outline: `2px solid ${colors.primary}`,
                 outlineOffset: 2,
               },
-
-              ...(isActive && {
-                boxShadow:
-                  "0 2px 6px rgba(15, 23, 42, 0.12)",
-              }),
             }}
           >
             {tab.label}

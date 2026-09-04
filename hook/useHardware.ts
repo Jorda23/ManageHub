@@ -54,7 +54,11 @@ export const useCreateHardwareProduct = () => {
 export const useUpdateHardwareProduct = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<UpdateHardwareProductResponse, Error, { id: string; request: UpdateHardwareProductRequest }>({
+  return useMutation<
+    UpdateHardwareProductResponse,
+    Error,
+    { id: string; request: UpdateHardwareProductRequest }
+  >({
     mutationFn: ({ id, request }) => updateHardwareProduct(id, request),
     onSuccess: async () => {
       await queryClient.invalidateQueries({

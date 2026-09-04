@@ -246,7 +246,10 @@ export function EditPropertyForm({
           </ModalField>
 
           <Box sx={twoColumnsStyles}>
-            <ModalField label="Número de identificación" htmlFor="edit-property-identification-number">
+            <ModalField
+              label="Número de identificación"
+              htmlFor="edit-property-identification-number"
+            >
               <TextField
                 id="edit-property-identification-number"
                 name="identificationNumber"
@@ -261,7 +264,10 @@ export function EditPropertyForm({
               />
             </ModalField>
 
-            <ModalField label="Documento de identificación" htmlFor="edit-property-identification-image">
+            <ModalField
+              label="Documento de identificación"
+              htmlFor="edit-property-identification-image"
+            >
               <ImageUrlField
                 label="Foto del documento"
                 value={formik.values.identificationImageUrl ?? ""}
@@ -290,7 +296,9 @@ export function EditPropertyForm({
             <ModalField label="Próximo pago" htmlFor="edit-property-next-payment-date">
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
-                  value={formik.values.nextPaymentDate ? dayjs(formik.values.nextPaymentDate) : null}
+                  value={
+                    formik.values.nextPaymentDate ? dayjs(formik.values.nextPaymentDate) : null
+                  }
                   onChange={(date: Dayjs | null) => {
                     void formik.setFieldValue(
                       "nextPaymentDate",

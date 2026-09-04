@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  FaPlusCircle,
-  FaTools,
-} from "react-icons/fa";
+import { FaPlusCircle, FaTools } from "react-icons/fa";
 
 import type { HardwareWorkspaceTab } from "../HardwareWorkspace";
 import { WorkspaceTabItem, WorkspaceTabs } from "@/components";
@@ -26,15 +23,6 @@ const tabs: WorkspaceTabItem<HardwareWorkspaceTab>[] = [
   },
 ];
 
-export function HardwareTabs({
-  value,
-  onChange,
-}: Readonly<HardwareTabsProps>) {
-  return (
-    <WorkspaceTabs
-      value={value}
-      onChange={onChange}
-      tabs={tabs}
-    />
-  );
+export function HardwareTabs({ value, onChange }: Readonly<HardwareTabsProps>) {
+  return <WorkspaceTabs value={value} onChange={onChange} tabs={tabs} />;
 }

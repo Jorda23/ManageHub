@@ -40,7 +40,14 @@ import {
 
 import { colors } from "@/theme/sharedColors";
 import { useToast } from "@/components/Toast";
-import { currencies, currencyLabels, normalizeCurrency } from "@/shared/utils/currency";
+import {
+  convertCurrency,
+  currencies,
+  currencyLabels,
+  EXCHANGE_RATE_NIO_PER_USD,
+  normalizeCurrency,
+  roundCurrency,
+} from "@/shared/utils/currency";
 
 import { PropertySectionCard } from "./PropertySectionCard";
 import { PropertySectionHeader } from "./PropertySectionHeader";
@@ -87,16 +94,28 @@ export function PropertyPaymentSection({
 
       const amount = Number(values.amount);
 
+      const safeCurrency = normalizeCurrency(values.currency);
+
+      const propertyCurrency = normalizeCurrency(selectedProperty.currency);
+
       const pendingAmount = getPendingAmount(selectedProperty);
 
-      if (pendingAmount <= 0) {
+      const convertedPendingAmount = roundCurrency(
+        convertCurrency(pendingAmount, propertyCurrency, safeCurrency),
+      );
+
+      const paymentAmountInPropertyCurrency = Number.isFinite(amount)
+        ? roundCurrency(convertCurrency(amount, safeCurrency, propertyCurrency))
+        : 0;
+
+      if (convertedPendingAmount <= 0) {
         helpers.setStatus("Esta cuenta ya está pagada en su totalidad.");
         showError("Esta cuenta ya está pagada en su totalidad.");
 
         return;
       }
 
-      if (amount > pendingAmount) {
+      if (amount > convertedPendingAmount) {
         helpers.setFieldError("amount", "El abono no puede ser mayor al saldo pendiente");
         showError("El abono no puede ser mayor al saldo pendiente.");
 
@@ -106,7 +125,6 @@ export function PropertyPaymentSection({
       helpers.setStatus(undefined);
 
       try {
-        const safeCurrency = normalizeCurrency(values.currency);
         await formik.setFieldValue("currency", safeCurrency, false);
 
         const payment = await registerPropertyPayment({
@@ -125,6 +143,18 @@ export function PropertyPaymentSection({
         try {
           const invoiceNumber = payment?.id ? `REC-${payment.id}` : `REC-${Date.now()}`;
 
+          const paidAfterPayment = roundCurrency(
+            payment?.amountPaid ?? selectedProperty.paid + paymentAmountInPropertyCurrency,
+          );
+
+          const pendingAfterPayment = Math.max(
+            roundCurrency(
+              payment?.pendingBalance ??
+                getPendingAmount(selectedProperty) - paymentAmountInPropertyCurrency,
+            ),
+            0,
+          );
+
           await downloadPaymentInvoicePdf({
             fileName: `${invoiceNumber}.pdf`,
 
@@ -139,13 +169,21 @@ export function PropertyPaymentSection({
             amount: payment?.amount ?? amount,
 
             paymentMethod: payment?.paymentMethod ?? values.paymentMethod,
-            currency: payment?.currency ?? values.currency,
+            currency: payment?.currency ?? safeCurrency,
 
             note: payment?.note ?? (values.note.trim() || null),
 
             totalPrice: selectedProperty.price,
 
             previousPaid: selectedProperty.paid,
+
+            propertyCurrency,
+
+            paymentAmountInPropertyCurrency,
+
+            paidAfterPayment,
+
+            pendingAfterPayment,
 
             paymentDate: payment?.createdAt ? new Date(payment.createdAt) : new Date(),
           });
@@ -429,7 +467,9 @@ export function PropertyPaymentSection({
               sx={selectSx}
             >
               {currencies.map((currency) => (
-                <MenuItem key={currency} value={currency}>{currencyLabels[currency]}</MenuItem>
+                <MenuItem key={currency} value={currency}>
+                  {currencyLabels[currency]}
+                </MenuItem>
               ))}
             </Select>
           </FormControl>
@@ -466,7 +506,11 @@ export function PropertyPaymentSection({
             minWidth: 0,
           }}
         >
-          <AccountSummary property={selectedProperty} currency={formik.values.currency} />
+          <AccountSummary
+            property={selectedProperty}
+            currency={formik.values.currency}
+            amount={Number(formik.values.amount)}
+          />
         </Box>
 
         <Button
@@ -596,15 +640,36 @@ function FieldLabel({ children }: { children: ReactNode }) {
 function AccountSummary({
   property,
   currency,
+  amount,
 }: {
   property?: PropertyItem;
   currency: "USD" | "NIO";
+  amount: number;
 }) {
   if (!property) {
     return null;
   }
 
   const pendingAmount = getPendingAmount(property);
+
+  const propertyCurrency = normalizeCurrency(property.currency);
+
+  const paymentCurrency = normalizeCurrency(currency);
+
+  const needsConversion = propertyCurrency !== paymentCurrency;
+
+  const equivalentAmount = Number.isFinite(amount)
+    ? roundCurrency(convertCurrency(amount, paymentCurrency, propertyCurrency))
+    : 0;
+
+  const paidAfterPayment = roundCurrency(
+    convertCurrency(property.paid, propertyCurrency, propertyCurrency) + equivalentAmount,
+  );
+
+  const pendingAfterPayment = Math.max(
+    roundCurrency(getPendingAmount(property) - equivalentAmount),
+    0,
+  );
 
   const statusColors = getStatusColors(property.status);
 
@@ -642,11 +707,73 @@ function AccountSummary({
 
         <SummaryRow label="Cliente propietario" value={property.ownerName} />
 
-        <SummaryRow label="Valor total" value={formatCurrency(property.price, currency)} />
+        <SummaryRow label="Valor total" value={formatCurrency(property.price, propertyCurrency)} />
 
-        <SummaryRow label="Abonado" value={formatCurrency(property.paid, currency)} />
+        <SummaryRow label="Abonado" value={formatCurrency(property.paid, propertyCurrency)} />
 
-        <SummaryRow label="Saldo pendiente" value={formatCurrency(pendingAmount, currency)} highlighted />
+        <SummaryRow
+          label="Saldo pendiente"
+          value={formatCurrency(pendingAmount, propertyCurrency)}
+          highlighted
+        />
+
+        {needsConversion && (
+          <Box
+            sx={{
+              px: 1.25,
+              py: 1,
+              borderRadius: "12px",
+              bgcolor: colors.primarySoft,
+              border: `1px solid ${colors.primaryBorder}`,
+              color: colors.primaryLight,
+              fontSize: 12,
+              lineHeight: 1.45,
+              fontWeight: 700,
+            }}
+          >
+            El pago se aplicará en la moneda de la propiedad ({propertyCurrency}). La tasa fija es 1
+            USD = {EXCHANGE_RATE_NIO_PER_USD.toLocaleString("es-US")} C$.
+          </Box>
+        )}
+
+        {Number.isFinite(amount) && amount > 0 && (
+          <Box
+            sx={{
+              mt: 0.25,
+              px: 1.25,
+              py: 1,
+              borderRadius: "12px",
+              bgcolor: "#ffffff",
+              border: `1px solid ${colors.cardBorder}`,
+            }}
+          >
+            <SummaryRow
+              label="Abono a registrar"
+              value={formatCurrency(amount, paymentCurrency)}
+              highlighted
+            />
+
+            {needsConversion && (
+              <SummaryRow
+                label="Equivale a"
+                value={formatCurrency(equivalentAmount, propertyCurrency)}
+              />
+            )}
+
+            <Divider sx={{ my: 0.75 }} />
+
+            <SummaryRow
+              label="Abonado tras pago"
+              value={formatCurrency(paidAfterPayment, propertyCurrency)}
+            />
+
+            <SummaryRow
+              label="Saldo tras pago"
+              value={formatCurrency(pendingAfterPayment, propertyCurrency)}
+              highlighted
+            />
+          </Box>
+        )}
 
         <Divider sx={{ my: 0.5 }} />
 

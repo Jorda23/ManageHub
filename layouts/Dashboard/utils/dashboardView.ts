@@ -1,4 +1,13 @@
-import { FaBell, FaBuilding, FaCashRegister, FaChartLine, FaCheckCircle, FaTools, FaTractor, FaWallet } from "react-icons/fa";
+import {
+  FaBell,
+  FaBuilding,
+  FaCashRegister,
+  FaChartLine,
+  FaCheckCircle,
+  FaTools,
+  FaTractor,
+  FaWallet,
+} from "react-icons/fa";
 
 import type {
   DashboardAlert,
