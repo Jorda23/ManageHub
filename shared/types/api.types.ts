@@ -65,7 +65,6 @@ export type RegisterHardwareSaleRequest = {
   productId: string;
   quantity: number;
   paymentMethod: string;
-  currency: Currency;
 };
 
 export type RegisterHardwareSaleResponse = {
@@ -153,7 +152,6 @@ export type RegisterGrainSaleRequest = {
   productId: string;
   quantity: number;
   paymentMethod: string;
-  currency: Currency;
 };
 
 export type RegisterGrainSaleResponse = {

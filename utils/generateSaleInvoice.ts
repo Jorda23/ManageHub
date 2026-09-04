@@ -1,4 +1,5 @@
 import { formatCurrency } from "@/shared";
+import { BUSINESS_CONFIG } from "@/shared/config/business.config";
 import type { Currency } from "@/shared/types/api.types";
 
 import { downloadHtmlAsPdf } from "./downloadPdf";
@@ -53,17 +54,25 @@ const buildSaleInvoiceHtml = ({
     <div class="header">
       <div>
         <h1 class="brand">
-          Recibo de venta
+          ${escapeHtml(BUSINESS_CONFIG.name)}
         </h1>
 
         <div class="subtitle">
-          ${escapeHtml(moduleLabel[module])}
+          ${escapeHtml(BUSINESS_CONFIG.activity)}
+        </div>
+
+        <div class="owner-info">
+          Propietario: ${escapeHtml(BUSINESS_CONFIG.owner)}
+        </div>
+
+        <div class="contact-info">
+          Tigo: ${escapeHtml(BUSINESS_CONFIG.phones.tigo)} | Claro: ${escapeHtml(BUSINESS_CONFIG.phones.claro)}
         </div>
       </div>
 
       <div class="invoice-info">
         <div class="invoice-label">
-          Recibo
+          Recibo de venta
         </div>
 
         <div class="invoice-number">
@@ -229,6 +238,18 @@ const buildSaleInvoiceHtml = ({
     .subtitle {
       margin-top: 6px;
       font-size: 13px;
+      opacity: 0.8;
+    }
+
+    .owner-info {
+      margin-top: 8px;
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .contact-info {
+      margin-top: 4px;
+      font-size: 11px;
       opacity: 0.8;
     }
 

@@ -7,7 +7,6 @@ import { useRegisterHardwareSale } from "@/hook/useHardware";
 import { registerHardwareSaleSchema } from "@/validations";
 
 import { downloadSaleInvoicePdf } from "@/utils";
-import { normalizeCurrency } from "@/shared/utils/currency";
 
 import { RegisterSaleForm, type SaleFormProduct } from "../RegisterSaleForm";
 
@@ -40,13 +39,10 @@ export function RegisterHardwareSaleForm<TProduct extends SaleFormProduct>({
     },
     product: TProduct,
   ): Promise<void> => {
-    const safeCurrency = normalizeCurrency(formValues.currency);
-
     const sale = await registerHardwareSale({
       productId: product.id,
       quantity: Number(formValues.quantity),
       paymentMethod: formValues.paymentMethod,
-      currency: safeCurrency,
     });
 
     try {

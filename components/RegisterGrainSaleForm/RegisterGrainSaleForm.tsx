@@ -7,7 +7,6 @@ import { useRegisterGrainSale } from "@/hook/useGrains";
 import { registerGrainSaleSchema } from "@/validations";
 
 import { downloadSaleInvoicePdf } from "@/utils";
-import { normalizeCurrency } from "@/shared/utils/currency";
 
 import { RegisterSaleForm, type SaleFormProduct } from "../RegisterSaleForm";
 
@@ -37,13 +36,10 @@ export function RegisterGrainSaleForm<TProduct extends SaleFormProduct>({
     },
     product: TProduct,
   ): Promise<void> => {
-    const safeCurrency = normalizeCurrency(formValues.currency);
-
     const sale = await registerGrainSale({
       productId: product.id,
       quantity: Number(formValues.quantity),
       paymentMethod: formValues.paymentMethod,
-      currency: safeCurrency,
     });
 
     try {

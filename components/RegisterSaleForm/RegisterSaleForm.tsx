@@ -31,8 +31,6 @@ import { useToast } from "../Toast";
 import type { RegisterSaleFormValues } from "@/validations";
 import {
   convertCurrency,
-  currencies,
-  currencyLabels,
   normalizeCurrency,
   roundCurrency,
 } from "@/shared/utils/currency";
@@ -481,27 +479,6 @@ export function RegisterSaleForm<TProduct extends SaleFormProduct>({
               {paymentMethods.map((method) => (
                 <MenuItem key={method} value={method}>
                   {method}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Box>
-
-        <Box sx={{ minWidth: 0 }}>
-          <FieldLabel>Moneda</FieldLabel>
-
-          <FormControl fullWidth size="small">
-            <Select
-              name="currency"
-              value={formik.values.currency}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={Boolean(getFieldError("currency"))}
-              sx={selectSx}
-            >
-              {currencies.map((currency) => (
-                <MenuItem key={currency} value={currency}>
-                  {currencyLabels[currency]}
                 </MenuItem>
               ))}
             </Select>
