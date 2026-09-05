@@ -3,6 +3,7 @@
 import { FaLeaf } from "react-icons/fa";
 
 import { Box, Chip, Paper, Typography } from "@mui/material";
+
 import { grainsConfig } from "@/shared";
 
 export function HeroHeader() {
@@ -12,16 +13,29 @@ export function HeroHeader() {
       sx={{
         position: "relative",
         overflow: "hidden",
-        p: {
-          xs: 2.5,
-          md: 3,
+        px: {
+          xs: 1.75,
+          sm: 2.25,
+          md: 2.75,
         },
-        borderRadius: "16px",
+        py: {
+          xs: 1.5,
+          sm: 1.75,
+          md: 2,
+        },
+        borderRadius: {
+          xs: "14px",
+          md: "16px",
+        },
         border: "1px solid rgba(187, 247, 208, 0.28)",
-        boxShadow: "0 14px 32px rgba(6, 78, 59, 0.16)",
+        boxShadow: "0 10px 24px rgba(6, 78, 59, 0.13)",
         color: "#ffffff",
         background: "linear-gradient(135deg, #064e3b 0%, #14532d 58%, #1f6f4a 100%)",
-        minHeight: 116,
+        minHeight: {
+          xs: 104,
+          sm: 108,
+          md: 112,
+        },
         display: "flex",
         alignItems: "center",
       }}
@@ -31,28 +45,39 @@ export function HeroHeader() {
           position: "relative",
           zIndex: 2,
           minWidth: 0,
+          pr: {
+            xs: 5,
+            sm: 10,
+            md: 16,
+          },
         }}
       >
         <Chip
           label={grainsConfig.badge}
           size="small"
           sx={{
-            mb: 1.25,
-            bgcolor: "rgba(255,255,255,0.15)",
+            height: 22,
+            mb: 0.75,
+            bgcolor: "rgba(255,255,255,0.14)",
             color: "#d1fae5",
-            fontWeight: 900,
-            fontSize: 11,
+            fontWeight: 800,
+            fontSize: 10,
+            "& .MuiChip-label": {
+              px: 1,
+            },
           }}
         />
 
         <Typography
           sx={{
             fontSize: {
-              xs: 22,
-              sm: 26,
+              xs: 20,
+              sm: 23,
+              md: 28,
             },
-            fontWeight: 950,
-            lineHeight: 1.1,
+            fontWeight: 900,
+            lineHeight: 1.12,
+            letterSpacing: "-0.02em",
           }}
         >
           {grainsConfig.title}
@@ -61,13 +86,18 @@ export function HeroHeader() {
         <Typography
           sx={{
             mt: 0.5,
-            maxWidth: 760,
-            color: "#d1fae5",
+            maxWidth: 720,
+            color: "rgba(209, 250, 229, 0.92)",
             fontSize: {
-              xs: 12,
-              sm: 14,
+              xs: 11.5,
+              sm: 12.5,
+              md: 13,
             },
-            lineHeight: 1.5,
+            lineHeight: 1.4,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
           }}
         >
           {grainsConfig.subtitle}
@@ -78,16 +108,24 @@ export function HeroHeader() {
         sx={{
           position: "absolute",
           right: {
-            xs: -16,
-            md: 50,
+            xs: -18,
+            sm: 12,
+            md: 32,
           },
-          bottom: -30,
-          color: "rgba(255,255,255,0.11)",
+          bottom: {
+            xs: -18,
+            sm: -26,
+            md: -30,
+          },
+          color: "rgba(255,255,255,0.1)",
           fontSize: {
-            xs: 110,
-            md: 150,
+            xs: 78,
+            sm: 100,
+            md: 118,
           },
-          transform: "rotate(-8deg)",
+          lineHeight: 0,
+          transform: "rotate(-7deg)",
+          pointerEvents: "none",
         }}
       >
         <FaLeaf />

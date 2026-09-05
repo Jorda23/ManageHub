@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Divider, TextField } from "@mui/material";
+import { Box, Button, CircularProgress, Divider, InputAdornment, TextField } from "@mui/material";
 
 import { FaMapMarkedAlt, FaMoneyBillWave, FaPlus, FaSearch } from "react-icons/fa";
 
@@ -7,82 +7,74 @@ import { EmptyState } from "@/components/EmptyState";
 import { LoadingState } from "@/components/LoadingState";
 
 import { colors } from "@/theme/sharedColors";
-
 import { sellButtonBaseSx, sellSecondaryButtonSx } from "@/theme/sellButtonStyles";
 
 import { useInfiniteScroll } from "@/hook/useInfiniteScroll";
 
-import { type PropertyItem } from "../../../shared/data/property.data";
+import type { PropertyItem } from "../../../shared/data/property.data";
 
 import { PropertySectionCard } from "./PropertySectionCard";
 
 type PropertyTerrainsSectionProps = {
   properties: PropertyItem[];
-
   search?: string;
-
   onSearchChange?: (value: string) => void;
-
   isInitialLoading?: boolean;
-
   hasMore?: boolean;
-
   isLoadingMore?: boolean;
-
   onLoadMore?: () => void;
-
   onAddProperty: () => void;
-
   onRegisterPayment?: () => void;
-
   onEditProperty?: (property: PropertyItem) => void;
 };
 
-const scrollAreaSx = {
-  maxHeight: {
-    xs: 460,
-    sm: 500,
-    md: 540,
-    lg: 600,
+const actionButtonSx = {
+  minHeight: 38,
+
+  px: {
+    xs: 1.25,
+    sm: 1.75,
   },
 
-  overflowY: "auto",
+  borderRadius: "10px",
+
+  fontSize: {
+    xs: 11,
+    sm: 12,
+  },
+
+  fontWeight: 800,
+  textTransform: "none",
+  whiteSpace: "nowrap",
+};
+
+const scrollAreaSx = {
+  overflowY: {
+    xs: "auto",
+    md: "visible",
+  },
+
   overflowX: "hidden",
 
-  scrollbarGutter: "stable",
-
   pr: {
-    xs: 0.75,
-    sm: 1,
-    md: 1.25,
-    lg: 1.5,
+    xs: 0.5,
+    md: 0,
   },
 
   "&::-webkit-scrollbar": {
-    width: {
-      xs: 5,
-      sm: 7,
-      md: 8,
-    },
+    width: 6,
   },
 
   "&::-webkit-scrollbar-track": {
-    bgcolor: colors.tableHead,
-    borderRadius: 999,
+    bgcolor: "transparent",
   },
 
   "&::-webkit-scrollbar-thumb": {
-    bgcolor: colors.softMuted,
+    bgcolor: "#cbd5e1",
     borderRadius: 999,
-    border: `2px solid ${colors.tableHead}`,
-  },
-
-  "&::-webkit-scrollbar-thumb:hover": {
-    bgcolor: colors.muted,
   },
 
   scrollbarWidth: "thin",
-  scrollbarColor: `${colors.softMuted} ${colors.tableHead}`,
 };
 
 export function PropertyTerrainsSection({
@@ -96,173 +88,225 @@ export function PropertyTerrainsSection({
   onAddProperty,
   onRegisterPayment,
   onEditProperty,
-}: PropertyTerrainsSectionProps) {
+}: Readonly<PropertyTerrainsSectionProps>) {
   const { rootRef, sentinelRef } = useInfiniteScroll<HTMLDivElement>({
     hasMore,
     isLoadingMore,
+
     onLoadMore: () => {
       onLoadMore?.();
     },
   });
+
+  const hasProperties = properties.length > 0;
+
+  const renderPropertiesContent = () => {
+    if (isInitialLoading && !hasProperties) {
+      return <LoadingState message="Cargando terrenos..." />;
+    }
+
+    if (!hasProperties && search) {
+      return (
+        <EmptyState
+          title="Sin resultados"
+          description={`No se encontraron terrenos que coincidan con "${search}".`}
+          icon={<FaMapMarkedAlt size={36} />}
+        />
+      );
+    }
+
+    if (!hasProperties) {
+      return (
+        <EmptyState
+          title="No hay terrenos registrados"
+          description="Agrega un terreno para comenzar a gestionar tus propiedades."
+          icon={<FaMapMarkedAlt size={36} />}
+        />
+      );
+    }
+
+    return (
+      <Box ref={rootRef} sx={scrollAreaSx}>
+        <Box
+          sx={{
+            display: "grid",
+
+            gridTemplateColumns: {
+              xs: "minmax(0, 1fr)",
+              md: "repeat(3, minmax(0, 1fr))",
+              xl: "repeat(4, minmax(0, 1fr))",
+            },
+
+            gap: {
+              xs: 1.25,
+              sm: 1.5,
+              md: 1.75,
+            },
+
+            width: "100%",
+            minWidth: 0,
+          }}
+        >
+          {properties.map((property) => (
+            <PropertyCard key={property.id} property={property} onEdit={onEditProperty} />
+          ))}
+        </Box>
+
+        {isLoadingMore && (
+          <Box
+            sx={{
+              py: 2,
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <CircularProgress
+              size={20}
+              thickness={4}
+              sx={{
+                color: colors.primary,
+              }}
+            />
+          </Box>
+        )}
+
+        {hasMore && (
+          <Box
+            ref={sentinelRef}
+            aria-hidden="true"
+            sx={{
+              height: 1,
+            }}
+          />
+        )}
+      </Box>
+    );
+  };
 
   return (
     <PropertySectionCard>
       <Box
         sx={{
           px: {
-            xs: 1,
+            xs: 1.5,
             sm: 2,
-            md: 3,
+            md: 2.5,
           },
 
           py: {
-            xs: 1,
-            sm: 1.75,
-            md: 2.5,
+            xs: 1.25,
+            sm: 1.5,
           },
 
           display: "flex",
 
           flexDirection: {
             xs: "column",
-            sm: "row",
+            md: "row",
           },
 
           justifyContent: "space-between",
 
           alignItems: {
             xs: "stretch",
-            sm: "center",
+            md: "center",
           },
 
-          gap: {
-            xs: 1,
-            sm: 2,
-          },
+          gap: 1.25,
 
           bgcolor: colors.cardBg,
         }}
       >
-        <Box
-          sx={{
-            flex: 1,
-            minWidth: 0,
-
-            width: {
-              xs: "100%",
-              sm: "auto",
-            },
-
-            maxWidth: {
-              sm: 420,
-            },
+        <TextField
+          size="small"
+          placeholder="Buscar por terreno o cliente..."
+          value={search}
+          onChange={(event) => {
+            onSearchChange?.(event.target.value);
           }}
-        >
-          <TextField
-            size="small"
-            placeholder="Buscar terreno por nombre o cliente..."
-            value={search}
-            onChange={(event) => onSearchChange?.(event.target.value)}
-            fullWidth
-            slotProps={{
-              input: {
-                startAdornment: (
+          fullWidth
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
                   <Box
-                    component="span"
                     sx={{
-                      mr: {
-                        xs: 0.75,
-                        sm: 1,
-                      },
-
                       display: "grid",
                       placeItems: "center",
-
                       color: colors.softMuted,
-
-                      fontSize: {
-                        xs: 12,
-                        sm: 13,
-                      },
+                      fontSize: 12,
                     }}
                   >
-                    <FaSearch size={12} />
+                    <FaSearch />
                   </Box>
-                ),
-              },
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                minHeight: {
-                  xs: 36,
-                  sm: 40,
-                },
+                </InputAdornment>
+              ),
+            },
+          }}
+          sx={{
+            width: "100%",
 
-                borderRadius: {
-                  xs: "8px",
-                  sm: "10px",
-                },
+            maxWidth: {
+              md: 420,
+            },
 
-                bgcolor: "#fbfdfc",
+            "& .MuiOutlinedInput-root": {
+              minHeight: 40,
+              borderRadius: "10px",
 
-                fontSize: {
-                  xs: 12,
-                  sm: 13,
-                },
+              bgcolor: "#ffffff",
 
-                fontWeight: 600,
-                color: colors.text,
+              fontSize: 12,
+              fontWeight: 600,
+              color: colors.text,
 
-                "& fieldset": {
-                  borderColor: colors.cardBorder,
-                },
-
-                "&:hover fieldset": {
-                  borderColor: "#94a3b8",
-                },
-
-                "&.Mui-focused fieldset": {
-                  borderColor: colors.primaryLight,
-                  borderWidth: 1.5,
-                },
+              "& fieldset": {
+                borderColor: colors.cardBorder,
               },
 
-              "& .MuiInputBase-input": {
-                px: {
-                  xs: 0.75,
-                  sm: 1.25,
-                },
-
-                py: {
-                  xs: 0.75,
-                  sm: 1,
-                },
+              "&:hover fieldset": {
+                borderColor: "#94a3b8",
               },
 
-              "& .MuiInputBase-input::placeholder": {
-                color: colors.softMuted,
-                opacity: 1,
+              "&.Mui-focused": {
+                bgcolor: "#ffffff",
               },
-            }}
-          />
-        </Box>
+
+              "&.Mui-focused fieldset": {
+                borderColor: colors.primaryLight,
+                borderWidth: 1.5,
+              },
+            },
+
+            "& .MuiInputBase-input::placeholder": {
+              color: colors.softMuted,
+              opacity: 1,
+            },
+          }}
+        />
 
         <Box
           sx={{
             display: "flex",
-
-            flexDirection: "row",
-
-            alignItems: "center",
-
+            flexDirection: {
+              xs: "column",
+              sm: "row",
+            },
+            alignItems: {
+              xs: "stretch",
+              sm: "center",
+            },
+            justifyContent: {
+              xs: "stretch",
+              md: "flex-end",
+            },
             gap: {
               xs: 0.75,
               sm: 1,
             },
-
             width: {
               xs: "100%",
-              sm: "auto",
+              md: "auto",
             },
           }}
         >
@@ -275,73 +319,33 @@ export function PropertyTerrainsSection({
               onClick={onRegisterPayment}
               sx={{
                 ...sellSecondaryButtonSx,
+                ...actionButtonSx,
 
                 flex: {
                   xs: 1,
                   sm: "initial",
                 },
 
-                minWidth: 0,
-
-                minHeight: {
-                  xs: 34,
-                  sm: 36,
-                },
-
-                width: {
-                  xs: 0,
-                  sm: "auto",
-                },
-
-                px: {
-                  xs: 0.75,
-                  sm: 1.5,
-                },
-
-                borderRadius: {
-                  xs: "8px",
-                  sm: "9px",
-                },
-
                 color: "#047857",
-
-                bgcolor: "#ecfdf5",
-
-                border: "1px solid #a7f3d0",
-
-                textTransform: "none",
-
-                fontSize: {
-                  xs: 11,
-                  sm: 12,
-                },
-
-                fontWeight: 800,
-
-                whiteSpace: "nowrap",
+                bgcolor: "#f0fdf4",
+                borderColor: "#bbf7d0",
 
                 boxShadow: "none",
 
                 "& .MuiButton-startIcon": {
-                  mr: {
-                    xs: 0.5,
-                    sm: 0.75,
-                  },
-
+                  mr: 0.7,
                   color: "#059669",
                 },
 
                 "&:hover": {
-                  bgcolor: "#d1fae5",
+                  bgcolor: "#dcfce7",
+                  borderColor: "#86efac",
                   color: "#065f46",
-
-                  borderColor: "#6ee7b7",
-
                   boxShadow: "none",
                 },
 
                 "&:active": {
-                  bgcolor: "#a7f3d0",
+                  bgcolor: "#bbf7d0",
                 },
 
                 "&:focus-visible": {
@@ -362,61 +366,25 @@ export function PropertyTerrainsSection({
             onClick={onAddProperty}
             sx={{
               ...sellButtonBaseSx,
+              ...actionButtonSx,
 
               flex: {
                 xs: 1,
                 sm: "initial",
               },
 
-              minWidth: 0,
-
-              minHeight: {
-                xs: 34,
-                sm: 36,
-              },
-
-              width: {
-                xs: 0,
-                sm: "auto",
-              },
-
-              px: {
-                xs: 0.75,
-                sm: 1.6,
-              },
-
-              borderRadius: {
-                xs: "8px",
-                sm: "9px",
-              },
-
               bgcolor: colors.primary,
-              color: colors.cardBg,
+              color: "#ffffff",
 
-              textTransform: "none",
-
-              fontSize: {
-                xs: 11,
-                sm: 12,
-              },
-
-              fontWeight: 800,
-
-              whiteSpace: "nowrap",
-
-              boxShadow: "0 3px 8px rgba(37, 99, 235, 0.18)",
+              boxShadow: "0 4px 10px rgba(37, 99, 235, 0.16)",
 
               "& .MuiButton-startIcon": {
-                mr: {
-                  xs: 0.5,
-                  sm: 0.75,
-                },
+                mr: 0.7,
               },
 
               "&:hover": {
                 bgcolor: colors.primary,
-
-                boxShadow: "0 4px 10px rgba(37, 99, 235, 0.22)",
+                boxShadow: "0 6px 14px rgba(37, 99, 235, 0.20)",
               },
 
               "&:active": {
@@ -434,84 +402,22 @@ export function PropertyTerrainsSection({
         </Box>
       </Box>
 
-      <Divider />
+      <Divider
+        sx={{
+          borderColor: colors.cardBorder,
+        }}
+      />
 
       <Box
         sx={{
           p: {
-            xs: 1.5,
-            sm: 2,
-            md: 2.5,
+            xs: 1.25,
+            sm: 1.75,
+            md: 2,
           },
         }}
       >
-        {isInitialLoading && properties.length === 0 ? (
-          <LoadingState message="Cargando terrenos..." />
-        ) : properties.length === 0 ? (
-          search ? (
-            <EmptyState
-              title="Sin resultados"
-              description={`No se encontraron terrenos que coincidan con "${search}".`}
-              icon={<FaMapMarkedAlt size={40} />}
-            />
-          ) : (
-            <EmptyState
-              title="No hay terrenos registrados"
-              description="Agrega un terreno para comenzar a gestionar tus propiedades."
-              icon={<FaMapMarkedAlt size={40} />}
-            />
-          )
-        ) : (
-          <Box ref={rootRef} sx={scrollAreaSx}>
-            <Box
-              sx={{
-                display: "grid",
-
-                gridTemplateColumns: {
-                  xs: "minmax(0, 1fr)",
-                  md: "repeat(2, minmax(0, 1fr))",
-                  lg: "repeat(3, minmax(0, 1fr))",
-                },
-
-                gap: {
-                  xs: 1.25,
-                  sm: 1.5,
-                  md: 2,
-                },
-
-                width: "100%",
-                minWidth: 0,
-              }}
-            >
-              {properties.map((property) => (
-                <PropertyCard key={property.id} property={property} onEdit={onEditProperty} />
-              ))}
-            </Box>
-
-            {isLoadingMore ? (
-              <Box
-                sx={{
-                  pt: 2,
-                  display: "flex",
-                  justifyContent: "center",
-                  color: colors.softMuted,
-                }}
-              >
-                <CircularProgress size={22} thickness={5} />
-              </Box>
-            ) : null}
-
-            {hasMore ? (
-              <Box
-                ref={sentinelRef}
-                aria-hidden="true"
-                sx={{
-                  height: 1,
-                }}
-              />
-            ) : null}
-          </Box>
-        )}
+        {renderPropertiesContent()}
       </Box>
     </PropertySectionCard>
   );
