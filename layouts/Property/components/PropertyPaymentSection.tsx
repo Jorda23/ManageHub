@@ -26,6 +26,7 @@ import {
   getPendingAmount,
   getStatusColors,
   paymentMethods,
+  selectMenuSx,
   type PropertyItem,
 } from "@/shared";
 
@@ -314,6 +315,7 @@ export function PropertyPaymentSection({
               name="propertyId"
               value={formik.values.propertyId}
               displayEmpty
+              MenuProps={{ slotProps: { paper: { sx: selectMenuSx } } }}
               disabled={isRegisteringPayment}
               onChange={(event) => {
                 void formik.setFieldValue("propertyId", String(event.target.value));
@@ -411,6 +413,7 @@ export function PropertyPaymentSection({
               name="paymentMethod"
               value={formik.values.paymentMethod}
               displayEmpty
+              MenuProps={{ slotProps: { paper: { sx: selectMenuSx } } }}
               disabled={isRegisteringPayment}
               onChange={(event) => {
                 void formik.setFieldValue("paymentMethod", String(event.target.value));
@@ -461,6 +464,7 @@ export function PropertyPaymentSection({
               id="currency"
               name="currency"
               value={formik.values.currency}
+              MenuProps={{ slotProps: { paper: { sx: selectMenuSx } } }}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               error={Boolean(formik.touched.currency && formik.errors.currency)}
@@ -1003,5 +1007,9 @@ const selectSx: SxProps<Theme> = {
     textOverflow: "ellipsis",
 
     whiteSpace: "nowrap",
+  },
+
+  "& .MuiSvgIcon-root": {
+    color: colors.muted,
   },
 };

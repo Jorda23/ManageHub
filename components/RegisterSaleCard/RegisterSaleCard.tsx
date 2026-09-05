@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { colors } from "@/theme/sharedColors";
-import { formatCurrency } from "@/shared";
+import { formatCurrency, selectMenuSx } from "@/shared";
 
 export type SaleProduct = {
   id: string;
@@ -112,6 +112,10 @@ const selectSx: SxProps<Theme> = {
       sm: 1.75,
     },
     py: 1.25,
+  },
+
+  "& .MuiSvgIcon-root": {
+    color: colors.muted,
   },
 };
 
@@ -264,6 +268,7 @@ export function RegisterSaleCard<TProduct extends SaleProduct>({
             <Select
               value={selectedProductId}
               displayEmpty
+              MenuProps={{ slotProps: { paper: { sx: selectMenuSx } } }}
               onChange={(event) => onSelectedProductChange(event.target.value)}
               sx={selectSx}
             >
@@ -308,6 +313,7 @@ export function RegisterSaleCard<TProduct extends SaleProduct>({
           <FormControl fullWidth size="small">
             <Select
               value={paymentMethod}
+              MenuProps={{ slotProps: { paper: { sx: selectMenuSx } } }}
               onChange={(event) => onPaymentMethodChange(event.target.value)}
               sx={selectSx}
             >

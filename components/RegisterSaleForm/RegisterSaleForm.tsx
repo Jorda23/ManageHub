@@ -23,7 +23,7 @@ import { FaCashRegister, FaPlusCircle } from "react-icons/fa";
 
 import { colors } from "@/theme/sharedColors";
 
-import { formatCurrency } from "@/shared";
+import { formatCurrency, selectMenuSx } from "@/shared";
 
 import { paymentMethods } from "@/shared/data/grains.data";
 import { useToast } from "../Toast";
@@ -133,6 +133,10 @@ const selectSx: SxProps<Theme> = {
       sm: 1.75,
     },
     py: 1.25,
+  },
+
+  "& .MuiSvgIcon-root": {
+    color: colors.muted,
   },
 };
 
@@ -407,6 +411,7 @@ export function RegisterSaleForm<TProduct extends SaleFormProduct>({
               name="productId"
               value={formik.values.productId}
               displayEmpty
+              MenuProps={{ slotProps: { paper: { sx: selectMenuSx } } }}
               onChange={(event) => {
                 const productId = String(event.target.value);
                 const product = products.find((item) => item.id === productId);
@@ -467,6 +472,7 @@ export function RegisterSaleForm<TProduct extends SaleFormProduct>({
             <Select
               name="paymentMethod"
               value={formik.values.paymentMethod}
+              MenuProps={{ slotProps: { paper: { sx: selectMenuSx } } }}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               error={Boolean(getFieldError("paymentMethod"))}

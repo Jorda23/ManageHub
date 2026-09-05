@@ -20,7 +20,7 @@ export const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: "Arial, Helvetica, sans-serif",
+    fontFamily: "var(--font-inter), Arial, Helvetica, sans-serif",
     h5: {
       fontWeight: 800,
     },

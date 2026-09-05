@@ -21,6 +21,7 @@ import { colors } from "@/theme/sharedColors";
 
 import type { PaymentHistoryFilters } from "@/shared";
 import { currencies, currencyLabels } from "@/shared/utils/currency";
+import { selectMenuSx } from "@/shared/utils/selectStyles";
 
 type HistoryFiltersProps = {
   value: PaymentHistoryFilters;
@@ -74,6 +75,10 @@ const inputSx: SxProps<Theme> = {
     color: colors.softMuted,
     opacity: 1,
   },
+
+  "& .MuiSvgIcon-root": {
+    color: colors.muted,
+  },
 };
 
 export function HistoryFilters({ value, onChange }: Readonly<HistoryFiltersProps>) {
@@ -88,7 +93,12 @@ export function HistoryFilters({ value, onChange }: Readonly<HistoryFiltersProps
   };
 
   const handleDateChange = (field: "from" | "to", date: Dayjs | null) => {
-    updateFilter(field, date?.isValid() ? date.format("YYYY-MM-DD") : "");
+    updateFilter(
+      field,
+      date?.isValid()
+        ? (field === "from" ? date.startOf("day") : date.endOf("day")).toISOString()
+        : "",
+    );
   };
 
   return (
@@ -137,6 +147,7 @@ export function HistoryFilters({ value, onChange }: Readonly<HistoryFiltersProps
           <Select
             size="small"
             value={value.type}
+            MenuProps={{ slotProps: { paper: { sx: selectMenuSx } } }}
             onChange={(event) =>
               updateFilter("type", event.target.value as PaymentHistoryFilters["type"])
             }
@@ -155,6 +166,7 @@ export function HistoryFilters({ value, onChange }: Readonly<HistoryFiltersProps
             size="small"
             value={value.currency ?? ""}
             displayEmpty
+            MenuProps={{ slotProps: { paper: { sx: selectMenuSx } } }}
             onChange={(event) =>
               updateFilter(
                 "currency",

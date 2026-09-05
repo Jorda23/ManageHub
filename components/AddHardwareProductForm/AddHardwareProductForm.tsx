@@ -290,6 +290,18 @@ export function AddHardwareProductForm({
             helperText={getFieldError("currency")}
             disabled={disabled}
             fullWidth
+            slotProps={{
+              select: {
+                MenuProps: {
+                  slotProps: {
+                    paper: {
+                      sx: menuPaperStyles,
+                    },
+                  },
+                },
+              },
+            }}
+            sx={fieldStyles}
           >
             {currencies.map((currency) => (
               <MenuItem key={currency} value={currency}>
