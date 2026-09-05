@@ -2,23 +2,11 @@
 
 import Link from "next/link";
 
-import {
-  alpha,
-  Box,
-  Card,
-  Divider,
-  Typography,
-} from "@mui/material";
+import { alpha, Box, Card, Divider, Typography } from "@mui/material";
 
-import {
-  FaArrowRight,
-  FaExclamationTriangle,
-} from "react-icons/fa";
+import { FaArrowRight, FaExclamationTriangle } from "react-icons/fa";
 
-import type {
-  AlertsCardProps,
-  AlertItem,
-} from "@/shared/types/dashboard.types";
+import type { AlertsCardProps, AlertItem } from "@/shared/types/dashboard.types";
 
 import { colors } from "@/theme/sharedColors";
 
@@ -26,9 +14,7 @@ import { cardStyles } from "./dashboard.styles";
 
 import { PanelHeader } from "./PanelHeader";
 
-export function AlertsCard({
-  alerts,
-}: AlertsCardProps) {
+export function AlertsCard({ alerts }: AlertsCardProps) {
   return (
     <Card
       elevation={0}
@@ -96,10 +82,7 @@ export function AlertsCard({
                       transition: "0.18s ease",
 
                       "&:hover": {
-                        bgcolor: alpha(
-                          accent,
-                          0.05,
-                        ),
+                        bgcolor: alpha(accent, 0.05),
                         px: 1,
                       },
                     }}
@@ -111,10 +94,7 @@ export function AlertsCard({
                         mt: 0.65,
                         borderRadius: "50%",
                         bgcolor: accent,
-                        boxShadow: `0 0 0 5px ${alpha(
-                          accent,
-                          0.1,
-                        )}`,
+                        boxShadow: `0 0 0 5px ${alpha(accent, 0.1)}`,
                         flexShrink: 0,
                       }}
                     />
@@ -147,19 +127,14 @@ export function AlertsCard({
                       </Typography>
                     </Box>
 
-                    <FaArrowRight
-                      size={11}
-                      color={colors.muted}
-                    />
+                    <FaArrowRight size={11} color={colors.muted} />
                   </Box>
                 </Link>
 
-                {index <
-                  alerts.length - 1 && (
+                {index < alerts.length - 1 && (
                   <Divider
                     sx={{
-                      borderColor:
-                        colors.cardBorder,
+                      borderColor: colors.cardBorder,
                     }}
                   />
                 )}
@@ -183,9 +158,7 @@ export function AlertsCard({
   );
 }
 
-function alertToneColor(
-  alert: AlertItem,
-) {
+function alertToneColor(alert: AlertItem) {
   return alert.tone === "danger"
     ? colors.danger
     : alert.tone === "warning"

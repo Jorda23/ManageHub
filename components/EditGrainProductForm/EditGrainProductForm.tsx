@@ -2,22 +2,13 @@
 
 import { useEffect, useState } from "react";
 
-import {
-  Box,
-  InputAdornment,
-  MenuItem,
-  TextField,
-} from "@mui/material";
+import { Box, InputAdornment, MenuItem, TextField } from "@mui/material";
 
 import type { SxProps, Theme } from "@mui/material/styles";
 
 import { useFormik } from "formik";
 
-import {
-  FaBoxesStacked,
-  FaDollarSign,
-  FaSeedling,
-} from "react-icons/fa6";
+import { FaBoxesStacked, FaDollarSign, FaSeedling } from "react-icons/fa6";
 
 import { colors } from "@/theme/sharedColors";
 
@@ -53,18 +44,10 @@ type EditGrainProductFormProps = {
   product: GrainProduct | null;
   isSubmitting?: boolean;
   onClose: () => void;
-  onSave: (
-    id: string,
-    values: EditGrainProductValues,
-  ) => void | Promise<void>;
+  onSave: (id: string, values: EditGrainProductValues) => void | Promise<void>;
 };
 
-const unitOptions = [
-  "Libra",
-  "Kilogramo",
-  "Saco",
-  "Quintal",
-];
+const unitOptions = ["Libra", "Kilogramo", "Saco", "Quintal"];
 
 const CONTROL_HEIGHT = 42;
 
@@ -75,8 +58,7 @@ export function EditGrainProductForm({
   onClose,
   onSave,
 }: Readonly<EditGrainProductFormProps>) {
-  const [isPriceFocused, setIsPriceFocused] =
-    useState(false);
+  const [isPriceFocused, setIsPriceFocused] = useState(false);
 
   const formik = useFormik<EditGrainProductValues>({
     initialValues: {
@@ -90,34 +72,22 @@ export function EditGrainProductForm({
       imageUrl: "",
     },
 
-    validationSchema: addGrainSchema.pick([
-      "name",
-      "unit",
-      "location",
-    ]),
+    validationSchema: addGrainSchema.pick(["name", "unit", "location"]),
 
     validate: (values) => {
       const stock = Number(values.stock);
 
-      if (
-        String(values.stock ?? "").trim() === "" ||
-        Number.isNaN(stock)
-      ) {
+      if (String(values.stock ?? "").trim() === "" || Number.isNaN(stock)) {
         return undefined;
       }
 
-      const errors: Partial<
-        Record<keyof EditGrainProductValues, string>
-      > = {};
+      const errors: Partial<Record<keyof EditGrainProductValues, string>> = {};
 
       if (stock < 0) {
-        errors.stock =
-          "El stock no puede ser negativo.";
+        errors.stock = "El stock no puede ser negativo.";
       }
 
-      return Object.keys(errors).length > 0
-        ? errors
-        : undefined;
+      return Object.keys(errors).length > 0 ? errors : undefined;
     },
 
     validateOnBlur: true,
@@ -128,25 +98,18 @@ export function EditGrainProductForm({
         return;
       }
 
-      const normalizedCurrency =
-        normalizeCurrency(values.currency);
+      const normalizedCurrency = normalizeCurrency(values.currency);
 
       await onSave(product.id, {
         name: values.name.trim(),
         unit: values.unit.trim(),
         location: values.location.trim(),
 
-        minimumStock: String(
-          values.minimumStock ?? "",
-        ).trim(),
+        minimumStock: String(values.minimumStock ?? "").trim(),
 
-        stock: String(
-          values.stock ?? "",
-        ).trim(),
+        stock: String(values.stock ?? "").trim(),
 
-        unitPrice: String(
-          values.unitPrice ?? "",
-        ).trim(),
+        unitPrice: String(values.unitPrice ?? "").trim(),
 
         currency: normalizedCurrency,
         imageUrl: values.imageUrl.trim(),
@@ -162,30 +125,19 @@ export function EditGrainProductForm({
       formik.setValues({
         name: product.name,
 
-        unit:
-          product.unit ||
-          "Quintal",
+        unit: product.unit || "Quintal",
 
-        location:
-          product.location,
+        location: product.location,
 
-        minimumStock: String(
-          product.minimumStock ?? "",
-        ),
+        minimumStock: String(product.minimumStock ?? ""),
 
-        stock: String(
-          product.currentStock ?? "",
-        ),
+        stock: String(product.currentStock ?? ""),
 
-        unitPrice: String(
-          product.unitPrice ?? "",
-        ),
+        unitPrice: String(product.unitPrice ?? ""),
 
-        currency:
-          product.currency,
+        currency: product.currency,
 
-        imageUrl:
-          product.imageUrl ?? "",
+        imageUrl: product.imageUrl ?? "",
       });
 
       formik.setTouched({});
@@ -194,15 +146,9 @@ export function EditGrainProductForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, product]);
 
-  const showPriceSymbol =
-    isPriceFocused ||
-    String(
-      formik.values.unitPrice ?? "",
-    ).trim() !== "";
+  const showPriceSymbol = isPriceFocused || String(formik.values.unitPrice ?? "").trim() !== "";
 
-  const getFieldError = (
-    field: keyof EditGrainProductValues,
-  ): string | undefined => {
+  const getFieldError = (field: keyof EditGrainProductValues): string | undefined => {
     if (!formik.touched[field]) {
       return undefined;
     }
@@ -210,9 +156,7 @@ export function EditGrainProductForm({
     return formik.errors[field];
   };
 
-  const disabled =
-    isSubmitting ||
-    formik.isSubmitting;
+  const disabled = isSubmitting || formik.isSubmitting;
 
   return (
     <FormModal
@@ -221,9 +165,7 @@ export function EditGrainProductForm({
       description="Actualiza la información del producto de granos."
       icon={<FaSeedling size={15} />}
       submitLabel="Guardar cambios"
-      submitIcon={
-        <FaBoxesStacked size={12} />
-      }
+      submitIcon={<FaBoxesStacked size={12} />}
       maxWidth={860}
       isSubmitting={isSubmitting}
       onClose={onClose}
@@ -242,10 +184,7 @@ export function EditGrainProductForm({
           description="Datos generales, presentación y ubicación del grano."
         >
           <Box sx={formGridStyles}>
-            <ModalField
-              label="Nombre del producto"
-              htmlFor="edit-grain-name"
-            >
+            <ModalField label="Nombre del producto" htmlFor="edit-grain-name">
               <TextField
                 id="edit-grain-name"
                 name="name"
@@ -253,12 +192,8 @@ export function EditGrainProductForm({
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 placeholder="Ej. Maíz amarillo"
-                error={Boolean(
-                  getFieldError("name"),
-                )}
-                helperText={
-                  getFieldError("name")
-                }
+                error={Boolean(getFieldError("name"))}
+                helperText={getFieldError("name")}
                 disabled={disabled}
                 fullWidth
                 autoFocus
@@ -267,10 +202,7 @@ export function EditGrainProductForm({
               />
             </ModalField>
 
-            <ModalField
-              label="Unidad"
-              htmlFor="edit-grain-unit"
-            >
+            <ModalField label="Unidad" htmlFor="edit-grain-unit">
               <TextField
                 id="edit-grain-unit"
                 name="unit"
@@ -280,12 +212,8 @@ export function EditGrainProductForm({
                 select
                 fullWidth
                 disabled={disabled}
-                error={Boolean(
-                  getFieldError("unit"),
-                )}
-                helperText={
-                  getFieldError("unit")
-                }
+                error={Boolean(getFieldError("unit"))}
+                helperText={getFieldError("unit")}
                 slotProps={{
                   select: {
                     MenuProps: {
@@ -300,59 +228,36 @@ export function EditGrainProductForm({
                 sx={fieldStyles}
               >
                 {unitOptions.map((unit) => (
-                  <MenuItem
-                    key={unit}
-                    value={unit}
-                  >
+                  <MenuItem key={unit} value={unit}>
                     {unit}
                   </MenuItem>
                 ))}
               </TextField>
             </ModalField>
 
-            <ModalField
-              label="Ubicación"
-              htmlFor="edit-grain-location"
-            >
+            <ModalField label="Ubicación" htmlFor="edit-grain-location">
               <TextField
                 id="edit-grain-location"
                 name="location"
-                value={
-                  formik.values.location
-                }
-                onChange={
-                  formik.handleChange
-                }
+                value={formik.values.location}
+                onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 placeholder="Ej. Bodega principal"
-                error={Boolean(
-                  getFieldError(
-                    "location",
-                  ),
-                )}
-                helperText={getFieldError(
-                  "location",
-                )}
+                error={Boolean(getFieldError("location"))}
+                helperText={getFieldError("location")}
                 disabled={disabled}
                 fullWidth
                 sx={fieldStyles}
               />
             </ModalField>
 
-            <ModalField
-              label="Moneda"
-              htmlFor="edit-grain-currency"
-            >
+            <ModalField label="Moneda" htmlFor="edit-grain-currency">
               <TextField
                 id="edit-grain-currency"
                 name="currency"
                 select
-                value={
-                  formik.values.currency
-                }
-                onChange={
-                  formik.handleChange
-                }
+                value={formik.values.currency}
+                onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 disabled={disabled}
                 fullWidth
@@ -369,40 +274,23 @@ export function EditGrainProductForm({
                 }}
                 sx={fieldStyles}
               >
-                {currencies.map(
-                  (currency) => (
-                    <MenuItem
-                      key={currency}
-                      value={currency}
-                    >
-                      {
-                        currencyLabels[
-                          currency
-                        ]
-                      }
-                    </MenuItem>
-                  ),
-                )}
+                {currencies.map((currency) => (
+                  <MenuItem key={currency} value={currency}>
+                    {currencyLabels[currency]}
+                  </MenuItem>
+                ))}
               </TextField>
             </ModalField>
           </Box>
 
           <Box sx={{ mt: 1.5 }}>
-            <ModalField
-              label="Imagen del producto"
-              htmlFor="edit-grain-image"
-            >
+            <ModalField label="Imagen del producto" htmlFor="edit-grain-image">
               <ImageUrlField
                 label="Imagen del grano"
-                value={
-                  formik.values.imageUrl
-                }
+                value={formik.values.imageUrl}
                 disabled={disabled}
                 onChange={(imageUrl) => {
-                  void formik.setFieldValue(
-                    "imageUrl",
-                    imageUrl,
-                  );
+                  void formik.setFieldValue("imageUrl", imageUrl);
                 }}
               />
             </ModalField>
@@ -410,35 +298,22 @@ export function EditGrainProductForm({
         </FormSection>
 
         <FormSection
-          icon={
-            <FaDollarSign size={14} />
-          }
+          icon={<FaDollarSign size={14} />}
           title="Inventario y precio"
           description="Configura existencias, punto de alerta y precio de venta."
         >
           <Box sx={inventoryGridStyles}>
-            <ModalField
-              label="Stock actual"
-              htmlFor="edit-grain-stock"
-            >
+            <ModalField label="Stock actual" htmlFor="edit-grain-stock">
               <TextField
                 id="edit-grain-stock"
                 name="stock"
                 type="number"
-                value={
-                  formik.values.stock
-                }
-                onChange={
-                  formik.handleChange
-                }
+                value={formik.values.stock}
+                onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 placeholder="0.00"
-                error={Boolean(
-                  getFieldError("stock"),
-                )}
-                helperText={
-                  getFieldError("stock")
-                }
+                error={Boolean(getFieldError("stock"))}
+                helperText={getFieldError("stock")}
                 disabled={disabled}
                 fullWidth
                 slotProps={{
@@ -451,31 +326,17 @@ export function EditGrainProductForm({
               />
             </ModalField>
 
-            <ModalField
-              label="Stock mínimo"
-              htmlFor="edit-grain-minimum-stock"
-            >
+            <ModalField label="Stock mínimo" htmlFor="edit-grain-minimum-stock">
               <TextField
                 id="edit-grain-minimum-stock"
                 name="minimumStock"
                 type="number"
-                value={
-                  formik.values
-                    .minimumStock
-                }
-                onChange={
-                  formik.handleChange
-                }
+                value={formik.values.minimumStock}
+                onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 placeholder="0.00"
-                error={Boolean(
-                  getFieldError(
-                    "minimumStock",
-                  ),
-                )}
-                helperText={getFieldError(
-                  "minimumStock",
-                )}
+                error={Boolean(getFieldError("minimumStock"))}
+                helperText={getFieldError("minimumStock")}
                 disabled={disabled}
                 fullWidth
                 slotProps={{
@@ -488,41 +349,24 @@ export function EditGrainProductForm({
               />
             </ModalField>
 
-            <ModalField
-              label="Precio unitario"
-              htmlFor="edit-grain-unit-price"
-            >
+            <ModalField label="Precio unitario" htmlFor="edit-grain-unit-price">
               <TextField
                 id="edit-grain-unit-price"
                 name="unitPrice"
                 type="number"
-                value={
-                  formik.values.unitPrice
-                }
-                onChange={
-                  formik.handleChange
-                }
+                value={formik.values.unitPrice}
+                onChange={formik.handleChange}
                 onFocus={() => {
                   setIsPriceFocused(true);
                 }}
                 onBlur={(event) => {
-                  setIsPriceFocused(
-                    false,
-                  );
+                  setIsPriceFocused(false);
 
-                  formik.handleBlur(
-                    event,
-                  );
+                  formik.handleBlur(event);
                 }}
                 placeholder="0.00"
-                error={Boolean(
-                  getFieldError(
-                    "unitPrice",
-                  ),
-                )}
-                helperText={getFieldError(
-                  "unitPrice",
-                )}
+                error={Boolean(getFieldError("unitPrice"))}
+                helperText={getFieldError("unitPrice")}
                 disabled={disabled}
                 fullWidth
                 slotProps={{
@@ -532,15 +376,11 @@ export function EditGrainProductForm({
                   },
 
                   input: {
-                    startAdornment:
-                      showPriceSymbol ? (
-                        <InputAdornment position="start">
-                          {getCurrencySymbol(
-                            formik.values
-                              .currency,
-                          )}
-                        </InputAdornment>
-                      ) : undefined,
+                    startAdornment: showPriceSymbol ? (
+                      <InputAdornment position="start">
+                        {getCurrencySymbol(formik.values.currency)}
+                      </InputAdornment>
+                    ) : undefined,
                   },
                 }}
                 sx={fieldStyles}
@@ -595,12 +435,10 @@ const fieldStyles: SxProps<Theme> = {
 
     fontWeight: 650,
 
-    transition:
-      "all 0.18s ease",
+    transition: "all 0.18s ease",
 
     "& fieldset": {
-      borderColor:
-        colors.cardBorder,
+      borderColor: colors.cardBorder,
     },
 
     "&:hover fieldset": {
@@ -610,20 +448,17 @@ const fieldStyles: SxProps<Theme> = {
     "&.Mui-focused": {
       bgcolor: "#ffffff",
 
-      boxShadow:
-        "0 0 0 3px rgba(6, 78, 59, 0.08)",
+      boxShadow: "0 0 0 3px rgba(6, 78, 59, 0.08)",
     },
 
     "&.Mui-focused fieldset": {
-      borderColor:
-        colors.primary,
+      borderColor: colors.primary,
 
       borderWidth: "1px",
     },
 
     "&.Mui-error fieldset": {
-      borderColor:
-        colors.danger,
+      borderColor: colors.danger,
     },
 
     "&.Mui-disabled": {
@@ -638,55 +473,43 @@ const fieldStyles: SxProps<Theme> = {
 
     padding: "0 12px",
 
-    color:
-      `${colors.text} !important`,
+    color: `${colors.text} !important`,
 
-    WebkitTextFillColor:
-      `${colors.text} !important`,
+    WebkitTextFillColor: `${colors.text} !important`,
 
     "&::placeholder": {
       color: "#94a3b8",
 
-      WebkitTextFillColor:
-        "#94a3b8",
+      WebkitTextFillColor: "#94a3b8",
 
       opacity: 1,
     },
 
     "&:-webkit-autofill": {
-      WebkitBoxShadow:
-        "0 0 0 1000px #ffffff inset",
+      WebkitBoxShadow: "0 0 0 1000px #ffffff inset",
 
-      WebkitTextFillColor:
-        `${colors.text} !important`,
+      WebkitTextFillColor: `${colors.text} !important`,
 
-      caretColor:
-        colors.text,
+      caretColor: colors.text,
     },
   },
 
   "& .MuiSelect-select": {
-    height:
-      `${CONTROL_HEIGHT}px !important`,
+    height: `${CONTROL_HEIGHT}px !important`,
 
-    minHeight:
-      `${CONTROL_HEIGHT}px !important`,
+    minHeight: `${CONTROL_HEIGHT}px !important`,
 
-    boxSizing:
-      "border-box !important",
+    boxSizing: "border-box !important",
 
     display: "flex",
 
     alignItems: "center",
 
-    padding:
-      "0 36px 0 12px !important",
+    padding: "0 36px 0 12px !important",
 
-    color:
-      `${colors.text} !important`,
+    color: `${colors.text} !important`,
 
-    WebkitTextFillColor:
-      `${colors.text} !important`,
+    WebkitTextFillColor: `${colors.text} !important`,
   },
 
   "& .MuiInputAdornment-root": {
@@ -717,21 +540,17 @@ const fieldStyles: SxProps<Theme> = {
     MozAppearance: "textfield",
   },
 
-  "& input[type='number']::-webkit-outer-spin-button":
-    {
-      WebkitAppearance:
-        "none",
+  "& input[type='number']::-webkit-outer-spin-button": {
+    WebkitAppearance: "none",
 
-      margin: 0,
-    },
+    margin: 0,
+  },
 
-  "& input[type='number']::-webkit-inner-spin-button":
-    {
-      WebkitAppearance:
-        "none",
+  "& input[type='number']::-webkit-inner-spin-button": {
+    WebkitAppearance: "none",
 
-      margin: 0,
-    },
+    margin: 0,
+  },
 };
 
 const menuPaperStyles: SxProps<Theme> = {
@@ -743,11 +562,9 @@ const menuPaperStyles: SxProps<Theme> = {
 
   bgcolor: "#ffffff",
 
-  border:
-    `1px solid ${colors.cardBorder}`,
+  border: `1px solid ${colors.cardBorder}`,
 
-  boxShadow:
-    "0 14px 34px rgba(15, 23, 42, 0.16)",
+  boxShadow: "0 14px 34px rgba(15, 23, 42, 0.16)",
 
   "& .MuiMenuItem-root": {
     minHeight: 42,
@@ -763,11 +580,9 @@ const menuPaperStyles: SxProps<Theme> = {
     },
 
     "&.Mui-selected": {
-      bgcolor:
-        colors.primarySoft,
+      bgcolor: colors.primarySoft,
 
-      color:
-        colors.primary,
+      color: colors.primary,
 
       "&:hover": {
         bgcolor: "#bbf7d0",

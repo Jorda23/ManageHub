@@ -40,7 +40,9 @@ import {
 } from "@/validations/registerPropertyPayment.schema";
 
 import { colors } from "@/theme/sharedColors";
+
 import { useToast } from "@/components/Toast";
+
 import {
   convertCurrency,
   currencies,
@@ -72,6 +74,7 @@ export function PropertyPaymentSection({
 }: Readonly<PropertyPaymentSectionProps>) {
   const { mutateAsync: registerPropertyPayment, isPending: isRegisteringPayment } =
     useRegisterPropertyPayment();
+
   const { showSuccess, showError } = useToast();
 
   const formik = useFormik<RegisterPropertyPaymentFormValues>({
@@ -88,6 +91,7 @@ export function PropertyPaymentSection({
 
       if (!selectedProperty) {
         helpers.setFieldError("propertyId", "Selecciona una propiedad válida");
+
         showError("Selecciona una propiedad válida.");
 
         return;
@@ -111,6 +115,7 @@ export function PropertyPaymentSection({
 
       if (convertedPendingAmount <= 0) {
         helpers.setStatus("Esta cuenta ya está pagada en su totalidad.");
+
         showError("Esta cuenta ya está pagada en su totalidad.");
 
         return;
@@ -118,6 +123,7 @@ export function PropertyPaymentSection({
 
       if (amount > convertedPendingAmount) {
         helpers.setFieldError("amount", "El abono no puede ser mayor al saldo pendiente");
+
         showError("El abono no puede ser mayor al saldo pendiente.");
 
         return;
@@ -134,6 +140,7 @@ export function PropertyPaymentSection({
           amount,
 
           paymentMethod: values.paymentMethod,
+
           currency: safeCurrency,
 
           note: values.note.trim() || null,
@@ -170,6 +177,7 @@ export function PropertyPaymentSection({
             amount: payment?.amount ?? amount,
 
             paymentMethod: payment?.paymentMethod ?? values.paymentMethod,
+
             currency: payment?.currency ?? safeCurrency,
 
             note: payment?.note ?? (values.note.trim() || null),
@@ -192,6 +200,7 @@ export function PropertyPaymentSection({
           console.error("Error generando recibo:", error);
 
           helpers.setStatus("El pago fue registrado, pero no se pudo generar el recibo.");
+
           showError("El pago fue registrado, pero no se pudo generar el recibo.");
 
           return;
@@ -200,14 +209,17 @@ export function PropertyPaymentSection({
         helpers.resetForm({
           values: {
             ...initialValues,
+
             propertyId: selectedProperty.id,
           },
         });
+
         onRegistered?.();
       } catch (error) {
         console.error("Error registrando abono:", error);
 
         helpers.setStatus("No se pudo registrar el abono.");
+
         showError("No se pudo registrar el abono.");
       }
     },
@@ -226,7 +238,9 @@ export function PropertyPaymentSection({
         currency: true,
         note: true,
       });
+
       showError("Revisa los campos marcados antes de continuar.");
+
       return;
     }
 
@@ -252,7 +266,16 @@ export function PropertyPaymentSection({
           lg: "100%",
         },
 
+        maxHeight: {
+          xs: "none",
+          lg: "calc(100vh - 220px)",
+        },
+
+        display: "flex",
+        flexDirection: "column",
+
         overflow: "hidden",
+
         border: "0",
         borderRadius: 0,
         boxShadow: "none",
@@ -268,6 +291,16 @@ export function PropertyPaymentSection({
         sx={{
           width: "100%",
           minWidth: 0,
+
+          flex: 1,
+          minHeight: 0,
+
+          overflowY: {
+            xs: "visible",
+            lg: "auto",
+          },
+
+          overflowX: "hidden",
 
           p: {
             xs: 1.8,
@@ -288,6 +321,28 @@ export function PropertyPaymentSection({
           },
 
           alignItems: "start",
+
+          scrollbarWidth: "thin",
+
+          scrollbarColor: `${colors.cardBorder} transparent`,
+
+          "&::-webkit-scrollbar": {
+            width: 6,
+          },
+
+          "&::-webkit-scrollbar-track": {
+            background: "transparent",
+          },
+
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: colors.cardBorder,
+
+            borderRadius: 999,
+          },
+
+          "&::-webkit-scrollbar-thumb:hover": {
+            backgroundColor: colors.muted,
+          },
         }}
       >
         {formik.status && (
@@ -315,7 +370,13 @@ export function PropertyPaymentSection({
               name="propertyId"
               value={formik.values.propertyId}
               displayEmpty
-              MenuProps={{ slotProps: { paper: { sx: selectMenuSx } } }}
+              MenuProps={{
+                slotProps: {
+                  paper: {
+                    sx: selectMenuSx,
+                  },
+                },
+              }}
               disabled={isRegisteringPayment}
               onChange={(event) => {
                 void formik.setFieldValue("propertyId", String(event.target.value));
@@ -333,7 +394,9 @@ export function PropertyPaymentSection({
                       component="span"
                       sx={{
                         color: colors.muted,
+
                         fontSize: 14,
+
                         fontWeight: 600,
                       }}
                     >
@@ -357,10 +420,15 @@ export function PropertyPaymentSection({
                     component="span"
                     sx={{
                       minWidth: 0,
+
                       fontSize: 14,
+
                       fontWeight: 600,
+
                       overflow: "hidden",
+
                       textOverflow: "ellipsis",
+
                       whiteSpace: "nowrap",
                     }}
                   >
@@ -385,6 +453,7 @@ export function PropertyPaymentSection({
             value={formik.values.amount}
             onChange={(event) => {
               formik.handleChange(event);
+
               formik.setStatus(undefined);
             }}
             onBlur={formik.handleBlur}
@@ -413,7 +482,13 @@ export function PropertyPaymentSection({
               name="paymentMethod"
               value={formik.values.paymentMethod}
               displayEmpty
-              MenuProps={{ slotProps: { paper: { sx: selectMenuSx } } }}
+              MenuProps={{
+                slotProps: {
+                  paper: {
+                    sx: selectMenuSx,
+                  },
+                },
+              }}
               disabled={isRegisteringPayment}
               onChange={(event) => {
                 void formik.setFieldValue("paymentMethod", String(event.target.value));
@@ -431,7 +506,9 @@ export function PropertyPaymentSection({
                       component="span"
                       sx={{
                         color: colors.muted,
+
                         fontSize: 14,
+
                         fontWeight: 600,
                       }}
                     >
@@ -457,14 +534,22 @@ export function PropertyPaymentSection({
             {paymentMethodError && <FormHelperText>{paymentMethodError}</FormHelperText>}
           </FormControl>
         </Box>
+
         <Box sx={{ minWidth: 0 }}>
           <FieldLabel>Moneda</FieldLabel>
+
           <FormControl fullWidth size="small">
             <Select
               id="currency"
               name="currency"
               value={formik.values.currency}
-              MenuProps={{ slotProps: { paper: { sx: selectMenuSx } } }}
+              MenuProps={{
+                slotProps: {
+                  paper: {
+                    sx: selectMenuSx,
+                  },
+                },
+              }}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               error={Boolean(formik.touched.currency && formik.errors.currency)}
@@ -527,6 +612,7 @@ export function PropertyPaymentSection({
           disabled={isRegisteringPayment || !formik.values.propertyId}
           sx={{
             gridColumn: "1 / -1",
+
             width: "100%",
 
             minHeight: {
@@ -550,6 +636,7 @@ export function PropertyPaymentSection({
             },
 
             color: "#ffffff",
+
             bgcolor: colors.primary,
 
             fontSize: {
@@ -559,8 +646,11 @@ export function PropertyPaymentSection({
             },
 
             lineHeight: 1.2,
+
             fontWeight: 800,
+
             textTransform: "none",
+
             whiteSpace: "nowrap",
 
             boxShadow: "0 10px 22px rgba(37, 99, 235, 0.22)",
@@ -588,6 +678,7 @@ export function PropertyPaymentSection({
 
             "&:hover": {
               bgcolor: "#172554",
+
               boxShadow: "0 14px 28px rgba(37, 99, 235, 0.28)",
             },
 
@@ -605,7 +696,9 @@ export function PropertyPaymentSection({
 
             "&.Mui-disabled": {
               bgcolor: "#e2e8f0",
+
               color: "#94a3b8",
+
               boxShadow: "none",
             },
           }}
@@ -623,6 +716,7 @@ function FieldLabel({ children }: { children: ReactNode }) {
       component="label"
       sx={{
         display: "block",
+
         mb: 0.75,
 
         fontSize: {
@@ -631,8 +725,11 @@ function FieldLabel({ children }: { children: ReactNode }) {
         },
 
         color: colors.text,
+
         fontWeight: 950,
+
         textTransform: "uppercase",
+
         letterSpacing: "0.06em",
       }}
     >
@@ -682,6 +779,7 @@ function AccountSummary({
       elevation={0}
       sx={{
         width: "100%",
+
         minWidth: 0,
 
         p: {
@@ -702,8 +800,11 @@ function AccountSummary({
       <Box
         sx={{
           display: "flex",
+
           flexDirection: "column",
+
           gap: 1.1,
+
           minWidth: 0,
         }}
       >
@@ -725,13 +826,21 @@ function AccountSummary({
           <Box
             sx={{
               px: 1.25,
+
               py: 1,
+
               borderRadius: "12px",
+
               bgcolor: colors.primarySoft,
+
               border: `1px solid ${colors.primaryBorder}`,
+
               color: colors.primaryLight,
+
               fontSize: 12,
+
               lineHeight: 1.45,
+
               fontWeight: 700,
             }}
           >
@@ -744,10 +853,15 @@ function AccountSummary({
           <Box
             sx={{
               mt: 0.25,
+
               px: 1.25,
+
               py: 1,
+
               borderRadius: "12px",
+
               bgcolor: "#ffffff",
+
               border: `1px solid ${colors.cardBorder}`,
             }}
           >
@@ -784,17 +898,24 @@ function AccountSummary({
         <Box
           sx={{
             display: "flex",
+
             justifyContent: "space-between",
+
             gap: 2,
+
             alignItems: "center",
+
             minWidth: 0,
           }}
         >
           <Typography
             sx={{
               minWidth: 0,
+
               fontSize: 13,
+
               color: colors.muted,
+
               fontWeight: 700,
             }}
           >
@@ -804,9 +925,13 @@ function AccountSummary({
           <Box
             sx={{
               maxWidth: "65%",
+
               minWidth: 0,
+
               px: 1,
+
               py: 0.45,
+
               borderRadius: 999,
 
               bgcolor: statusColors.bg,
@@ -816,11 +941,15 @@ function AccountSummary({
               border: `1px solid ${statusColors.border}`,
 
               fontSize: 11,
+
               lineHeight: 1.2,
+
               fontWeight: 950,
+
               textAlign: "center",
 
               overflow: "hidden",
+
               textOverflow: "ellipsis",
 
               whiteSpace: "nowrap",
@@ -850,6 +979,7 @@ function SummaryRow({
 
         gridTemplateColumns: {
           xs: "minmax(0, 0.9fr) minmax(0, 1.1fr)",
+
           sm: "minmax(0, 1fr) minmax(0, 1.4fr)",
         },
 
@@ -924,7 +1054,9 @@ const inputSx: SxProps<Theme> = {
     bgcolor: "#fbfdfc",
 
     fontSize: 14,
+
     fontWeight: 600,
+
     color: colors.text,
 
     "& fieldset": {
@@ -972,7 +1104,9 @@ const selectSx: SxProps<Theme> = {
   bgcolor: "#fbfdfc",
 
   fontSize: 14,
+
   fontWeight: 600,
+
   color: colors.text,
 
   "& fieldset": {
@@ -993,6 +1127,7 @@ const selectSx: SxProps<Theme> = {
     minWidth: 0,
 
     display: "flex",
+
     alignItems: "center",
 
     px: {

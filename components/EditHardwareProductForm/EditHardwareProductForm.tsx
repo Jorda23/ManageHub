@@ -2,21 +2,13 @@
 
 import { useEffect, useState } from "react";
 
-import {
-  Box,
-  InputAdornment,
-  MenuItem,
-  TextField,
-} from "@mui/material";
+import { Box, InputAdornment, MenuItem, TextField } from "@mui/material";
 
 import type { SxProps, Theme } from "@mui/material/styles";
 
 import { useFormik } from "formik";
 
-import {
-  FaDollarSign,
-  FaTools,
-} from "react-icons/fa";
+import { FaDollarSign, FaTools } from "react-icons/fa";
 
 import { FaBoxesStacked } from "react-icons/fa6";
 
@@ -54,10 +46,7 @@ type EditHardwareProductFormProps = {
   product: HardwareProduct | null;
   isSubmitting?: boolean;
   onClose: () => void;
-  onSave: (
-    id: string,
-    values: EditHardwareProductValues,
-  ) => void | Promise<void>;
+  onSave: (id: string, values: EditHardwareProductValues) => void | Promise<void>;
 };
 
 const categoryOptions = [
@@ -80,92 +69,67 @@ export function EditHardwareProductForm({
   onClose,
   onSave,
 }: Readonly<EditHardwareProductFormProps>) {
-  const [isPriceFocused, setIsPriceFocused] =
-    useState(false);
+  const [isPriceFocused, setIsPriceFocused] = useState(false);
 
-  const formik =
-    useFormik<EditHardwareProductValues>({
-      initialValues: {
-        name: "",
-        detail: "",
-        category: "",
-        minimumStock: "",
-        stock: "",
-        unitPrice: "",
-        currency: "USD",
-        imageUrl: "",
-      },
+  const formik = useFormik<EditHardwareProductValues>({
+    initialValues: {
+      name: "",
+      detail: "",
+      category: "",
+      minimumStock: "",
+      stock: "",
+      unitPrice: "",
+      currency: "USD",
+      imageUrl: "",
+    },
 
-      validationSchema:
-        addHardwareProductSchema.pick([
-          "name",
-          "detail",
-          "category",
-        ]),
+    validationSchema: addHardwareProductSchema.pick(["name", "detail", "category"]),
 
-      validate: (values) => {
-        const stock = Number(values.stock);
+    validate: (values) => {
+      const stock = Number(values.stock);
 
-        if (
-          String(values.stock ?? "").trim() === "" ||
-          Number.isNaN(stock)
-        ) {
-          return undefined;
-        }
+      if (String(values.stock ?? "").trim() === "" || Number.isNaN(stock)) {
+        return undefined;
+      }
 
-        const errors: Partial<
-          Record<
-            keyof EditHardwareProductValues,
-            string
-          >
-        > = {};
+      const errors: Partial<Record<keyof EditHardwareProductValues, string>> = {};
 
-        if (stock < 0) {
-          errors.stock =
-            "El stock no puede ser negativo.";
-        }
+      if (stock < 0) {
+        errors.stock = "El stock no puede ser negativo.";
+      }
 
-        return Object.keys(errors).length > 0
-          ? errors
-          : undefined;
-      },
+      return Object.keys(errors).length > 0 ? errors : undefined;
+    },
 
-      validateOnBlur: true,
-      validateOnChange: false,
+    validateOnBlur: true,
+    validateOnChange: false,
 
-      onSubmit: async (values, helpers) => {
-        if (!product) {
-          return;
-        }
+    onSubmit: async (values, helpers) => {
+      if (!product) {
+        return;
+      }
 
-        const normalizedCurrency =
-          normalizeCurrency(values.currency);
+      const normalizedCurrency = normalizeCurrency(values.currency);
 
-        await onSave(product.id, {
-          name: values.name.trim(),
-          detail: values.detail.trim(),
-          category: values.category.trim(),
+      await onSave(product.id, {
+        name: values.name.trim(),
+        detail: values.detail.trim(),
+        category: values.category.trim(),
 
-          minimumStock: String(
-            values.minimumStock ?? "",
-          ).trim(),
+        minimumStock: String(values.minimumStock ?? "").trim(),
 
-          stock: String(
-            values.stock ?? "",
-          ).trim(),
+        stock: String(values.stock ?? "").trim(),
 
-          unitPrice: String(
-            values.unitPrice ?? "",
-          ).trim(),
+        unitPrice: String(values.unitPrice ?? "").trim(),
 
-          currency: normalizedCurrency,
-          imageUrl: values.imageUrl.trim(),
-        });
+        currency: normalizedCurrency,
+        imageUrl: values.imageUrl.trim(),
+      });
 
-        helpers.resetForm();
-        setIsPriceFocused(false);
-      },
-    });
+      helpers.resetForm();
+      setIsPriceFocused(false);
+    },
+  });
 
   useEffect(() => {
     if (open && product) {
@@ -174,17 +138,11 @@ export function EditHardwareProductForm({
         detail: product.detail,
         category: product.category,
 
-        minimumStock: String(
-          product.minimumStock ?? "",
-        ),
+        minimumStock: String(product.minimumStock ?? ""),
 
-        stock: String(
-          product.currentStock ?? "",
-        ),
+        stock: String(product.currentStock ?? ""),
 
-        unitPrice: String(
-          product.unitPrice ?? "",
-        ),
+        unitPrice: String(product.unitPrice ?? ""),
 
         currency: product.currency,
         imageUrl: product.imageUrl ?? "",
@@ -196,15 +154,9 @@ export function EditHardwareProductForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, product]);
 
-  const showPriceSymbol =
-    isPriceFocused ||
-    String(
-      formik.values.unitPrice ?? "",
-    ).trim() !== "";
+  const showPriceSymbol = isPriceFocused || String(formik.values.unitPrice ?? "").trim() !== "";
 
-  const getFieldError = (
-    field: keyof EditHardwareProductValues,
-  ): string | undefined => {
+  const getFieldError = (field: keyof EditHardwareProductValues): string | undefined => {
     if (!formik.touched[field]) {
       return undefined;
     }
@@ -212,9 +164,7 @@ export function EditHardwareProductForm({
     return formik.errors[field];
   };
 
-  const disabled =
-    isSubmitting ||
-    formik.isSubmitting;
+  const disabled = isSubmitting || formik.isSubmitting;
 
   return (
     <FormModal
@@ -223,9 +173,7 @@ export function EditHardwareProductForm({
       description="Actualiza la información del producto de ferretería."
       icon={<FaTools size={15} />}
       submitLabel="Guardar cambios"
-      submitIcon={
-        <FaBoxesStacked size={12} />
-      }
+      submitIcon={<FaBoxesStacked size={12} />}
       maxWidth={860}
       isSubmitting={isSubmitting}
       onClose={onClose}
@@ -244,10 +192,7 @@ export function EditHardwareProductForm({
           description="Datos generales, clasificación e imagen del producto."
         >
           <Box sx={formGridStyles}>
-            <ModalField
-              label="Nombre del producto"
-              htmlFor="edit-hardware-product-name"
-            >
+            <ModalField label="Nombre del producto" htmlFor="edit-hardware-product-name">
               <TextField
                 id="edit-hardware-product-name"
                 name="name"
@@ -255,12 +200,8 @@ export function EditHardwareProductForm({
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 placeholder="Ej. Taladro inalámbrico"
-                error={Boolean(
-                  getFieldError("name"),
-                )}
-                helperText={
-                  getFieldError("name")
-                }
+                error={Boolean(getFieldError("name"))}
+                helperText={getFieldError("name")}
                 disabled={disabled}
                 fullWidth
                 autoFocus
@@ -269,29 +210,18 @@ export function EditHardwareProductForm({
               />
             </ModalField>
 
-            <ModalField
-              label="Categoría"
-              htmlFor="edit-hardware-product-category"
-            >
+            <ModalField label="Categoría" htmlFor="edit-hardware-product-category">
               <TextField
                 id="edit-hardware-product-category"
                 name="category"
-                value={
-                  formik.values.category
-                }
-                onChange={
-                  formik.handleChange
-                }
+                value={formik.values.category}
+                onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 select
                 fullWidth
                 disabled={disabled}
-                error={Boolean(
-                  getFieldError("category"),
-                )}
-                helperText={
-                  getFieldError("category")
-                }
+                error={Boolean(getFieldError("category"))}
+                helperText={getFieldError("category")}
                 slotProps={{
                   select: {
                     MenuProps: {
@@ -305,60 +235,37 @@ export function EditHardwareProductForm({
                 }}
                 sx={fieldStyles}
               >
-                {categoryOptions.map(
-                  (category) => (
-                    <MenuItem
-                      key={category}
-                      value={category}
-                    >
-                      {category}
-                    </MenuItem>
-                  ),
-                )}
+                {categoryOptions.map((category) => (
+                  <MenuItem key={category} value={category}>
+                    {category}
+                  </MenuItem>
+                ))}
               </TextField>
             </ModalField>
 
-            <ModalField
-              label="Detalle o presentación"
-              htmlFor="edit-hardware-product-detail"
-            >
+            <ModalField label="Detalle o presentación" htmlFor="edit-hardware-product-detail">
               <TextField
                 id="edit-hardware-product-detail"
                 name="detail"
-                value={
-                  formik.values.detail
-                }
-                onChange={
-                  formik.handleChange
-                }
+                value={formik.values.detail}
+                onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 placeholder="Ej. 18V Kit"
-                error={Boolean(
-                  getFieldError("detail"),
-                )}
-                helperText={
-                  getFieldError("detail")
-                }
+                error={Boolean(getFieldError("detail"))}
+                helperText={getFieldError("detail")}
                 disabled={disabled}
                 fullWidth
                 sx={fieldStyles}
               />
             </ModalField>
 
-            <ModalField
-              label="Moneda"
-              htmlFor="edit-hardware-currency"
-            >
+            <ModalField label="Moneda" htmlFor="edit-hardware-currency">
               <TextField
                 id="edit-hardware-currency"
                 name="currency"
                 select
-                value={
-                  formik.values.currency
-                }
-                onChange={
-                  formik.handleChange
-                }
+                value={formik.values.currency}
+                onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 disabled={disabled}
                 fullWidth
@@ -375,40 +282,23 @@ export function EditHardwareProductForm({
                 }}
                 sx={fieldStyles}
               >
-                {currencies.map(
-                  (currency) => (
-                    <MenuItem
-                      key={currency}
-                      value={currency}
-                    >
-                      {
-                        currencyLabels[
-                          currency
-                        ]
-                      }
-                    </MenuItem>
-                  ),
-                )}
+                {currencies.map((currency) => (
+                  <MenuItem key={currency} value={currency}>
+                    {currencyLabels[currency]}
+                  </MenuItem>
+                ))}
               </TextField>
             </ModalField>
           </Box>
 
           <Box sx={{ mt: 1.5 }}>
-            <ModalField
-              label="Imagen del producto"
-              htmlFor="edit-hardware-product-image"
-            >
+            <ModalField label="Imagen del producto" htmlFor="edit-hardware-product-image">
               <ImageUrlField
                 label="Imagen del producto"
-                value={
-                  formik.values.imageUrl
-                }
+                value={formik.values.imageUrl}
                 disabled={disabled}
                 onChange={(imageUrl) => {
-                  void formik.setFieldValue(
-                    "imageUrl",
-                    imageUrl,
-                  );
+                  void formik.setFieldValue("imageUrl", imageUrl);
                 }}
               />
             </ModalField>
@@ -416,35 +306,22 @@ export function EditHardwareProductForm({
         </FormSection>
 
         <FormSection
-          icon={
-            <FaDollarSign size={14} />
-          }
+          icon={<FaDollarSign size={14} />}
           title="Inventario y precio"
           description="Configura existencias, punto de alerta y precio unitario de venta."
         >
           <Box sx={inventoryGridStyles}>
-            <ModalField
-              label="Stock actual"
-              htmlFor="edit-hardware-product-stock"
-            >
+            <ModalField label="Stock actual" htmlFor="edit-hardware-product-stock">
               <TextField
                 id="edit-hardware-product-stock"
                 name="stock"
                 type="number"
-                value={
-                  formik.values.stock
-                }
-                onChange={
-                  formik.handleChange
-                }
+                value={formik.values.stock}
+                onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 placeholder="0"
-                error={Boolean(
-                  getFieldError("stock"),
-                )}
-                helperText={
-                  getFieldError("stock")
-                }
+                error={Boolean(getFieldError("stock"))}
+                helperText={getFieldError("stock")}
                 disabled={disabled}
                 fullWidth
                 slotProps={{
@@ -457,31 +334,17 @@ export function EditHardwareProductForm({
               />
             </ModalField>
 
-            <ModalField
-              label="Stock mínimo"
-              htmlFor="edit-hardware-product-minimum-stock"
-            >
+            <ModalField label="Stock mínimo" htmlFor="edit-hardware-product-minimum-stock">
               <TextField
                 id="edit-hardware-product-minimum-stock"
                 name="minimumStock"
                 type="number"
-                value={
-                  formik.values
-                    .minimumStock
-                }
-                onChange={
-                  formik.handleChange
-                }
+                value={formik.values.minimumStock}
+                onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 placeholder="0"
-                error={Boolean(
-                  getFieldError(
-                    "minimumStock",
-                  ),
-                )}
-                helperText={getFieldError(
-                  "minimumStock",
-                )}
+                error={Boolean(getFieldError("minimumStock"))}
+                helperText={getFieldError("minimumStock")}
                 disabled={disabled}
                 fullWidth
                 slotProps={{
@@ -494,41 +357,24 @@ export function EditHardwareProductForm({
               />
             </ModalField>
 
-            <ModalField
-              label="Precio unitario"
-              htmlFor="edit-hardware-product-unit-price"
-            >
+            <ModalField label="Precio unitario" htmlFor="edit-hardware-product-unit-price">
               <TextField
                 id="edit-hardware-product-unit-price"
                 name="unitPrice"
                 type="number"
-                value={
-                  formik.values.unitPrice
-                }
-                onChange={
-                  formik.handleChange
-                }
+                value={formik.values.unitPrice}
+                onChange={formik.handleChange}
                 onFocus={() => {
                   setIsPriceFocused(true);
                 }}
                 onBlur={(event) => {
-                  setIsPriceFocused(
-                    false,
-                  );
+                  setIsPriceFocused(false);
 
-                  formik.handleBlur(
-                    event,
-                  );
+                  formik.handleBlur(event);
                 }}
                 placeholder="0.00"
-                error={Boolean(
-                  getFieldError(
-                    "unitPrice",
-                  ),
-                )}
-                helperText={getFieldError(
-                  "unitPrice",
-                )}
+                error={Boolean(getFieldError("unitPrice"))}
+                helperText={getFieldError("unitPrice")}
                 disabled={disabled}
                 fullWidth
                 slotProps={{
@@ -538,15 +384,11 @@ export function EditHardwareProductForm({
                   },
 
                   input: {
-                    startAdornment:
-                      showPriceSymbol ? (
-                        <InputAdornment position="start">
-                          {getCurrencySymbol(
-                            formik.values
-                              .currency,
-                          )}
-                        </InputAdornment>
-                      ) : undefined,
+                    startAdornment: showPriceSymbol ? (
+                      <InputAdornment position="start">
+                        {getCurrencySymbol(formik.values.currency)}
+                      </InputAdornment>
+                    ) : undefined,
                   },
                 }}
                 sx={fieldStyles}
@@ -601,12 +443,10 @@ const fieldStyles: SxProps<Theme> = {
 
     fontWeight: 650,
 
-    transition:
-      "all 0.18s ease",
+    transition: "all 0.18s ease",
 
     "& fieldset": {
-      borderColor:
-        colors.cardBorder,
+      borderColor: colors.cardBorder,
     },
 
     "&:hover fieldset": {
@@ -616,20 +456,17 @@ const fieldStyles: SxProps<Theme> = {
     "&.Mui-focused": {
       bgcolor: "#ffffff",
 
-      boxShadow:
-        "0 0 0 3px rgba(146, 64, 14, 0.09)",
+      boxShadow: "0 0 0 3px rgba(146, 64, 14, 0.09)",
     },
 
     "&.Mui-focused fieldset": {
-      borderColor:
-        colors.primary,
+      borderColor: colors.primary,
 
       borderWidth: "1px",
     },
 
     "&.Mui-error fieldset": {
-      borderColor:
-        colors.danger,
+      borderColor: colors.danger,
     },
 
     "&.Mui-disabled": {
@@ -644,55 +481,43 @@ const fieldStyles: SxProps<Theme> = {
 
     padding: "0 12px",
 
-    color:
-      `${colors.text} !important`,
+    color: `${colors.text} !important`,
 
-    WebkitTextFillColor:
-      `${colors.text} !important`,
+    WebkitTextFillColor: `${colors.text} !important`,
 
     "&::placeholder": {
       color: "#94a3b8",
 
-      WebkitTextFillColor:
-        "#94a3b8",
+      WebkitTextFillColor: "#94a3b8",
 
       opacity: 1,
     },
 
     "&:-webkit-autofill": {
-      WebkitBoxShadow:
-        "0 0 0 1000px #ffffff inset",
+      WebkitBoxShadow: "0 0 0 1000px #ffffff inset",
 
-      WebkitTextFillColor:
-        `${colors.text} !important`,
+      WebkitTextFillColor: `${colors.text} !important`,
 
-      caretColor:
-        colors.text,
+      caretColor: colors.text,
     },
   },
 
   "& .MuiSelect-select": {
-    height:
-      `${CONTROL_HEIGHT}px !important`,
+    height: `${CONTROL_HEIGHT}px !important`,
 
-    minHeight:
-      `${CONTROL_HEIGHT}px !important`,
+    minHeight: `${CONTROL_HEIGHT}px !important`,
 
-    boxSizing:
-      "border-box !important",
+    boxSizing: "border-box !important",
 
     display: "flex",
 
     alignItems: "center",
 
-    padding:
-      "0 36px 0 12px !important",
+    padding: "0 36px 0 12px !important",
 
-    color:
-      `${colors.text} !important`,
+    color: `${colors.text} !important`,
 
-    WebkitTextFillColor:
-      `${colors.text} !important`,
+    WebkitTextFillColor: `${colors.text} !important`,
   },
 
   "& .MuiInputAdornment-root": {
@@ -717,21 +542,17 @@ const fieldStyles: SxProps<Theme> = {
     MozAppearance: "textfield",
   },
 
-  "& input[type='number']::-webkit-outer-spin-button":
-    {
-      WebkitAppearance:
-        "none",
+  "& input[type='number']::-webkit-outer-spin-button": {
+    WebkitAppearance: "none",
 
-      margin: 0,
-    },
+    margin: 0,
+  },
 
-  "& input[type='number']::-webkit-inner-spin-button":
-    {
-      WebkitAppearance:
-        "none",
+  "& input[type='number']::-webkit-inner-spin-button": {
+    WebkitAppearance: "none",
 
-      margin: 0,
-    },
+    margin: 0,
+  },
 };
 
 const menuPaperStyles: SxProps<Theme> = {
@@ -743,11 +564,9 @@ const menuPaperStyles: SxProps<Theme> = {
 
   bgcolor: "#ffffff",
 
-  border:
-    `1px solid ${colors.cardBorder}`,
+  border: `1px solid ${colors.cardBorder}`,
 
-  boxShadow:
-    "0 14px 34px rgba(15, 23, 42, 0.16)",
+  boxShadow: "0 14px 34px rgba(15, 23, 42, 0.16)",
 
   "& .MuiMenuItem-root": {
     minHeight: 42,
@@ -763,11 +582,9 @@ const menuPaperStyles: SxProps<Theme> = {
     },
 
     "&.Mui-selected": {
-      bgcolor:
-        colors.primarySoft,
+      bgcolor: colors.primarySoft,
 
-      color:
-        colors.primary,
+      color: colors.primary,
 
       "&:hover": {
         bgcolor: "#fed7aa",
