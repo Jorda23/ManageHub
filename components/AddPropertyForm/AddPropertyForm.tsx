@@ -47,7 +47,7 @@ const initialValues: AddPropertyFormValues = {
   location: "",
   ownerName: "",
   totalPrice: "",
-  currency: "NIO",
+  currency: "USD",
   initialPayment: "",
   nextPaymentDate: "",
   imageUrl: "",

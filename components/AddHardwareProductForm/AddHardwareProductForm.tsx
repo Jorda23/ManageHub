@@ -64,7 +64,7 @@ const initialValues: AddHardwareProductValues = {
   initialStock: "",
   minimumStock: "",
   unitPrice: "",
-  currency: "NIO",
+  currency: "USD",
   inventoryStatus: "Available",
   imageUrl: "",
 };

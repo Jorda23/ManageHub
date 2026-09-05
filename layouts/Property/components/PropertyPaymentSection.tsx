@@ -62,7 +62,7 @@ const initialValues: RegisterPropertyPaymentFormValues = {
   propertyId: "",
   amount: "500",
   paymentMethod: paymentMethods[0] ?? "",
-  currency: "NIO",
+  currency: "USD",
   note: "Abono de cuota",
 };
 

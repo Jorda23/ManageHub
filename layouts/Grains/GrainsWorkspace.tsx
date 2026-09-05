@@ -156,6 +156,7 @@ export function GrainsWorkspace() {
             name: values.name.trim(),
             unit: values.unit.trim(),
             location: values.location.trim(),
+            stock: Number(values.stock),
             minimumStock: Number(values.minimumStock),
             unitPrice: Number(values.unitPrice),
             currency: safeCurrency,

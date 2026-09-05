@@ -54,7 +54,7 @@ const initialValues: AddGrainFormValues = {
   initialStock: "",
   minimumStock: "",
   unitPrice: "",
-  currency: "NIO",
+  currency: "USD",
   imageUrl: "",
 };
 

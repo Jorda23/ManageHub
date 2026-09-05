@@ -175,10 +175,10 @@ export function HardwareWorkspace() {
             name: values.name.trim(),
             detail: values.detail.trim(),
             category: values.category.trim(),
+            stock: Number(values.stock),
             minimumStock: Number(values.minimumStock),
             unitPrice: Number(values.unitPrice),
             currency: safeCurrency,
-            inventoryStatus: values.inventoryStatus,
             imageUrl: values.imageUrl.trim() || null,
           },
         });

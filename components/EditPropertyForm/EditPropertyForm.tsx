@@ -3,11 +3,9 @@
 import { useEffect } from "react";
 
 import { Box, TextField } from "@mui/material";
-
 import type { SxProps, Theme } from "@mui/material/styles";
 
 import dayjs, { type Dayjs } from "dayjs";
-
 import { useFormik } from "formik";
 
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -42,8 +40,13 @@ type EditPropertyFormProps = {
   property: Property | null;
   isSubmitting?: boolean;
   onClose: () => void;
-  onSave: (id: string, values: EditPropertyValues) => void | Promise<void>;
+  onSave: (
+    id: string,
+    values: EditPropertyValues,
+  ) => void | Promise<void>;
 };
+
+const CONTROL_HEIGHT = 42;
 
 export function EditPropertyForm({
   open,
@@ -80,7 +83,8 @@ export function EditPropertyForm({
         identificationNumber: values.identificationNumber.trim(),
         nextPaymentDate: values.nextPaymentDate || null,
         imageUrl: values.imageUrl?.trim() || null,
-        identificationImageUrl: values.identificationImageUrl?.trim() || null,
+        identificationImageUrl:
+          values.identificationImageUrl?.trim() || null,
       });
 
       helpers.resetForm();
@@ -95,20 +99,29 @@ export function EditPropertyForm({
         measure: property.measure,
         location: property.location,
         ownerName: property.ownerName,
-        identificationNumber: property.IdentificationNumber ?? property.identificationNumber ?? "",
+        identificationNumber:
+          property.IdentificationNumber ??
+          property.identificationNumber ??
+          "",
         nextPaymentDate: property.nextPaymentDate
           ? dayjs(property.nextPaymentDate).format("YYYY-MM-DD")
           : "",
         imageUrl: property.imageUrl ?? "",
         identificationImageUrl:
-          property.IdentificationImageUrl ?? property.identificationImageUrl ?? "",
+          property.IdentificationImageUrl ??
+          property.identificationImageUrl ??
+          "",
       });
+
       formik.setTouched({});
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, property]);
 
-  const getFieldError = (field: keyof EditPropertyValues): string | undefined => {
+  const getFieldError = (
+    field: keyof EditPropertyValues,
+  ): string | undefined => {
     if (!formik.touched[field]) {
       return undefined;
     }
@@ -126,7 +139,7 @@ export function EditPropertyForm({
       icon={<FaBuilding size={15} />}
       submitLabel="Guardar cambios"
       submitIcon={<FaSave size={12} />}
-      maxWidth={680}
+      maxWidth={860}
       isSubmitting={isSubmitting}
       onClose={onClose}
       onSubmit={formik.handleSubmit}
@@ -135,7 +148,7 @@ export function EditPropertyForm({
         sx={{
           display: "flex",
           flexDirection: "column",
-          gap: 2,
+          gap: 1.5,
         }}
       >
         <FormSection
@@ -143,8 +156,11 @@ export function EditPropertyForm({
           title="Información del terreno"
           description="Datos generales y ubicación de la propiedad."
         >
-          <Box sx={twoColumnsStyles}>
-            <ModalField label="Nombre de la propiedad" htmlFor="edit-property-name">
+          <Box sx={formGridStyles}>
+            <ModalField
+              label="Nombre de la propiedad"
+              htmlFor="edit-property-name"
+            >
               <TextField
                 id="edit-property-name"
                 name="name"
@@ -161,7 +177,10 @@ export function EditPropertyForm({
               />
             </ModalField>
 
-            <ModalField label="Proyecto" htmlFor="edit-property-project">
+            <ModalField
+              label="Proyecto"
+              htmlFor="edit-property-project"
+            >
               <TextField
                 id="edit-property-project"
                 name="projectName"
@@ -176,10 +195,11 @@ export function EditPropertyForm({
                 sx={fieldStyles}
               />
             </ModalField>
-          </Box>
 
-          <Box sx={twoColumnsStyles}>
-            <ModalField label="Medida" htmlFor="edit-property-measure">
+            <ModalField
+              label="Medida"
+              htmlFor="edit-property-measure"
+            >
               <TextField
                 id="edit-property-measure"
                 name="measure"
@@ -195,7 +215,10 @@ export function EditPropertyForm({
               />
             </ModalField>
 
-            <ModalField label="Ubicación" htmlFor="edit-property-location">
+            <ModalField
+              label="Ubicación"
+              htmlFor="edit-property-location"
+            >
               <TextField
                 id="edit-property-location"
                 name="location"
@@ -212,68 +235,20 @@ export function EditPropertyForm({
             </ModalField>
           </Box>
 
-          <ModalField label="Imagen del terreno" htmlFor="edit-property-image">
-            <ImageUrlField
+          <Box sx={{ mt: 1.5 }}>
+            <ModalField
               label="Imagen del terreno"
-              value={formik.values.imageUrl ?? ""}
-              disabled={disabled}
-              onChange={(imageUrl) => {
-                void formik.setFieldValue("imageUrl", imageUrl);
-              }}
-            />
-          </ModalField>
-        </FormSection>
-
-        <FormSection
-          icon={<FaIdCard size={14} />}
-          title="Datos del propietario"
-          description="Información de la persona asociada al terreno."
-        >
-          <ModalField label="Propietario" htmlFor="edit-property-owner-name">
-            <TextField
-              id="edit-property-owner-name"
-              name="ownerName"
-              value={formik.values.ownerName}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="Ej. Valeria Gómez"
-              error={Boolean(getFieldError("ownerName"))}
-              helperText={getFieldError("ownerName")}
-              disabled={disabled}
-              fullWidth
-              sx={fieldStyles}
-            />
-          </ModalField>
-
-          <Box sx={twoColumnsStyles}>
-            <ModalField
-              label="Número de identificación"
-              htmlFor="edit-property-identification-number"
-            >
-              <TextField
-                id="edit-property-identification-number"
-                name="identificationNumber"
-                value={formik.values.identificationNumber}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                placeholder="Ej. 001-010190-0001A"
-                helperText={getFieldError("identificationNumber")}
-                disabled={disabled}
-                fullWidth
-                sx={fieldStyles}
-              />
-            </ModalField>
-
-            <ModalField
-              label="Documento de identificación"
-              htmlFor="edit-property-identification-image"
+              htmlFor="edit-property-image"
             >
               <ImageUrlField
-                label="Foto del documento"
-                value={formik.values.identificationImageUrl ?? ""}
+                label="Imagen del terreno"
+                value={formik.values.imageUrl ?? ""}
                 disabled={disabled}
                 onChange={(imageUrl) => {
-                  void formik.setFieldValue("identificationImageUrl", imageUrl);
+                  void formik.setFieldValue(
+                    "imageUrl",
+                    imageUrl,
+                  );
                 }}
               />
             </ModalField>
@@ -281,32 +256,103 @@ export function EditPropertyForm({
         </FormSection>
 
         <FormSection
-          icon={<FaSave size={14} />}
-          title="Siguiente pago"
-          description="Programa la fecha del próximo pago."
+          icon={<FaIdCard size={14} />}
+          title="Datos del propietario"
+          description="Información de la persona asociada al terreno."
         >
-          <Box
-            sx={{
-              width: {
-                xs: "100%",
-                sm: "calc(50% - 8px)",
-              },
-            }}
-          >
-            <ModalField label="Próximo pago" htmlFor="edit-property-next-payment-date">
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <Box sx={formGridStyles}>
+            <Box
+              sx={{
+                gridColumn: {
+                  xs: "auto",
+                  md: "1 / -1",
+                },
+              }}
+            >
+              <ModalField
+                label="Propietario"
+                htmlFor="edit-property-owner-name"
+              >
+                <TextField
+                  id="edit-property-owner-name"
+                  name="ownerName"
+                  value={formik.values.ownerName}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  placeholder="Ej. Valeria Gómez"
+                  error={Boolean(
+                    getFieldError("ownerName"),
+                  )}
+                  helperText={
+                    getFieldError("ownerName")
+                  }
+                  disabled={disabled}
+                  fullWidth
+                  sx={fieldStyles}
+                />
+              </ModalField>
+            </Box>
+
+            <ModalField
+              label="Número de identificación"
+              htmlFor="edit-property-identification-number"
+            >
+              <TextField
+                id="edit-property-identification-number"
+                name="identificationNumber"
+                value={
+                  formik.values.identificationNumber
+                }
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                placeholder="Ej. 001-010190-0001A"
+                error={Boolean(
+                  getFieldError(
+                    "identificationNumber",
+                  ),
+                )}
+                helperText={getFieldError(
+                  "identificationNumber",
+                )}
+                disabled={disabled}
+                fullWidth
+                sx={fieldStyles}
+              />
+            </ModalField>
+
+            <ModalField
+              label="Próximo pago"
+              htmlFor="edit-property-next-payment-date"
+            >
+              <LocalizationProvider
+                dateAdapter={AdapterDayjs}
+              >
                 <DatePicker
                   value={
-                    formik.values.nextPaymentDate ? dayjs(formik.values.nextPaymentDate) : null
+                    formik.values.nextPaymentDate
+                      ? dayjs(
+                          formik.values
+                            .nextPaymentDate,
+                        )
+                      : null
                   }
-                  onChange={(date: Dayjs | null) => {
+                  onChange={(
+                    date: Dayjs | null,
+                  ) => {
                     void formik.setFieldValue(
                       "nextPaymentDate",
-                      date ? date.format("YYYY-MM-DD") : "",
+                      date
+                        ? date.format(
+                            "YYYY-MM-DD",
+                          )
+                        : "",
                     );
                   }}
                   onClose={() => {
-                    void formik.setFieldTouched("nextPaymentDate", true);
+                    void formik.setFieldTouched(
+                      "nextPaymentDate",
+                      true,
+                    );
                   }}
                   disabled={disabled}
                   format="DD/MM/YYYY"
@@ -315,14 +361,52 @@ export function EditPropertyForm({
                       id: "edit-property-next-payment-date",
                       name: "nextPaymentDate",
                       fullWidth: true,
-                      error: Boolean(getFieldError("nextPaymentDate")),
-                      helperText: getFieldError("nextPaymentDate"),
-                      sx: fieldStyles,
+                    
+                      error: Boolean(
+                        getFieldError(
+                          "nextPaymentDate",
+                        ),
+                      ),
+                      helperText:
+                        getFieldError(
+                          "nextPaymentDate",
+                        ),
+                      sx: dateFieldStyles,
                     },
                   }}
                 />
               </LocalizationProvider>
             </ModalField>
+
+            <Box
+              sx={{
+                gridColumn: {
+                  xs: "auto",
+                  md: "1 / -1",
+                },
+              }}
+            >
+              <ModalField
+                label="Documento de identificación"
+                htmlFor="edit-property-identification-image"
+              >
+                <ImageUrlField
+                  label="Foto del documento"
+                  value={
+                    formik.values
+                      .identificationImageUrl ??
+                    ""
+                  }
+                  disabled={disabled}
+                  onChange={(imageUrl) => {
+                    void formik.setFieldValue(
+                      "identificationImageUrl",
+                      imageUrl,
+                    );
+                  }}
+                />
+              </ModalField>
+            </Box>
           </Box>
         </FormSection>
       </Box>
@@ -330,81 +414,185 @@ export function EditPropertyForm({
   );
 }
 
-const twoColumnsStyles: SxProps<Theme> = {
+const formGridStyles: SxProps<Theme> = {
   display: "grid",
   gridTemplateColumns: {
     xs: "1fr",
-    sm: "1fr 1fr",
+    md: "repeat(2, minmax(0, 1fr))",
   },
-  gap: 2,
+  gap: 1.5,
   alignItems: "start",
 };
 
 const fieldStyles: SxProps<Theme> = {
   "& .MuiOutlinedInput-root": {
-    minHeight: 48,
+    height: CONTROL_HEIGHT,
+    minHeight: CONTROL_HEIGHT,
     borderRadius: "9px",
     bgcolor: "#ffffff",
     color: colors.text,
     fontSize: 13,
     fontWeight: 650,
     transition: "all 0.18s ease",
+
     "& fieldset": {
       borderColor: colors.cardBorder,
     },
+
     "&:hover fieldset": {
       borderColor: "#93a8d8",
     },
+
     "&.Mui-focused": {
       bgcolor: "#ffffff",
-      boxShadow: "0 0 0 3px rgba(37, 99, 235, 0.09)",
+      boxShadow:
+        "0 0 0 3px rgba(37, 99, 235, 0.09)",
     },
+
     "&.Mui-focused fieldset": {
       borderColor: colors.primaryLight,
       borderWidth: "1px",
     },
+
     "&.Mui-error fieldset": {
       borderColor: colors.danger,
     },
+
     "&.Mui-disabled": {
       bgcolor: "#f8fafc",
     },
   },
+
   "& .MuiInputBase-input": {
+    height: CONTROL_HEIGHT,
+    boxSizing: "border-box",
+    padding: "0 12px",
     color: `${colors.text} !important`,
-    WebkitTextFillColor: `${colors.text} !important`,
-    py: 1.35,
+    WebkitTextFillColor:
+      `${colors.text} !important`,
+
     "&::placeholder": {
       color: "#94a3b8",
       WebkitTextFillColor: "#94a3b8",
       opacity: 1,
     },
+
     "&:-webkit-autofill": {
-      WebkitBoxShadow: "0 0 0 1000px #ffffff inset",
-      WebkitTextFillColor: `${colors.text} !important`,
+      WebkitBoxShadow:
+        "0 0 0 1000px #ffffff inset",
+      WebkitTextFillColor:
+        `${colors.text} !important`,
       caretColor: colors.text,
     },
   },
+
   "& .MuiInputAdornment-root": {
     color: colors.muted,
   },
+
   "& .MuiFormHelperText-root": {
-    minHeight: 16,
+    minHeight: 14,
     ml: 0,
-    mt: 0.55,
+    mt: 0.4,
     color: colors.danger,
     fontSize: 10.5,
     fontWeight: 650,
   },
+
   "& input[type='number']": {
     MozAppearance: "textfield",
   },
-  "& input[type='number']::-webkit-outer-spin-button": {
-    WebkitAppearance: "none",
-    margin: 0,
+
+  "& input[type='number']::-webkit-outer-spin-button":
+    {
+      WebkitAppearance: "none",
+      margin: 0,
+    },
+
+  "& input[type='number']::-webkit-inner-spin-button":
+    {
+      WebkitAppearance: "none",
+      margin: 0,
+    },
+};
+
+const dateFieldStyles: SxProps<Theme> = {
+  "& .MuiInputBase-root": {
+    height: CONTROL_HEIGHT,
+    minHeight: CONTROL_HEIGHT,
+    paddingRight: "6px",
+    borderRadius: "9px",
+    bgcolor: "#ffffff",
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: 650,
+    transition: "all 0.18s ease",
   },
-  "& input[type='number']::-webkit-inner-spin-button": {
-    WebkitAppearance: "none",
-    margin: 0,
+
+  "& .MuiOutlinedInput-input": {
+    height: CONTROL_HEIGHT,
+    boxSizing: "border-box",
+    padding: "0 12px",
+    color: `${colors.text} !important`,
+    WebkitTextFillColor:
+      `${colors.text} !important`,
+    fontSize: 13,
+    fontWeight: 650,
+  },
+
+  "& .MuiOutlinedInput-notchedOutline": {
+    borderColor: colors.cardBorder,
+  },
+
+  "& .MuiInputBase-root:hover .MuiOutlinedInput-notchedOutline":
+    {
+      borderColor: "#93a8d8",
+    },
+
+  "& .MuiInputBase-root.Mui-focused": {
+    bgcolor: "#ffffff",
+    boxShadow:
+      "0 0 0 3px rgba(37, 99, 235, 0.09)",
+  },
+
+  "& .MuiInputBase-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+    {
+      borderColor: colors.primaryLight,
+      borderWidth: "1px",
+    },
+
+  "& .MuiInputBase-root.Mui-error .MuiOutlinedInput-notchedOutline":
+    {
+      borderColor: colors.danger,
+    },
+
+  "& .MuiInputBase-root.Mui-disabled": {
+    bgcolor: "#f8fafc",
+  },
+
+  "& .MuiInputAdornment-root": {
+    height: CONTROL_HEIGHT,
+    maxHeight: CONTROL_HEIGHT,
+    marginLeft: 0,
+    color: colors.muted,
+  },
+
+  "& .MuiIconButton-root": {
+    width: 32,
+    height: 32,
+    padding: "6px",
+  },
+
+  "& .MuiSvgIcon-root": {
+    fontSize: 20,
+  },
+
+  "& .MuiFormHelperText-root": {
+    minHeight: 14,
+    ml: 0,
+    mt: 0.4,
+    color: colors.danger,
+    fontSize: 10.5,
+    fontWeight: 650,
   },
 };

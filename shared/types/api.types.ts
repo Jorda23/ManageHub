@@ -33,10 +33,10 @@ export type UpdateHardwareProductRequest = {
   name: string;
   detail: string;
   category: string;
+  stock: number;
   minimumStock: number;
   unitPrice: number;
   currency: Currency;
-  inventoryStatus: string;
   imageUrl?: string | null;
 };
 
@@ -127,6 +127,7 @@ export type UpdateGrainProductRequest = {
   name: string;
   unit: string;
   location: string;
+  stock: number;
   minimumStock: number;
   unitPrice: number;
   currency: Currency;
