@@ -1,4 +1,4 @@
-import { normalizeCurrency } from "./currency";
+import { currencySymbols, normalizeCurrency } from "./currency";
 
 export type FormatPriceOptions = {
   locale?: string;
@@ -11,14 +11,16 @@ export function formatPrice(value: number, options: FormatPriceOptions = {}): st
   const { locale = "es-US", currency = "USD" } = options;
   const safeCurrency = normalizeCurrency(currency);
 
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency: safeCurrency,
-    ...(options.minimumFractionDigits !== undefined && {
-      minimumFractionDigits: options.minimumFractionDigits,
-    }),
-    ...(options.maximumFractionDigits !== undefined && {
-      maximumFractionDigits: options.maximumFractionDigits,
-    }),
+  const minimumFractionDigits = options.minimumFractionDigits ?? 2;
+  const maximumFractionDigits = options.maximumFractionDigits ?? minimumFractionDigits;
+
+  const quantity = new Intl.NumberFormat(locale, {
+    minimumFractionDigits,
+    maximumFractionDigits,
   }).format(value);
+
+  const symbol = currencySymbols[safeCurrency] ?? safeCurrency;
+  const spacer = safeCurrency === "NIO" ? " " : "";
+
+  return `${symbol}${spacer}${quantity}`;
 }
