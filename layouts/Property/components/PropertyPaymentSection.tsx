@@ -1,4 +1,4 @@
-import type { FormEvent, ReactNode } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 
 import {
   Alert,
@@ -9,6 +9,7 @@ import {
   FormControl,
   FormHelperText,
   MenuItem,
+  MenuList,
   Paper,
   Select,
   TextField,
@@ -17,9 +18,13 @@ import {
 
 import type { SxProps, Theme } from "@mui/material/styles";
 
+import type { MenuListProps } from "@mui/material/MenuList";
+
+import type { SelectProps } from "@mui/material/Select";
+
 import { useFormik } from "formik";
 
-import { FaPlusCircle, FaReceipt } from "react-icons/fa";
+import { FaPlusCircle, FaReceipt, FaSearch } from "react-icons/fa";
 
 import {
   formatCurrency,
@@ -62,7 +67,7 @@ type PropertyPaymentSectionProps = {
 
 const initialValues: RegisterPropertyPaymentFormValues = {
   propertyId: "",
-  amount: "500",
+  amount: "",
   paymentMethod: paymentMethods[0] ?? "",
   currency: "USD",
   note: "Abono de cuota",
@@ -76,6 +81,8 @@ export function PropertyPaymentSection({
     useRegisterPropertyPayment();
 
   const { showSuccess, showError } = useToast();
+
+  const [propertySearch, setPropertySearch] = useState("");
 
   const formik = useFormik<RegisterPropertyPaymentFormValues>({
     initialValues,
@@ -249,6 +256,20 @@ export function PropertyPaymentSection({
 
   const selectedProperty = properties.find((property) => property.id === formik.values.propertyId);
 
+  const normalizedPropertySearch = propertySearch.trim().toLocaleLowerCase();
+
+  const visibleProperties = normalizedPropertySearch
+    ? properties.filter((property) =>
+        `${property.name} ${property.ownerName} ${property.code}`
+          .toLocaleLowerCase()
+          .includes(normalizedPropertySearch),
+      )
+    : properties;
+
+  const selectedPropertyFilteredOut =
+    selectedProperty != null &&
+    !visibleProperties.some((property) => property.id === selectedProperty.id);
+
   const propertyError = formik.touched.propertyId ? formik.errors.propertyId : undefined;
 
   const amountError = formik.touched.amount ? formik.errors.amount : undefined;
@@ -370,14 +391,28 @@ export function PropertyPaymentSection({
               name="propertyId"
               value={formik.values.propertyId}
               displayEmpty
-              MenuProps={{
-                slotProps: {
-                  paper: {
-                    sx: selectMenuSx,
+              MenuProps={
+                {
+                  slotProps: {
+                    paper: {
+                      sx: {
+                        ...selectMenuSx,
+                        maxHeight: "none",
+                        overflowY: "hidden",
+                      },
+                    },
+                    list: {
+                      component: SearchablePropertyMenuList,
+                      searchValue: propertySearch,
+                      onSearchValueChange: setPropertySearch,
+                    },
                   },
-                },
-              }}
+                } as SelectProps["MenuProps"]
+              }
               disabled={isRegisteringPayment}
+              onOpen={() => {
+                setPropertySearch("");
+              }}
               onChange={(event) => {
                 void formik.setFieldValue("propertyId", String(event.target.value));
 
@@ -414,7 +449,17 @@ export function PropertyPaymentSection({
                 Seleccionar propiedad
               </MenuItem>
 
-              {properties.map((property) => (
+              {selectedPropertyFilteredOut && selectedProperty ? (
+                <MenuItem
+                  key={selectedProperty.id}
+                  value={selectedProperty.id}
+                  sx={{ display: "none" }}
+                >
+                  {selectedProperty.name}
+                </MenuItem>
+              ) : null}
+
+              {visibleProperties.map((property) => (
                 <MenuItem key={property.id} value={property.id}>
                   <Typography
                     component="span"
@@ -436,6 +481,28 @@ export function PropertyPaymentSection({
                   </Typography>
                 </MenuItem>
               ))}
+
+              {normalizedPropertySearch && visibleProperties.length === 0 ? (
+                <MenuItem disabled value="">
+                  <Typography
+                    component="span"
+                    sx={{
+                      width: "100%",
+                      py: 1,
+
+                      color: colors.muted,
+
+                      fontSize: 13,
+
+                      fontWeight: 600,
+
+                      textAlign: "center",
+                    }}
+                  >
+                    No se encontraron propiedades
+                  </Typography>
+                </MenuItem>
+              ) : null}
             </Select>
 
             {propertyError && <FormHelperText>{propertyError}</FormHelperText>}
@@ -738,6 +805,86 @@ function FieldLabel({ children }: { children: ReactNode }) {
   );
 }
 
+function SearchablePropertyMenuList({
+  searchValue,
+  onSearchValueChange,
+  children,
+  ...menuListProps
+}: MenuListProps & {
+  searchValue?: string;
+  onSearchValueChange?: (value: string) => void;
+}) {
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        minWidth: 0,
+      }}
+    >
+      <Box
+        sx={{
+          px: 1.25,
+          pt: 1.25,
+          pb: 0.75,
+
+          bgcolor: "#ffffff",
+        }}
+      >
+        <TextField
+          value={searchValue ?? ""}
+          onChange={(event) => onSearchValueChange?.(event.target.value)}
+          onKeyDown={(event) => event.stopPropagation()}
+          placeholder="Buscar propiedad..."
+          fullWidth
+          size="small"
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              width: "100%",
+              borderRadius: "10px",
+              bgcolor: "#fbfdfc",
+              fontSize: 14,
+              fontWeight: 600,
+              color: colors.text,
+              "& fieldset": {
+                borderColor: colors.cardBorder,
+              },
+              "&:hover fieldset": {
+                borderColor: "#94a3b8",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: colors.primaryLight,
+                borderWidth: 1.5,
+              },
+            },
+          }}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <Box
+                  component="span"
+                  sx={{
+                    mr: 1,
+                    display: "flex",
+                    alignItems: "center",
+
+                    color: colors.muted,
+                  }}
+                >
+                  <FaSearch size={14} />
+                </Box>
+              ),
+            },
+          }}
+        />
+      </Box>
+
+      <MenuList {...menuListProps} sx={searchMenuListSx}>
+        {children}
+      </MenuList>
+    </Box>
+  );
+}
+
 function AccountSummary({
   property,
   currency,
@@ -1034,6 +1181,35 @@ function SummaryRow({
     </Box>
   );
 }
+
+const searchMenuListSx: SxProps<Theme> = {
+  maxHeight: 280,
+
+  overflowY: "auto",
+
+  py: 0.5,
+
+  scrollbarWidth: "thin",
+
+  scrollbarColor: `${colors.cardBorder} transparent`,
+
+  "&::-webkit-scrollbar": {
+    width: 6,
+  },
+
+  "&::-webkit-scrollbar-track": {
+    background: "transparent",
+  },
+
+  "&::-webkit-scrollbar-thumb": {
+    backgroundColor: colors.cardBorder,
+    borderRadius: 999,
+  },
+
+  "&::-webkit-scrollbar-thumb:hover": {
+    backgroundColor: colors.muted,
+  },
+};
 
 const inputSx: SxProps<Theme> = {
   width: "100%",
