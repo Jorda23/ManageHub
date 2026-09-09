@@ -1,4 +1,12 @@
-import { FaBuilding, FaHistory, FaLayerGroup, FaTools, FaTractor } from "react-icons/fa";
+import {
+  FaBuilding,
+  FaChartBar,
+  FaHistory,
+  FaLayerGroup,
+  FaTools,
+  FaTractor,
+} from "react-icons/fa";
+import { FaGear } from "react-icons/fa6";
 import type { SidebarSection } from "../types";
 
 /**
@@ -11,7 +19,14 @@ import type { SidebarSection } from "../types";
  * El tipo `AppShellSection` se deriva de `SidebarItemKey`, así al agregar
  * una key el resto del sistema (páginas y sidebar) lo reconoce automáticamente.
  */
-export type SidebarItemKey = "dashboard" | "hardware" | "grains" | "property" | "history";
+export type SidebarItemKey =
+  | "dashboard"
+  | "hardware"
+  | "grains"
+  | "property"
+  | "history"
+  | "reportes"
+  | "settings";
 
 export const sidebarSections: SidebarSection[] = [
   {
@@ -64,6 +79,26 @@ export const sidebarSections: SidebarSection[] = [
         href: "/history",
         icon: FaHistory,
         key: "history",
+      },
+      {
+        label: "Reportes",
+        mobileLabel: "Reportes",
+        href: "/reports",
+        icon: FaChartBar,
+        key: "reportes",
+      },
+    ],
+  },
+  {
+    id: "system",
+    title: "Sistema",
+    items: [
+      {
+        label: "Configuración",
+        mobileLabel: "Config.",
+        href: "/settings",
+        icon: FaGear,
+        key: "settings",
       },
     ],
   },

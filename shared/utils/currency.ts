@@ -61,7 +61,7 @@ export function getCurrencySymbol(currency: unknown): string {
   return currencySymbols[normalizeCurrency(currency)] ?? "C$";
 }
 
-export const EXCHANGE_RATE_NIO_PER_USD = 36.5;
+export const EXCHANGE_RATE_NIO_PER_USD = 36.6243;
 
 export function convertCurrency(
   amount: number,

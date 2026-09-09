@@ -376,3 +376,117 @@ export type PaymentHistoryFilters = {
   page?: number;
   limit?: number;
 };
+
+export type BackupModuleName = "hardware" | "grains" | "property";
+
+export type BackupExportPayload = {
+  exportedAt: string;
+  application: string;
+  version: string;
+  modules: Partial<Record<BackupModuleName, unknown[]>>;
+};
+
+export type SystemInfo = {
+  application: string;
+  version: string;
+  databaseConnected: boolean;
+  modules: string[];
+};
+
+export type ReportFilters = {
+  from?: string;
+  to?: string;
+};
+
+export type ReportStatus = "Pagado" | "Pendiente" | "Atrasado" | "Al día";
+
+export type ReportModule = "hardware" | "grains" | "property";
+
+export type SaleReportRow = {
+  id: string;
+  date: string;
+  customer: string;
+  items: string;
+  total: number;
+  currency: Currency;
+  paymentMethod: string;
+  status: ReportStatus;
+  module: ReportModule;
+};
+
+export type SoldPropertyRow = {
+  id: string;
+  date: string | null;
+  property: string;
+  customer: string;
+  price: number;
+  currency: Currency;
+  status: ReportStatus;
+};
+
+export type PropertyPaymentRow = {
+  id: string;
+  date: string;
+  customer: string;
+  property: string;
+  amount: number;
+  currency: Currency;
+  paymentMethod: string;
+};
+
+export type PendingAccountRow = {
+  id: string;
+  customer: string;
+  property: string;
+  pendingBalance: number;
+  currency: Currency;
+  nextPaymentDate: string | null;
+  status: ReportStatus;
+};
+
+export type InventoryRow = {
+  id: string;
+  product: string;
+  category: string;
+  quantity: number;
+  unit: string;
+  price: number;
+  currency: Currency;
+  totalValue: number;
+};
+
+export type GrainSaleRow = {
+  id: string;
+  date: string;
+  product: string;
+  unit: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+  currency: Currency;
+  paymentMethod: string;
+};
+
+export type HardwareSaleRow = {
+  id: string;
+  date: string;
+  product: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+  currency: Currency;
+  paymentMethod: string;
+};
+
+export type ProfitModuleRow = {
+  id: ReportModule;
+  module: string;
+  income: number;
+  count: number;
+  currency: Currency;
+};
+
+export type ProfitReportData = {
+  modules: ProfitModuleRow[];
+  costsAvailable: false;
+};

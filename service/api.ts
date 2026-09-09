@@ -36,6 +36,15 @@ import type {
   HardwareProductFilters,
   GrainProductFilters,
   PropertyFilters,
+  ReportFilters,
+  SaleReportRow,
+  SoldPropertyRow,
+  PropertyPaymentRow,
+  PendingAccountRow,
+  InventoryRow,
+  GrainSaleRow,
+  HardwareSaleRow,
+  ProfitReportData,
 } from "../shared/types/api.types";
 
 export const login = async (request: LoginRequest): Promise<LoginResponse> => {
@@ -173,4 +182,46 @@ export const getPaymentHistory = async (
 
 export const getDashboard = async (): Promise<DashboardResponse> => {
   return apiClient.get<DashboardResponse>("/api/dashboard");
+};
+
+export const getSalesReport = async (filters?: ReportFilters): Promise<SaleReportRow[]> => {
+  return apiClient.get<SaleReportRow[]>("/api/reports/sales", { params: filters });
+};
+
+export const getSoldPropertiesReport = async (
+  filters?: ReportFilters,
+): Promise<SoldPropertyRow[]> => {
+  return apiClient.get<SoldPropertyRow[]>("/api/reports/sold-properties", { params: filters });
+};
+
+export const getPropertyPaymentsReport = async (
+  filters?: ReportFilters,
+): Promise<PropertyPaymentRow[]> => {
+  return apiClient.get<PropertyPaymentRow[]>("/api/reports/property-payments", {
+    params: filters,
+  });
+};
+
+export const getPendingAccountsReport = async (
+  filters?: ReportFilters,
+): Promise<PendingAccountRow[]> => {
+  return apiClient.get<PendingAccountRow[]>("/api/reports/pending-accounts", { params: filters });
+};
+
+export const getInventoryReport = async (): Promise<InventoryRow[]> => {
+  return apiClient.get<InventoryRow[]>("/api/reports/inventory");
+};
+
+export const getGrainSalesReport = async (filters?: ReportFilters): Promise<GrainSaleRow[]> => {
+  return apiClient.get<GrainSaleRow[]>("/api/reports/grain-sales", { params: filters });
+};
+
+export const getHardwareSalesReport = async (
+  filters?: ReportFilters,
+): Promise<HardwareSaleRow[]> => {
+  return apiClient.get<HardwareSaleRow[]>("/api/reports/hardware-sales", { params: filters });
+};
+
+export const getProfitReport = async (filters?: ReportFilters): Promise<ProfitReportData> => {
+  return apiClient.get<ProfitReportData>("/api/reports/profit", { params: filters });
 };

@@ -3,3 +3,4 @@ export * from "./hardware.data";
 export * from "./grains.data";
 export * from "./appShell.data";
 export * from "./saleWorkspace.data";
+export * from "./settings.data";
