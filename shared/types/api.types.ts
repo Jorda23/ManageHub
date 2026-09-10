@@ -398,7 +398,12 @@ export type ReportFilters = {
   to?: string;
 };
 
-export type ReportStatus = "Pagado" | "Pendiente" | "Atrasado" | "Al día";
+export type ReportStatus =
+  | "Pagado"
+  | "Pendiente"
+  | "Atrasado"
+  | "Al día"
+  | "Vendido a crédito";
 
 export type ReportModule = "hardware" | "grains" | "property";
 

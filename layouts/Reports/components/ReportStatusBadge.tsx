@@ -30,10 +30,21 @@ const STATUS_STYLES: Record<
     color: colors.primaryLight,
     borderColor: colors.primaryBorder,
   },
+  "Vendido a crédito": {
+    bgcolor: colors.primarySoft,
+    color: colors.primary,
+    borderColor: colors.primaryBorder,
+  },
+};
+
+const FALLBACK_STYLE = {
+  bgcolor: colors.tableHead,
+  color: colors.muted,
+  borderColor: colors.cardBorder,
 };
 
 export function ReportStatusBadge({ status }: Readonly<{ status: ReportStatus }>) {
-  const style = STATUS_STYLES[status];
+  const style = STATUS_STYLES[status] ?? FALLBACK_STYLE;
 
   return (
     <Chip
