@@ -61,6 +61,26 @@ export const AppShell = ({ children, active }: AppShellProps) => {
               overflowY: "auto",
               WebkitOverflowScrolling: "touch",
               overscrollBehavior: "contain",
+              scrollbarGutter: "stable",
+              scrollbarWidth: "thin",
+              scrollbarColor: "#94a3b8 #e2e8f0",
+
+              "&::-webkit-scrollbar": {
+                width: 8,
+              },
+
+              "&::-webkit-scrollbar-track": {
+                bgcolor: "#e2e8f0",
+              },
+
+              "&::-webkit-scrollbar-thumb": {
+                bgcolor: "#94a3b8",
+                borderRadius: 999,
+              },
+
+              "&::-webkit-scrollbar-thumb:hover": {
+                bgcolor: "#64748b",
+              },
               pt: {
                 xs: "80px",
                 lg: 0,

@@ -58,7 +58,7 @@ const initialValues: AddGrainFormValues = {
   imageUrl: "",
 };
 
-const unitOptions = ["Libra", "Kilogramo", "Saco", "Quintal"];
+const unitOptions = ["Unidad", "Docena", "Caja", "Libra", "Kilogramo", "Saco", "Quintal"];
 
 export function AddGrainForm({
   onCancel,
@@ -310,7 +310,7 @@ export function AddGrainForm({
         </ModalField>
 
         <Box sx={twoColumnsStyles}>
-          <ModalField label="Unidad" htmlFor="grain-unit">
+          <ModalField label="Presentación" htmlFor="grain-unit">
             <TextField
               id="grain-unit"
               name="unit"

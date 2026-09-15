@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 
 import {
   Alert,
@@ -83,6 +83,103 @@ export function PropertyPaymentSection({
   const { showSuccess, showError } = useToast();
 
   const [propertySearch, setPropertySearch] = useState("");
+
+  const paymentFormRef = useRef<HTMLFormElement>(null);
+
+  const [scrollIndicator, setScrollIndicator] = useState({
+    isVisible: false,
+    thumbHeight: 0,
+    thumbOffset: 0,
+  });
+
+  useEffect(() => {
+    const form = paymentFormRef.current;
+
+    if (!form) {
+      return;
+    }
+
+    let frameId: number | undefined;
+
+    const updateScrollIndicator = () => {
+      const { clientHeight, scrollHeight, scrollTop } = form;
+
+      if (clientHeight === 0 || scrollHeight <= clientHeight + 1) {
+        setScrollIndicator((current) =>
+          current.isVisible ? { isVisible: false, thumbHeight: 0, thumbOffset: 0 } : current,
+        );
+
+        return;
+      }
+
+      const trackHeight = Math.max(clientHeight - 24, 0);
+
+      const thumbHeight = Math.min(
+        trackHeight,
+        Math.max(24, Math.round((clientHeight / scrollHeight) * trackHeight)),
+      );
+
+      const maxScroll = scrollHeight - clientHeight;
+
+      const thumbOffset = Math.round(
+        ((trackHeight - thumbHeight) * Math.min(Math.max(scrollTop / maxScroll, 0), 1)),
+      );
+
+      setScrollIndicator((current) => {
+        if (
+          current.isVisible &&
+          current.thumbHeight === thumbHeight &&
+          current.thumbOffset === thumbOffset
+        ) {
+          return current;
+        }
+
+        return { isVisible: true, thumbHeight, thumbOffset };
+      });
+    };
+
+    const scheduleUpdate = () => {
+      if (frameId !== undefined) {
+        cancelAnimationFrame(frameId);
+      }
+
+      frameId = requestAnimationFrame(updateScrollIndicator);
+    };
+
+    const resizeObserver =
+      typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(scheduleUpdate);
+
+    resizeObserver?.observe(form);
+
+    Array.from(form.children).forEach((child) => resizeObserver?.observe(child));
+
+    const mutationObserver =
+      typeof MutationObserver === "undefined"
+        ? undefined
+        : new MutationObserver(scheduleUpdate);
+
+    mutationObserver?.observe(form, { childList: true, subtree: true, characterData: true });
+
+    form.addEventListener("scroll", scheduleUpdate, { passive: true });
+
+    window.addEventListener("resize", scheduleUpdate);
+
+    scheduleUpdate();
+
+    return () => {
+      if (frameId !== undefined) {
+        cancelAnimationFrame(frameId);
+      }
+
+      resizeObserver?.disconnect();
+
+      mutationObserver?.disconnect();
+
+      form.removeEventListener("scroll", scheduleUpdate);
+
+      window.removeEventListener("resize", scheduleUpdate);
+    };
+  }, []);
 
   const formik = useFormik<RegisterPropertyPaymentFormValues>({
     initialValues,
@@ -282,18 +379,11 @@ export function PropertyPaymentSection({
         width: "100%",
         minWidth: 0,
 
-        height: {
-          xs: "auto",
-          lg: "100%",
-        },
-
-        maxHeight: {
-          xs: "none",
-          lg: "calc(100vh - 220px)",
-        },
-
         display: "flex",
         flexDirection: "column",
+        flex: 1,
+        minHeight: 0,
+        maxHeight: "100%",
 
         overflow: "hidden",
 
@@ -307,8 +397,6 @@ export function PropertyPaymentSection({
       <Divider />
 
       <Box
-        component="form"
-        onSubmit={handleSubmit}
         sx={{
           width: "100%",
           minWidth: 0,
@@ -316,56 +404,80 @@ export function PropertyPaymentSection({
           flex: 1,
           minHeight: 0,
 
-          overflowY: {
-            xs: "visible",
-            lg: "auto",
-          },
+          position: "relative",
 
-          overflowX: "hidden",
-
-          p: {
-            xs: 1.8,
-            sm: 2.25,
-            md: 2.5,
-          },
-
-          display: "grid",
-
-          gridTemplateColumns: {
-            xs: "minmax(0, 1fr)",
-            md: "repeat(2, minmax(0, 1fr))",
-          },
-
-          gap: {
-            xs: 1.75,
-            md: 2,
-          },
-
-          alignItems: "start",
-
-          scrollbarWidth: "thin",
-
-          scrollbarColor: `${colors.cardBorder} transparent`,
-
-          "&::-webkit-scrollbar": {
-            width: 6,
-          },
-
-          "&::-webkit-scrollbar-track": {
-            background: "transparent",
-          },
-
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: colors.cardBorder,
-
-            borderRadius: 999,
-          },
-
-          "&::-webkit-scrollbar-thumb:hover": {
-            backgroundColor: colors.muted,
-          },
+          display: "flex",
         }}
       >
+        <Box
+          ref={paymentFormRef}
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{
+            width: "100%",
+            minWidth: 0,
+
+            flex: 1,
+            minHeight: 0,
+
+            overflowY: "auto",
+
+            overflowX: "hidden",
+
+            p: {
+              xs: 1.8,
+              sm: 2.25,
+              md: 2.5,
+            },
+
+            pr: {
+              xs: 3.2,
+              sm: 3.65,
+              md: 3.9,
+            },
+
+            pb: {
+              xs: 4,
+              sm: 4.5,
+            },
+
+            display: "grid",
+
+            gridTemplateColumns: {
+              xs: "minmax(0, 1fr)",
+              md: "repeat(2, minmax(0, 1fr))",
+            },
+
+            gap: {
+              xs: 1.75,
+              md: 2,
+            },
+
+            alignItems: "start",
+
+            scrollbarWidth: "thin",
+
+            scrollbarColor: `${colors.cardBorder} transparent`,
+
+            "&::-webkit-scrollbar": {
+              width: 6,
+            },
+
+            "&::-webkit-scrollbar-track": {
+              background: "transparent",
+            },
+
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: colors.cardBorder,
+
+              borderRadius: 999,
+            },
+
+            "&::-webkit-scrollbar-thumb:hover": {
+              backgroundColor: colors.muted,
+            },
+          }}
+        >
         {formik.status && (
           <Alert
             severity="error"
@@ -772,6 +884,35 @@ export function PropertyPaymentSection({
         >
           {isRegisteringPayment ? "Registrando abono..." : "Registrar abono"}
         </Button>
+        </Box>
+
+        {scrollIndicator.isVisible && (
+          <Box
+            aria-hidden="true"
+            sx={{
+              position: "absolute",
+              top: 12,
+              right: 5,
+              bottom: 12,
+              width: 4,
+              pointerEvents: "none",
+              borderRadius: 999,
+              bgcolor: "rgba(100, 116, 139, 0.12)",
+              zIndex: 1,
+            }}
+          >
+            <Box
+              sx={{
+                width: "100%",
+                height: scrollIndicator.thumbHeight,
+                transform: `translateY(${scrollIndicator.thumbOffset}px)`,
+                borderRadius: "inherit",
+                bgcolor: "rgba(71, 85, 105, 0.64)",
+                transition: "transform 120ms ease-out, height 120ms ease-out",
+              }}
+            />
+          </Box>
+        )}
       </Box>
     </PropertySectionCard>
   );

@@ -47,7 +47,7 @@ type EditGrainProductFormProps = {
   onSave: (id: string, values: EditGrainProductValues) => void | Promise<void>;
 };
 
-const unitOptions = ["Libra", "Kilogramo", "Saco", "Quintal"];
+const unitOptions = ["Unidad", "Docena", "Caja", "Libra", "Kilogramo", "Saco", "Quintal"];
 
 const CONTROL_HEIGHT = 42;
 
@@ -202,7 +202,7 @@ export function EditGrainProductForm({
               />
             </ModalField>
 
-            <ModalField label="Unidad" htmlFor="edit-grain-unit">
+            <ModalField label="Presentación" htmlFor="edit-grain-unit">
               <TextField
                 id="edit-grain-unit"
                 name="unit"
