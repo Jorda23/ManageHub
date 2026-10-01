@@ -11,6 +11,7 @@ import {
   FaHome,
   FaMapMarkerAlt,
   FaRulerCombined,
+  FaTrash,
 } from "react-icons/fa";
 
 import { getPendingAmount, getStatusColors, type PropertyItem } from "@/shared/data/property.data";
@@ -23,12 +24,14 @@ type PropertyCardProps = {
   property: PropertyItem;
   onClick?: (property: PropertyItem) => void;
   onEdit?: (property: PropertyItem) => void;
+  onDelete?: (property: PropertyItem) => void;
 };
 
 export const PropertyCard = memo(function PropertyCard({
   property,
   onClick,
   onEdit,
+  onDelete,
 }: Readonly<PropertyCardProps>) {
   const pendingAmount = getPendingAmount(property);
 
@@ -92,7 +95,12 @@ export const PropertyCard = memo(function PropertyCard({
         },
       }}
     >
-      <PropertyImage property={property} statusColors={statusColors} onEdit={onEdit} />
+      <PropertyImage
+        property={property}
+        statusColors={statusColors}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />
 
       <Box
         sx={{
@@ -122,14 +130,39 @@ export const PropertyCard = memo(function PropertyCard({
 
 type StatusColors = ReturnType<typeof getStatusColors>;
 
+const actionButtonSx = {
+  width: 30,
+  height: 30,
+  bgcolor: "rgba(255,255,255,0.92)",
+  border: "1px solid rgba(255,255,255,0.65)",
+  color: colors.text,
+  boxShadow: "0 4px 12px rgba(15,23,42,0.12)",
+
+  "&:hover": {
+    bgcolor: "#ffffff",
+    color: colors.primary,
+  },
+} as const;
+
+const actionButtonDangerSx = {
+  ...actionButtonSx,
+
+  "&:hover": {
+    bgcolor: colors.danger,
+    color: "#ffffff",
+  },
+} as const;
+
 function PropertyImage({
   property,
   statusColors,
   onEdit,
+  onDelete,
 }: {
   property: PropertyItem;
   statusColors: StatusColors;
   onEdit?: (property: PropertyItem) => void;
+  onDelete?: (property: PropertyItem) => void;
 }) {
   const hasImage = Boolean(property.imageUrl?.trim());
 
@@ -206,34 +239,47 @@ function PropertyImage({
         }}
       />
 
-      {onEdit && (
-        <IconButton
-          type="button"
-          size="small"
-          aria-label={`Editar ${property.name}`}
-          onClick={(event) => {
-            event.stopPropagation();
-            onEdit(property);
-          }}
+      {(onEdit || onDelete) && (
+        <Box
           sx={{
             position: "absolute",
             top: 10,
             right: 10,
-            width: 30,
-            height: 30,
-            bgcolor: "rgba(255,255,255,0.92)",
-            border: "1px solid rgba(255,255,255,0.65)",
-            color: colors.text,
-            boxShadow: "0 4px 12px rgba(15,23,42,0.12)",
-
-            "&:hover": {
-              bgcolor: "#ffffff",
-              color: colors.primary,
-            },
+            display: "flex",
+            alignItems: "center",
+            gap: 0.5,
           }}
         >
-          <FaEdit size={12} />
-        </IconButton>
+          {onDelete && (
+            <IconButton
+              type="button"
+              size="small"
+              aria-label={`Eliminar ${property.name}`}
+              onClick={(event) => {
+                event.stopPropagation();
+                onDelete(property);
+              }}
+              sx={actionButtonDangerSx}
+            >
+              <FaTrash size={12} />
+            </IconButton>
+          )}
+
+          {onEdit && (
+            <IconButton
+              type="button"
+              size="small"
+              aria-label={`Editar ${property.name}`}
+              onClick={(event) => {
+                event.stopPropagation();
+                onEdit(property);
+              }}
+              sx={actionButtonSx}
+            >
+              <FaEdit size={12} />
+            </IconButton>
+          )}
+        </Box>
       )}
     </Box>
   );

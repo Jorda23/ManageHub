@@ -16,6 +16,7 @@ import { formatCurrency } from "@/shared";
 export const HardwareProductCard = memo(function HardwareProductCard({
   product,
   onEdit,
+  onDelete,
 }: Readonly<HardwareProductCardProps>) {
   const isLowStock = product.status === "lowStock" || product.stock <= product.minStock;
 
@@ -93,7 +94,12 @@ export const HardwareProductCard = memo(function HardwareProductCard({
             },
           }}
         >
-          <ProductHeader product={product} isLowStock={isLowStock} onEdit={onEdit} />
+          <ProductHeader
+            product={product}
+            isLowStock={isLowStock}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
 
           <Box
             sx={{

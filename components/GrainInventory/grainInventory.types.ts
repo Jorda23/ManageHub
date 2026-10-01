@@ -27,11 +27,13 @@ export type GrainInventoryProps = {
   onAddProduct: () => void;
   onRegisterSale?: () => void;
   onEditProduct?: (product: GrainInventoryItem) => void;
+  onDeleteProduct?: (product: GrainInventoryItem) => void;
 };
 
 export type GrainProductCardProps = {
   product: GrainInventoryItem;
   onEdit?: (product: GrainInventoryItem) => void;
+  onDelete?: (product: GrainInventoryItem) => void;
 };
 
 export type ProductImageProps = {
@@ -43,6 +45,7 @@ export type ProductCardHeaderProps = {
   product: GrainInventoryItem;
   isLowStock: boolean;
   onEdit?: (product: GrainInventoryItem) => void;
+  onDelete?: (product: GrainInventoryItem) => void;
 };
 
 export type StockProgressProps = {

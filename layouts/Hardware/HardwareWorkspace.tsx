@@ -6,11 +6,13 @@ import { Box, Dialog } from "@mui/material";
 
 import {
   useCreateHardwareProduct,
+  useDeleteHardwareProduct,
   useHardwareProducts,
   useUpdateHardwareProduct,
 } from "@/hook/useHardware";
 
 import {
+  ConfirmDialog,
   LoadingState,
   RegisterHardwareSaleForm,
   HardwareInventory,
@@ -21,6 +23,8 @@ import {
   EditHardwareProductValues,
   useToast,
 } from "@/components";
+
+import { resolveDeleteErrorMessage } from "@/shared/utils/apiError";
 
 import type { HardwareProduct, HardwareProductFilters } from "@/shared/types/api.types";
 
@@ -82,9 +86,14 @@ export function HardwareWorkspace() {
   const { mutateAsync: updateHardwareProduct, isPending: isUpdatingProduct } =
     useUpdateHardwareProduct();
 
+  const { mutateAsync: deleteHardwareProduct, isPending: isDeletingProduct } =
+    useDeleteHardwareProduct();
+
   const { showSuccess, showError } = useToast();
 
   const [editingProduct, setEditingProduct] = useState<HardwareProduct | null>(null);
+
+  const [deletingProduct, setDeletingProduct] = useState<HardwareInventoryItem | null>(null);
 
   const [activeTab, setActiveTab] = useState<HardwareWorkspaceTab>("inventory");
   const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
@@ -195,6 +204,31 @@ export function HardwareWorkspace() {
     [updateHardwareProduct, showSuccess, showError],
   );
 
+  const handleDeleteProduct = useCallback(
+    async (): Promise<void> => {
+      if (!deletingProduct) {
+        return;
+      }
+
+      try {
+        await deleteHardwareProduct(deletingProduct.id);
+
+        showSuccess("Producto de ferretería eliminado correctamente.");
+
+        setDeletingProduct(null);
+      } catch (error) {
+        showError(
+          resolveDeleteErrorMessage(error, {
+            conflict: "No se pudo eliminar el producto porque tiene ventas registradas.",
+            notFound: "El producto ya no existe.",
+            fallback: "No se pudo eliminar el producto.",
+          }),
+        );
+      }
+    },
+    [deleteHardwareProduct, deletingProduct, showSuccess, showError],
+  );
+
   if (isLoadingProducts) {
     return <LoadingState message="Cargando módulo de Ferretería..." />;
   }
@@ -271,6 +305,9 @@ export function HardwareWorkspace() {
                 void fetchNextPage();
               }}
               onEditProduct={handleEditProduct}
+              onDeleteProduct={(product) => {
+                setDeletingProduct(product);
+              }}
               onRegisterSale={() => setIsSaleModalOpen(true)}
               onAddProduct={() => {
                 setActiveTab("create");
@@ -295,6 +332,20 @@ export function HardwareWorkspace() {
             setEditingProduct(null);
           }}
           onSave={handleUpdateProduct}
+        />
+
+        <ConfirmDialog
+          open={Boolean(deletingProduct)}
+          title="Eliminar producto"
+          description={`¿Seguro que deseas eliminar "${deletingProduct?.name ?? ""}"? Esta acción no se puede deshacer.`}
+          confirmLabel="Eliminar"
+          isPending={isDeletingProduct}
+          onClose={() => {
+            setDeletingProduct(null);
+          }}
+          onConfirm={() => {
+            void handleDeleteProduct();
+          }}
         />
 
         <Dialog

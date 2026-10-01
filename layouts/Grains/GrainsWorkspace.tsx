@@ -4,9 +4,15 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Box, Dialog } from "@mui/material";
 
-import { useCreateGrainProduct, useGrainProducts, useUpdateGrainProduct } from "@/hook/useGrains";
+import {
+  useCreateGrainProduct,
+  useDeleteGrainProduct,
+  useGrainProducts,
+  useUpdateGrainProduct,
+} from "@/hook/useGrains";
 
 import {
+  ConfirmDialog,
   LoadingState,
   RegisterGrainSaleForm,
   AddGrainForm,
@@ -15,6 +21,8 @@ import {
   EditGrainProductValues,
   useToast,
 } from "@/components";
+
+import { resolveDeleteErrorMessage } from "@/shared/utils/apiError";
 
 import type { GrainProduct, GrainProductFilters } from "@/shared/types/api.types";
 
@@ -74,12 +82,16 @@ export function GrainsWorkspace() {
 
   const { mutateAsync: updateGrainProduct, isPending: isUpdatingProduct } = useUpdateGrainProduct();
 
+  const { mutateAsync: deleteGrainProduct, isPending: isDeletingProduct } = useDeleteGrainProduct();
+
   const { showSuccess, showError } = useToast();
 
   const [activeTab, setActiveTab] = useState<GrainsWorkspaceTab>("inventory");
   const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
 
   const [editingProduct, setEditingProduct] = useState<GrainProduct | null>(null);
+
+  const [deletingProduct, setDeletingProduct] = useState<GrainInventoryItem | null>(null);
 
   const toItems = useCallback((list: GrainProduct[]): GrainInventoryItem[] => {
     return list.map((product) => {
@@ -176,6 +188,31 @@ export function GrainsWorkspace() {
     [updateGrainProduct, showSuccess, showError],
   );
 
+  const handleDeleteProduct = useCallback(
+    async (): Promise<void> => {
+      if (!deletingProduct) {
+        return;
+      }
+
+      try {
+        await deleteGrainProduct(deletingProduct.id);
+
+        showSuccess("Producto de granos eliminado correctamente.");
+
+        setDeletingProduct(null);
+      } catch (error) {
+        showError(
+          resolveDeleteErrorMessage(error, {
+            conflict: "No se pudo eliminar el producto porque tiene ventas registradas.",
+            notFound: "El producto ya no existe.",
+            fallback: "No se pudo eliminar el producto.",
+          }),
+        );
+      }
+    },
+    [deleteGrainProduct, deletingProduct, showSuccess, showError],
+  );
+
   if (isLoadingProducts) {
     return <LoadingState message="Cargando módulo de granos..." />;
   }
@@ -236,6 +273,9 @@ export function GrainsWorkspace() {
                 void fetchNextPage();
               }}
               onEditProduct={handleEditProduct}
+              onDeleteProduct={(product) => {
+                setDeletingProduct(product);
+              }}
               onRegisterSale={() => setIsSaleModalOpen(true)}
               onAddProduct={() => {
                 setActiveTab("create");
@@ -260,6 +300,20 @@ export function GrainsWorkspace() {
             setEditingProduct(null);
           }}
           onSave={handleUpdateProduct}
+        />
+
+        <ConfirmDialog
+          open={Boolean(deletingProduct)}
+          title="Eliminar producto"
+          description={`¿Seguro que deseas eliminar "${deletingProduct?.name ?? ""}"? Esta acción no se puede deshacer.`}
+          confirmLabel="Eliminar"
+          isPending={isDeletingProduct}
+          onClose={() => {
+            setDeletingProduct(null);
+          }}
+          onConfirm={() => {
+            void handleDeleteProduct();
+          }}
         />
 
         <Dialog

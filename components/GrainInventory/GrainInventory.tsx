@@ -71,6 +71,7 @@ export function GrainInventory({
   onLoadMore,
   onAddProduct,
   onEditProduct,
+  onDeleteProduct,
   onRegisterSale,
 }: Readonly<GrainInventoryProps>) {
   const { rootRef, sentinelRef } = useInfiniteScroll<HTMLDivElement>({
@@ -131,7 +132,12 @@ export function GrainInventory({
           }}
         >
           {products.map((product) => (
-            <GrainProductCard key={product.id} product={product} onEdit={onEditProduct} />
+            <GrainProductCard
+              key={product.id}
+              product={product}
+              onEdit={onEditProduct}
+              onDelete={onDeleteProduct}
+            />
           ))}
         </Box>
 

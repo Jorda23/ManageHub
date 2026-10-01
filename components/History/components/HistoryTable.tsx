@@ -4,6 +4,7 @@ import {
   Box,
   Chip,
   CircularProgress,
+  IconButton,
   Paper,
   Table,
   TableBody,
@@ -11,8 +12,11 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Tooltip,
   Typography,
 } from "@mui/material";
+
+import { FaTrash } from "react-icons/fa";
 
 import { colors, palette } from "@/theme/sharedColors";
 
@@ -27,6 +31,8 @@ type HistoryTableProps = {
   hasMore?: boolean;
   isLoadingMore?: boolean;
   onLoadMore?: () => void;
+  onDeletePayment?: (item: PaymentHistoryItem) => void;
+  isDeletingPaymentId?: string | null;
 };
 
 const TYPE_LABELS = {
@@ -58,6 +64,8 @@ export function HistoryTable({
   hasMore = false,
   isLoadingMore = false,
   onLoadMore,
+  onDeletePayment,
+  isDeletingPaymentId = null,
 }: Readonly<HistoryTableProps>) {
   const { rootRef, sentinelRef } = useInfiniteScroll<HTMLDivElement>({
     hasMore,
@@ -66,6 +74,9 @@ export function HistoryTable({
       onLoadMore?.();
     },
   });
+
+  const isDeletable = (item: PaymentHistoryItem): boolean =>
+    Boolean(onDeletePayment) && item.type === "Property";
 
   return (
     <TableContainer
@@ -111,18 +122,22 @@ export function HistoryTable({
       >
         <TableHead>
           <TableRow>
-            <HeaderCell width="17%">Fecha</HeaderCell>
+            <HeaderCell width="16%">Fecha</HeaderCell>
 
-            <HeaderCell width="12%">Tipo</HeaderCell>
+            <HeaderCell width="11%">Tipo</HeaderCell>
 
-            <HeaderCell width="26%">Descripción</HeaderCell>
+            <HeaderCell width="23%">Descripción</HeaderCell>
 
-            <HeaderCell width="17%">Detalle</HeaderCell>
+            <HeaderCell width="16%">Detalle</HeaderCell>
 
-            <HeaderCell width="16%">Método de pago</HeaderCell>
+            <HeaderCell width="15%">Método de pago</HeaderCell>
 
-            <HeaderCell width="12%" align="right">
+            <HeaderCell width="13%" align="right">
               Monto
+            </HeaderCell>
+
+            <HeaderCell width="6%" align="right">
+              Acciones
             </HeaderCell>
           </TableRow>
         </TableHead>
@@ -240,6 +255,44 @@ export function HistoryTable({
                     })}
                   </Typography>
                 </TableCell>
+
+                <TableCell align="right">
+                  {isDeletable(item) ? (
+                    <Tooltip title="Eliminar abono">
+                      <span>
+                        <IconButton
+                          type="button"
+                          size="small"
+                          aria-label={`Eliminar abono de ${item.name}`}
+                          disabled={isDeletingPaymentId === item.id}
+                          onClick={() => {
+                            onDeletePayment?.(item);
+                          }}
+                          sx={{
+                            width: 28,
+                            height: 28,
+                            color: colors.muted,
+
+                            "&:hover": {
+                              bgcolor: colors.dangerSoft,
+                              color: colors.danger,
+                            },
+
+                            "&.Mui-disabled": {
+                              opacity: 0.5,
+                            },
+                          }}
+                        >
+                          {isDeletingPaymentId === item.id ? (
+                            <CircularProgress size={13} thickness={5} />
+                          ) : (
+                            <FaTrash size={11} />
+                          )}
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                  ) : null}
+                </TableCell>
               </TableRow>
             );
           })}
@@ -247,7 +300,7 @@ export function HistoryTable({
           {isLoadingMore ? (
             <TableRow>
               <TableCell
-                colSpan={6}
+                colSpan={7}
                 sx={{
                   border: 0,
                   py: 1.75,
@@ -269,7 +322,7 @@ export function HistoryTable({
           {hasMore ? (
             <TableRow aria-hidden="true">
               <TableCell
-                colSpan={6}
+                colSpan={7}
                 sx={{
                   border: 0,
                   p: 0,

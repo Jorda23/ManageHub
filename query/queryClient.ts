@@ -21,6 +21,10 @@ const handleApiError = (error: unknown) => {
       console.error("Resource not found");
       break;
 
+    case 409:
+      console.error("Conflicting resource state");
+      break;
+
     case 500:
       console.error("Server error");
       break;
@@ -44,7 +48,13 @@ export const queryClient = new QueryClient({
         if (error instanceof AxiosError) {
           const status = error.response?.status;
 
-          if (status === 400 || status === 401 || status === 403 || status === 404) {
+          if (
+            status === 400 ||
+            status === 401 ||
+            status === 403 ||
+            status === 404 ||
+            status === 409
+          ) {
             return false;
           }
         }

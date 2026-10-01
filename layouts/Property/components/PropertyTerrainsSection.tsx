@@ -26,6 +26,7 @@ type PropertyTerrainsSectionProps = {
   onAddProperty: () => void;
   onRegisterPayment?: () => void;
   onEditProperty?: (property: PropertyItem) => void;
+  onDeleteProperty?: (property: PropertyItem) => void;
 };
 
 const actionButtonSx = {
@@ -88,6 +89,7 @@ export function PropertyTerrainsSection({
   onAddProperty,
   onRegisterPayment,
   onEditProperty,
+  onDeleteProperty,
 }: Readonly<PropertyTerrainsSectionProps>) {
   const { rootRef, sentinelRef } = useInfiniteScroll<HTMLDivElement>({
     hasMore,
@@ -148,7 +150,12 @@ export function PropertyTerrainsSection({
           }}
         >
           {properties.map((property) => (
-            <PropertyCard key={property.id} property={property} onEdit={onEditProperty} />
+            <PropertyCard
+              key={property.id}
+              property={property}
+              onEdit={onEditProperty}
+              onDelete={onDeleteProperty}
+            />
           ))}
         </Box>
 

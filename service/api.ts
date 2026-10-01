@@ -78,6 +78,10 @@ export const updateHardwareProduct = async (
   );
 };
 
+export const deleteHardwareProduct = async (id: string): Promise<void> => {
+  await apiClient.delete<void>(`/api/hardware/products/${id}`);
+};
+
 export const registerHardwareSale = async (
   request: RegisterHardwareSaleRequest,
 ): Promise<RegisterHardwareSaleResponse> => {
@@ -118,6 +122,10 @@ export const updateGrainProduct = async (
   );
 };
 
+export const deleteGrainProduct = async (id: string): Promise<void> => {
+  await apiClient.delete<void>(`/api/grains/products/${id}`);
+};
+
 export const registerGrainSale = async (
   request: RegisterGrainSaleRequest,
 ): Promise<RegisterGrainSaleResponse> => {
@@ -155,6 +163,10 @@ export const updateProperty = async (
   );
 };
 
+export const deleteProperty = async (id: string): Promise<void> => {
+  await apiClient.delete<void>(`/api/properties/${id}`);
+};
+
 export const registerPropertyPayment = async (
   request: RegisterPropertyPaymentRequest,
 ): Promise<RegisterPropertyPaymentResponse> => {
@@ -170,6 +182,10 @@ export const getPropertyPayments = async (
   return apiClient.get<PropertyPayment[]>("/api/properties/payments", {
     params: filters,
   });
+};
+
+export const deletePropertyPayment = async (id: string): Promise<void> => {
+  await apiClient.delete<void>(`/api/properties/payments/${id}`);
 };
 
 export const getPaymentHistory = async (

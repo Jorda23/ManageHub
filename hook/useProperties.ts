@@ -2,6 +2,8 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 
 import {
   createProperty,
+  deleteProperty,
+  deletePropertyPayment,
   getProperties,
   getPropertyPayments,
   registerPropertyPayment,
@@ -24,6 +26,8 @@ import type {
 const PROPERTIES_QUERY_KEY = ["properties"];
 
 const PROPERTY_PAYMENTS_QUERY_KEY = ["property-payments"];
+
+const PAYMENT_HISTORY_QUERY_KEY = ["payment-history"];
 
 export const useProperties = (filters?: PropertyFilters) => {
   return useQuery<Property[], Error>({
@@ -68,6 +72,19 @@ export const useUpdateProperty = () => {
   );
 };
 
+export const useDeleteProperty = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, string>({
+    mutationFn: deleteProperty,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: PROPERTIES_QUERY_KEY,
+      });
+    },
+  });
+};
+
 export const useRegisterPropertyPayment = () => {
   const queryClient = useQueryClient();
 
@@ -80,6 +97,27 @@ export const useRegisterPropertyPayment = () => {
         }),
         queryClient.invalidateQueries({
           queryKey: PROPERTY_PAYMENTS_QUERY_KEY,
+        }),
+      ]);
+    },
+  });
+};
+
+export const useDeletePropertyPayment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, string>({
+    mutationFn: deletePropertyPayment,
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: PROPERTIES_QUERY_KEY,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: PROPERTY_PAYMENTS_QUERY_KEY,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: PAYMENT_HISTORY_QUERY_KEY,
         }),
       ]);
     },

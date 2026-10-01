@@ -16,6 +16,7 @@ import { StockProgress } from "./StockProgress";
 export const GrainProductCard = memo(function GrainProductCard({
   product,
   onEdit,
+  onDelete,
 }: Readonly<GrainProductCardProps>) {
   const stockReference = product.initialStock > 0 ? product.initialStock : product.stock;
   const stockPercent =
@@ -85,7 +86,12 @@ export const GrainProductCard = memo(function GrainProductCard({
             overflow: "hidden",
           }}
         >
-          <ProductCardHeader product={product} isLowStock={isLowStock} onEdit={onEdit} />
+          <ProductCardHeader
+            product={product}
+            isLowStock={isLowStock}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
 
           <Box
             sx={{

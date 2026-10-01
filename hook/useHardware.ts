@@ -2,6 +2,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 
 import {
   createHardwareProduct,
+  deleteHardwareProduct,
   getHardwareProducts,
   getHardwareSales,
   registerHardwareSale,
@@ -62,6 +63,19 @@ export const useUpdateHardwareProduct = () => {
     { id: string; request: UpdateHardwareProductRequest }
   >({
     mutationFn: ({ id, request }) => updateHardwareProduct(id, request),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: HARDWARE_PRODUCTS_QUERY_KEY,
+      });
+    },
+  });
+};
+
+export const useDeleteHardwareProduct = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, string>({
+    mutationFn: deleteHardwareProduct,
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: HARDWARE_PRODUCTS_QUERY_KEY,

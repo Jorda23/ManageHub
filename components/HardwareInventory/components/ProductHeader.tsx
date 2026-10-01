@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, IconButton, Typography } from "@mui/material";
-import { FaCheckCircle, FaEdit, FaExclamationTriangle } from "react-icons/fa";
+import { FaCheckCircle, FaEdit, FaExclamationTriangle, FaTrash } from "react-icons/fa";
 
 import type { HardwareProductHeaderProps } from "../hardwareInventory.types";
 import { colors } from "@/theme/sharedColors";
@@ -10,6 +10,7 @@ export function ProductHeader({
   product,
   isLowStock,
   onEdit,
+  onDelete,
 }: Readonly<HardwareProductHeaderProps>) {
   return (
     <Box
@@ -92,40 +93,82 @@ export function ProductHeader({
         </Typography>
       </Box>
 
-      <IconButton
-        type="button"
-        size="small"
-        aria-label={`Editar ${product.name}`}
-        disabled={!onEdit}
-        onClick={() => {
-          onEdit?.(product);
-        }}
+      <Box
         sx={{
-          width: {
-            xs: 25,
-            sm: 27,
-            md: 29,
-          },
-          height: {
-            xs: 25,
-            sm: 27,
-            md: 29,
-          },
-          bgcolor: colors.tableHead,
-          border: `1px solid ${colors.cardBorder}`,
-          color: colors.muted,
+          display: "flex",
+          alignItems: "center",
+          gap: 0.35,
           flexShrink: 0,
-          "&:hover": {
-            bgcolor: colors.primarySoft,
-            color: colors.primary,
-          },
-          "&.Mui-disabled": {
-            opacity: 0.5,
-          },
         }}
       >
-        <FaEdit size={11} />
-      </IconButton>
+        <IconButton
+          type="button"
+          size="small"
+          aria-label={`Editar ${product.name}`}
+          disabled={!onEdit}
+          onClick={() => {
+            onEdit?.(product);
+          }}
+          sx={{
+            width: {
+              xs: 25,
+              sm: 27,
+              md: 29,
+            },
+            height: {
+              xs: 25,
+              sm: 27,
+              md: 29,
+            },
+            bgcolor: colors.tableHead,
+            border: `1px solid ${colors.cardBorder}`,
+            color: colors.muted,
+            flexShrink: 0,
+            "&:hover": {
+              bgcolor: colors.primarySoft,
+              color: colors.primary,
+            },
+            "&.Mui-disabled": {
+              opacity: 0.5,
+            },
+          }}
+        >
+          <FaEdit size={11} />
+        </IconButton>
+
+        {onDelete && (
+          <IconButton
+            type="button"
+            size="small"
+            aria-label={`Eliminar ${product.name}`}
+            onClick={() => {
+              onDelete(product);
+            }}
+            sx={{
+              width: {
+                xs: 25,
+                sm: 27,
+                md: 29,
+              },
+              height: {
+                xs: 25,
+                sm: 27,
+                md: 29,
+              },
+              bgcolor: colors.tableHead,
+              border: `1px solid ${colors.cardBorder}`,
+              color: colors.muted,
+              flexShrink: 0,
+              "&:hover": {
+                bgcolor: colors.dangerSoft,
+                color: colors.danger,
+              },
+            }}
+          >
+            <FaTrash size={11} />
+          </IconButton>
+        )}
+      </Box>
     </Box>
   );
 }

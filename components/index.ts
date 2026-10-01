@@ -1,5 +1,6 @@
 export * from "./AppShell";
 export * from "./AuthGuard";
+export * from "./ConfirmDialog";
 export * from "./EmptyState";
 export * from "./FormModal";
 export * from "./GrainInventory";

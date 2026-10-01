@@ -8,15 +8,18 @@ import dayjs from "dayjs";
 
 import { PropertyHeroHeader, PropertyPaymentSection, PropertyTerrainsSection } from "./components";
 
-import { useProperties, useUpdateProperty } from "@/hook/useProperties";
+import { useDeleteProperty, useProperties, useUpdateProperty } from "@/hook/useProperties";
 
 import {
+  ConfirmDialog,
   LoadingState,
   type PropertyItem,
   EditPropertyForm,
   EditPropertyValues,
   useToast,
 } from "@/components";
+
+import { resolveDeleteErrorMessage } from "@/shared/utils/apiError";
 
 import type { Property, PropertyFilters } from "@/shared/types/api.types";
 
@@ -73,12 +76,16 @@ export function PropertyWorkspace() {
 
   const { mutateAsync: updateProperty, isPending: isUpdatingProperty } = useUpdateProperty();
 
+  const { mutateAsync: deleteProperty, isPending: isDeletingProperty } = useDeleteProperty();
+
   const { showSuccess, showError } = useToast();
 
   const [activeTab, setActiveTab] = useState<PropertyWorkspaceTab>("properties");
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
+
+  const [deletingProperty, setDeletingProperty] = useState<PropertyItem | null>(null);
 
   const toItems = useCallback((list: Property[]): PropertyItem[] => {
     return list.map((property) => {
@@ -158,6 +165,31 @@ export function PropertyWorkspace() {
     [updateProperty, showSuccess, showError],
   );
 
+  const handleDeleteProperty = useCallback(
+    async (): Promise<void> => {
+      if (!deletingProperty) {
+        return;
+      }
+
+      try {
+        await deleteProperty(deletingProperty.id);
+
+        showSuccess("Terreno eliminado correctamente.");
+
+        setDeletingProperty(null);
+      } catch (error) {
+        showError(
+          resolveDeleteErrorMessage(error, {
+            conflict: "No se pudo eliminar el terreno porque tiene abonos registrados.",
+            notFound: "El terreno ya no existe.",
+            fallback: "No se pudo eliminar el terreno.",
+          }),
+        );
+      }
+    },
+    [deleteProperty, deletingProperty, showSuccess, showError],
+  );
+
   if (isLoadingProperties) {
     return <LoadingState message="Cargando módulo de propiedades..." />;
   }
@@ -206,6 +238,9 @@ export function PropertyWorkspace() {
               void fetchNextPage();
             }}
             onEditProperty={handleEditProperty}
+            onDeleteProperty={(property) => {
+              setDeletingProperty(property);
+            }}
             onRegisterPayment={() => setIsPaymentModalOpen(true)}
             onAddProperty={() => {
               setActiveTab("create");
@@ -230,6 +265,20 @@ export function PropertyWorkspace() {
             setEditingProperty(null);
           }}
           onSave={handleUpdateProperty}
+        />
+
+        <ConfirmDialog
+          open={Boolean(deletingProperty)}
+          title="Eliminar terreno"
+          description={`¿Seguro que deseas eliminar "${deletingProperty?.name ?? ""}"? Esta acción no se puede deshacer.`}
+          confirmLabel="Eliminar"
+          isPending={isDeletingProperty}
+          onClose={() => {
+            setDeletingProperty(null);
+          }}
+          onConfirm={() => {
+            void handleDeleteProperty();
+          }}
         />
 
         <Dialog

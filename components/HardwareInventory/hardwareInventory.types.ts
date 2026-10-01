@@ -27,11 +27,13 @@ export type HardwareInventoryProps = {
   onAddProduct: () => void;
   onRegisterSale?: () => void;
   onEditProduct?: (product: HardwareInventoryItem) => void;
+  onDeleteProduct?: (product: HardwareInventoryItem) => void;
 };
 
 export type HardwareProductCardProps = {
   product: HardwareInventoryItem;
   onEdit?: (product: HardwareInventoryItem) => void;
+  onDelete?: (product: HardwareInventoryItem) => void;
 };
 
 export type HardwareProductImageProps = {
@@ -43,6 +45,7 @@ export type HardwareProductHeaderProps = {
   product: HardwareInventoryItem;
   isLowStock: boolean;
   onEdit?: (product: HardwareInventoryItem) => void;
+  onDelete?: (product: HardwareInventoryItem) => void;
 };
 
 export type HardwareStockProgressProps = {

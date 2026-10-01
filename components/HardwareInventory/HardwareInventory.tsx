@@ -71,6 +71,7 @@ export function HardwareInventory({
   onLoadMore,
   onAddProduct,
   onEditProduct,
+  onDeleteProduct,
   onRegisterSale,
 }: Readonly<HardwareInventoryProps>) {
   const { rootRef, sentinelRef } = useInfiniteScroll<HTMLDivElement>({
@@ -131,7 +132,12 @@ export function HardwareInventory({
           }}
         >
           {products.map((product) => (
-            <HardwareProductCard key={product.id} product={product} onEdit={onEditProduct} />
+            <HardwareProductCard
+              key={product.id}
+              product={product}
+              onEdit={onEditProduct}
+              onDelete={onDeleteProduct}
+            />
           ))}
         </Box>
 

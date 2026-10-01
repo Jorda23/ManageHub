@@ -2,6 +2,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 
 import {
   createGrainProduct,
+  deleteGrainProduct,
   getGrainProducts,
   getGrainSales,
   registerGrainSale,
@@ -62,6 +63,19 @@ export const useUpdateGrainProduct = () => {
     { id: string; request: UpdateGrainProductRequest }
   >({
     mutationFn: ({ id, request }) => updateGrainProduct(id, request),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: GRAIN_PRODUCTS_QUERY_KEY,
+      });
+    },
+  });
+};
+
+export const useDeleteGrainProduct = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, string>({
+    mutationFn: deleteGrainProduct,
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: GRAIN_PRODUCTS_QUERY_KEY,
