@@ -188,30 +188,27 @@ export function GrainsWorkspace() {
     [updateGrainProduct, showSuccess, showError],
   );
 
-  const handleDeleteProduct = useCallback(
-    async (): Promise<void> => {
-      if (!deletingProduct) {
-        return;
-      }
+  const handleDeleteProduct = useCallback(async (): Promise<void> => {
+    if (!deletingProduct) {
+      return;
+    }
 
-      try {
-        await deleteGrainProduct(deletingProduct.id);
+    try {
+      await deleteGrainProduct(deletingProduct.id);
 
-        showSuccess("Producto de granos eliminado correctamente.");
+      showSuccess("Producto de granos eliminado correctamente.");
 
-        setDeletingProduct(null);
-      } catch (error) {
-        showError(
-          resolveDeleteErrorMessage(error, {
-            conflict: "No se pudo eliminar el producto porque tiene ventas registradas.",
-            notFound: "El producto ya no existe.",
-            fallback: "No se pudo eliminar el producto.",
-          }),
-        );
-      }
-    },
-    [deleteGrainProduct, deletingProduct, showSuccess, showError],
-  );
+      setDeletingProduct(null);
+    } catch (error) {
+      showError(
+        resolveDeleteErrorMessage(error, {
+          conflict: "No se pudo eliminar el producto porque tiene ventas registradas.",
+          notFound: "El producto ya no existe.",
+          fallback: "No se pudo eliminar el producto.",
+        }),
+      );
+    }
+  }, [deleteGrainProduct, deletingProduct, showSuccess, showError]);
 
   if (isLoadingProducts) {
     return <LoadingState message="Cargando módulo de granos..." />;

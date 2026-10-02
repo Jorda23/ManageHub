@@ -251,7 +251,8 @@ export function RegisterSaleForm<TProduct extends SaleFormProduct>({
   );
 
   const selectedProductFilteredOut =
-    selectedProduct != null && !visibleProducts.some((product) => product.id === selectedProduct.id);
+    selectedProduct != null &&
+    !visibleProducts.some((product) => product.id === selectedProduct.id);
 
   const numericQuantity = Number(formik.values.quantity);
 
@@ -470,7 +471,11 @@ export function RegisterSaleForm<TProduct extends SaleFormProduct>({
               )}
 
               {selectedProductFilteredOut && selectedProduct ? (
-                <MenuItem key={selectedProduct.id} value={selectedProduct.id} sx={{ display: "none" }}>
+                <MenuItem
+                  key={selectedProduct.id}
+                  value={selectedProduct.id}
+                  sx={{ display: "none" }}
+                >
                   {productOptionLabel(selectedProduct)}
                 </MenuItem>
               ) : null}

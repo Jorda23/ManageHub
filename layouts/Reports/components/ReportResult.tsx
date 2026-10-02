@@ -64,11 +64,7 @@ export function ReportResult<T>({
       {hasRows ? (
         <ReportTable columns={columns} rows={rows} minWidth={minWidth} />
       ) : (
-        <ReportEmptyState
-          title={emptyTitle}
-          description={emptyDescription}
-          icon={emptyIcon}
-        />
+        <ReportEmptyState title={emptyTitle} description={emptyDescription} icon={emptyIcon} />
       )}
     </Box>
   );

@@ -25,10 +25,7 @@ export function HardwareSalesReport({ filters }: Readonly<HardwareSalesReportPro
   const { data = [], isLoading, isError, refetch } = useHardwareSalesReport(filters);
 
   const summary = useMemo(
-    () =>
-      summarizeAmounts(
-        data.map((row) => ({ amount: row.total, currency: row.currency })),
-      ),
+    () => summarizeAmounts(data.map((row) => ({ amount: row.total, currency: row.currency }))),
     [data],
   );
 
@@ -39,9 +36,7 @@ export function HardwareSalesReport({ filters }: Readonly<HardwareSalesReportPro
       iconColor: colors.green,
       label: "Total vendido",
       value: formatSummaryValue(summary),
-      detail: summary.isMixed
-        ? formatSummaryDetail(summary)
-        : `${summary.count} ventas`,
+      detail: summary.isMixed ? formatSummaryDetail(summary) : `${summary.count} ventas`,
     },
     {
       icon: <FaTools size={18} />,

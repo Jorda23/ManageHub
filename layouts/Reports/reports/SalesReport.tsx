@@ -6,13 +6,14 @@ import { FaChartLine, FaCoins, FaReceipt } from "react-icons/fa";
 
 import { colors } from "@/theme/sharedColors";
 
-import {
-  ReportCellText,
-  ReportResult,
-  ReportStatusBadge,
-} from "../components";
+import { ReportCellText, ReportResult, ReportStatusBadge } from "../components";
 import { useSalesReport } from "../hooks/useReports";
-import type { ReportColumn, ReportFilters, ReportMetric, SaleReportRow } from "../types/reports.types";
+import type {
+  ReportColumn,
+  ReportFilters,
+  ReportMetric,
+  SaleReportRow,
+} from "../types/reports.types";
 import { formatMoney, formatReportDate } from "../utils/format";
 import { formatSummaryDetail, formatSummaryValue, summarizeAmounts } from "../utils/reportStats";
 
@@ -24,10 +25,7 @@ export function SalesReport({ filters }: Readonly<SalesReportProps>) {
   const { data = [], isLoading, isError, refetch } = useSalesReport(filters);
 
   const summary = useMemo(
-    () =>
-      summarizeAmounts(
-        data.map((row) => ({ amount: row.total, currency: row.currency })),
-      ),
+    () => summarizeAmounts(data.map((row) => ({ amount: row.total, currency: row.currency }))),
     [data],
   );
 
@@ -38,9 +36,7 @@ export function SalesReport({ filters }: Readonly<SalesReportProps>) {
       iconColor: colors.green,
       label: "Total ventas",
       value: formatSummaryValue(summary),
-      detail: summary.isMixed
-        ? formatSummaryDetail(summary)
-        : `${summary.count} operaciones`,
+      detail: summary.isMixed ? formatSummaryDetail(summary) : `${summary.count} operaciones`,
     },
     {
       icon: <FaReceipt size={18} />,

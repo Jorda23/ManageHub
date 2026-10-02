@@ -14,11 +14,7 @@ type ReportEmptyStateProps = {
   icon?: ReactNode;
 };
 
-export function ReportEmptyState({
-  title,
-  description,
-  icon,
-}: Readonly<ReportEmptyStateProps>) {
+export function ReportEmptyState({ title, description, icon }: Readonly<ReportEmptyStateProps>) {
   return (
     <Box
       sx={{

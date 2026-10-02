@@ -26,9 +26,7 @@ export function PendingAccountsReport({ filters }: Readonly<PendingAccountsRepor
 
   const summary = useMemo(
     () =>
-      summarizeAmounts(
-        data.map((row) => ({ amount: row.pendingBalance, currency: row.currency })),
-      ),
+      summarizeAmounts(data.map((row) => ({ amount: row.pendingBalance, currency: row.currency }))),
     [data],
   );
 
@@ -44,9 +42,7 @@ export function PendingAccountsReport({ filters }: Readonly<PendingAccountsRepor
       iconColor: colors.orange,
       label: "Total pendiente",
       value: formatSummaryValue(summary),
-      detail: summary.isMixed
-        ? formatSummaryDetail(summary)
-        : `${summary.count} cuentas`,
+      detail: summary.isMixed ? formatSummaryDetail(summary) : `${summary.count} cuentas`,
     },
     {
       icon: <FaUserClock size={18} />,

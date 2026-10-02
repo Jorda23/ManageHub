@@ -122,7 +122,7 @@ export function PropertyPaymentSection({
       const maxScroll = scrollHeight - clientHeight;
 
       const thumbOffset = Math.round(
-        ((trackHeight - thumbHeight) * Math.min(Math.max(scrollTop / maxScroll, 0), 1)),
+        (trackHeight - thumbHeight) * Math.min(Math.max(scrollTop / maxScroll, 0), 1),
       );
 
       setScrollIndicator((current) => {
@@ -154,9 +154,7 @@ export function PropertyPaymentSection({
     Array.from(form.children).forEach((child) => resizeObserver?.observe(child));
 
     const mutationObserver =
-      typeof MutationObserver === "undefined"
-        ? undefined
-        : new MutationObserver(scheduleUpdate);
+      typeof MutationObserver === "undefined" ? undefined : new MutationObserver(scheduleUpdate);
 
     mutationObserver?.observe(form, { childList: true, subtree: true, characterData: true });
 
@@ -478,412 +476,417 @@ export function PropertyPaymentSection({
             },
           }}
         >
-        {formik.status && (
-          <Alert
-            severity="error"
+          {formik.status && (
+            <Alert
+              severity="error"
+              sx={{
+                gridColumn: "1 / -1",
+              }}
+            >
+              {formik.status}
+            </Alert>
+          )}
+
+          <Box
             sx={{
               gridColumn: "1 / -1",
+              minWidth: 0,
             }}
           >
-            {formik.status}
-          </Alert>
-        )}
+            <FieldLabel>Propiedad</FieldLabel>
 
-        <Box
-          sx={{
-            gridColumn: "1 / -1",
-            minWidth: 0,
-          }}
-        >
-          <FieldLabel>Propiedad</FieldLabel>
-
-          <FormControl fullWidth size="small" error={Boolean(propertyError)}>
-            <Select
-              id="propertyId"
-              name="propertyId"
-              value={formik.values.propertyId}
-              displayEmpty
-              MenuProps={
-                {
-                  slotProps: {
-                    paper: {
-                      sx: {
-                        ...selectMenuSx,
-                        maxHeight: "none",
-                        overflowY: "hidden",
+            <FormControl fullWidth size="small" error={Boolean(propertyError)}>
+              <Select
+                id="propertyId"
+                name="propertyId"
+                value={formik.values.propertyId}
+                displayEmpty
+                MenuProps={
+                  {
+                    slotProps: {
+                      paper: {
+                        sx: {
+                          ...selectMenuSx,
+                          maxHeight: "none",
+                          overflowY: "hidden",
+                        },
+                      },
+                      list: {
+                        component: SearchablePropertyMenuList,
+                        searchValue: propertySearch,
+                        onSearchValueChange: setPropertySearch,
                       },
                     },
-                    list: {
-                      component: SearchablePropertyMenuList,
-                      searchValue: propertySearch,
-                      onSearchValueChange: setPropertySearch,
+                  } as SelectProps["MenuProps"]
+                }
+                disabled={isRegisteringPayment}
+                onOpen={() => {
+                  setPropertySearch("");
+                }}
+                onChange={(event) => {
+                  void formik.setFieldValue("propertyId", String(event.target.value));
+
+                  formik.setStatus(undefined);
+                }}
+                onBlur={() => {
+                  void formik.setFieldTouched("propertyId", true);
+                }}
+                sx={selectSx}
+                renderValue={(value) => {
+                  if (!value) {
+                    return (
+                      <Typography
+                        component="span"
+                        sx={{
+                          color: colors.muted,
+
+                          fontSize: 14,
+
+                          fontWeight: 600,
+                        }}
+                      >
+                        Seleccionar propiedad
+                      </Typography>
+                    );
+                  }
+
+                  const property = properties.find((item) => item.id === String(value));
+
+                  return property ? `${property.name} - ${property.ownerName}` : String(value);
+                }}
+              >
+                <MenuItem value="" disabled>
+                  Seleccionar propiedad
+                </MenuItem>
+
+                {selectedPropertyFilteredOut && selectedProperty ? (
+                  <MenuItem
+                    key={selectedProperty.id}
+                    value={selectedProperty.id}
+                    sx={{ display: "none" }}
+                  >
+                    {selectedProperty.name}
+                  </MenuItem>
+                ) : null}
+
+                {visibleProperties.map((property) => (
+                  <MenuItem key={property.id} value={property.id}>
+                    <Typography
+                      component="span"
+                      sx={{
+                        minWidth: 0,
+
+                        fontSize: 14,
+
+                        fontWeight: 600,
+
+                        overflow: "hidden",
+
+                        textOverflow: "ellipsis",
+
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {property.name} - {property.ownerName}
+                    </Typography>
+                  </MenuItem>
+                ))}
+
+                {normalizedPropertySearch && visibleProperties.length === 0 ? (
+                  <MenuItem disabled value="">
+                    <Typography
+                      component="span"
+                      sx={{
+                        width: "100%",
+                        py: 1,
+
+                        color: colors.muted,
+
+                        fontSize: 13,
+
+                        fontWeight: 600,
+
+                        textAlign: "center",
+                      }}
+                    >
+                      No se encontraron propiedades
+                    </Typography>
+                  </MenuItem>
+                ) : null}
+              </Select>
+
+              {propertyError && <FormHelperText>{propertyError}</FormHelperText>}
+            </FormControl>
+          </Box>
+
+          <Box sx={{ minWidth: 0 }}>
+            <FieldLabel>Monto del abono</FieldLabel>
+
+            <TextField
+              id="amount"
+              name="amount"
+              type="number"
+              size="small"
+              value={formik.values.amount}
+              onChange={(event) => {
+                formik.handleChange(event);
+
+                formik.setStatus(undefined);
+              }}
+              onBlur={formik.handleBlur}
+              placeholder="0.00"
+              error={Boolean(amountError)}
+              helperText={amountError}
+              disabled={isRegisteringPayment}
+              slotProps={{
+                htmlInput: {
+                  min: 0.01,
+                  step: 0.01,
+                  inputMode: "decimal",
+                },
+              }}
+              fullWidth
+              sx={inputSx}
+            />
+          </Box>
+
+          <Box sx={{ minWidth: 0 }}>
+            <FieldLabel>Método de pago</FieldLabel>
+
+            <FormControl fullWidth size="small" error={Boolean(paymentMethodError)}>
+              <Select
+                id="paymentMethod"
+                name="paymentMethod"
+                value={formik.values.paymentMethod}
+                displayEmpty
+                MenuProps={{
+                  slotProps: {
+                    paper: {
+                      sx: selectMenuSx,
                     },
                   },
-                } as SelectProps["MenuProps"]
-              }
-              disabled={isRegisteringPayment}
-              onOpen={() => {
-                setPropertySearch("");
-              }}
-              onChange={(event) => {
-                void formik.setFieldValue("propertyId", String(event.target.value));
+                }}
+                disabled={isRegisteringPayment}
+                onChange={(event) => {
+                  void formik.setFieldValue("paymentMethod", String(event.target.value));
 
-                formik.setStatus(undefined);
-              }}
-              onBlur={() => {
-                void formik.setFieldTouched("propertyId", true);
-              }}
-              sx={selectSx}
-              renderValue={(value) => {
-                if (!value) {
-                  return (
-                    <Typography
-                      component="span"
-                      sx={{
-                        color: colors.muted,
+                  formik.setStatus(undefined);
+                }}
+                onBlur={() => {
+                  void formik.setFieldTouched("paymentMethod", true);
+                }}
+                sx={selectSx}
+                renderValue={(value) => {
+                  if (!value) {
+                    return (
+                      <Typography
+                        component="span"
+                        sx={{
+                          color: colors.muted,
 
-                        fontSize: 14,
+                          fontSize: 14,
 
-                        fontWeight: 600,
-                      }}
-                    >
-                      Seleccionar propiedad
-                    </Typography>
-                  );
-                }
+                          fontWeight: 600,
+                        }}
+                      >
+                        Seleccionar método
+                      </Typography>
+                    );
+                  }
 
-                const property = properties.find((item) => item.id === String(value));
-
-                return property ? `${property.name} - ${property.ownerName}` : String(value);
-              }}
-            >
-              <MenuItem value="" disabled>
-                Seleccionar propiedad
-              </MenuItem>
-
-              {selectedPropertyFilteredOut && selectedProperty ? (
-                <MenuItem
-                  key={selectedProperty.id}
-                  value={selectedProperty.id}
-                  sx={{ display: "none" }}
-                >
-                  {selectedProperty.name}
+                  return String(value);
+                }}
+              >
+                <MenuItem value="" disabled>
+                  Seleccionar método
                 </MenuItem>
-              ) : null}
 
-              {visibleProperties.map((property) => (
-                <MenuItem key={property.id} value={property.id}>
-                  <Typography
-                    component="span"
-                    sx={{
-                      minWidth: 0,
+                {paymentMethods?.map((method) => (
+                  <MenuItem key={method} value={method}>
+                    {method}
+                  </MenuItem>
+                ))}
+              </Select>
 
-                      fontSize: 14,
+              {paymentMethodError && <FormHelperText>{paymentMethodError}</FormHelperText>}
+            </FormControl>
+          </Box>
 
-                      fontWeight: 600,
+          <Box sx={{ minWidth: 0 }}>
+            <FieldLabel>Moneda</FieldLabel>
 
-                      overflow: "hidden",
-
-                      textOverflow: "ellipsis",
-
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {property.name} - {property.ownerName}
-                  </Typography>
-                </MenuItem>
-              ))}
-
-              {normalizedPropertySearch && visibleProperties.length === 0 ? (
-                <MenuItem disabled value="">
-                  <Typography
-                    component="span"
-                    sx={{
-                      width: "100%",
-                      py: 1,
-
-                      color: colors.muted,
-
-                      fontSize: 13,
-
-                      fontWeight: 600,
-
-                      textAlign: "center",
-                    }}
-                  >
-                    No se encontraron propiedades
-                  </Typography>
-                </MenuItem>
-              ) : null}
-            </Select>
-
-            {propertyError && <FormHelperText>{propertyError}</FormHelperText>}
-          </FormControl>
-        </Box>
-
-        <Box sx={{ minWidth: 0 }}>
-          <FieldLabel>Monto del abono</FieldLabel>
-
-          <TextField
-            id="amount"
-            name="amount"
-            type="number"
-            size="small"
-            value={formik.values.amount}
-            onChange={(event) => {
-              formik.handleChange(event);
-
-              formik.setStatus(undefined);
-            }}
-            onBlur={formik.handleBlur}
-            placeholder="0.00"
-            error={Boolean(amountError)}
-            helperText={amountError}
-            disabled={isRegisteringPayment}
-            slotProps={{
-              htmlInput: {
-                min: 0.01,
-                step: 0.01,
-                inputMode: "decimal",
-              },
-            }}
-            fullWidth
-            sx={inputSx}
-          />
-        </Box>
-
-        <Box sx={{ minWidth: 0 }}>
-          <FieldLabel>Método de pago</FieldLabel>
-
-          <FormControl fullWidth size="small" error={Boolean(paymentMethodError)}>
-            <Select
-              id="paymentMethod"
-              name="paymentMethod"
-              value={formik.values.paymentMethod}
-              displayEmpty
-              MenuProps={{
-                slotProps: {
-                  paper: {
-                    sx: selectMenuSx,
+            <FormControl fullWidth size="small">
+              <Select
+                id="currency"
+                name="currency"
+                value={formik.values.currency}
+                MenuProps={{
+                  slotProps: {
+                    paper: {
+                      sx: selectMenuSx,
+                    },
                   },
-                },
-              }}
-              disabled={isRegisteringPayment}
-              onChange={(event) => {
-                void formik.setFieldValue("paymentMethod", String(event.target.value));
+                }}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={Boolean(formik.touched.currency && formik.errors.currency)}
+                sx={selectSx}
+              >
+                {currencies.map((currency) => (
+                  <MenuItem key={currency} value={currency}>
+                    {currencyLabels[currency]}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
 
-                formik.setStatus(undefined);
-              }}
-              onBlur={() => {
-                void formik.setFieldTouched("paymentMethod", true);
-              }}
-              sx={selectSx}
-              renderValue={(value) => {
-                if (!value) {
-                  return (
-                    <Typography
-                      component="span"
-                      sx={{
-                        color: colors.muted,
+          <Box
+            sx={{
+              gridColumn: "1 / -1",
+              minWidth: 0,
+            }}
+          >
+            <FieldLabel>Nota</FieldLabel>
 
-                        fontSize: 14,
-
-                        fontWeight: 600,
-                      }}
-                    >
-                      Seleccionar método
-                    </Typography>
-                  );
-                }
-
-                return String(value);
-              }}
-            >
-              <MenuItem value="" disabled>
-                Seleccionar método
-              </MenuItem>
-
-              {paymentMethods?.map((method) => (
-                <MenuItem key={method} value={method}>
-                  {method}
-                </MenuItem>
-              ))}
-            </Select>
-
-            {paymentMethodError && <FormHelperText>{paymentMethodError}</FormHelperText>}
-          </FormControl>
-        </Box>
-
-        <Box sx={{ minWidth: 0 }}>
-          <FieldLabel>Moneda</FieldLabel>
-
-          <FormControl fullWidth size="small">
-            <Select
-              id="currency"
-              name="currency"
-              value={formik.values.currency}
-              MenuProps={{
-                slotProps: {
-                  paper: {
-                    sx: selectMenuSx,
-                  },
-                },
-              }}
+            <TextField
+              id="note"
+              name="note"
+              size="small"
+              value={formik.values.note}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              error={Boolean(formik.touched.currency && formik.errors.currency)}
-              sx={selectSx}
-            >
-              {currencies.map((currency) => (
-                <MenuItem key={currency} value={currency}>
-                  {currencyLabels[currency]}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Box>
+              placeholder="Agregar una nota opcional"
+              disabled={isRegisteringPayment}
+              fullWidth
+              multiline
+              minRows={2}
+              maxRows={4}
+              sx={inputSx}
+            />
+          </Box>
 
-        <Box
-          sx={{
-            gridColumn: "1 / -1",
-            minWidth: 0,
-          }}
-        >
-          <FieldLabel>Nota</FieldLabel>
+          <Box
+            sx={{
+              gridColumn: "1 / -1",
+              minWidth: 0,
+            }}
+          >
+            <AccountSummary
+              property={selectedProperty}
+              currency={formik.values.currency}
+              amount={Number(formik.values.amount)}
+            />
+          </Box>
 
-          <TextField
-            id="note"
-            name="note"
-            size="small"
-            value={formik.values.note}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            placeholder="Agregar una nota opcional"
-            disabled={isRegisteringPayment}
+          <Button
+            type="submit"
             fullWidth
-            multiline
-            minRows={2}
-            maxRows={4}
-            sx={inputSx}
-          />
-        </Box>
+            variant="contained"
+            startIcon={
+              isRegisteringPayment ? (
+                <CircularProgress size={17} color="inherit" />
+              ) : (
+                <FaPlusCircle />
+              )
+            }
+            disabled={isRegisteringPayment || !formik.values.propertyId}
+            sx={{
+              gridColumn: "1 / -1",
 
-        <Box
-          sx={{
-            gridColumn: "1 / -1",
-            minWidth: 0,
-          }}
-        >
-          <AccountSummary
-            property={selectedProperty}
-            currency={formik.values.currency}
-            amount={Number(formik.values.amount)}
-          />
-        </Box>
+              width: "100%",
 
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          startIcon={
-            isRegisteringPayment ? <CircularProgress size={17} color="inherit" /> : <FaPlusCircle />
-          }
-          disabled={isRegisteringPayment || !formik.values.propertyId}
-          sx={{
-            gridColumn: "1 / -1",
-
-            width: "100%",
-
-            minHeight: {
-              xs: 52,
-              sm: 48,
-            },
-
-            px: {
-              xs: 2,
-              sm: 3,
-            },
-
-            py: {
-              xs: 1.35,
-              sm: 1.2,
-            },
-
-            borderRadius: {
-              xs: "14px",
-              sm: "12px",
-            },
-
-            color: "#ffffff",
-
-            bgcolor: colors.primary,
-
-            fontSize: {
-              xs: 15,
-              sm: 14,
-              md: 15,
-            },
-
-            lineHeight: 1.2,
-
-            fontWeight: 800,
-
-            textTransform: "none",
-
-            whiteSpace: "nowrap",
-
-            boxShadow: "0 10px 22px rgba(37, 99, 235, 0.22)",
-
-            transition: "background-color 160ms ease, box-shadow 160ms ease, transform 120ms ease",
-
-            "& .MuiButton-startIcon": {
-              mr: {
-                xs: 1,
-                sm: 0.8,
+              minHeight: {
+                xs: 52,
+                sm: 48,
               },
 
-              "& svg": {
-                width: {
-                  xs: 19,
-                  sm: 17,
+              px: {
+                xs: 2,
+                sm: 3,
+              },
+
+              py: {
+                xs: 1.35,
+                sm: 1.2,
+              },
+
+              borderRadius: {
+                xs: "14px",
+                sm: "12px",
+              },
+
+              color: "#ffffff",
+
+              bgcolor: colors.primary,
+
+              fontSize: {
+                xs: 15,
+                sm: 14,
+                md: 15,
+              },
+
+              lineHeight: 1.2,
+
+              fontWeight: 800,
+
+              textTransform: "none",
+
+              whiteSpace: "nowrap",
+
+              boxShadow: "0 10px 22px rgba(37, 99, 235, 0.22)",
+
+              transition:
+                "background-color 160ms ease, box-shadow 160ms ease, transform 120ms ease",
+
+              "& .MuiButton-startIcon": {
+                mr: {
+                  xs: 1,
+                  sm: 0.8,
                 },
 
-                height: {
-                  xs: 19,
-                  sm: 17,
+                "& svg": {
+                  width: {
+                    xs: 19,
+                    sm: 17,
+                  },
+
+                  height: {
+                    xs: 19,
+                    sm: 17,
+                  },
                 },
               },
-            },
 
-            "&:hover": {
-              bgcolor: "#172554",
+              "&:hover": {
+                bgcolor: "#172554",
 
-              boxShadow: "0 14px 28px rgba(37, 99, 235, 0.28)",
-            },
+                boxShadow: "0 14px 28px rgba(37, 99, 235, 0.28)",
+              },
 
-            "&:active": {
-              transform: "scale(0.985)",
+              "&:active": {
+                transform: "scale(0.985)",
 
-              boxShadow: "0 5px 12px rgba(37, 99, 235, 0.2)",
-            },
+                boxShadow: "0 5px 12px rgba(37, 99, 235, 0.2)",
+              },
 
-            "&:focus-visible": {
-              outline: "3px solid rgba(37, 99, 235, 0.25)",
+              "&:focus-visible": {
+                outline: "3px solid rgba(37, 99, 235, 0.25)",
 
-              outlineOffset: 2,
-            },
+                outlineOffset: 2,
+              },
 
-            "&.Mui-disabled": {
-              bgcolor: "#e2e8f0",
+              "&.Mui-disabled": {
+                bgcolor: "#e2e8f0",
 
-              color: "#94a3b8",
+                color: "#94a3b8",
 
-              boxShadow: "none",
-            },
-          }}
-        >
-          {isRegisteringPayment ? "Registrando abono..." : "Registrar abono"}
-        </Button>
+                boxShadow: "none",
+              },
+            }}
+          >
+            {isRegisteringPayment ? "Registrando abono..." : "Registrar abono"}
+          </Button>
         </Box>
 
         {scrollIndicator.isVisible && (
@@ -1133,7 +1136,12 @@ function AccountSummary({
             }}
           >
             El pago se aplicará en la moneda de la propiedad ({propertyCurrency}). La tasa fija es 1
-            USD = {EXCHANGE_RATE_NIO_PER_USD.toLocaleString("es-US")} C$.
+            USD ={" "}
+            {EXCHANGE_RATE_NIO_PER_USD.toLocaleString("es-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}{" "}
+            C$.
           </Box>
         )}
 

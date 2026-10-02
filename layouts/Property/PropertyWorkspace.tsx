@@ -39,6 +39,7 @@ export function PropertyWorkspace() {
   const [search, setSearch] = useState("");
 
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [propertyOrder, setPropertyOrder] = useState<"created" | "alphabetical">("created");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -48,9 +49,12 @@ export function PropertyWorkspace() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const searchFilters = useMemo<PropertyFilters | undefined>(
-    () => (debouncedSearch ? { search: debouncedSearch } : undefined),
-    [debouncedSearch],
+  const searchFilters = useMemo<PropertyFilters>(
+    () => ({
+      ...(debouncedSearch ? { search: debouncedSearch } : {}),
+      ...(propertyOrder === "alphabetical" ? { alphabetical: true } : {}),
+    }),
+    [debouncedSearch, propertyOrder],
   );
 
   const {
@@ -165,30 +169,27 @@ export function PropertyWorkspace() {
     [updateProperty, showSuccess, showError],
   );
 
-  const handleDeleteProperty = useCallback(
-    async (): Promise<void> => {
-      if (!deletingProperty) {
-        return;
-      }
+  const handleDeleteProperty = useCallback(async (): Promise<void> => {
+    if (!deletingProperty) {
+      return;
+    }
 
-      try {
-        await deleteProperty(deletingProperty.id);
+    try {
+      await deleteProperty(deletingProperty.id);
 
-        showSuccess("Terreno eliminado correctamente.");
+      showSuccess("Terreno eliminado correctamente.");
 
-        setDeletingProperty(null);
-      } catch (error) {
-        showError(
-          resolveDeleteErrorMessage(error, {
-            conflict: "No se pudo eliminar el terreno porque tiene abonos registrados.",
-            notFound: "El terreno ya no existe.",
-            fallback: "No se pudo eliminar el terreno.",
-          }),
-        );
-      }
-    },
-    [deleteProperty, deletingProperty, showSuccess, showError],
-  );
+      setDeletingProperty(null);
+    } catch (error) {
+      showError(
+        resolveDeleteErrorMessage(error, {
+          conflict: "No se pudo eliminar el terreno porque tiene abonos registrados.",
+          notFound: "El terreno ya no existe.",
+          fallback: "No se pudo eliminar el terreno.",
+        }),
+      );
+    }
+  }, [deleteProperty, deletingProperty, showSuccess, showError]);
 
   if (isLoadingProperties) {
     return <LoadingState message="Cargando módulo de propiedades..." />;
@@ -231,6 +232,8 @@ export function PropertyWorkspace() {
             properties={filteredProperties}
             search={search}
             onSearchChange={setSearch}
+            propertyOrder={propertyOrder}
+            onPropertyOrderChange={setPropertyOrder}
             isInitialLoading={isSearchLoading}
             hasMore={hasNextPage ?? false}
             isLoadingMore={isFetchingNextPage}

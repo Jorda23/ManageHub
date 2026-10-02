@@ -105,11 +105,7 @@ function collectSheets(source: unknown, path: string[]): SheetData[] {
       Array.isArray(child[0].items)
     ) {
       for (const entry of child) {
-        if (
-          isPlainObject(entry) &&
-          typeof entry.kind === "string" &&
-          Array.isArray(entry.items)
-        ) {
+        if (isPlainObject(entry) && typeof entry.kind === "string" && Array.isArray(entry.items)) {
           sheets.push(...collectSheets(entry.items, [key, entry.kind]));
         }
       }

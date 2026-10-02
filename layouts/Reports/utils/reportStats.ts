@@ -26,12 +26,12 @@ export function summarizeAmounts(
     count += 1;
   }
 
-  const currenciesWithValue = (
-    Object.keys(parts) as Currency[]
-  ).filter((key) => (parts[key] as number) !== 0);
+  const currenciesWithValue = (Object.keys(parts) as Currency[]).filter(
+    (key) => (parts[key] as number) !== 0,
+  );
 
   const isMixed = currenciesWithValue.length > 1;
-  const base: Currency = isMixed ? "NIO" : currenciesWithValue[0] ?? "NIO";
+  const base: Currency = isMixed ? "NIO" : (currenciesWithValue[0] ?? "NIO");
 
   let total = 0;
 
@@ -61,7 +61,9 @@ export function formatSummaryDetail(summary: AmountSummary): string {
     (key) => (summary.parts[key] as number) !== 0,
   );
 
-  return entries.map((currency) => `${formatCurrency(summary.parts[currency] as number, currency)} ${currency}`).join(" + ");
+  return entries
+    .map((currency) => `${formatCurrency(summary.parts[currency] as number, currency)} ${currency}`)
+    .join(" + ");
 }
 
 export function matchesDateRange(

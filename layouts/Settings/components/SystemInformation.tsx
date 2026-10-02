@@ -146,7 +146,11 @@ export function SystemInformation() {
               py: 3,
             }}
           >
-            <CircularProgress size={24} thickness={4} aria-label="Cargando información del sistema" />
+            <CircularProgress
+              size={24}
+              thickness={4}
+              aria-label="Cargando información del sistema"
+            />
           </Box>
         ) : isError || !data ? (
           <Box

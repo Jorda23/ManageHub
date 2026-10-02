@@ -36,17 +36,11 @@ export function ProfitReport({ filters }: Readonly<ProfitReportProps>) {
   const modules = useMemo(() => data?.modules ?? [], [data]);
 
   const incomeSummary = useMemo(
-    () =>
-      summarizeAmounts(
-        modules.map((row) => ({ amount: row.income, currency: row.currency })),
-      ),
+    () => summarizeAmounts(modules.map((row) => ({ amount: row.income, currency: row.currency }))),
     [modules],
   );
 
-  const visibleModules = useMemo(
-    () => modules.filter((row) => row.count > 0),
-    [modules],
-  );
+  const visibleModules = useMemo(() => modules.filter((row) => row.count > 0), [modules]);
 
   const metrics: ReportMetric[] = [
     {
@@ -55,9 +49,7 @@ export function ProfitReport({ filters }: Readonly<ProfitReportProps>) {
       iconColor: colors.green,
       label: "Ingresos totales",
       value: formatSummaryValue(incomeSummary),
-      detail: incomeSummary.isMixed
-        ? formatSummaryDetail(incomeSummary)
-        : "ingresos del período",
+      detail: incomeSummary.isMixed ? formatSummaryDetail(incomeSummary) : "ingresos del período",
     },
     {
       icon: <FaCalculator size={18} />,
@@ -154,18 +146,13 @@ export function ProfitReport({ filters }: Readonly<ProfitReportProps>) {
             lineHeight: 1.5,
           }}
         >
-          La ganancia neta y el margen no se calculan porque el sistema no registra los
-          costos de los productos. A continuación se muestra el desglose de ingresos por
-          módulo.
+          La ganancia neta y el margen no se calculan porque el sistema no registra los costos de
+          los productos. A continuación se muestra el desglose de ingresos por módulo.
         </Typography>
       </Box>
 
       {visibleModules.length > 0 ? (
-        <ReportTable
-          columns={columns}
-          rows={visibleModules}
-          minWidth={520}
-        />
+        <ReportTable columns={columns} rows={visibleModules} minWidth={520} />
       ) : (
         <ReportEmptyState
           title="Sin ingresos en el período"

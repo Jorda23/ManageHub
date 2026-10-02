@@ -37,9 +37,7 @@ export async function getSalesReport(filters: ReportFilters): Promise<SaleReport
   return sortByDateDesc(await fetchSalesReport(withDates(filters)));
 }
 
-export async function getSoldPropertiesReport(
-  filters: ReportFilters,
-): Promise<SoldPropertyRow[]> {
+export async function getSoldPropertiesReport(filters: ReportFilters): Promise<SoldPropertyRow[]> {
   return sortByDateDescNullable(await fetchSoldPropertiesReport(withDates(filters)));
 }
 
@@ -63,9 +61,7 @@ export async function getGrainSalesReport(filters: ReportFilters): Promise<Grain
   return sortByDateDesc(await fetchGrainSalesReport(withDates(filters)));
 }
 
-export async function getHardwareSalesReport(
-  filters: ReportFilters,
-): Promise<HardwareSaleRow[]> {
+export async function getHardwareSalesReport(filters: ReportFilters): Promise<HardwareSaleRow[]> {
   return sortByDateDesc(await fetchHardwareSalesReport(withDates(filters)));
 }
 

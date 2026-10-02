@@ -55,7 +55,9 @@ export function ReportErrorState({
 }>) {
   return (
     <StateCard borderColor={colors.dangerBorder}>
-      <Box sx={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <Box
+        sx={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}
+      >
         <Box
           sx={{
             width: 44,

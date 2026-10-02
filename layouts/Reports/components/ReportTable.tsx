@@ -20,11 +20,7 @@ type ReportTableProps<T> = {
   minWidth?: number;
 };
 
-export function ReportTable<T>({
-  columns,
-  rows,
-  minWidth = 780,
-}: Readonly<ReportTableProps<T>>) {
+export function ReportTable<T>({ columns, rows, minWidth = 780 }: Readonly<ReportTableProps<T>>) {
   return (
     <TableContainer
       component={Paper}

@@ -25,10 +25,7 @@ export function PropertyPaymentsReport({ filters }: Readonly<PropertyPaymentsRep
   const { data = [], isLoading, isError, refetch } = usePropertyPaymentsReport(filters);
 
   const summary = useMemo(
-    () =>
-      summarizeAmounts(
-        data.map((row) => ({ amount: row.amount, currency: row.currency })),
-      ),
+    () => summarizeAmounts(data.map((row) => ({ amount: row.amount, currency: row.currency }))),
     [data],
   );
 
@@ -39,9 +36,7 @@ export function PropertyPaymentsReport({ filters }: Readonly<PropertyPaymentsRep
       iconColor: colors.green,
       label: "Total recibido",
       value: formatSummaryValue(summary),
-      detail: summary.isMixed
-        ? formatSummaryDetail(summary)
-        : `${summary.count} pagos`,
+      detail: summary.isMixed ? formatSummaryDetail(summary) : `${summary.count} pagos`,
     },
     {
       icon: <FaReceipt size={18} />,

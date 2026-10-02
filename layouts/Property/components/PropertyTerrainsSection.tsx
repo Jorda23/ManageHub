@@ -1,4 +1,15 @@
-import { Box, Button, CircularProgress, Divider, InputAdornment, TextField } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Divider,
+  FormControl,
+  InputAdornment,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+} from "@mui/material";
 
 import { FaMapMarkedAlt, FaMoneyBillWave, FaPlus, FaSearch } from "react-icons/fa";
 
@@ -11,21 +22,37 @@ import { sellButtonBaseSx, sellSecondaryButtonSx } from "@/theme/sellButtonStyle
 
 import { useInfiniteScroll } from "@/hook/useInfiniteScroll";
 
+import { selectMenuSx } from "@/shared/utils/selectStyles";
+
 import type { PropertyItem } from "../../../shared/data/property.data";
 
 import { PropertySectionCard } from "./PropertySectionCard";
 
 type PropertyTerrainsSectionProps = {
   properties: PropertyItem[];
+
   search?: string;
+
   onSearchChange?: (value: string) => void;
+
+  propertyOrder?: "created" | "alphabetical";
+
+  onPropertyOrderChange?: (value: "created" | "alphabetical") => void;
+
   isInitialLoading?: boolean;
+
   hasMore?: boolean;
+
   isLoadingMore?: boolean;
+
   onLoadMore?: () => void;
+
   onAddProperty: () => void;
+
   onRegisterPayment?: () => void;
+
   onEditProperty?: (property: PropertyItem) => void;
+
   onDeleteProperty?: (property: PropertyItem) => void;
 };
 
@@ -45,7 +72,9 @@ const actionButtonSx = {
   },
 
   fontWeight: 800,
+
   textTransform: "none",
+
   whiteSpace: "nowrap",
 };
 
@@ -78,21 +107,115 @@ const scrollAreaSx = {
   scrollbarWidth: "thin",
 };
 
+const sortSelectSx = {
+  width: {
+    xs: "100%",
+    sm: 180,
+  },
+
+  minWidth: 0,
+
+  minHeight: 40,
+
+  borderRadius: "10px",
+
+  bgcolor: "#ffffff",
+
+  color: colors.text,
+
+  fontSize: 12,
+
+  fontWeight: 700,
+
+  boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04)",
+
+  transition: "border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease",
+
+  "& .MuiSelect-select": {
+    display: "flex",
+
+    alignItems: "center",
+
+    minHeight: "unset !important",
+
+    py: 1,
+
+    pl: 1.5,
+
+    pr: "34px !important",
+  },
+
+  "& .MuiOutlinedInput-notchedOutline": {
+    borderColor: colors.cardBorder,
+
+    transition: "border-color 160ms ease",
+  },
+
+  "&:hover .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#94a3b8",
+  },
+
+  "&.Mui-focused": {
+    bgcolor: "#ffffff",
+
+    boxShadow: `0 0 0 3px ${colors.primary}12`,
+  },
+
+  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+    borderColor: colors.primary,
+
+    borderWidth: "1px",
+  },
+
+  "& .MuiSelect-icon": {
+    right: 9,
+
+    color: colors.softMuted,
+
+    fontSize: 20,
+
+    transition: "transform 160ms ease, color 160ms ease",
+  },
+
+  "&.Mui-focused .MuiSelect-icon": {
+    color: colors.primary,
+  },
+
+  "& .MuiSelect-iconOpen": {
+    transform: "rotate(180deg)",
+  },
+};
+
 export function PropertyTerrainsSection({
   properties,
+
   search = "",
+
   onSearchChange,
+
+  propertyOrder = "created",
+
+  onPropertyOrderChange,
+
   isInitialLoading = false,
+
   hasMore = false,
+
   isLoadingMore = false,
+
   onLoadMore,
+
   onAddProperty,
+
   onRegisterPayment,
+
   onEditProperty,
+
   onDeleteProperty,
 }: Readonly<PropertyTerrainsSectionProps>) {
   const { rootRef, sentinelRef } = useInfiniteScroll<HTMLDivElement>({
     hasMore,
+
     isLoadingMore,
 
     onLoadMore: () => {
@@ -146,6 +269,7 @@ export function PropertyTerrainsSection({
             },
 
             width: "100%",
+
             minWidth: 0,
           }}
         >
@@ -163,7 +287,9 @@ export function PropertyTerrainsSection({
           <Box
             sx={{
               py: 2,
+
               display: "flex",
+
               justifyContent: "center",
             }}
           >
@@ -239,8 +365,11 @@ export function PropertyTerrainsSection({
                   <Box
                     sx={{
                       display: "grid",
+
                       placeItems: "center",
+
                       color: colors.softMuted,
+
                       fontSize: 12,
                     }}
                   >
@@ -259,12 +388,15 @@ export function PropertyTerrainsSection({
 
             "& .MuiOutlinedInput-root": {
               minHeight: 40,
+
               borderRadius: "10px",
 
               bgcolor: "#ffffff",
 
               fontSize: 12,
+
               fontWeight: 600,
+
               color: colors.text,
 
               "& fieldset": {
@@ -281,12 +413,14 @@ export function PropertyTerrainsSection({
 
               "&.Mui-focused fieldset": {
                 borderColor: colors.primaryLight,
+
                 borderWidth: 1.5,
               },
             },
 
             "& .MuiInputBase-input::placeholder": {
               color: colors.softMuted,
+
               opacity: 1,
             },
           }}
@@ -295,28 +429,160 @@ export function PropertyTerrainsSection({
         <Box
           sx={{
             display: "flex",
+
             flexDirection: {
               xs: "column",
               sm: "row",
             },
+
             alignItems: {
               xs: "stretch",
               sm: "center",
             },
+
             justifyContent: {
               xs: "stretch",
               md: "flex-end",
             },
+
             gap: {
               xs: 0.75,
               sm: 1,
             },
+
             width: {
               xs: "100%",
               md: "auto",
             },
           }}
         >
+          <Box
+            sx={{
+              display: "flex",
+
+              alignItems: {
+                xs: "stretch",
+                sm: "center",
+              },
+
+              flexDirection: {
+                xs: "column",
+                sm: "row",
+              },
+
+              gap: {
+                xs: 0.5,
+                sm: 0.75,
+              },
+
+              width: {
+                xs: "100%",
+                sm: "auto",
+              },
+
+              minWidth: 0,
+            }}
+          >
+            <Typography
+              component="span"
+              sx={{
+                color: colors.muted,
+
+                fontSize: 12,
+
+                fontWeight: 600,
+
+                lineHeight: 1,
+
+                whiteSpace: "nowrap",
+              }}
+            >
+              Ordenar por:
+            </Typography>
+
+            <FormControl
+              size="small"
+              sx={{
+                width: {
+                  xs: "100%",
+                  sm: 180,
+                },
+
+                minWidth: 0,
+              }}
+            >
+              <Select
+                value={propertyOrder}
+                onChange={(event) => {
+                  onPropertyOrderChange?.(
+                    event.target.value === "alphabetical" ? "alphabetical" : "created",
+                  );
+                }}
+                inputProps={{
+                  "aria-label": "Ordenar propiedades por",
+                }}
+                MenuProps={{
+                  slotProps: {
+                    paper: {
+                      sx: {
+                        ...selectMenuSx,
+
+                        mt: 0.5,
+
+                        borderRadius: "10px",
+
+                        border: `1px solid ${colors.cardBorder}`,
+
+                        boxShadow: "0 10px 30px rgba(15, 23, 42, 0.10)",
+
+                        "& .MuiMenuItem-root": {
+                          minHeight: 38,
+
+                          px: 1.5,
+
+                          mx: 0.5,
+
+                          my: 0.25,
+
+                          borderRadius: "7px",
+
+                          fontSize: 12,
+
+                          fontWeight: 600,
+
+                          color: colors.text,
+
+                          transition: "background-color 140ms ease, color 140ms ease",
+
+                          "&:hover": {
+                            bgcolor: "#f8fafc",
+                          },
+
+                          "&.Mui-selected": {
+                            bgcolor: `${colors.primary}0D`,
+
+                            color: colors.primary,
+
+                            fontWeight: 700,
+
+                            "&:hover": {
+                              bgcolor: `${colors.primary}14`,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                }}
+                sx={sortSelectSx}
+              >
+                <MenuItem value="created">Más recientes</MenuItem>
+
+                <MenuItem value="alphabetical">Orden alfabético</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+
           {onRegisterPayment && (
             <Button
               type="button"
@@ -326,6 +592,7 @@ export function PropertyTerrainsSection({
               onClick={onRegisterPayment}
               sx={{
                 ...sellSecondaryButtonSx,
+
                 ...actionButtonSx,
 
                 flex: {
@@ -334,20 +601,26 @@ export function PropertyTerrainsSection({
                 },
 
                 color: "#047857",
+
                 bgcolor: "#f0fdf4",
+
                 borderColor: "#bbf7d0",
 
                 boxShadow: "none",
 
                 "& .MuiButton-startIcon": {
                   mr: 0.7,
+
                   color: "#059669",
                 },
 
                 "&:hover": {
                   bgcolor: "#dcfce7",
+
                   borderColor: "#86efac",
+
                   color: "#065f46",
+
                   boxShadow: "none",
                 },
 
@@ -357,6 +630,7 @@ export function PropertyTerrainsSection({
 
                 "&:focus-visible": {
                   outline: "2px solid #10b981",
+
                   outlineOffset: 2,
                 },
               }}
@@ -373,6 +647,7 @@ export function PropertyTerrainsSection({
             onClick={onAddProperty}
             sx={{
               ...sellButtonBaseSx,
+
               ...actionButtonSx,
 
               flex: {
@@ -381,6 +656,7 @@ export function PropertyTerrainsSection({
               },
 
               bgcolor: colors.primary,
+
               color: "#ffffff",
 
               boxShadow: "0 4px 10px rgba(37, 99, 235, 0.16)",
@@ -391,6 +667,7 @@ export function PropertyTerrainsSection({
 
               "&:hover": {
                 bgcolor: colors.primary,
+
                 boxShadow: "0 6px 14px rgba(37, 99, 235, 0.20)",
               },
 
@@ -400,6 +677,7 @@ export function PropertyTerrainsSection({
 
               "&:focus-visible": {
                 outline: `2px solid ${colors.primary}`,
+
                 outlineOffset: 2,
               },
             }}

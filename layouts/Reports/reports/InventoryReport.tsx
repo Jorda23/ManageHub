@@ -16,15 +16,13 @@ export function InventoryReport() {
   const { data = [], isLoading, isError, refetch } = useInventoryReport();
 
   const quantityTotal = useMemo(
-    () => data.reduce((total, row) => total + (Number.isFinite(row.quantity) ? row.quantity : 0), 0),
+    () =>
+      data.reduce((total, row) => total + (Number.isFinite(row.quantity) ? row.quantity : 0), 0),
     [data],
   );
 
   const valueSummary = useMemo(
-    () =>
-      summarizeAmounts(
-        data.map((row) => ({ amount: row.totalValue, currency: row.currency })),
-      ),
+    () => summarizeAmounts(data.map((row) => ({ amount: row.totalValue, currency: row.currency }))),
     [data],
   );
 
@@ -51,9 +49,7 @@ export function InventoryReport() {
       iconColor: colors.orange,
       label: "Valor estimado",
       value: formatSummaryValue(valueSummary),
-      detail: valueSummary.isMixed
-        ? formatSummaryDetail(valueSummary)
-        : "a precio de venta",
+      detail: valueSummary.isMixed ? formatSummaryDetail(valueSummary) : "a precio de venta",
     },
   ];
 

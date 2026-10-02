@@ -25,10 +25,7 @@ export function SoldPropertiesReport({ filters }: Readonly<SoldPropertiesReportP
   const { data = [], isLoading, isError, refetch } = useSoldPropertiesReport(filters);
 
   const summary = useMemo(
-    () =>
-      summarizeAmounts(
-        data.map((row) => ({ amount: row.price, currency: row.currency })),
-      ),
+    () => summarizeAmounts(data.map((row) => ({ amount: row.price, currency: row.currency }))),
     [data],
   );
 
@@ -39,9 +36,7 @@ export function SoldPropertiesReport({ filters }: Readonly<SoldPropertiesReportP
       iconColor: colors.green,
       label: "Total vendido",
       value: formatSummaryValue(summary),
-      detail: summary.isMixed
-        ? formatSummaryDetail(summary)
-        : `${summary.count} terrenos`,
+      detail: summary.isMixed ? formatSummaryDetail(summary) : `${summary.count} terrenos`,
     },
     {
       icon: <FaBuilding size={18} />,

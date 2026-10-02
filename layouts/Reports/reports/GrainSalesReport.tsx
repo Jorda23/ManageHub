@@ -25,10 +25,7 @@ export function GrainSalesReport({ filters }: Readonly<GrainSalesReportProps>) {
   const { data = [], isLoading, isError, refetch } = useGrainSalesReport(filters);
 
   const summary = useMemo(
-    () =>
-      summarizeAmounts(
-        data.map((row) => ({ amount: row.total, currency: row.currency })),
-      ),
+    () => summarizeAmounts(data.map((row) => ({ amount: row.total, currency: row.currency }))),
     [data],
   );
 
@@ -39,9 +36,7 @@ export function GrainSalesReport({ filters }: Readonly<GrainSalesReportProps>) {
       iconColor: colors.green,
       label: "Total vendido",
       value: formatSummaryValue(summary),
-      detail: summary.isMixed
-        ? formatSummaryDetail(summary)
-        : `${summary.count} ventas`,
+      detail: summary.isMixed ? formatSummaryDetail(summary) : `${summary.count} ventas`,
     },
     {
       icon: <FaTractor size={18} />,

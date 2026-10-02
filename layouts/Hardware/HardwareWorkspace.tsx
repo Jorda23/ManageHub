@@ -204,30 +204,27 @@ export function HardwareWorkspace() {
     [updateHardwareProduct, showSuccess, showError],
   );
 
-  const handleDeleteProduct = useCallback(
-    async (): Promise<void> => {
-      if (!deletingProduct) {
-        return;
-      }
+  const handleDeleteProduct = useCallback(async (): Promise<void> => {
+    if (!deletingProduct) {
+      return;
+    }
 
-      try {
-        await deleteHardwareProduct(deletingProduct.id);
+    try {
+      await deleteHardwareProduct(deletingProduct.id);
 
-        showSuccess("Producto de ferretería eliminado correctamente.");
+      showSuccess("Producto de ferretería eliminado correctamente.");
 
-        setDeletingProduct(null);
-      } catch (error) {
-        showError(
-          resolveDeleteErrorMessage(error, {
-            conflict: "No se pudo eliminar el producto porque tiene ventas registradas.",
-            notFound: "El producto ya no existe.",
-            fallback: "No se pudo eliminar el producto.",
-          }),
-        );
-      }
-    },
-    [deleteHardwareProduct, deletingProduct, showSuccess, showError],
-  );
+      setDeletingProduct(null);
+    } catch (error) {
+      showError(
+        resolveDeleteErrorMessage(error, {
+          conflict: "No se pudo eliminar el producto porque tiene ventas registradas.",
+          notFound: "El producto ya no existe.",
+          fallback: "No se pudo eliminar el producto.",
+        }),
+      );
+    }
+  }, [deleteHardwareProduct, deletingProduct, showSuccess, showError]);
 
   if (isLoadingProducts) {
     return <LoadingState message="Cargando módulo de Ferretería..." />;

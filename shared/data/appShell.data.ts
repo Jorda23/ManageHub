@@ -20,13 +20,7 @@ import type { SidebarSection } from "../types";
  * una key el resto del sistema (páginas y sidebar) lo reconoce automáticamente.
  */
 export type SidebarItemKey =
-  | "dashboard"
-  | "hardware"
-  | "grains"
-  | "property"
-  | "history"
-  | "reportes"
-  | "settings";
+  "dashboard" | "hardware" | "grains" | "property" | "history" | "reportes" | "settings";
 
 export const sidebarSections: SidebarSection[] = [
   {
