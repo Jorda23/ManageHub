@@ -66,7 +66,7 @@ export function useInfiniteScroll<TElement extends HTMLElement>({
 
   const sentinelRef = useCallback(
     (element: HTMLDivElement | null) => {
-      if (element && hasMoreRef.current) {
+      if (element) {
         connect(element);
       } else {
         disconnect();
