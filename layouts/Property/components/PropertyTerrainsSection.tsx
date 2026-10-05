@@ -213,10 +213,12 @@ export function PropertyTerrainsSection({
 
   onDeleteProperty,
 }: Readonly<PropertyTerrainsSectionProps>) {
-  const { rootRef, sentinelRef } = useInfiniteScroll<HTMLDivElement>({
+  const { sentinelRef } = useInfiniteScroll<HTMLDivElement>({
     hasMore,
 
     isLoadingMore,
+
+    useViewport: true,
 
     onLoadMore: () => {
       onLoadMore?.();
@@ -251,7 +253,7 @@ export function PropertyTerrainsSection({
     }
 
     return (
-      <Box ref={rootRef} sx={scrollAreaSx}>
+      <Box sx={scrollAreaSx}>
         <Box
           sx={{
             display: "grid",

@@ -4,12 +4,14 @@ type UseInfiniteScrollOptions = {
   hasMore: boolean;
   isLoadingMore: boolean;
   onLoadMore: () => void;
+  useViewport?: boolean;
 };
 
 export function useInfiniteScroll<TElement extends HTMLElement>({
   hasMore,
   isLoadingMore,
   onLoadMore,
+  useViewport = false,
 }: UseInfiniteScrollOptions) {
   const rootRef = useRef<TElement | null>(null);
 
@@ -43,8 +45,6 @@ export function useInfiniteScroll<TElement extends HTMLElement>({
     (target: Element) => {
       disconnect();
 
-      const root = rootRef.current;
-
       const observer = new IntersectionObserver(
         (entries) => {
           if (entries[0]?.isIntersecting && hasMoreRef.current && !isLoadingMoreRef.current) {
@@ -52,7 +52,7 @@ export function useInfiniteScroll<TElement extends HTMLElement>({
           }
         },
         {
-          root,
+          root: useViewport ? null : rootRef.current,
           rootMargin: "160px 0px",
         },
       );
@@ -61,7 +61,7 @@ export function useInfiniteScroll<TElement extends HTMLElement>({
 
       observerRef.current = observer;
     },
-    [disconnect],
+    [disconnect, useViewport],
   );
 
   const sentinelRef = useCallback(

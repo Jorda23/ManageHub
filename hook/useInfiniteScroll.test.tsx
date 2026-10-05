@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { useInfiniteScroll } from "./useInfiniteScroll";
 
 class IntersectionObserverMock implements IntersectionObserver {
-  readonly root = null;
+  readonly root: Element | Document | null;
   readonly rootMargin = "160px 0px";
   readonly thresholds = [0];
   readonly observe = vi.fn();
@@ -12,7 +12,12 @@ class IntersectionObserverMock implements IntersectionObserver {
   readonly disconnect = vi.fn();
   readonly takeRecords = vi.fn((): IntersectionObserverEntry[] => []);
 
-  constructor(private readonly callback: IntersectionObserverCallback) {}
+  constructor(
+    private readonly callback: IntersectionObserverCallback,
+    options?: IntersectionObserverInit,
+  ) {
+    this.root = options?.root ?? null;
+  }
 
   trigger(isIntersecting: boolean) {
     this.callback(
@@ -23,17 +28,14 @@ class IntersectionObserverMock implements IntersectionObserver {
 }
 
 function ScrollHarness({ hasMore, onLoadMore }: { hasMore: boolean; onLoadMore: () => void }) {
-  const { rootRef, sentinelRef } = useInfiniteScroll<HTMLDivElement>({
+  const { sentinelRef } = useInfiniteScroll({
     hasMore,
     isLoadingMore: false,
     onLoadMore,
+    useViewport: true,
   });
 
-  return (
-    <div ref={rootRef}>
-      {hasMore && <div ref={sentinelRef} data-testid="sentinel" />}
-    </div>
-  );
+  return <div>{hasMore && <div ref={sentinelRef} data-testid="sentinel" />}</div>;
 }
 
 describe("useInfiniteScroll", () => {
@@ -46,8 +48,8 @@ describe("useInfiniteScroll", () => {
     vi.stubGlobal(
       "IntersectionObserver",
       class extends IntersectionObserverMock {
-        constructor(callback: IntersectionObserverCallback) {
-          super(callback);
+        constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
+          super(callback, options);
           observers.push(this);
         }
       },
@@ -60,6 +62,7 @@ describe("useInfiniteScroll", () => {
     rerender(<ScrollHarness hasMore onLoadMore={onLoadMore} />);
 
     expect(observers[0]?.observe).toHaveBeenCalledWith(getByTestId("sentinel"));
+    expect(observers[0]?.root).toBeNull();
 
     act(() => {
       observers[0]?.trigger(true);
