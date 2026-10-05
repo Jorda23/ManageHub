@@ -310,6 +310,7 @@ export type PropertyFilters = {
   limit?: number;
   page?: number;
   alphabetical?: boolean;
+  numeric?: boolean;
 };
 
 export type DashboardSummary = {

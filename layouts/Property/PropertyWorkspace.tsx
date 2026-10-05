@@ -39,7 +39,9 @@ export function PropertyWorkspace() {
   const [search, setSearch] = useState("");
 
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [propertyOrder, setPropertyOrder] = useState<"created" | "alphabetical">("created");
+  const [propertyOrder, setPropertyOrder] = useState<"created" | "alphabetical" | "numeric">(
+    "created",
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -53,6 +55,7 @@ export function PropertyWorkspace() {
     () => ({
       ...(debouncedSearch ? { search: debouncedSearch } : {}),
       ...(propertyOrder === "alphabetical" ? { alphabetical: true } : {}),
+      ...(propertyOrder === "numeric" ? { numeric: true } : {}),
     }),
     [debouncedSearch, propertyOrder],
   );

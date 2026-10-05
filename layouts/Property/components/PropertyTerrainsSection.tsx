@@ -35,9 +35,9 @@ type PropertyTerrainsSectionProps = {
 
   onSearchChange?: (value: string) => void;
 
-  propertyOrder?: "created" | "alphabetical";
+  propertyOrder?: "created" | "alphabetical" | "numeric";
 
-  onPropertyOrderChange?: (value: "created" | "alphabetical") => void;
+  onPropertyOrderChange?: (value: "created" | "alphabetical" | "numeric") => void;
 
   isInitialLoading?: boolean;
 
@@ -514,8 +514,9 @@ export function PropertyTerrainsSection({
               <Select
                 value={propertyOrder}
                 onChange={(event) => {
+                  const value = event.target.value;
                   onPropertyOrderChange?.(
-                    event.target.value === "alphabetical" ? "alphabetical" : "created",
+                    value === "alphabetical" || value === "numeric" ? value : "created",
                   );
                 }}
                 inputProps={{
@@ -579,6 +580,8 @@ export function PropertyTerrainsSection({
                 <MenuItem value="created">Más recientes</MenuItem>
 
                 <MenuItem value="alphabetical">Orden alfabético</MenuItem>
+
+                <MenuItem value="numeric">Orden numérico</MenuItem>
               </Select>
             </FormControl>
           </Box>
