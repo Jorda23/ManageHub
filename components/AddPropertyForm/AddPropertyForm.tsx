@@ -6,13 +6,9 @@ import { Alert, Box, Button, InputAdornment, MenuItem, TextField, Typography } f
 
 import type { SxProps, Theme } from "@mui/material/styles";
 
-import dayjs, { type Dayjs } from "dayjs";
 
 import { useFormik } from "formik";
 
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 import { FaBuilding, FaDollarSign, FaIdCard, FaPlusCircle, FaTimes } from "react-icons/fa";
 
@@ -49,7 +45,7 @@ const initialValues: AddPropertyFormValues = {
   totalPrice: "",
   currency: "USD",
   initialPayment: "",
-  nextPaymentDate: "",
+  paymentDayOfMonth: null,
   imageUrl: "",
   identificationImageUrl: "",
   identificationNumber: "",
@@ -93,9 +89,7 @@ export function AddPropertyForm({ onCancel, onCreated }: Readonly<AddPropertyFor
 
           currency: normalizeCurrency(values.currency),
 
-          nextPaymentDate: values.nextPaymentDate
-            ? dayjs(values.nextPaymentDate).startOf("day").toISOString()
-            : null,
+          paymentDayOfMonth: values.paymentDayOfMonth ?? null,
 
           imageUrl: values.imageUrl.trim() || null,
 
@@ -146,7 +140,7 @@ export function AddPropertyForm({ onCancel, onCreated }: Readonly<AddPropertyFor
         totalPrice: true,
         currency: true,
         initialPayment: true,
-        nextPaymentDate: true,
+        paymentDayOfMonth: true,
         imageUrl: true,
         identificationImageUrl: true,
         identificationNumber: true,
@@ -508,33 +502,25 @@ export function AddPropertyForm({ onCancel, onCreated }: Readonly<AddPropertyFor
             },
           }}
         >
-          <ModalField label="Próximo pago" htmlFor="property-next-payment-date">
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                value={formik.values.nextPaymentDate ? dayjs(formik.values.nextPaymentDate) : null}
-                onChange={(date: Dayjs | null) => {
-                  void formik.setFieldValue(
-                    "nextPaymentDate",
-                    date ? date.format("YYYY-MM-DD") : "",
-                  );
-                }}
-                onClose={() => {
-                  void formik.setFieldTouched("nextPaymentDate", true);
-                }}
-                disabled={isCreatingProperty}
-                format="DD/MM/YYYY"
-                slotProps={{
-                  textField: {
-                    id: "property-next-payment-date",
-                    name: "nextPaymentDate",
-                    fullWidth: true,
-                    error: Boolean(getFieldError("nextPaymentDate")),
-                    helperText: getFieldError("nextPaymentDate"),
-                    sx: fieldStyles,
-                  },
-                }}
-              />
-            </LocalizationProvider>
+          <ModalField label="Día de pago mensual" htmlFor="property-payment-day">
+            <TextField
+              id="property-payment-day"
+              name="paymentDayOfMonth"
+              type="number"
+              value={formik.values.paymentDayOfMonth ?? ""}
+              onChange={(event) => {
+                const value = event.target.value;
+                void formik.setFieldValue("paymentDayOfMonth", value === "" ? null : Number(value));
+              }}
+              onBlur={formik.handleBlur}
+              placeholder="Se paga cada día 15"
+              error={Boolean(getFieldError("paymentDayOfMonth"))}
+              helperText={getFieldError("paymentDayOfMonth")}
+              disabled={isCreatingProperty}
+              fullWidth
+              slotProps={{ htmlInput: { min: 1, max: 31, step: 1 } }}
+              sx={fieldStyles}
+            />
           </ModalField>
         </Box>
       </FormSection>

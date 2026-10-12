@@ -17,7 +17,7 @@ export type PropertyItem = {
   paid: number;
   buyerName: string;
   buyerEmail: string;
-  dueDate: string;
+  paymentDayOfMonth?: number | null;
   status: AccountStatus;
   accent: string;
   imageUrl: string;

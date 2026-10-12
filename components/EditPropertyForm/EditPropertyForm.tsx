@@ -5,12 +5,8 @@ import { useEffect } from "react";
 import { Box, TextField } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 
-import dayjs, { type Dayjs } from "dayjs";
 import { useFormik } from "formik";
 
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 import { FaBuilding, FaIdCard, FaSave } from "react-icons/fa";
 
@@ -30,7 +26,7 @@ export type EditPropertyValues = {
   location: string;
   ownerName: string;
   identificationNumber: string;
-  nextPaymentDate: string | null;
+  paymentDayOfMonth: number | null;
   imageUrl: string | null;
   identificationImageUrl: string | null;
 };
@@ -60,12 +56,24 @@ export function EditPropertyForm({
       location: "",
       ownerName: "",
       identificationNumber: "",
-      nextPaymentDate: "",
+      paymentDayOfMonth: null,
       imageUrl: "",
       identificationImageUrl: "",
     },
     validateOnBlur: true,
     validateOnChange: false,
+    validate: (values) => {
+      if (
+        values.paymentDayOfMonth != null &&
+        (!Number.isInteger(values.paymentDayOfMonth) ||
+          values.paymentDayOfMonth < 1 ||
+          values.paymentDayOfMonth > 31)
+      ) {
+        return { paymentDayOfMonth: "El día debe ser un número entero entre 1 y 31" };
+      }
+
+      return {};
+    },
     onSubmit: async (values, helpers) => {
       if (!property) {
         return;
@@ -78,7 +86,7 @@ export function EditPropertyForm({
         location: values.location.trim(),
         ownerName: values.ownerName.trim(),
         identificationNumber: values.identificationNumber.trim(),
-        nextPaymentDate: values.nextPaymentDate || null,
+        paymentDayOfMonth: values.paymentDayOfMonth ?? null,
         imageUrl: values.imageUrl?.trim() || null,
         identificationImageUrl: values.identificationImageUrl?.trim() || null,
       });
@@ -96,9 +104,7 @@ export function EditPropertyForm({
         location: property.location,
         ownerName: property.ownerName,
         identificationNumber: property.IdentificationNumber ?? property.identificationNumber ?? "",
-        nextPaymentDate: property.nextPaymentDate
-          ? dayjs(property.nextPaymentDate).format("YYYY-MM-DD")
-          : "",
+        paymentDayOfMonth: property.paymentDayOfMonth ?? null,
         imageUrl: property.imageUrl ?? "",
         identificationImageUrl:
           property.IdentificationImageUrl ?? property.identificationImageUrl ?? "",
@@ -276,36 +282,25 @@ export function EditPropertyForm({
               />
             </ModalField>
 
-            <ModalField label="Próximo pago" htmlFor="edit-property-next-payment-date">
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  value={
-                    formik.values.nextPaymentDate ? dayjs(formik.values.nextPaymentDate) : null
-                  }
-                  onChange={(date: Dayjs | null) => {
-                    void formik.setFieldValue(
-                      "nextPaymentDate",
-                      date ? date.format("YYYY-MM-DD") : "",
-                    );
-                  }}
-                  onClose={() => {
-                    void formik.setFieldTouched("nextPaymentDate", true);
-                  }}
-                  disabled={disabled}
-                  format="DD/MM/YYYY"
-                  slotProps={{
-                    textField: {
-                      id: "edit-property-next-payment-date",
-                      name: "nextPaymentDate",
-                      fullWidth: true,
-
-                      error: Boolean(getFieldError("nextPaymentDate")),
-                      helperText: getFieldError("nextPaymentDate"),
-                      sx: dateFieldStyles,
-                    },
-                  }}
-                />
-              </LocalizationProvider>
+            <ModalField label="Día de pago mensual" htmlFor="edit-property-payment-day">
+              <TextField
+                id="edit-property-payment-day"
+                name="paymentDayOfMonth"
+                type="number"
+                value={formik.values.paymentDayOfMonth ?? ""}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  void formik.setFieldValue("paymentDayOfMonth", value === "" ? null : Number(value));
+                }}
+                onBlur={formik.handleBlur}
+                placeholder="Se paga cada día 15"
+                error={Boolean(getFieldError("paymentDayOfMonth"))}
+                helperText={getFieldError("paymentDayOfMonth")}
+                disabled={disabled}
+                fullWidth
+                slotProps={{ htmlInput: { min: 1, max: 31, step: 1 } }}
+                sx={fieldStyles}
+              />
             </ModalField>
 
             <Box

@@ -94,17 +94,3 @@ export function matchesDateRange(
 export function propertySaleStatus(status: string | undefined): ReportStatus {
   return status === "Paid" ? "Pagado" : "Pendiente";
 }
-
-export function pendingAccountStatus(nextPaymentDate?: string | null): ReportStatus {
-  if (!nextPaymentDate) {
-    return "Pendiente";
-  }
-
-  const due = new Date(nextPaymentDate).getTime();
-
-  if (!Number.isFinite(due)) {
-    return "Pendiente";
-  }
-
-  return due < Date.now() ? "Atrasado" : "Pendiente";
-}

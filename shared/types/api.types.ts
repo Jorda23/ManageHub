@@ -211,7 +211,7 @@ export type CreatePropertyRequest = {
   totalPrice: number;
   initialPayment: number;
   currency: Currency;
-  nextPaymentDate?: string | null;
+  paymentDayOfMonth?: number | null;
   imageUrl?: string | null;
   IdentificationImageUrl?: string | null;
   IdentificationNumber: string;
@@ -230,7 +230,7 @@ export type UpdatePropertyRequest = {
   location: string;
   ownerName: string;
   identificationNumber: string;
-  nextPaymentDate?: string | null;
+  paymentDayOfMonth?: number | null;
   imageUrl?: string | null;
   identificationImageUrl?: string | null;
 };
@@ -253,7 +253,7 @@ export type Property = {
   currency?: Currency;
   amountPaid: number;
   pendingBalance: number;
-  nextPaymentDate?: string | null;
+  paymentDayOfMonth?: number | null;
   status: string;
   imageUrl?: string | null;
   IdentificationImageUrl?: string | null;
@@ -442,7 +442,7 @@ export type PendingAccountRow = {
   property: string;
   pendingBalance: number;
   currency: Currency;
-  nextPaymentDate: string | null;
+  paymentDayOfMonth: number | null;
   status: ReportStatus;
 };
 

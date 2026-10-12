@@ -369,14 +369,17 @@ function PropertyIdentity({ property }: { property: PropertyItem }) {
 }
 
 function PropertyMetadata({ property }: { property: PropertyItem }) {
+  const paymentDayOfMonth = property.paymentDayOfMonth;
+  const paymentDayLabel =
+    paymentDayOfMonth != null && paymentDayOfMonth >= 1 && paymentDayOfMonth <= 31
+      ? `día ${paymentDayOfMonth} de cada mes`
+      : "Sin día de pago definido";
+
   return (
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: {
-          xs: "1fr",
-          sm: "repeat(3, minmax(0, 1fr))",
-        },
+        gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
         gap: {
           xs: 0.7,
           sm: 1,
@@ -394,12 +397,27 @@ function PropertyMetadata({ property }: { property: PropertyItem }) {
         value={property.ownerName || "Sin registrar"}
       />
 
-      <MetadataItem icon={<FaCalendarAlt />} label="Próximo pago" value={property.dueDate} />
+      <MetadataItem
+        icon={<FaCalendarAlt />}
+        label="Día de pago mensual"
+        value={paymentDayLabel}
+        fullWidth
+      />
     </Box>
   );
 }
 
-function MetadataItem({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
+function MetadataItem({
+  icon,
+  label,
+  value,
+  fullWidth = false,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+  fullWidth?: boolean;
+}) {
   return (
     <Box
       sx={{
@@ -407,6 +425,11 @@ function MetadataItem({ icon, label, value }: { icon: ReactNode; label: string; 
         alignItems: "center",
         gap: 0.7,
         minWidth: 0,
+        ...(fullWidth && {
+          gridColumn: "1 / -1",
+          pt: 1,
+          borderTop: `1px solid ${colors.cardBorder}`,
+        }),
       }}
     >
       <Box
@@ -427,26 +450,27 @@ function MetadataItem({ icon, label, value }: { icon: ReactNode; label: string; 
 
       <Box sx={{ minWidth: 0 }}>
         <Typography
-          noWrap
           sx={{
             color: colors.softMuted,
             fontSize: 9,
             fontWeight: 800,
             textTransform: "uppercase",
             letterSpacing: "0.03em",
+            lineHeight: 1.3,
           }}
         >
           {label}
         </Typography>
 
         <Typography
-          noWrap
           title={value}
           sx={{
             mt: 0.05,
             color: colors.text,
             fontSize: 11,
             fontWeight: 800,
+            lineHeight: 1.35,
+            overflowWrap: "anywhere",
           }}
         >
           {value}

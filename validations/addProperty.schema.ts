@@ -17,7 +17,14 @@ export const addPropertySchema = yup.object({
 
   imageUrl: yup.string().default(""),
 
-  nextPaymentDate: yup.string().default(""),
+  paymentDayOfMonth: yup
+    .number()
+    .transform((value, originalValue) => (originalValue === "" ? null : value))
+    .nullable()
+    .integer("Ingresa un día entero")
+    .min(1, "El día debe estar entre 1 y 31")
+    .max(31, "El día debe estar entre 1 y 31")
+    .default(null),
 
   totalPrice: yup
     .string()

@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Box, Dialog } from "@mui/material";
 
-import dayjs from "dayjs";
 
 import { PropertyHeroHeader, PropertyPaymentSection, PropertyTerrainsSection } from "./components";
 
@@ -112,11 +111,7 @@ export function PropertyWorkspace() {
         ownerDocument: "",
         buyerName: property.ownerName,
         buyerEmail: "",
-        dueDate: isPaid
-          ? "Pagado"
-          : property.nextPaymentDate
-            ? new Date(property.nextPaymentDate).toLocaleDateString("es-NI")
-            : "Sin fecha",
+        paymentDayOfMonth: property.paymentDayOfMonth,
         status: isPaid ? "Pagado" : "Pendiente",
         accent: isPaid ? colors.green : colors.primaryLight,
         imageUrl: property.imageUrl ?? "",
@@ -152,9 +147,7 @@ export function PropertyWorkspace() {
             location: values.location.trim(),
             ownerName: values.ownerName.trim(),
             identificationNumber: values.identificationNumber.trim(),
-            nextPaymentDate: values.nextPaymentDate
-              ? dayjs(values.nextPaymentDate).startOf("day").toISOString()
-              : null,
+            paymentDayOfMonth: values.paymentDayOfMonth ?? null,
             imageUrl: values.imageUrl?.trim() || null,
             identificationImageUrl: values.identificationImageUrl?.trim() || null,
           },

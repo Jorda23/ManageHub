@@ -14,7 +14,7 @@ import type {
   ReportFilters,
   ReportMetric,
 } from "../types/reports.types";
-import { formatMoney, formatReportDate } from "../utils/format";
+import { formatMoney } from "../utils/format";
 import { formatSummaryDetail, formatSummaryValue, summarizeAmounts } from "../utils/reportStats";
 
 type PendingAccountsReportProps = {
@@ -31,7 +31,7 @@ export function PendingAccountsReport({ filters }: Readonly<PendingAccountsRepor
   );
 
   const nextDueCount = useMemo(
-    () => data.filter((row) => Boolean(row.nextPaymentDate)).length,
+    () => data.filter((row) => Boolean(row.paymentDayOfMonth)).length,
     [data],
   );
 
@@ -56,9 +56,9 @@ export function PendingAccountsReport({ filters }: Readonly<PendingAccountsRepor
       icon: <FaCalendarAlt size={18} />,
       iconBg: colors.dangerSoft,
       iconColor: colors.danger,
-      label: "Próximos vencimientos",
+      label: "Días de pago mensual",
       value: String(nextDueCount),
-      detail: "con fecha de pago definida",
+      detail: "con día de pago mensual definido",
     },
   ];
 
@@ -87,11 +87,11 @@ export function PendingAccountsReport({ filters }: Readonly<PendingAccountsRepor
       ),
     },
     {
-      key: "nextPaymentDate",
-      header: "Próxima fecha de pago",
+      key: "paymentDayOfMonth",
+      header: "Día de pago",
       width: "22%",
       render: (row) => (
-        <ReportCellText muted>{formatReportDate(row.nextPaymentDate)}</ReportCellText>
+        <ReportCellText muted>{row.paymentDayOfMonth ?? "Sin definir"}</ReportCellText>
       ),
     },
     {
