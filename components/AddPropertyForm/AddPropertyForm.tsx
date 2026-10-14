@@ -42,6 +42,8 @@ const initialValues: AddPropertyFormValues = {
   measure: "",
   location: "",
   ownerName: "",
+  Phone: "",
+  Email: "",
   totalPrice: "",
   currency: "USD",
   initialPayment: "",
@@ -82,6 +84,10 @@ export function AddPropertyForm({ onCancel, onCreated }: Readonly<AddPropertyFor
           location: values.location.trim(),
 
           ownerName: values.ownerName.trim(),
+
+          Phone: values.Phone?.trim() || null,
+
+          Email: values.Email?.trim() || null,
 
           totalPrice: Number(values.totalPrice),
 
@@ -137,6 +143,8 @@ export function AddPropertyForm({ onCancel, onCreated }: Readonly<AddPropertyFor
         measure: true,
         location: true,
         ownerName: true,
+        Phone: true,
+        Email: true,
         totalPrice: true,
         currency: true,
         initialPayment: true,
@@ -358,6 +366,38 @@ export function AddPropertyForm({ onCancel, onCreated }: Readonly<AddPropertyFor
             sx={fieldStyles}
           />
         </ModalField>
+
+        <Box sx={twoColumnsStyles}>
+          <ModalField label="Teléfono (opcional)" htmlFor="property-owner-phone">
+            <TextField
+              id="property-owner-phone"
+              name="Phone"
+              value={formik.values.Phone ?? ""}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              placeholder="Ej. 8888-8888"
+              disabled={isCreatingProperty}
+              fullWidth
+              sx={fieldStyles}
+            />
+          </ModalField>
+          <ModalField label="Correo electrónico (opcional)" htmlFor="property-owner-email">
+            <TextField
+              id="property-owner-email"
+              name="Email"
+              type="email"
+              value={formik.values.Email ?? ""}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              placeholder="cliente@ejemplo.com"
+              error={Boolean(getFieldError("Email"))}
+              helperText={getFieldError("Email")}
+              disabled={isCreatingProperty}
+              fullWidth
+              sx={fieldStyles}
+            />
+          </ModalField>
+        </Box>
 
         <Box sx={twoColumnsStyles}>
           <ModalField label="Número de identificación" htmlFor="property-identification-number">

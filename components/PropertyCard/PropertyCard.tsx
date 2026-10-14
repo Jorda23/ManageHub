@@ -2,12 +2,13 @@
 
 import { memo, type KeyboardEvent, type ReactNode } from "react";
 
-import { Box, Chip, IconButton, LinearProgress, Paper, Typography } from "@mui/material";
+import { Box, Button, Chip, IconButton, LinearProgress, Paper, Typography } from "@mui/material";
 
 import {
   FaBuilding,
   FaCalendarAlt,
   FaEdit,
+  FaFileDownload,
   FaHome,
   FaMapMarkerAlt,
   FaRulerCombined,
@@ -19,6 +20,7 @@ import { getPendingAmount, getStatusColors, type PropertyItem } from "@/shared/d
 import { colors } from "@/theme/sharedColors";
 import { formatCurrency } from "@/shared";
 import { getImageKitUrl } from "@/utils/imagekit";
+import { downloadPropertyPdf } from "@/utils/propertyPdf";
 
 type PropertyCardProps = {
   property: PropertyItem;
@@ -123,6 +125,30 @@ export const PropertyCard = memo(function PropertyCard({
         <FinancialSummary property={property} pendingAmount={pendingAmount} />
 
         <PaymentProgress progress={progress} accent={property.accent} />
+
+        <Button
+          type="button"
+          variant="outlined"
+          size="small"
+          startIcon={<FaFileDownload />}
+          onClick={(event) => {
+            event.stopPropagation();
+            downloadPropertyPdf(property);
+          }}
+          sx={{
+            mt: 0.5,
+            borderColor: colors.primaryBorder,
+            color: colors.primary,
+            fontWeight: 800,
+            textTransform: "none",
+            "&:hover": {
+              borderColor: colors.primary,
+              bgcolor: colors.primarySoft,
+            },
+          }}
+        >
+          Descargar detalles PDF
+        </Button>
       </Box>
     </Paper>
   );

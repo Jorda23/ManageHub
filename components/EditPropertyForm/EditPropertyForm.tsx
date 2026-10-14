@@ -25,6 +25,8 @@ export type EditPropertyValues = {
   measure: string;
   location: string;
   ownerName: string;
+  Phone: string;
+  Email: string;
   identificationNumber: string;
   paymentDayOfMonth: number | null;
   imageUrl: string | null;
@@ -55,6 +57,8 @@ export function EditPropertyForm({
       measure: "",
       location: "",
       ownerName: "",
+      Phone: "",
+      Email: "",
       identificationNumber: "",
       paymentDayOfMonth: null,
       imageUrl: "",
@@ -85,6 +89,8 @@ export function EditPropertyForm({
         measure: values.measure.trim(),
         location: values.location.trim(),
         ownerName: values.ownerName.trim(),
+        Phone: values.Phone.trim(),
+        Email: values.Email.trim(),
         identificationNumber: values.identificationNumber.trim(),
         paymentDayOfMonth: values.paymentDayOfMonth ?? null,
         imageUrl: values.imageUrl?.trim() || null,
@@ -103,6 +109,8 @@ export function EditPropertyForm({
         measure: property.measure,
         location: property.location,
         ownerName: property.ownerName,
+        Phone: property.Phone ?? property.phone ?? "",
+        Email: property.Email ?? property.email ?? "",
         identificationNumber: property.IdentificationNumber ?? property.identificationNumber ?? "",
         paymentDayOfMonth: property.paymentDayOfMonth ?? null,
         imageUrl: property.imageUrl ?? "",
@@ -262,6 +270,35 @@ export function EditPropertyForm({
                 />
               </ModalField>
             </Box>
+
+            <ModalField label="Teléfono (opcional)" htmlFor="edit-property-owner-phone">
+              <TextField
+                id="edit-property-owner-phone"
+                name="Phone"
+                value={formik.values.Phone}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                placeholder="Ej. 8888-8888"
+                disabled={disabled}
+                fullWidth
+                sx={fieldStyles}
+              />
+            </ModalField>
+
+            <ModalField label="Correo electrónico (opcional)" htmlFor="edit-property-owner-email">
+              <TextField
+                id="edit-property-owner-email"
+                name="Email"
+                type="email"
+                value={formik.values.Email}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                placeholder="cliente@ejemplo.com"
+                disabled={disabled}
+                fullWidth
+                sx={fieldStyles}
+              />
+            </ModalField>
 
             <ModalField
               label="Número de identificación"

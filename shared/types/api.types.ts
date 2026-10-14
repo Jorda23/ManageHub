@@ -208,6 +208,10 @@ export type CreatePropertyRequest = {
   measure: string;
   location: string;
   ownerName: string;
+  Phone?: string | null;
+  Email?: string | null;
+  phone?: string | null;
+  email?: string | null;
   totalPrice: number;
   initialPayment: number;
   currency: Currency;
@@ -229,6 +233,8 @@ export type UpdatePropertyRequest = {
   measure: string;
   location: string;
   ownerName: string;
+  Phone?: string | null;
+  Email?: string | null;
   identificationNumber: string;
   paymentDayOfMonth?: number | null;
   imageUrl?: string | null;
@@ -249,6 +255,10 @@ export type Property = {
   measure: string;
   location: string;
   ownerName: string;
+  Phone?: string | null;
+  Email?: string | null;
+  phone?: string | null;
+  email?: string | null;
   totalPrice: number;
   currency?: Currency;
   amountPaid: number;

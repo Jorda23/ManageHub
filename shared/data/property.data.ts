@@ -22,7 +22,8 @@ export type PropertyItem = {
   accent: string;
   imageUrl: string;
   ownerName: string;
-  ownerPhone?: string;
+  ownerPhone?: string | null;
+  ownerEmail?: string | null;
   ownerDocument?: string;
 };
 

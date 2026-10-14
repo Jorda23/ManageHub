@@ -11,6 +11,10 @@ export const addPropertySchema = yup.object({
 
   ownerName: yup.string().trim().required("Ingresa el nombre del propietario"),
 
+  Phone: yup.string().trim().default(""),
+
+  Email: yup.string().trim().email("Ingresa un correo válido").default(""),
+
   identificationNumber: yup.string().trim().required("Ingresa el número de identificación"),
 
   identificationImageUrl: yup.string().default(""),
