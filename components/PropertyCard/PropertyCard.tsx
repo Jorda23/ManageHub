@@ -519,11 +519,8 @@ function FinancialSummary({
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: {
-          xs: "1fr 1fr",
-          sm: "repeat(4, minmax(0, 1fr))",
-        },
-        gap: 1,
+        gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+        gap: 0.75,
       }}
     >
       <FinancialItem label="Precio" value={formatCurrency(property.price, currency)} />
@@ -537,21 +534,22 @@ function FinancialSummary({
             ? formatCurrency(property.lastPaymentAmount, currency)
             : "Sin pagos"
         }
+        accent
       />
 
       <Box
         sx={{
           minWidth: 0,
-          p: 1.15,
-          borderRadius: "12px",
-          bgcolor: "#f8fafc",
-          border: `1px solid ${colors.cardBorder}`,
+          p: 1,
+          borderRadius: "11px",
+          bgcolor: pendingAmount > 0 ? colors.primarySoft : colors.greenSoft,
+          border: `1px solid ${pendingAmount > 0 ? colors.primaryBorder : colors.greenBorder}`,
         }}
       >
         <Typography
           sx={{
-            color: colors.softMuted,
-            fontSize: 9,
+            color: pendingAmount > 0 ? colors.primary : colors.green,
+            fontSize: 9.5,
             fontWeight: 800,
             textTransform: "uppercase",
             letterSpacing: "0.04em",
@@ -564,13 +562,14 @@ function FinancialSummary({
           noWrap
           title={formatCurrency(pendingAmount, currency)}
           sx={{
-            mt: 0.15,
+            mt: 0.35,
             color: pendingAmount > 0 ? colors.text : colors.green,
             fontWeight: 950,
             fontSize: {
-              xs: 14,
+              xs: 13,
               md: 15,
             },
+            lineHeight: 1.2,
           }}
         >
           {formatCurrency(pendingAmount, currency)}
@@ -580,19 +579,29 @@ function FinancialSummary({
   );
 }
 
-function FinancialItem({ label, value }: { label: string; value: string }) {
+function FinancialItem({
+  label,
+  value,
+  accent = false,
+}: {
+  label: string;
+  value: string;
+  accent?: boolean;
+}) {
   return (
     <Box
       sx={{
         minWidth: 0,
-        px: 0.25,
-        py: 0.5,
+        p: 1,
+        borderRadius: "11px",
+        bgcolor: accent ? "#f0f7ff" : "#f8fafc",
+        border: `1px solid ${accent ? colors.primaryBorder : colors.cardBorder}`,
       }}
     >
       <Typography
         sx={{
-          color: colors.softMuted,
-          fontSize: 9,
+          color: accent ? colors.primary : colors.softMuted,
+          fontSize: 9.5,
           fontWeight: 800,
           textTransform: "uppercase",
           letterSpacing: "0.04em",
@@ -605,13 +614,14 @@ function FinancialItem({ label, value }: { label: string; value: string }) {
         noWrap
         title={value}
         sx={{
-          mt: 0.15,
-          color: colors.text,
-          fontWeight: 850,
+          mt: 0.35,
+          color: accent ? colors.primary : colors.text,
+          fontWeight: 900,
           fontSize: {
-            xs: 12,
+            xs: 11,
             md: 13,
           },
+          lineHeight: 1.2,
         }}
       >
         {value}
