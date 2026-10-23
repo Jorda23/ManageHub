@@ -15,6 +15,7 @@ export type PropertyItem = {
   price: number;
   currency?: Currency;
   paid: number;
+  lastPaymentAmount?: number | null;
   buyerName: string;
   buyerEmail: string;
   paymentDayOfMonth?: number | null;

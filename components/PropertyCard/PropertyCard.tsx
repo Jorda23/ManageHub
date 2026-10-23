@@ -521,7 +521,7 @@ function FinancialSummary({
         display: "grid",
         gridTemplateColumns: {
           xs: "1fr 1fr",
-          sm: "1fr 1fr 1.25fr",
+          sm: "repeat(4, minmax(0, 1fr))",
         },
         gap: 1,
       }}
@@ -530,12 +530,17 @@ function FinancialSummary({
 
       <FinancialItem label="Abonado" value={formatCurrency(property.paid, currency)} />
 
+      <FinancialItem
+        label="Último pago"
+        value={
+          property.lastPaymentAmount != null
+            ? formatCurrency(property.lastPaymentAmount, currency)
+            : "Sin pagos"
+        }
+      />
+
       <Box
         sx={{
-          gridColumn: {
-            xs: "1 / -1",
-            sm: "auto",
-          },
           minWidth: 0,
           p: 1.15,
           borderRadius: "12px",

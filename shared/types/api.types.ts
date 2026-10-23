@@ -262,6 +262,7 @@ export type Property = {
   totalPrice: number;
   currency?: Currency;
   amountPaid: number;
+  lastPaymentAmount?: number | null;
   pendingBalance: number;
   paymentDayOfMonth?: number | null;
   status: string;

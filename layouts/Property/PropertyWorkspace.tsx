@@ -106,6 +106,7 @@ export function PropertyWorkspace() {
         price: property.totalPrice,
         currency: normalizeCurrency(property.currency ?? "NIO"),
         paid: property.amountPaid,
+        lastPaymentAmount: property.lastPaymentAmount,
         ownerName: property.ownerName,
         ownerPhone: property.Phone ?? property.phone ?? "",
         ownerEmail: property.Email ?? property.email ?? "",
