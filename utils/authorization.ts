@@ -86,9 +86,7 @@ export function getUserRoles(): AppRole[] {
 }
 
 export function getEffectiveRoles(): AppRole[] {
-  const roles = getUserRoles();
-  // Existing accounts without role claims keep the current administrator experience.
-  return roles.length ? roles : ["admin"];
+  return getUserRoles();
 }
 
 export function isAdministrator(): boolean {
@@ -124,14 +122,14 @@ export function getLoginDestination(): string {
   ];
   if (destinations.length > 1) return "/access";
   if (destinations.length === 1) return destinations[0];
-  return "/dashboard";
+  return "/access";
 }
 
 export function canAccessProtectedRoute(pathname: string): boolean {
   const roles = getEffectiveRoles();
   const isAdmin = roles.includes("admin");
 
-  if (pathname === "/access") return roles.some((role) => role !== "admin");
+  if (pathname === "/access") return roles.length === 0 || roles.some((role) => role !== "admin");
   if (pathname === "/pos") return getCashierModules().length > 0;
   if (pathname === "/pos/hardware") return roles.includes("hardware");
   if (pathname === "/pos/grains") return roles.includes("grains");

@@ -85,7 +85,25 @@ export function RoleDestinationSelector() {
             gap: 2,
           }}
         >
-          {destinations.map((destination) => (
+          {destinations.length === 0 ? (
+            <Card
+              sx={{
+                gridColumn: "1 / -1",
+                p: 3,
+                borderRadius: 3,
+                border: "1px solid #e2e8f0",
+                boxShadow: "0 12px 34px rgba(15,23,42,.06)",
+              }}
+            >
+              <Typography sx={{ fontSize: 20, fontWeight: 900 }}>
+                Tu cuenta no tiene permisos asignados
+              </Typography>
+              <Typography sx={{ mt: 0.75, color: "#64748b" }}>
+                Solicita al administrador que asigne un rol para poder acceder a un módulo.
+              </Typography>
+            </Card>
+          ) : (
+            destinations.map((destination) => (
             <Card
               key={destination.id}
               onClick={() => router.push(destination.href)}
@@ -126,7 +144,8 @@ export function RoleDestinationSelector() {
                 Abrir módulo
               </Button>
             </Card>
-          ))}
+            ))
+          )}
         </Box>
       </Box>
     </Box>
