@@ -37,6 +37,10 @@ type PropertyTerrainsSectionProps = {
 
   propertyOrder?: "created" | "alphabetical" | "numeric";
 
+  stage?: "all" | "1" | "2" | "3" | "4";
+
+  onStageChange?: (value: "all" | "1" | "2" | "3" | "4") => void;
+
   onPropertyOrderChange?: (value: "created" | "alphabetical" | "numeric") => void;
 
   isInitialLoading?: boolean;
@@ -194,6 +198,10 @@ export function PropertyTerrainsSection({
   onSearchChange,
 
   propertyOrder = "created",
+
+  stage = "all",
+
+  onStageChange,
 
   onPropertyOrderChange,
 
@@ -587,6 +595,28 @@ export function PropertyTerrainsSection({
               </Select>
             </FormControl>
           </Box>
+
+          <FormControl size="small" sx={{ width: { xs: "100%", sm: 150 }, minWidth: 0 }}>
+            <Select
+              value={stage}
+              onChange={(event) => {
+                const value = event.target.value;
+                onStageChange?.(
+                  value === "1" || value === "2" || value === "3" || value === "4"
+                    ? value
+                    : "all",
+                );
+              }}
+              inputProps={{ "aria-label": "Filtrar por etapa" }}
+              sx={sortSelectSx}
+            >
+              <MenuItem value="all">Todas las etapas</MenuItem>
+              <MenuItem value="1">Etapa 1</MenuItem>
+              <MenuItem value="2">Etapa 2</MenuItem>
+              <MenuItem value="3">Etapa 3</MenuItem>
+              <MenuItem value="4">Etapa 4</MenuItem>
+            </Select>
+          </FormControl>
 
           {onRegisterPayment && (
             <Button

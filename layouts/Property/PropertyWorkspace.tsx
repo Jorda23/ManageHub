@@ -32,6 +32,19 @@ import { getProperties } from "@/service/api";
 
 export type PropertyWorkspaceTab = "properties" | "create";
 
+function getStageNumber(property: Property): number | null {
+  const label = `${property.name} ${property.code}`;
+  const explicitStage = label.match(/\bETAPA\s*(\d+)\b/i);
+  const compactStage = label.match(/\b[A-Z]\s*(\d+)\s*LOTE\b/i);
+  const value = explicitStage?.[1] ?? compactStage?.[1];
+  return value ? Number(value) : null;
+}
+
+function getLotNumber(property: Property): number {
+  const value = `${property.name} ${property.code}`.match(/\bLOTE\s*(\d+)\b/i)?.[1];
+  return value ? Number(value) : Number.MAX_SAFE_INTEGER;
+}
+
 export function PropertyWorkspace() {
   const { data: apiProperties = [], isLoading: isLoadingProperties } = useProperties();
 
@@ -41,6 +54,7 @@ export function PropertyWorkspace() {
   const [propertyOrder, setPropertyOrder] = useState<"created" | "alphabetical" | "numeric">(
     "created",
   );
+  const [stage, setStage] = useState<"all" | "1" | "2" | "3" | "4">("all");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -124,8 +138,29 @@ export function PropertyWorkspace() {
   const properties = useMemo(() => toItems(apiProperties), [apiProperties, toItems]);
 
   const filteredProperties = useMemo(
-    () => toItems(visibleProperties),
-    [visibleProperties, toItems],
+    () => {
+      if (stage === "all") {
+        return toItems(visibleProperties);
+      }
+
+      const term = search.trim().toLocaleLowerCase();
+      const stageProperties = apiProperties
+        .filter((property) => String(getStageNumber(property)) === stage)
+        .filter(
+          (property) =>
+            !term ||
+            [property.name, property.code, property.ownerName, property.location]
+              .some((value) => value.toLocaleLowerCase().includes(term)),
+        )
+        .sort(
+          (a, b) =>
+            getLotNumber(a) - getLotNumber(b) ||
+            a.name.localeCompare(b.name, "es", { numeric: true, sensitivity: "base" }),
+        );
+
+      return toItems(stageProperties);
+    },
+    [apiProperties, search, stage, toItems, visibleProperties],
   );
 
   const handleEditProperty = useCallback(
@@ -234,9 +269,11 @@ export function PropertyWorkspace() {
             onSearchChange={setSearch}
             propertyOrder={propertyOrder}
             onPropertyOrderChange={setPropertyOrder}
-            isInitialLoading={isSearchLoading}
-            hasMore={hasNextPage ?? false}
-            isLoadingMore={isFetchingNextPage}
+            stage={stage}
+            onStageChange={setStage}
+            isInitialLoading={stage === "all" ? isSearchLoading : isLoadingProperties}
+            hasMore={stage === "all" ? (hasNextPage ?? false) : false}
+            isLoadingMore={stage === "all" && isFetchingNextPage}
             onLoadMore={() => {
               void fetchNextPage();
             }}
