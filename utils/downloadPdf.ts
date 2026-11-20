@@ -50,8 +50,6 @@ export const downloadHtmlAsPdf = async (html: string, fileName: string): Promise
       logging: false,
     });
 
-    const imageData = canvas.toDataURL("image/jpeg", 0.95);
-
     const pdf = new jsPDF({
       orientation: "portrait",
 
@@ -61,14 +59,45 @@ export const downloadHtmlAsPdf = async (html: string, fileName: string): Promise
     });
 
     const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
 
     const margin = 8;
 
     const contentWidth = pageWidth - margin * 2;
+    const contentHeight = pageHeight - margin * 2;
+    const pixelsPerPage = Math.floor((canvas.width * contentHeight) / contentWidth);
 
-    const imageHeight = (canvas.height * contentWidth) / canvas.width;
+    for (let offsetY = 0; offsetY < canvas.height; offsetY += pixelsPerPage) {
+      if (offsetY > 0) {
+        pdf.addPage();
+      }
 
-    pdf.addImage(imageData, "JPEG", margin, margin, contentWidth, imageHeight);
+      const sliceHeight = Math.min(pixelsPerPage, canvas.height - offsetY);
+      const pageCanvas = document.createElement("canvas");
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = sliceHeight;
+
+      const context = pageCanvas.getContext("2d");
+      if (!context) {
+        throw new Error("No se pudo preparar una página de la factura.");
+      }
+
+      context.drawImage(
+        canvas,
+        0,
+        offsetY,
+        canvas.width,
+        sliceHeight,
+        0,
+        0,
+        canvas.width,
+        sliceHeight,
+      );
+
+      const pageImage = pageCanvas.toDataURL("image/jpeg", 0.95);
+      const imageHeight = (sliceHeight * contentWidth) / canvas.width;
+      pdf.addImage(pageImage, "JPEG", margin, margin, contentWidth, imageHeight);
+    }
 
     pdf.save(fileName);
   } finally {

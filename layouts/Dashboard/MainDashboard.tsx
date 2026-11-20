@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { Box } from "@mui/material";
 
@@ -16,10 +16,13 @@ import {
   CashFlowCard,
   AlertsCard,
   ActivityCard,
+  SectionHeading,
+  CategoryTotalsSection,
 } from "./components";
 
 export default function MainDashboard() {
-  const { data, isLoading, isError } = useDashboard();
+  const [categoryPeriod, setCategoryPeriod] = useState<"month" | "year">("month");
+  const { data, isLoading, isError } = useDashboard(categoryPeriod);
   const dashboardView = useMemo(() => buildDashboardView(data), [data]);
 
   if (isLoading) {
@@ -69,35 +72,56 @@ export default function MainDashboard() {
         >
           <DashboardHero />
 
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                sm: "repeat(2, minmax(0, 1fr))",
-                xl: "repeat(4, minmax(0, 1fr))",
-              },
-              gap: 2,
-            }}
-          >
-            {dashboardView.metrics.map((metric) => (
-              <DashboardMetricCard key={metric.label} {...metric} />
-            ))}
+          <Box>
+            <SectionHeading
+              eyebrow="Vista general"
+              title="Resumen del negocio"
+              subtitle="Una lectura rápida de ventas, ingresos, cuentas abiertas y alertas."
+            />
+
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "repeat(2, minmax(0, 1fr))",
+                  xl: "repeat(4, minmax(0, 1fr))",
+                },
+                gap: { xs: 1.5, md: 2 },
+              }}
+            >
+              {dashboardView.metrics.map((metric) => (
+                <DashboardMetricCard key={metric.label} {...metric} />
+              ))}
+            </Box>
           </Box>
 
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                xl: "minmax(0, 1.7fr) minmax(320px, 0.7fr)",
-              },
-              gap: 2,
-              alignItems: "stretch",
-            }}
-          >
-            <CashFlowCard cashFlow={dashboardView.cashFlow} />
-            <AlertsCard alerts={dashboardView.alerts} />
+          <CategoryTotalsSection
+            categories={data.categories ?? []}
+            period={categoryPeriod}
+            onPeriodChange={setCategoryPeriod}
+          />
+
+          <Box>
+            <SectionHeading
+              eyebrow="Operación"
+              title="Seguimiento operativo"
+              subtitle="Revisa el movimiento semanal y atiende los pendientes prioritarios."
+            />
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  xl: "minmax(0, 1.7fr) minmax(320px, 0.7fr)",
+                },
+                gap: 2,
+                alignItems: "stretch",
+              }}
+            >
+              <CashFlowCard cashFlow={dashboardView.cashFlow} />
+              <AlertsCard alerts={dashboardView.alerts} />
+            </Box>
           </Box>
 
           <Box>

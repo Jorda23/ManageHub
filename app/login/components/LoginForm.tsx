@@ -12,6 +12,7 @@ import { FaArrowRightToBracket } from "react-icons/fa6";
 
 import { LoginField } from "./LoginField";
 import { useLogin } from "@/hook/useLogin";
+import { getLoginDestination, getRolesFromLogin } from "@/utils/authorization";
 
 const colors = {
   green: "#164c38",
@@ -45,13 +46,24 @@ export function LoginForm() {
         onSuccess: (response) => {
           const storage = rememberSession ? localStorage : sessionStorage;
 
+          localStorage.removeItem("access_token");
+          sessionStorage.removeItem("access_token");
+          localStorage.removeItem("user_roles");
+          sessionStorage.removeItem("user_roles");
+          localStorage.removeItem("user_id");
+          sessionStorage.removeItem("user_id");
+          localStorage.removeItem("username");
+          sessionStorage.removeItem("username");
+
           storage.setItem("access_token", response.token);
 
           storage.setItem("user_id", response.userId);
 
           storage.setItem("username", response.username);
 
-          router.replace("/dashboard");
+          storage.setItem("user_roles", JSON.stringify(getRolesFromLogin(response)));
+
+          router.replace(getLoginDestination());
         },
       },
     );

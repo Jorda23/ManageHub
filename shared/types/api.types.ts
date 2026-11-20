@@ -7,6 +7,8 @@ export type LoginResponse = {
   userId: string;
   username: string;
   token: string;
+  roles?: string[];
+  role?: string;
 };
 
 export type Currency = "USD" | "NIO";
@@ -77,6 +79,32 @@ export type RegisterHardwareSaleResponse = {
   remainingStock: number;
   paymentMethod: string;
   currency: Currency;
+  createdAt: string;
+};
+
+export type RegisterInvoiceRequest = {
+  items: Array<{ productId: string; quantity: number }>;
+  paymentMethod: string;
+};
+
+export type RegisterInvoiceItemResponse = {
+  productId: string;
+  productName: string;
+  productCode?: string;
+  unit?: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+  currency: Currency;
+};
+
+export type RegisterInvoiceResponse = {
+  id: string;
+  invoiceNumber: string;
+  items: RegisterInvoiceItemResponse[];
+  total: number;
+  currency: Currency;
+  paymentMethod: string;
   createdAt: string;
 };
 
@@ -359,11 +387,23 @@ export type DashboardAlert = {
   imageUrl: string | null;
 };
 
+export type DashboardCategoryKey = "grains" | "hardware" | "properties";
+
+export type DashboardCategory = {
+  category: DashboardCategoryKey;
+  totalValue: number;
+  periodSales: number;
+  inventoryCount: number;
+  inventoryUnit: "products" | "assets";
+};
+
 export type DashboardResponse = {
   summary: DashboardSummary;
   recentActivity: DashboardRecentActivity[];
   cashFlow7Days: DashboardCashFlowDay[];
   alerts: DashboardAlert[];
+  categoryPeriod?: "month" | "year";
+  categories?: DashboardCategory[];
 };
 
 export type PaymentHistoryType = "Hardware" | "Grains" | "Property";

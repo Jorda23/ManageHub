@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { getToken, isTokenExpired, removeToken } from "@/utils/auth";
+import { canAccessProtectedRoute, getUnauthorizedDestination } from "@/utils/authorization";
 
 type AuthGuardProps = {
   children: React.ReactNode;
@@ -29,9 +30,13 @@ export const AuthGuard = ({ children }: AuthGuardProps) => {
     }
 
     setIsAuthenticated(true);
+
+    if (!canAccessProtectedRoute(pathname)) {
+      router.replace(getUnauthorizedDestination());
+    }
   }, [pathname, router]);
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !canAccessProtectedRoute(pathname)) {
     return null;
   }
 

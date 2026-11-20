@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { Box, Dialog } from "@mui/material";
+import { Box } from "@mui/material";
 
 import {
   useCreateGrainProduct,
@@ -14,7 +14,6 @@ import {
 import {
   ConfirmDialog,
   LoadingState,
-  RegisterGrainSaleForm,
   AddGrainForm,
   AddGrainFormValues,
   EditGrainProductForm,
@@ -87,7 +86,6 @@ export function GrainsWorkspace() {
   const { showSuccess, showError } = useToast();
 
   const [activeTab, setActiveTab] = useState<GrainsWorkspaceTab>("inventory");
-  const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
 
   const [editingProduct, setEditingProduct] = useState<GrainProduct | null>(null);
 
@@ -273,7 +271,6 @@ export function GrainsWorkspace() {
               onDeleteProduct={(product) => {
                 setDeletingProduct(product);
               }}
-              onRegisterSale={() => setIsSaleModalOpen(true)}
               onAddProduct={() => {
                 setActiveTab("create");
               }}
@@ -312,41 +309,6 @@ export function GrainsWorkspace() {
             void handleDeleteProduct();
           }}
         />
-
-        <Dialog
-          open={isSaleModalOpen}
-          onClose={() => setIsSaleModalOpen(false)}
-          fullWidth
-          maxWidth={false}
-          scroll="paper"
-          slotProps={{
-            paper: {
-              elevation: 0,
-              sx: {
-                width: { xs: "calc(100% - 24px)", sm: "calc(100% - 64px)" },
-                maxWidth: 620,
-                maxHeight: { xs: "calc(100dvh - 24px)", sm: "calc(100dvh - 64px)" },
-                m: { xs: 1.5, sm: 4 },
-                borderRadius: "16px",
-                overflow: "hidden",
-                border: "1px solid rgba(148, 163, 184, 0.28)",
-                boxShadow: "0 28px 80px rgba(15, 23, 42, 0.24)",
-              },
-            },
-            backdrop: {
-              sx: {
-                bgcolor: "rgba(15, 23, 42, 0.56)",
-                backdropFilter: "blur(5px)",
-              },
-            },
-          }}
-        >
-          <RegisterGrainSaleForm
-            products={products}
-            productOptionLabel={({ name, unit }) => `${name} · ${unit}`}
-            onRegistered={() => setIsSaleModalOpen(false)}
-          />
-        </Dialog>
       </Box>
     </Box>
   );

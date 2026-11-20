@@ -1,24 +1,24 @@
 import { colors } from "@/theme/sharedColors";
 
 export const cardStyles = {
-  p: 2.2,
-  borderRadius: "16px",
+  p: { xs: 1.8, md: 2.2 },
+  borderRadius: "18px",
   bgcolor: colors.cardBg,
   border: `1px solid ${colors.cardBorder}`,
-  boxShadow: "0 8px 24px rgba(15, 23, 42, 0.05)",
-  transition: "all 0.18s ease",
+  boxShadow: "0 7px 22px rgba(15, 36, 66, 0.045)",
+  transition: "box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease",
   "&:hover": {
-    boxShadow: "0 16px 36px rgba(15, 23, 42, 0.08)",
+    boxShadow: "0 12px 28px rgba(15, 36, 66, 0.075)",
   },
 } as const;
 
 export const eyebrowStyles = {
   color: colors.muted,
-  fontSize: 10.5,
-  fontWeight: 850,
-  mb: 0.6,
+  fontSize: 9.5,
+  fontWeight: 900,
+  mb: 0.55,
   textTransform: "uppercase",
-  letterSpacing: "0.035em",
+  letterSpacing: "0.08em",
 } as const;
 
 export function buttonStyles(variant: "outlined" | "contained") {

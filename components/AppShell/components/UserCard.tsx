@@ -1,12 +1,33 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Avatar, Box, Typography } from "@mui/material";
 
 import { colors } from "@/theme/sharedColors";
 
 import { LogoutButton } from "./LogoutButton";
+import { getEffectiveRoles } from "@/utils/authorization";
+
+const roleLabels: Record<string, string> = {
+  admin: "Administrador",
+  hardware: "Ferretería",
+  grains: "Granos básicos",
+  property: "Terrenos",
+};
 
 export function UserCard() {
+  const [username, setUsername] = useState("Usuario");
+  const [roleLabel, setRoleLabel] = useState("Asset Hub");
+
+  useEffect(() => {
+    const savedUsername = localStorage.getItem("username") ?? sessionStorage.getItem("username");
+    const roles = getEffectiveRoles();
+    setUsername(savedUsername || "Usuario");
+    setRoleLabel(roles.map((role) => roleLabels[role]).join(" · "));
+  }, []);
+
+  const initials = username.trim().slice(0, 2).toLocaleUpperCase();
+
   return (
     <Box
       sx={{
@@ -29,7 +50,7 @@ export function UserCard() {
             fontWeight: 900,
           }}
         >
-          AU
+          {initials || "US"}
         </Avatar>
 
         <Box sx={{ minWidth: 0 }}>
@@ -41,7 +62,7 @@ export function UserCard() {
               fontWeight: 900,
             }}
           >
-            Admin User
+            {username}
           </Typography>
 
           <Typography
@@ -52,7 +73,7 @@ export function UserCard() {
               fontWeight: 600,
             }}
           >
-            Global Manager
+            {roleLabel}
           </Typography>
         </Box>
       </Box>

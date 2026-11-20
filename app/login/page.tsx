@@ -92,7 +92,7 @@ export default function LoginPage() {
                 mb: 1.1,
               }}
             >
-              Acceso administrativo
+              Acceso a Asset Hub
             </Typography>
 
             <Typography
@@ -130,7 +130,7 @@ export default function LoginPage() {
                 lineHeight: 1.6,
               }}
             >
-              Ingresa tus credenciales para acceder al panel de control centralizado.
+              Ingresa con tu cuenta para abrir el panel o las cajas que tienes asignadas.
             </Typography>
 
             <LoginForm />

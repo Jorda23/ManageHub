@@ -2,6 +2,7 @@ export * from "./DashboardHero";
 export * from "./DashboardMetricCard";
 export * from "./IconBadge";
 export * from "./SectionHeading";
+export * from "./CategoryTotalsSection";
 export * from "./StatusScreen";
 export * from "./ActivityCard";
 export * from "./AlertsCard";

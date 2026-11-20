@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { Box, Dialog } from "@mui/material";
+import { Box } from "@mui/material";
 
 import {
   useCreateHardwareProduct,
@@ -14,7 +14,6 @@ import {
 import {
   ConfirmDialog,
   LoadingState,
-  RegisterHardwareSaleForm,
   HardwareInventory,
   HardwareInventoryItem,
   AddHardwareProductValues,
@@ -96,7 +95,6 @@ export function HardwareWorkspace() {
   const [deletingProduct, setDeletingProduct] = useState<HardwareInventoryItem | null>(null);
 
   const [activeTab, setActiveTab] = useState<HardwareWorkspaceTab>("inventory");
-  const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
 
   const toItems = useCallback((list: HardwareProduct[]): HardwareInventoryItem[] => {
     return list.map((product) => {
@@ -305,7 +303,6 @@ export function HardwareWorkspace() {
               onDeleteProduct={(product) => {
                 setDeletingProduct(product);
               }}
-              onRegisterSale={() => setIsSaleModalOpen(true)}
               onAddProduct={() => {
                 setActiveTab("create");
               }}
@@ -344,41 +341,6 @@ export function HardwareWorkspace() {
             void handleDeleteProduct();
           }}
         />
-
-        <Dialog
-          open={isSaleModalOpen}
-          onClose={() => setIsSaleModalOpen(false)}
-          fullWidth
-          maxWidth={false}
-          scroll="paper"
-          slotProps={{
-            paper: {
-              elevation: 0,
-              sx: {
-                width: { xs: "calc(100% - 24px)", sm: "calc(100% - 64px)" },
-                maxWidth: 620,
-                maxHeight: { xs: "calc(100dvh - 24px)", sm: "calc(100dvh - 64px)" },
-                m: { xs: 1.5, sm: 4 },
-                borderRadius: "16px",
-                overflow: "hidden",
-                border: "1px solid rgba(148, 163, 184, 0.28)",
-                boxShadow: "0 28px 80px rgba(15, 23, 42, 0.24)",
-              },
-            },
-            backdrop: {
-              sx: {
-                bgcolor: "rgba(15, 23, 42, 0.56)",
-                backdropFilter: "blur(5px)",
-              },
-            },
-          }}
-        >
-          <RegisterHardwareSaleForm
-            products={products}
-            productOptionLabel={({ name, code }) => `${code} · ${name}`}
-            onRegistered={() => setIsSaleModalOpen(false)}
-          />
-        </Dialog>
       </Box>
     </Box>
   );

@@ -8,6 +8,8 @@ import { AppShellProps, sidebarSections } from "@/shared";
 import { SidebarHeader } from "./SidebarHeader";
 import { SidebarLink } from "./SidebarLink";
 import { UserCard } from "./UserCard";
+import { canAccessNavItem } from "@/utils/authorization";
+import { CashierNavSection } from "./CashierNavSection";
 
 type DesktopSidebarProps = {
   active?: AppShellProps["active"];
@@ -44,34 +46,40 @@ export function DesktopSidebar({ active }: Readonly<DesktopSidebarProps>) {
           overflowY: "auto",
         }}
       >
-        {sidebarSections.map((section) => (
-          <Box
-            key={section.id}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 0.6,
-            }}
-          >
-            <Typography
+        {sidebarSections.map((section) => {
+          const visibleItems = section.items.filter((item) => canAccessNavItem(item.key));
+          if (!visibleItems.length) return null;
+          return (
+            <Box
+              key={section.id}
               sx={{
-                px: 1,
-                color: colors.softMuted,
-                fontSize: 9.5,
-                fontWeight: 900,
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
+                display: "flex",
+                flexDirection: "column",
+                gap: 0.6,
               }}
             >
-              {section.title}
-            </Typography>
+              <Typography
+                sx={{
+                  px: 1,
+                  color: colors.softMuted,
+                  fontSize: 9.5,
+                  fontWeight: 900,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                }}
+              >
+                {section.title}
+              </Typography>
 
-            {section.items.map((item) => (
-              <SidebarLink key={item.key} item={item} active={active} />
-            ))}
-          </Box>
-        ))}
+              {visibleItems.map((item) => (
+                <SidebarLink key={item.key} item={item} active={active} />
+              ))}
+            </Box>
+          );
+        })}
       </Box>
+
+      <CashierNavSection />
 
       <Box sx={{ flex: 1 }} />
 

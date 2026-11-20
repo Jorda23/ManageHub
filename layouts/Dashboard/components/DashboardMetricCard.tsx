@@ -25,14 +25,28 @@ export function DashboardMetricCard({
           : colors.primaryLight;
 
   return (
-    <Card elevation={0} sx={cardStyles}>
+    <Card
+      elevation={0}
+      sx={{
+        ...cardStyles,
+        position: "relative",
+        overflow: "hidden",
+        p: { xs: 1.8, md: 2.1 },
+        borderTop: `2px solid ${alpha(accent, 0.72)}`,
+        "&:hover": {
+          ...cardStyles["&:hover"],
+          transform: "translateY(-2px)",
+          borderColor: alpha(accent, 0.48),
+        },
+      }}
+    >
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "flex-start",
+          alignItems: "center",
           gap: 2,
-          mb: 1.8,
+          mb: 1.45,
         }}
       >
         <IconBadge accent={accent}>
@@ -49,6 +63,7 @@ export function DashboardMetricCard({
             color: detailColor,
             fontSize: 10.5,
             fontWeight: 900,
+            maxWidth: "68%",
             "& .MuiChip-label": { px: 1 },
           }}
         />
@@ -58,13 +73,25 @@ export function DashboardMetricCard({
       <Typography
         sx={{
           color: colors.text,
-          fontSize: { xs: 21, md: 24 },
+          fontSize: { xs: 20, md: 22 },
           fontWeight: 950,
           lineHeight: 1.15,
+          letterSpacing: "-0.025em",
+          fontVariantNumeric: "tabular-nums",
+          overflowWrap: "anywhere",
         }}
       >
         {value}
       </Typography>
+      <Box
+        sx={{
+          mt: 1.1,
+          height: 3,
+          width: 38,
+          borderRadius: 2,
+          bgcolor: alpha(accent, 0.45),
+        }}
+      />
     </Card>
   );
 }

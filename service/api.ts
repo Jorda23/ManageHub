@@ -10,6 +10,8 @@ import type {
   HardwareProduct,
   RegisterHardwareSaleRequest,
   RegisterHardwareSaleResponse,
+  RegisterInvoiceRequest,
+  RegisterInvoiceResponse,
   HardwareSale,
   HardwareSalesFilters,
   CreateGrainProductRequest,
@@ -91,6 +93,15 @@ export const registerHardwareSale = async (
   );
 };
 
+export const registerHardwareInvoice = async (
+  request: RegisterInvoiceRequest,
+): Promise<RegisterInvoiceResponse> => {
+  return apiClient.post<RegisterInvoiceResponse, RegisterInvoiceRequest>(
+    "/api/hardware/sales/invoices",
+    request,
+  );
+};
+
 export const getHardwareSales = async (filters?: HardwareSalesFilters): Promise<HardwareSale[]> => {
   return apiClient.get<HardwareSale[]>("/api/hardware/sales", {
     params: filters,
@@ -131,6 +142,15 @@ export const registerGrainSale = async (
 ): Promise<RegisterGrainSaleResponse> => {
   return apiClient.post<RegisterGrainSaleResponse, RegisterGrainSaleRequest>(
     "/api/grains/sales",
+    request,
+  );
+};
+
+export const registerGrainInvoice = async (
+  request: RegisterInvoiceRequest,
+): Promise<RegisterInvoiceResponse> => {
+  return apiClient.post<RegisterInvoiceResponse, RegisterInvoiceRequest>(
+    "/api/grains/sales/invoices",
     request,
   );
 };
@@ -196,8 +216,8 @@ export const getPaymentHistory = async (
   });
 };
 
-export const getDashboard = async (): Promise<DashboardResponse> => {
-  return apiClient.get<DashboardResponse>("/api/dashboard");
+export const getDashboard = async (period: "month" | "year" = "month"): Promise<DashboardResponse> => {
+  return apiClient.get<DashboardResponse>("/api/dashboard", { params: { period } });
 };
 
 export const getSalesReport = async (filters?: ReportFilters): Promise<SaleReportRow[]> => {

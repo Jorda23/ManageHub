@@ -5,7 +5,7 @@ export const getToken = () => {
     return null;
   }
 
-  return localStorage.getItem(TOKEN_KEY);
+  return localStorage.getItem(TOKEN_KEY) ?? sessionStorage.getItem(TOKEN_KEY);
 };
 
 export const saveToken = (token: string) => {
@@ -22,6 +22,13 @@ export const removeToken = () => {
   }
 
   localStorage.removeItem(TOKEN_KEY);
+  sessionStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem("user_id");
+  sessionStorage.removeItem("user_id");
+  localStorage.removeItem("username");
+  sessionStorage.removeItem("username");
+  localStorage.removeItem("user_roles");
+  sessionStorage.removeItem("user_roles");
 };
 
 export const isTokenExpired = (token: string) => {
