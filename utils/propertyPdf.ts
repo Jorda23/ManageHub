@@ -2,6 +2,7 @@ import { jsPDF } from "jspdf";
 
 import { getPendingAmount, type PropertyItem } from "@/shared/data/property.data";
 import { formatCurrency } from "@/shared";
+import type { PropertyPayment } from "@/shared/types/api.types";
 
 const PDF_MARGIN = 18;
 const LINE_HEIGHT = 7;
@@ -15,7 +16,7 @@ function sanitizeFileName(value: string): string {
     .toLowerCase();
 }
 
-export function downloadPropertyPdf(property: PropertyItem): void {
+export function downloadPropertyPdf(property: PropertyItem, payments: PropertyPayment[]): void {
   const pdf = new jsPDF({ unit: "mm", format: "a4" });
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
@@ -91,6 +92,36 @@ export function downloadPropertyPdf(property: PropertyItem): void {
     "Avance de pago",
     `${property.price > 0 ? Math.round(Math.min(100, (property.paid / property.price) * 100)) : 0}%`,
   );
+
+  addSection("Historial de pagos");
+  if (payments.length === 0) {
+    addField("Pagos", "No hay pagos registrados para este terreno.");
+  } else {
+    [...payments]
+      .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
+      .forEach((payment, index) => {
+        const date = new Date(payment.createdAt);
+        const formattedDate = Number.isNaN(date.getTime())
+          ? payment.createdAt
+          : date.toLocaleDateString("es-NI");
+        const details = [
+          `${index + 1}. ${formattedDate} · ${formatCurrency(payment.amount, payment.currency)}`,
+          `Método: ${payment.paymentMethod || "No especificado"}`,
+          ...(payment.note ? [`Nota: ${payment.note}`] : []),
+        ];
+        const lines = pdf.splitTextToSize(details.join("\n"), contentWidth - 8) as string[];
+        const height = Math.max(LINE_HEIGHT, lines.length * 5);
+        ensureSpace(height + 3);
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(9);
+        pdf.setTextColor(15, 23, 42);
+        pdf.text(lines, PDF_MARGIN + 3, y);
+        y += height;
+        pdf.setDrawColor(226, 232, 240);
+        pdf.line(PDF_MARGIN + 3, y - 1, pageWidth - PDF_MARGIN - 3, y - 1);
+        y += 2;
+      });
+  }
 
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(8);

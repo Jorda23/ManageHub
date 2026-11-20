@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, type KeyboardEvent, type ReactNode } from "react";
+import { memo, useState, type KeyboardEvent, type ReactNode } from "react";
 
 import { Box, Button, Chip, IconButton, LinearProgress, Paper, Typography } from "@mui/material";
 
@@ -21,6 +21,8 @@ import { colors } from "@/theme/sharedColors";
 import { formatCurrency } from "@/shared";
 import { getImageKitUrl } from "@/utils/imagekit";
 import { downloadPropertyPdf } from "@/utils/propertyPdf";
+import { getPropertyPayments } from "@/service/api";
+import { useToast } from "@/components/Toast/ToastProvider";
 
 type PropertyCardProps = {
   property: PropertyItem;
@@ -35,6 +37,8 @@ export const PropertyCard = memo(function PropertyCard({
   onEdit,
   onDelete,
 }: Readonly<PropertyCardProps>) {
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+  const { showError } = useToast();
   const pendingAmount = getPendingAmount(property);
 
   const progress = property.price > 0 ? Math.min(100, (property.paid / property.price) * 100) : 0;
@@ -131,9 +135,21 @@ export const PropertyCard = memo(function PropertyCard({
           variant="outlined"
           size="small"
           startIcon={<FaFileDownload />}
-          onClick={(event) => {
+          disabled={isDownloadingPdf}
+          onClick={async (event) => {
             event.stopPropagation();
-            downloadPropertyPdf(property);
+            setIsDownloadingPdf(true);
+            try {
+              const payments = await getPropertyPayments();
+              downloadPropertyPdf(
+                property,
+                payments.filter((payment) => payment.propertyId === property.id),
+              );
+            } catch {
+              showError("No se pudo cargar el historial de pagos del terreno.");
+            } finally {
+              setIsDownloadingPdf(false);
+            }
           }}
           sx={{
             mt: 0.5,
@@ -147,7 +163,7 @@ export const PropertyCard = memo(function PropertyCard({
             },
           }}
         >
-          Descargar detalles PDF
+          {isDownloadingPdf ? "Generando PDF..." : "Descargar detalles PDF"}
         </Button>
       </Box>
     </Paper>
