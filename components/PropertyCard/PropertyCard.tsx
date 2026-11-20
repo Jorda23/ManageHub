@@ -21,7 +21,7 @@ import { colors } from "@/theme/sharedColors";
 import { formatCurrency } from "@/shared";
 import { getImageKitUrl } from "@/utils/imagekit";
 import { downloadPropertyPdf } from "@/utils/propertyPdf";
-import { getPropertyPayments } from "@/service/api";
+import { getPropertyPaymentsReport } from "@/service/api";
 import { useToast } from "@/components/Toast/ToastProvider";
 
 type PropertyCardProps = {
@@ -140,10 +140,14 @@ export const PropertyCard = memo(function PropertyCard({
             event.stopPropagation();
             setIsDownloadingPdf(true);
             try {
-              const payments = await getPropertyPayments();
+              const payments = await getPropertyPaymentsReport();
               downloadPropertyPdf(
                 property,
-                payments.filter((payment) => payment.propertyId === property.id),
+                payments.filter(
+                  (payment) =>
+                    payment.property.trim().toLocaleLowerCase() ===
+                    property.name.trim().toLocaleLowerCase(),
+                ),
               );
             } catch {
               showError("No se pudo cargar el historial de pagos del terreno.");
