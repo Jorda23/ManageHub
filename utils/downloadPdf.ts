@@ -4,7 +4,7 @@ import html2canvas from "html2canvas";
 
 const INVOICE_WIDTH = 800;
 
-const renderOffscreen = (html: string): HTMLElement => {
+const renderOffscreen = (html: string, padding: number): HTMLElement => {
   const container = document.createElement("div");
 
   container.style.position = "fixed";
@@ -18,8 +18,6 @@ const renderOffscreen = (html: string): HTMLElement => {
   container.style.width = `${INVOICE_WIDTH}px`;
 
   container.style.pointerEvents = "none";
-
-  const padding = 48;
 
   container.style.padding = `${padding}px`;
 
@@ -36,8 +34,17 @@ const cleanup = (container: HTMLElement): void => {
   }
 };
 
-export const downloadHtmlAsPdf = async (html: string, fileName: string): Promise<void> => {
-  const container = renderOffscreen(html);
+type DownloadHtmlAsPdfOptions = {
+  fitToSinglePage?: boolean;
+  containerPadding?: number;
+};
+
+export const downloadHtmlAsPdf = async (
+  html: string,
+  fileName: string,
+  { fitToSinglePage = false, containerPadding = 48 }: DownloadHtmlAsPdfOptions = {},
+): Promise<void> => {
+  const container = renderOffscreen(html, containerPadding);
 
   try {
     const canvas = await html2canvas(container, {
@@ -65,6 +72,26 @@ export const downloadHtmlAsPdf = async (html: string, fileName: string): Promise
 
     const contentWidth = pageWidth - margin * 2;
     const contentHeight = pageHeight - margin * 2;
+
+    if (fitToSinglePage) {
+      const scale = Math.min(contentWidth / canvas.width, contentHeight / canvas.height);
+      const imageWidth = canvas.width * scale;
+      const imageHeight = canvas.height * scale;
+      const imageX = (pageWidth - imageWidth) / 2;
+      const imageY = (pageHeight - imageHeight) / 2;
+
+      pdf.addImage(
+        canvas.toDataURL("image/jpeg", 0.95),
+        "JPEG",
+        imageX,
+        imageY,
+        imageWidth,
+        imageHeight,
+      );
+      pdf.save(fileName);
+      return;
+    }
+
     const pixelsPerPage = Math.floor((canvas.width * contentHeight) / contentWidth);
 
     for (let offsetY = 0; offsetY < canvas.height; offsetY += pixelsPerPage) {

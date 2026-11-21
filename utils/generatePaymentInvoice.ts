@@ -259,12 +259,15 @@ const buildPaymentInvoiceHtml = ({
 
       .invoice {
         width: 100%;
-        max-width: 800px;
+        min-height: 1158px;
+        max-width: none;
         margin: 0 auto;
         background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 20px;
+        border: 0;
+        border-radius: 0;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
       }
 
       .header {
@@ -320,6 +323,9 @@ const buildPaymentInvoiceHtml = ({
 
       .content {
         padding: 36px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
       }
 
       .section {
@@ -417,6 +423,7 @@ const buildPaymentInvoiceHtml = ({
       }
 
       .footer {
+        margin-top: auto;
         padding-top: 30px;
         color: #94a3b8;
         font-size: 11px;
@@ -436,5 +443,8 @@ export const downloadPaymentInvoicePdf = async ({
 }: DownloadPaymentInvoicePdfParams): Promise<void> => {
   const html = buildPaymentInvoiceHtml(data);
 
-  await downloadHtmlAsPdf(html, fileName);
+  await downloadHtmlAsPdf(html, fileName, {
+    fitToSinglePage: true,
+    containerPadding: 0,
+  });
 };

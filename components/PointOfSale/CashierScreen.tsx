@@ -24,6 +24,7 @@ import {
   FaArrowLeft,
   FaBoxOpen,
   FaCreditCard,
+  FaExclamationTriangle,
   FaMinus,
   FaPlus,
   FaSearch,
@@ -35,6 +36,7 @@ import {
 } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/Toast";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { LogoutButton } from "@/components/AppShell/components/LogoutButton";
 import { paymentMethods } from "@/shared/data/grains.data";
 import { formatCurrency } from "@/shared";
@@ -96,6 +98,7 @@ export function CashierScreen({
   const [currency, setCurrency] = useState<Currency>("NIO");
   const [paymentMethod, setPaymentMethod] = useState(paymentMethods[0]);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [checkoutConfirmOpen, setCheckoutConfirmOpen] = useState(false);
   const [isDownloadingPreview, setIsDownloadingPreview] = useState(false);
   const [previewCreatedAt, setPreviewCreatedAt] = useState("");
   const isBusy = isSubmitting || isDownloadingPreview;
@@ -225,6 +228,7 @@ export function CashierScreen({
 
   const submit = async () => {
     if (!cart.length || isBusy) return;
+    setCheckoutConfirmOpen(false);
     try {
       await onCheckout({
         items: cart.map(({ id, quantity }) => ({ productId: id, quantity })),
@@ -1016,7 +1020,7 @@ export function CashierScreen({
               fullWidth
               disabled={!cart.length || isBusy}
               startIcon={<FaCreditCard size={14} />}
-              onClick={() => void submit()}
+              onClick={() => setCheckoutConfirmOpen(true)}
               sx={{
                 minHeight: 46,
                 borderRadius: 2.5,
@@ -1147,6 +1151,18 @@ export function CashierScreen({
           </Button>
         </DialogActions>
       </Dialog>
+      <ConfirmDialog
+        open={checkoutConfirmOpen}
+        title={isHardware ? "Confirmar factura de ferretería" : "Confirmar factura de granos"}
+        description={`Vas a registrar el cobro por ${formatCurrency(total, currency)} (${paymentMethod}). Verifica los productos y las cantidades: al confirmar se registrará la venta y se descontará el inventario.`}
+        confirmLabel="Confirmar cobro"
+        cancelLabel="Volver a revisar"
+        icon={<FaExclamationTriangle size={16} color="#d97706" />}
+        isPending={isSubmitting}
+        isDanger={false}
+        onClose={() => setCheckoutConfirmOpen(false)}
+        onConfirm={() => void submit()}
+      />
     </Box>
   );
 }
