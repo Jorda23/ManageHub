@@ -83,7 +83,7 @@ export function CategoryTotalsSection({
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", xl: "repeat(3, minmax(0, 1fr))" },
+          gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(3, minmax(0, 1fr))" },
           gap: { xs: 1.5, md: 2 },
         }}
       >
@@ -94,7 +94,7 @@ export function CategoryTotalsSection({
             <Card
               key={category.category}
               elevation={0}
-              sx={{ ...cardStyles, p: { xs: 1.8, md: 2.1 }, borderColor: colors.primaryBorder }}
+              sx={{ ...cardStyles, p: { xs: 1.8, md: 2.1 } }}
             >
               <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.6 }}>
                 <IconBadge accent={presentation.accent}>

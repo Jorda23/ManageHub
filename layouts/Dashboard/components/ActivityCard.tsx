@@ -11,13 +11,16 @@ import { PanelHeader } from "./PanelHeader";
 
 export function ActivityCard({ activities }: ActivityCardProps) {
   return (
-    <Card elevation={0} sx={{ ...cardStyles, p: { xs: 2, md: 2.5 } }}>
+    <Card
+      elevation={0}
+      sx={{ ...cardStyles, p: { xs: 2, md: 2.5 }, minWidth: 0 }}
+    >
       <PanelHeader
         icon={FaReceipt}
         accent={colors.green}
-        title="Actividad reciente"
-        subtitle="Ultimos movimientos realizados en todos los modulos"
-        action="Ver historial"
+        title="Últimas operaciones"
+        subtitle="Actividad reciente en todos los módulos"
+        action="Ver todas"
         href="/history"
       />
 
@@ -28,13 +31,22 @@ export function ActivityCard({ activities }: ActivityCardProps) {
 
             return (
               <Box key={`${activity.title}-${activity.time}-${index}`}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1.45 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.3, py: 1.45 }}>
                   <IconBadge accent={activity.accent} compact>
                     <Icon size={13} />
                   </IconBadge>
 
                   <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography sx={{ color: colors.text, fontSize: 12.5, fontWeight: 900 }}>
+                    <Typography
+                      sx={{
+                        color: colors.text,
+                        fontSize: 12.5,
+                        fontWeight: 900,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
                       {activity.title}
                     </Typography>
                     <Typography
@@ -43,6 +55,10 @@ export function ActivityCard({ activities }: ActivityCardProps) {
                         color: colors.muted,
                         fontSize: 11.3,
                         fontWeight: 600,
+                        overflow: "hidden",
+                        display: "-webkit-box",
+                        WebkitBoxOrient: "vertical",
+                        WebkitLineClamp: 2,
                       }}
                     >
                       {activity.subtitle}
@@ -51,7 +67,7 @@ export function ActivityCard({ activities }: ActivityCardProps) {
 
                   <Box sx={{ textAlign: "right", flexShrink: 0 }}>
                     {activity.amount && (
-                      <Typography sx={{ color: colors.green, fontSize: 12.5, fontWeight: 950 }}>
+                      <Typography sx={{ color: colors.primary, fontSize: 12, fontWeight: 950 }}>
                         {activity.amount}
                       </Typography>
                     )}

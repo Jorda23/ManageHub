@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import type { DashboardSalesChart, DashboardSalesPeriod } from "./api.types";
 
 export type DashboardIcon = ComponentType<{ size?: number }>;
 
@@ -45,24 +46,22 @@ export type AlertItem = {
   tone: AlertTone;
 };
 
-export type CashFlowViewItem = {
-  day: string;
-  isToday: boolean;
-  hardware: number;
-  grains: number;
-  property: number;
-  total: number;
-};
-
 export type DashboardView = {
   metrics: MetricCard[];
-  cashFlow: CashFlowViewItem[];
   alerts: AlertItem[];
   activities: ActivityItem[];
 };
 
 export type CashFlowCardProps = {
-  cashFlow: CashFlowViewItem[];
+  salesChart?: DashboardSalesChart;
+  period: DashboardSalesPeriod;
+  from: string;
+  to: string;
+  isFetching?: boolean;
+  error?: string;
+  onPeriodChange: (period: DashboardSalesPeriod) => void;
+  onFromChange: (date: string) => void;
+  onToChange: (date: string) => void;
 };
 
 export type AlertsCardProps = {
@@ -90,6 +89,7 @@ export type IconBadgeProps = {
 export type ChartBarProps = {
   value: number;
   accent: string;
+  title: string;
 };
 
 export type LegendDotProps = {

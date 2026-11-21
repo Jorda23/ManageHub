@@ -13,6 +13,7 @@ import type {
   DashboardAlert,
   DashboardCashFlowDay,
   DashboardRecentActivity,
+  DashboardSalesChart,
   DashboardResponse,
   DashboardSummary,
 } from "@/shared/types/api.types";
@@ -20,26 +21,48 @@ import type {
   ActivityItem,
   AlertItem,
   AlertTone,
-  CashFlowViewItem,
   DashboardView,
   MetricCard,
 } from "@/shared/types/dashboard.types";
 import { colors } from "@/theme/sharedColors";
 import { formatCurrency } from "@/shared";
 
-const cashFlowDayFormatter = new Intl.DateTimeFormat("es-NI", {
-  weekday: "short",
-});
-
 const activityTimeFormatter = new Intl.DateTimeFormat("es-NI", {
   hour: "numeric",
   minute: "2-digit",
 });
 
+const weekdayFormatter = new Intl.DateTimeFormat("es-NI", {
+  weekday: "short",
+  timeZone: "America/Managua",
+});
+
+export function buildLegacyWeeklySalesChart(items: DashboardCashFlowDay[]): DashboardSalesChart {
+  const orderedItems = [...items].sort((left, right) => left.date.localeCompare(right.date));
+
+  return {
+    period: "week",
+    from: orderedItems[0]?.date.slice(0, 10) ?? "",
+    to: orderedItems[orderedItems.length - 1]?.date.slice(0, 10) ?? "",
+    currency: "NIO",
+    series: orderedItems.map((item) => {
+      const date = item.date.slice(0, 10);
+
+      return {
+        bucket: date,
+        label: weekdayFormatter.format(new Date(`${date}T12:00:00Z`)),
+        grains: item.grains,
+        hardware: item.hardware,
+        properties: item.properties,
+        total: item.total,
+      };
+    }),
+  };
+}
+
 export function buildDashboardView(data?: DashboardResponse): DashboardView {
   return {
     metrics: buildMetrics(data?.summary),
-    cashFlow: buildCashFlowView(data?.cashFlow7Days ?? []),
     alerts: buildAlertView(data?.alerts ?? []),
     activities: buildActivityView(data?.recentActivity ?? []),
   };
@@ -82,24 +105,6 @@ function buildMetrics(summary?: DashboardSummary): MetricCard[] {
   ];
 }
 
-function buildCashFlowView(items: DashboardCashFlowDay[]): CashFlowViewItem[] {
-  const maxTotal = Math.max(...items.map((item) => item.total), 0);
-  const todayIso = new Date().toISOString().slice(0, 10);
-
-  return items.map((item) => {
-    const isToday = item.date.slice(0, 10) === todayIso;
-
-    return {
-      day: formatCashFlowDayLabel(item.date, isToday),
-      isToday,
-      hardware: scaleBarValue(item.hardware, maxTotal),
-      grains: scaleBarValue(item.grains, maxTotal),
-      property: scaleBarValue(item.properties, maxTotal),
-      total: item.total,
-    };
-  });
-}
-
 function buildAlertView(items: DashboardAlert[]): AlertItem[] {
   return items.map((alert) => ({
     title: alert.title,
@@ -120,42 +125,13 @@ function buildActivityView(items: DashboardRecentActivity[]): ActivityItem[] {
   }));
 }
 
-export function getBestDayLabel(items: CashFlowViewItem[]) {
-  if (items.length === 0) {
-    return "Sin datos";
-  }
-
-  const bestDay = items.reduce(
-    (best, current) => (current.total > best.total ? current : best),
-    items[0],
-  );
-
-  return bestDay.day;
-}
-
 function formatPercent(value: number | undefined, suffix: string) {
   const percent = value ?? 0;
   return `${percent > 0 ? "+" : ""}${percent}% ${suffix}`;
 }
 
-function formatCashFlowDayLabel(date: string, isToday: boolean) {
-  if (isToday) {
-    return "Hoy";
-  }
-
-  return cashFlowDayFormatter.format(new Date(date));
-}
-
 function formatActivityTime(date: string) {
   return activityTimeFormatter.format(new Date(date));
-}
-
-function scaleBarValue(value: number, maxTotal: number) {
-  if (!maxTotal) {
-    return 0;
-  }
-
-  return Math.max((value / maxTotal) * 100, 6);
 }
 
 function alertHrefByCode(code: string) {

@@ -8,6 +8,10 @@ import {
   Button,
   Chip,
   Divider,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
   InputAdornment,
   MenuItem,
@@ -37,6 +41,8 @@ import { formatCurrency } from "@/shared";
 import type { Currency, RegisterInvoiceRequest } from "@/shared/types/api.types";
 import { convertCurrency, EXCHANGE_RATE_NIO_PER_USD, roundCurrency } from "@/shared/utils/currency";
 import { getImageKitUrl } from "@/utils/imagekit";
+import { buildCartInvoiceHtml, downloadPreInvoicePdf } from "@/utils/generateCartInvoice";
+import type { ProductInvoiceDocument } from "@/utils/generateCartInvoice";
 
 export type CashierProduct = {
   id: string;
@@ -89,6 +95,10 @@ export function CashierScreen({
   const [cart, setCart] = useState<CartLine[]>([]);
   const [currency, setCurrency] = useState<Currency>("NIO");
   const [paymentMethod, setPaymentMethod] = useState(paymentMethods[0]);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [isDownloadingPreview, setIsDownloadingPreview] = useState(false);
+  const [previewCreatedAt, setPreviewCreatedAt] = useState("");
+  const isBusy = isSubmitting || isDownloadingPreview;
   const [cashierName] = useState(() => {
     if (typeof window === "undefined") return "Usuario";
     return (
@@ -146,7 +156,6 @@ export function CashierScreen({
   }, [products, search]);
 
   const itemCount = cart.reduce((count, line) => count + line.quantity, 0);
-  const cartCurrency = cart[0]?.currency;
   const total = roundCurrency(
     cart.reduce(
       (sum, line) =>
@@ -156,18 +165,40 @@ export function CashierScreen({
   );
   const priceInCurrency = (line: CashierProduct, amount: number) =>
     roundCurrency(convertCurrency(amount, line.currency, currency));
+  const preInvoice: ProductInvoiceDocument = {
+    invoiceNumber: "BORRADOR",
+    createdAt: previewCreatedAt,
+    items: cart.map((line) => ({
+      productName: line.name,
+      productCode: line.code,
+      unit: line.unit,
+      quantity: line.quantity,
+      unitPrice: priceInCurrency(line, line.price),
+      total: priceInCurrency(line, line.price * line.quantity),
+      currency,
+    })),
+    total,
+    currency,
+    paymentMethod,
+  };
+  const preInvoiceHtml = buildCartInvoiceHtml(preInvoice, module, true);
+
+  const downloadPreview = async () => {
+    setIsDownloadingPreview(true);
+    try {
+      await downloadPreInvoicePdf(preInvoice, module);
+    } catch {
+      showError("No se pudo descargar la prefactura.");
+    } finally {
+      setIsDownloadingPreview(false);
+    }
+  };
 
   // Step 2 means the cart is ready for payment. Step 3 is only shown during checkout.
   const activeStep = isSubmitting ? 3 : cart.length > 0 ? 2 : 1;
 
   const addToCart = (product: CashierProduct) => {
-    if (product.stock <= 0 || isSubmitting) return;
-    if (cartCurrency && product.currency !== cartCurrency) {
-      showError(
-        `La factura solo admite productos en ${cartCurrency}. Vacía la factura para agregar productos en otra moneda.`,
-      );
-      return;
-    }
+    if (product.stock <= 0 || isBusy) return;
     setCart((current) => {
       const existing = current.find((line) => line.id === product.id);
       if (!existing) return [...current, { ...product, quantity: 1 }];
@@ -177,11 +208,10 @@ export function CashierScreen({
           : line,
       );
     });
-    if (!cartCurrency) setCurrency(product.currency);
   };
 
   const updateQuantity = (id: string, delta: number) => {
-    if (isSubmitting) return;
+    if (isBusy) return;
     setCart((current) =>
       current
         .map((line) =>
@@ -194,11 +224,12 @@ export function CashierScreen({
   };
 
   const submit = async () => {
-    if (!cart.length || isSubmitting) return;
+    if (!cart.length || isBusy) return;
     try {
       await onCheckout({
         items: cart.map(({ id, quantity }) => ({ productId: id, quantity })),
         paymentMethod,
+        currency,
       });
       setCart([]);
     } catch (checkoutError) {
@@ -448,12 +479,6 @@ export function CashierScreen({
                 {error}
               </Alert>
             )}
-            {cartCurrency && (
-              <Alert severity="info" sx={{ mb: 2 }}>
-                Esta factura está en {cartCurrency}. Para cambiar de moneda, vacía la factura antes
-                de agregar otros productos.
-              </Alert>
-            )}
             <Box
               sx={{
                 height: { xs: "auto", lg: "clamp(280px, calc(100dvh - 440px), 560px)" },
@@ -481,10 +506,7 @@ export function CashierScreen({
                     ))
                   : visibleProducts.map((product) => {
                       const inCart = cart.find((line) => line.id === product.id)?.quantity ?? 0;
-                      const hasDifferentCurrency = Boolean(
-                        cartCurrency && product.currency !== cartCurrency,
-                      );
-                      const canAdd = product.stock > inCart && !isSubmitting && !hasDifferentCurrency;
+                      const canAdd = product.stock > inCart && !isBusy;
                       return (
                         <Box
                           key={product.id}
@@ -820,7 +842,7 @@ export function CashierScreen({
                       <IconButton
                         aria-label={`Quitar ${line.name}`}
                         size="small"
-                        disabled={isSubmitting}
+                        disabled={isBusy}
                         onClick={() =>
                           setCart((current) => current.filter((item) => item.id !== line.id))
                         }
@@ -841,7 +863,7 @@ export function CashierScreen({
                         <IconButton
                           aria-label={`Disminuir cantidad de ${line.name}`}
                           size="small"
-                          disabled={isSubmitting}
+                          disabled={isBusy}
                           onClick={() => updateQuantity(line.id, -1)}
                           sx={{
                             bgcolor: palette.background,
@@ -860,7 +882,7 @@ export function CashierScreen({
                         <IconButton
                           aria-label={`Aumentar cantidad de ${line.name}`}
                           size="small"
-                          disabled={isSubmitting || line.quantity >= line.stock}
+                          disabled={isBusy || line.quantity >= line.stock}
                           onClick={() => updateQuantity(line.id, 1)}
                           sx={{
                             bgcolor: palette.background,
@@ -884,56 +906,69 @@ export function CashierScreen({
               )}
             </Box>
             <Divider sx={{ my: 1.8 }} />
-            <Typography
+            <Box
               sx={{
-                fontSize: 10,
-                letterSpacing: ".04em",
-                color: palette.muted,
-                fontWeight: 900,
-                mb: 0.7,
+                display: "grid",
+                gridTemplateColumns: { xs: "minmax(0, 1fr) minmax(0, 1fr)", sm: "1fr 1fr" },
+                gap: 1.25,
+                alignItems: "start",
               }}
             >
-              MONEDA DE LA FACTURA
-            </Typography>
-            <Select
-              size="small"
-              fullWidth
-              value={currency}
-              disabled={isSubmitting || Boolean(cartCurrency)}
-              onChange={(event) => setCurrency(event.target.value as Currency)}
-              sx={{ borderRadius: 2, mb: 0.5, fontSize: 12 }}
-            >
-              <MenuItem value="NIO">Córdobas (C$)</MenuItem>
-              <MenuItem value="USD">Dólares (US$)</MenuItem>
-            </Select>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography
+                  sx={{
+                    fontSize: 10,
+                    letterSpacing: ".04em",
+                    color: palette.muted,
+                    fontWeight: 900,
+                    mb: 0.7,
+                  }}
+                >
+                  MONEDA DE LA FACTURA
+                </Typography>
+                <Select
+                  size="small"
+                  fullWidth
+                  value={currency}
+                  disabled={isBusy}
+                  onChange={(event) => setCurrency(event.target.value as Currency)}
+                  sx={{ borderRadius: 2, fontSize: 12 }}
+                >
+                  <MenuItem value="NIO">C&#243;rdobas (C$)</MenuItem>
+                  <MenuItem value="USD">D&#243;lares (US$)</MenuItem>
+                </Select>
+              </Box>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography
+                  sx={{
+                    fontSize: 10,
+                    letterSpacing: ".04em",
+                    color: palette.muted,
+                    fontWeight: 900,
+                    mb: 0.7,
+                  }}
+                >
+                  METODO DE PAGO
+                </Typography>
+                <Select
+                  size="small"
+                  fullWidth
+                  value={paymentMethod}
+                  disabled={isBusy}
+                  onChange={(event) => setPaymentMethod(event.target.value)}
+                  sx={{ borderRadius: 2, fontSize: 12 }}
+                >
+                  {paymentMethods.map((method) => (
+                    <MenuItem key={method} value={method}>
+                      {method}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </Box>
+            </Box>
             <Typography sx={{ fontSize: 10, color: palette.muted, mb: 1.6 }}>
               Tasa aplicada: 1 USD = C${EXCHANGE_RATE_NIO_PER_USD.toFixed(2)}
             </Typography>
-            <Typography
-              sx={{
-                fontSize: 10,
-                letterSpacing: ".04em",
-                color: palette.muted,
-                fontWeight: 900,
-                mb: 0.7,
-              }}
-            >
-              MÉTODO DE PAGO
-            </Typography>
-            <Select
-              size="small"
-              fullWidth
-              value={paymentMethod}
-              disabled={isSubmitting}
-              onChange={(event) => setPaymentMethod(event.target.value)}
-              sx={{ borderRadius: 2, fontSize: 12 }}
-            >
-              {paymentMethods.map((method) => (
-                <MenuItem key={method} value={method}>
-                  {method}
-                </MenuItem>
-              ))}
-            </Select>
             <Box
               sx={{
                 display: "flex",
@@ -957,9 +992,29 @@ export function CashierScreen({
               </Typography>
             </Box>
             <Button
+              variant="outlined"
+              fullWidth
+              disabled={!cart.length || isBusy}
+              onClick={() => {
+                setPreviewCreatedAt(new Date().toISOString());
+                setPreviewOpen(true);
+              }}
+              sx={{
+                minHeight: 42,
+                mb: 0.8,
+                borderRadius: 2.5,
+                borderColor: "#cbd6e6",
+                color: palette.blue,
+                fontWeight: 850,
+                textTransform: "none",
+              }}
+            >
+              Vista previa de prefactura
+            </Button>
+            <Button
               variant="contained"
               fullWidth
-              disabled={!cart.length || isSubmitting}
+              disabled={!cart.length || isBusy}
               startIcon={<FaCreditCard size={14} />}
               onClick={() => void submit()}
               sx={{
@@ -977,7 +1032,7 @@ export function CashierScreen({
             {cart.length > 0 && (
               <Button
                 fullWidth
-                disabled={isSubmitting}
+                disabled={isBusy}
                 onClick={() => setCart([])}
                 sx={{ mt: 0.6, color: palette.muted, fontSize: 11, textTransform: "none" }}
               >
@@ -1024,7 +1079,7 @@ export function CashierScreen({
             Revisar
           </Button>
           <Button
-            disabled={isSubmitting}
+            disabled={isBusy}
             onClick={() =>
               summaryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
             }
@@ -1041,6 +1096,57 @@ export function CashierScreen({
           </Button>
         </Box>
       )}
+      <Dialog
+        open={previewOpen}
+        onClose={() => {
+          if (!isDownloadingPreview) setPreviewOpen(false);
+        }}
+        fullWidth
+        maxWidth="md"
+        slotProps={{ paper: { sx: { borderRadius: 2.5, overflow: "hidden" } } }}
+      >
+        <DialogTitle sx={{ pb: 1, fontWeight: 900, color: palette.ink }}>
+          Prefactura
+          <Typography
+            component="span"
+            sx={{ display: "block", mt: 0.5, color: palette.muted, fontSize: 12, fontWeight: 500 }}
+          >
+            Revisa los productos y descarga el documento antes de registrar el cobro.
+          </Typography>
+        </DialogTitle>
+        <DialogContent sx={{ bgcolor: "#edf1f6", p: { xs: 1, sm: 2 } }}>
+          <Box
+            component="iframe"
+            title="Vista previa de prefactura"
+            srcDoc={preInvoiceHtml}
+            sx={{
+              display: "block",
+              width: "100%",
+              height: { xs: "62vh", sm: "68vh" },
+              border: 0,
+              bgcolor: "white",
+              borderRadius: 1,
+            }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2, gap: 1, borderTop: "1px solid #e2e8f0" }}>
+          <Button
+            disabled={isDownloadingPreview}
+            onClick={() => setPreviewOpen(false)}
+            sx={{ textTransform: "none", color: palette.muted }}
+          >
+            Cerrar
+          </Button>
+          <Button
+            variant="contained"
+            disabled={isDownloadingPreview}
+            onClick={() => void downloadPreview()}
+            sx={{ bgcolor: palette.blue, fontWeight: 800, textTransform: "none", boxShadow: "none" }}
+          >
+            {isDownloadingPreview ? "Preparando PDF…" : "Descargar prefactura PDF"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

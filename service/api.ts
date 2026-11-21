@@ -216,8 +216,18 @@ export const getPaymentHistory = async (
   });
 };
 
-export const getDashboard = async (period: "month" | "year" = "month"): Promise<DashboardResponse> => {
-  return apiClient.get<DashboardResponse>("/api/dashboard", { params: { period } });
+export type DashboardQuery = {
+  period?: "month" | "year";
+  salesPeriod?: "day" | "week" | "month" | "custom";
+  date?: string;
+  from?: string;
+  to?: string;
+};
+
+export const getDashboard = async (query: DashboardQuery = {}): Promise<DashboardResponse> => {
+  return apiClient.get<DashboardResponse>("/api/dashboard", {
+    params: { period: "month", salesPeriod: "week", ...query },
+  });
 };
 
 export const getSalesReport = async (filters?: ReportFilters): Promise<SaleReportRow[]> => {

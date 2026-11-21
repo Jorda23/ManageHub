@@ -2,28 +2,43 @@
 
 import { useMemo, useState } from "react";
 
-import { Box } from "@mui/material";
+import { Box, Button } from "@mui/material";
+import { FaArrowRight } from "react-icons/fa";
 
 import { useDashboard } from "@/hook/useDashboard";
 import { colors } from "@/theme/sharedColors";
 
 import { AppShell } from "@/components/AppShell";
-import { buildDashboardView } from "./utils/dashboardView";
+import { buildDashboardView, buildLegacyWeeklySalesChart } from "./utils/dashboardView";
 import {
   StatusScreen,
   DashboardHero,
   DashboardMetricCard,
   CashFlowCard,
-  AlertsCard,
-  ActivityCard,
   SectionHeading,
   CategoryTotalsSection,
+  ActivityCard,
 } from "./components";
+import type { DashboardSalesPeriod } from "@/shared/types/api.types";
 
 export default function MainDashboard() {
   const [categoryPeriod, setCategoryPeriod] = useState<"month" | "year">("month");
-  const { data, isLoading, isError } = useDashboard(categoryPeriod);
+  const [salesPeriod, setSalesPeriod] = useState<DashboardSalesPeriod>("week");
+  const [salesFrom, setSalesFrom] = useState("");
+  const [salesTo, setSalesTo] = useState("");
+  const { data, isLoading, isError, isFetching, error } = useDashboard({
+    period: categoryPeriod,
+    salesPeriod,
+    ...(salesPeriod === "custom" ? { from: salesFrom, to: salesTo } : {}),
+  });
   const dashboardView = useMemo(() => buildDashboardView(data), [data]);
+  const salesChart = useMemo(() => {
+    if (data?.salesChart) return data.salesChart;
+    if (salesPeriod === "week" && data?.cashFlow7Days) {
+      return buildLegacyWeeklySalesChart(data.cashFlow7Days);
+    }
+    return undefined;
+  }, [data, salesPeriod]);
 
   if (isLoading) {
     return (
@@ -36,7 +51,7 @@ export default function MainDashboard() {
     );
   }
 
-  if (isError || !data) {
+  if (!data) {
     return (
       <AppShell active="dashboard">
         <StatusScreen
@@ -66,18 +81,43 @@ export default function MainDashboard() {
             mx: "auto",
             display: "flex",
             flexDirection: "column",
-            gap: { xs: 2, md: 3 },
+            gap: { xs: 2, md: 2.25 },
             minWidth: 0,
           }}
         >
           <DashboardHero />
 
           <Box>
-            <SectionHeading
-              eyebrow="Vista general"
-              title="Resumen del negocio"
-              subtitle="Una lectura rápida de ventas, ingresos, cuentas abiertas y alertas."
-            />
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: { xs: "flex-start", sm: "center" },
+                justifyContent: "space-between",
+                gap: 1.5,
+                mb: { xs: 1.25, md: 1.5 },
+              }}
+            >
+              <SectionHeading
+                eyebrow="Vista general"
+                title="Resumen del negocio"
+                subtitle="Ventas, ingresos, cuentas abiertas y alertas en un solo lugar."
+              />
+              <Button
+                href="/reports"
+                endIcon={<FaArrowRight size={10} />}
+                sx={{
+                  flexShrink: 0,
+                  mt: { xs: 0.3, sm: 0 },
+                  color: colors.primary,
+                  fontSize: 11,
+                  fontWeight: 900,
+                  textTransform: "none",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Exportar informe
+              </Button>
+            </Box>
 
             <Box
               sx={{
@@ -85,7 +125,7 @@ export default function MainDashboard() {
                 gridTemplateColumns: {
                   xs: "1fr",
                   sm: "repeat(2, minmax(0, 1fr))",
-                  xl: "repeat(4, minmax(0, 1fr))",
+                  lg: "repeat(4, minmax(0, 1fr))",
                 },
                 gap: { xs: 1.5, md: 2 },
               }}
@@ -102,29 +142,24 @@ export default function MainDashboard() {
             onPeriodChange={setCategoryPeriod}
           />
 
-          <Box>
-            <SectionHeading
-              eyebrow="Operación"
-              title="Seguimiento operativo"
-              subtitle="Revisa el movimiento semanal y atiende los pendientes prioritarios."
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: { xs: 1.5, md: 2 },
+            }}
+          >
+            <CashFlowCard
+              salesChart={salesChart}
+              period={salesPeriod}
+              from={salesFrom}
+              to={salesTo}
+              isFetching={isFetching}
+              error={isError ? error?.message : undefined}
+              onPeriodChange={setSalesPeriod}
+              onFromChange={setSalesFrom}
+              onToChange={setSalesTo}
             />
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  xl: "minmax(0, 1.7fr) minmax(320px, 0.7fr)",
-                },
-                gap: 2,
-                alignItems: "stretch",
-              }}
-            >
-              <CashFlowCard cashFlow={dashboardView.cashFlow} />
-              <AlertsCard alerts={dashboardView.alerts} />
-            </Box>
-          </Box>
-
-          <Box>
             <ActivityCard activities={dashboardView.activities} />
           </Box>
         </Box>

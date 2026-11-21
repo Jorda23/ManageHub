@@ -85,6 +85,7 @@ export type RegisterHardwareSaleResponse = {
 export type RegisterInvoiceRequest = {
   items: Array<{ productId: string; quantity: number }>;
   paymentMethod: string;
+  currency: Currency;
 };
 
 export type RegisterInvoiceItemResponse = {
@@ -378,6 +379,23 @@ export type DashboardCashFlowDay = {
   total: number;
 };
 
+export type DashboardSalesPeriod = "day" | "week" | "month" | "custom";
+
+export type DashboardSalesChart = {
+  period: DashboardSalesPeriod;
+  from: string;
+  to: string;
+  currency: "NIO";
+  series: Array<{
+    bucket: string;
+    label: string;
+    grains: number;
+    hardware: number;
+    properties: number;
+    total: number;
+  }>;
+};
+
 export type DashboardAlert = {
   group: string;
   code: string;
@@ -404,6 +422,7 @@ export type DashboardResponse = {
   alerts: DashboardAlert[];
   categoryPeriod?: "month" | "year";
   categories?: DashboardCategory[];
+  salesChart?: DashboardSalesChart;
 };
 
 export type PaymentHistoryType = "Hardware" | "Grains" | "Property";
